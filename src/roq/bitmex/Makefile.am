@@ -1,6 +1,10 @@
+SUBDIRS = api json
+
 bin_PROGRAMS = roq-bitmex
 roq_bitmex_LDFLAGS = \
 	$(PTHREAD_CFLAGS) \
+	$(top_builddir)/src/roq/bitmex/json/libroq-bitmex-json.la \
+	$(top_builddir)/src/roq/bitmex/api/libroq-bitmex-api.la \
 	$(ROQ_SERVER_LIBS) \
 	$(ROQ_CORE_LIBS) \
 	$(ROQ_API_LIBS) \
@@ -32,7 +36,6 @@ roq_bitmex_CPPFLAGS = \
 roq_bitmex_SOURCES = \
 	application.cpp \
 	config.cpp \
-	fix.cpp \
 	gateway.cpp \
 	options.cpp \
 	order_mapping.cpp \
