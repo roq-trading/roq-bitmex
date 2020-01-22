@@ -8,31 +8,8 @@ libroq_bitmex_json_la_CPPFLAGS = \
 	$(LIBCONFIG_CFLAGS) \
 	$(ROQ_CFLAGS)
 libroq_bitmex_json_la_SOURCES = \
-	account.cpp \
-	accounts.cpp \
-	activate.cpp \
-	change.cpp \
-	currency.cpp \
-	done.cpp \
-	error.cpp \
-	fill.cpp \
-	fills.cpp \
-	heartbeat.cpp \
-	last_match.cpp \
-	l2book.cpp \
-	l2update.cpp \
-	l3book.cpp \
-	match.cpp \
-	open.cpp \
+	instrument.cpp \
 	order.cpp \
-	orders.cpp \
-	parser.cpp \
-	product.cpp \
-	products.cpp \
-	received.cpp \
-	snapshot.cpp \
-	status.cpp \
-	subscriptions.cpp \
-	ticker.cpp \
-	time_.cpp \
+	order_book.cpp \
+	position.cpp \
 	utils.cpp

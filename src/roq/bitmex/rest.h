@@ -200,7 +200,6 @@ class Rest final : public HTTPConnection::Handler {
   Gateway& _gateway;
   // config
   const std::string _access_key;
-  const std::string _access_password;
   const std::string _access_secret;
   const core::URI _uri;
   // async

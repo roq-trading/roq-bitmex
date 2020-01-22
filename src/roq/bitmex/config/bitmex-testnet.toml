@@ -1,0 +1,44 @@
+symbols = ".*"
+
+[order_templates]
+
+  [order_templates.default]
+  self_trade_prevention = 'D'
+
+[accounts]
+
+  [accounts.A1]
+  master = true
+  login = "1cfeVo42NyR7fk7b1sSF-7Ma"
+  secret = "tNCVUWji1mNbS1du2-s-qKQ4quz-qWWfCesKtUsci6m99QOq"
+  symbols = [ "BTC-.*", "ETH-.*" ]
+
+[users]
+
+  [users.test]
+  password = "1234"
+  symbols = ".*"
+
+  [users.trader]
+  password = "secret"
+  accounts = [ "A1" ]
+  symbols = [ "BTC-USD" ]
+  monitor_period_secs = 60
+  ban_period_secs = 300
+  request_limit = 10
+
+  [users.example-1]
+  password = "1234"
+  symbols = ".*"
+
+  [users.example-2]
+  password = "secret"
+  symbols = ".*"
+
+  [users.example-3]
+  password = "secret"
+  accounts = [ "A1" ]
+  symbols = [ "BTC-USD" ]
+  monitor_period_secs = 60
+  ban_period_secs = 300
+  request_limit = 10

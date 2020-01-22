@@ -12,23 +12,19 @@ DEFINE_string(config_file,
     "config file (path)");
 
 DEFINE_string(rest_uri,
-    "https://api-public.sandbox.pro.bitmex.com",
+    "https://testnet.bitmex.com/api/v1",
     "REST end-point (URI)");
 
 DEFINE_string(ws_uri,
-    "wss://ws-feed-public.sandbox.pro.bitmex.com",
+    "wss://testnet.bitmex.com/realtime",
     "WebSocket end-point (URI)");
-
-DEFINE_string(fix_uri,
-    "tcp+ssl://fix-public.sandbox.pro.bitmex.com:4198",
-    "FIX end-point (URI)");
 
 DEFINE_uint64(ping_freq_secs,
     uint64_t{5},
     "ping frequency (seconds)");
 
 DEFINE_string(exchange,
-    "bitmex-pro",
+    "bitmex",
     "exchange identifier (string)");
 
 DEFINE_bool(cancel_on_disconnect,
@@ -46,7 +42,3 @@ DEFINE_uint32(decode_buffer_size,
 DEFINE_uint64(reconnect_secs,
     uint64_t{3},
     "time before reconnect (seconds)");
-
-DEFINE_bool(log_fix,
-    false,
-    "log fix messages?");

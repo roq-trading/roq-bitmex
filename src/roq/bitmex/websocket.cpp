@@ -6,6 +6,7 @@
 // #include <fmt/chrono.h>
 
 #include "roq/builtins.h"
+#include "roq/patterns.h"
 
 #include "roq/core/clock.h"
 
@@ -22,8 +23,6 @@
 
 #include "roq/bitmex/options.h"
 #include "roq/bitmex/random.h"
-
-#include "roq/bitmex/json/parser.h"
 
 #define PREFIX "[WS] "
 
@@ -65,7 +64,6 @@ WebSocket::WebSocket(
     core::ssl::Context& ssl_context)
     : _gateway(gateway),
       _access_key(config.get_api_key()),
-      _access_password(config.get_passphrase()),
       _access_secret(config.get_secret()),
       _connection_factory(
           base,
@@ -82,20 +80,6 @@ WebSocket::WebSocket(
       },
       _profile {
         .parse = create_profile("parse"),
-        .error = create_profile("error"),
-        .heartbeat = create_profile("heartbeat"),
-        .subscriptions = create_profile("subscriptions"),
-        .status = create_profile("status"),
-        .received = create_profile("received"),
-        .open = create_profile("open"),
-        .match = create_profile("match"),
-        .done = create_profile("done"),
-        .change = create_profile("change"),
-        .activate = create_profile("activate"),
-        .ticker = create_profile("ticker"),
-        .snapshot = create_profile("snapshot"),
-        .l2update = create_profile("l2update"),
-        .last_match = create_profile("last_match"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -132,6 +116,7 @@ void WebSocket::operator()(const TimerEvent& event) {
 }
 
 void WebSocket::subscribe(const std::vector<std::string>& symbols) {
+  /*
   // *must* be seconds (see bitmex-pro api documentation)
   auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(
       core::get_realtime_clock());
@@ -168,6 +153,7 @@ void WebSocket::subscribe(const std::vector<std::string>& symbols) {
       writer,
       text);
   send(writer.finish());
+  */
 }
 
 void WebSocket::operator()(Metrics& metrics) {
@@ -176,20 +162,6 @@ void WebSocket::operator()(Metrics& metrics) {
     .write(_counter.disconnect)
     // profile
     .write(_profile.parse)
-    .write(_profile.error)
-    .write(_profile.heartbeat)
-    .write(_profile.subscriptions)
-    .write(_profile.status)
-    .write(_profile.received)
-    .write(_profile.open)
-    .write(_profile.match)
-    .write(_profile.done)
-    .write(_profile.change)
-    .write(_profile.activate)
-    .write(_profile.ticker)
-    .write(_profile.snapshot)
-    .write(_profile.l2update)
-    .write(_profile.last_match)
     // latency
     .write(_latency.ping)
     .write(_latency.heartbeat);
@@ -254,8 +226,6 @@ void WebSocket::operator()(const core::net::Manager::Connected&) {
 void WebSocket::operator()(const core::net::Manager::Disconnected&) {
   _response_key.clear();
   _response.reset();
-  for (auto& iter : _product)
-    iter.second = Product {};
   (*this)(State::DISCONNECTED);
   ++_counter.disconnect;
 }
@@ -487,263 +457,7 @@ void WebSocket::parse(const std::string_view& message) {
 }
 
 void WebSocket::parse_helper(const std::string_view& message) {
-  auto type = json::Parser::find_type(message);
-  switch (json::Parser::parse_type(type)) {
-    case json::Parser::Type::UNKNOWN: {
-      throw std::runtime_error(
-          fmt::format("Unknown message type=\"{}\"", type));
-      break;
-    }
-    case json::Parser::Type::ERROR: {
-      _profile.error(
-          [&]() {
-            (*this)(json::Error::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::HEARTBEAT: {
-      _profile.heartbeat(
-          [&]() {
-            (*this)(json::Heartbeat::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::SUBSCRIPTIONS: {
-      _profile.subscriptions(
-          [&]() {
-            core::json::Buffer buffer(_decode_buffer);
-            (*this)(json::Subscriptions::parse(message, buffer));
-          });
-      break;
-    }
-    case json::Parser::Type::STATUS: {
-      _profile.status(
-          [&]() {
-            core::json::Buffer buffer(_decode_buffer);
-            (*this)(json::Status::parse(message, buffer));
-          });
-      break;
-    }
-    case json::Parser::Type::RECEIVED: {
-      _profile.received(
-          [&]() {
-            (*this)(json::Received::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::OPEN: {
-      _profile.open(
-          [&]() {
-            (*this)(json::Open::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::MATCH: {
-      _profile.match(
-          [&]() {
-            (*this)(json::Match::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::DONE: {
-      _profile.done(
-          [&]() {
-            (*this)(json::Done::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::CHANGE: {
-      _profile.change(
-          [&]() {
-            (*this)(json::Change::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::ACTIVATE: {
-      _profile.activate(
-          [&]() {
-            (*this)(json::Activate::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::TICKER: {
-      _profile.ticker(
-          [&]() {
-            (*this)(json::Ticker::parse(message));
-          });
-      break;
-    }
-    case json::Parser::Type::SNAPSHOT: {
-      _profile.snapshot(
-          [&]() {
-            core::json::Buffer buffer(_decode_buffer);
-            (*this)(json::Snapshot::parse(message, buffer));
-          });
-      break;
-    }
-    case json::Parser::Type::L2UPDATE: {
-      _profile.l2update(
-          [&]() {
-            core::json::Buffer buffer(_decode_buffer);
-            (*this)(json::L2Update::parse(message, buffer));
-          });
-      break;
-    }
-    case json::Parser::Type::LAST_MATCH: {
-      _profile.last_match(
-          [&]() {
-            (*this)(json::LastMatch::parse(message));
-          });
-      break;
-    }
-  }
-}
-
-void WebSocket::operator()(const json::Error& error) {
-  LOG(WARNING)(PREFIX "error={}", error);
-  _gateway(error);
-}
-
-void WebSocket::operator()(const json::Heartbeat& heartbeat) {
-  auto now = core::get_realtime_clock();  // before logging
-  VLOG(1)(PREFIX "heartbeat={}", heartbeat);
-  auto latency =
-    std::chrono::duration_cast<std::chrono::nanoseconds>(
-        now - heartbeat.time);
-  _latency.heartbeat.update(latency.count());
-  check(
-      heartbeat.product_id,
-      heartbeat.sequence);
-  _gateway(heartbeat);
-}
-
-void WebSocket::operator()(const json::Subscriptions& subscriptions) {
-  VLOG(1)(PREFIX "subscriptions={}", subscriptions);
-  _gateway(subscriptions);
-}
-
-void WebSocket::operator()(const json::Status& status) {
-  VLOG(1)(PREFIX "status={}", status);
-  _gateway(status);
-}
-
-void WebSocket::operator()(const json::Received& received) {
-  VLOG(1)(PREFIX "received={}", received);
-  check(
-      received.product_id,
-      received.sequence);
-  _gateway(received);
-}
-
-void WebSocket::operator()(const json::Open& open) {
-  VLOG(1)(PREFIX "open={}", open);
-  check(
-      open.product_id,
-      open.sequence);
-  _gateway(open);
-}
-
-void WebSocket::operator()(const json::Match& match) {
-  VLOG(1)(PREFIX "match={}", match);
-  auto& product = check(
-      match.product_id,
-      match.sequence);
-  auto trade_summary = product.match_last_trade_id != match.trade_id;
-  product.match_last_trade_id = match.trade_id;
-  auto trade_update =
-    product.fill_last_trade_id != match.trade_id &&
-    (match.maker_user_id.empty() == false ||
-    match.taker_user_id.empty() == false);
-  if (trade_update)
-    product.fill_last_trade_id = match.trade_id;
-  _gateway(
-      match,
-      trade_summary,
-      trade_update);
-}
-
-void WebSocket::operator()(const json::Done& done) {
-  VLOG(1)(PREFIX "done={}", done);
-  check(
-      done.product_id,
-      done.sequence);
-  _gateway(done);
-}
-
-void WebSocket::operator()(const json::Change& change) {
-  VLOG(1)(PREFIX "change={}", change);
-  check(
-      change.product_id,
-      change.sequence);
-  _gateway(change);
-}
-
-void WebSocket::operator()(const json::Activate& activate) {
-  VLOG(1)(PREFIX "activate={}", activate);
-  _gateway(activate);
-}
-
-void WebSocket::operator()(const json::Ticker& ticker) {
-  VLOG(1)(PREFIX "ticker={}", ticker);
-  check(
-      ticker.product_id,
-      ticker.sequence);
-  _gateway(ticker);
-}
-
-void WebSocket::operator()(const json::Snapshot& snapshot) {
-  VLOG(1)(PREFIX "snapshot={}", snapshot);
-  _gateway(snapshot);
-}
-
-void WebSocket::operator()(const json::L2Update& l2update) {
-  VLOG(1)(PREFIX "l2update={}", l2update);
-  _gateway(l2update);
-}
-
-void WebSocket::operator()(const json::LastMatch& last_match) {
-  VLOG(1)(PREFIX "last_match={}", last_match);
-  check(
-      last_match.product_id,
-      last_match.sequence);
-  _gateway(last_match);
-}
-
-WebSocket::Product& WebSocket::check(
-    const std::string_view& product_id,
-    uint64_t sequence) {
-  auto iter = _product.find(product_id);
-  if (unlikely(iter == _product.end())) {
-    iter = _product.emplace(
-        std::string(product_id),
-        Product {}).first;
-  }
-  auto& item = (*iter).second;
-  auto& previous = item.last_sequence;
-  auto expected = previous + 1;
-  if ((previous && sequence == expected) || (previous == 0)) {
-    // all good
-  } else if (sequence < previous) {
-    LOG(WARNING)(PREFIX
-        "*** SEQUENCE REPLAY *** "
-        "product_id=\"{}\" current={} previous={} distance={}",
-        product_id,
-        sequence,
-        previous,
-        previous - sequence);
-  } else if (sequence > expected) {
-    LOG(WARNING)(PREFIX
-        "*** SEQUENCE GAP *** "
-        "product_id=\"{}\" current={} previous={} distance={}",
-        product_id,
-        sequence,
-        previous,
-        sequence - previous);
-  } else {
-    assert(sequence == previous);
-  }
-  previous = sequence;
-  return item;
+  // XXX
 }
 
 }  // namespace bitmex

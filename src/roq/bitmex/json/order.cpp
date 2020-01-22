@@ -11,221 +11,480 @@ namespace json {
 namespace {
 enum class Field {
   UNKNOWN,
-  CREATED_AT,
-  EXECUTED_VALUE,
-  FILLED_SIZE,
-  FILL_FEES,
-  ID,
-  POST_ONLY,
+  ACCOUNT,
+  AVG_PX,
+  CL_ORD_ID,
+  CL_ORD_LINK_ID,
+  CONTINGENCY_TYPE,
+  CUM_QTY,
+  CURRENCY,
+  DISPLAY_QTY,
+  EX_DESTINATION,
+  EXEC_INST,
+  LEAVES_QTY,
+  MULTI_LEG_REPORTING_TYPE,
+  ORDER_ID,
+  ORDER_QTY,
+  ORD_REJ_REASON,
+  ORD_STATUS,
+  ORD_TYPE,
+  PEG_OFFSET_VALUE,
+  PEG_PRICE_TYPE,
   PRICE,
-  PRODUCT_ID,
-  SETTLED,
+  SETTL_CURRENCY,
   SIDE,
-  SIZE,
-  STATUS,
-  STP,
+  SIMPLE_CUM_QTY,
+  SIMPLE_LEAVES_QTY,
+  SIMPLE_ORDER_QTY,
+  STOP_PX,
+  SYMBOL,
+  TEXT,
   TIME_IN_FORCE,
-  TYPE,
+  TIMESTAMP,
+  TRANSACT_TIME,
+  TRIGGERED,
+  WORKING_INDICATOR,
 };
 
-constexpr Field parse_c(auto& name) {
-  if (name.compare("created_at") == 0)
-    return Field::CREATED_AT;
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_e(auto& name) {
-  if (name.compare("executed_value") == 0)
-    return Field::EXECUTED_VALUE;
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_f(auto& name) {
-  if (name.length() >= 5) {
-    switch (name.data()[4]) {
-      case 'e':
-        if (name.compare("filled_size") == 0)
-          return Field::FILLED_SIZE;
+constexpr Field parse_a(auto& name) {
+  if (name.length() >= 2) {
+    switch (name.data()[1]) {
+      case 'c':
+        if (name.compare("account") == 0)
+          return Field::ACCOUNT;
         break;
-      case '_':
-        if (name.compare("fill_fees") == 0)
-          return Field::FILL_FEES;
+      case 'v':
+        if (name.compare("avgPx") == 0)
+          return Field::AVG_PX;
         break;
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_i(auto& name) {
-  if (name.compare("id") == 0)
-    return Field::ID;
+constexpr Field parse_c(auto& name) {
+  if (name.length() >= 3) {
+    switch (name.data()[2]) {
+      case 'O': {
+        if (name.length() >= 6) {
+          switch (name.data()[5]) {
+            case 'I': {
+              if (name.compare("clOrdId") == 0)
+                return Field::CL_ORD_ID;
+              break;
+            }
+            case 'L': {
+              if (name.compare("clOrdLinkId") == 0)
+                return Field::CL_ORD_LINK_ID;
+              break;
+            }
+          }
+        }
+        break;
+      }
+      case 'n': {
+        if (name.compare("contingencyType") == 0)
+          return Field::CONTINGENCY_TYPE;
+        break;
+      }
+      case 'm': {
+        if (name.compare("cumQty") == 0)
+          return Field::CUM_QTY;
+        break;
+      }
+      case 'r': {
+        if (name.compare("currency") == 0)
+          return Field::CURRENCY;
+        break;
+      }
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_d(auto& name) {
+  if (name.compare("displayQty") == 0)
+    return Field::DISPLAY_QTY;
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_e(auto& name) {
+  if (name.length() >= 3) {
+    switch (name.data()[2]) {
+      case 'D': {
+        if (name.compare("exDestination") == 0)
+          return Field::EX_DESTINATION;
+        break;
+      }
+      case 'e': {
+        if (name.compare("execInst") == 0)
+          return Field::EXEC_INST;
+        break;
+      }
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_l(auto& name) {
+  if (name.compare("leavesQty") == 0)
+    return Field::LEAVES_QTY;
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_m(auto& name) {
+  if (name.compare("multiLegReportingType") == 0)
+    return Field::MULTI_LEG_REPORTING_TYPE;
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_o(auto& name) {
+  if (name.length() >= 6) {
+    switch (name.data()[5]) {
+      case 'I': {
+        if (name.compare("orderId") == 0)
+          return Field::ORDER_ID;
+        break;
+      }
+      case 'Q': {
+        if (name.compare("orderQty") == 0)
+          return Field::ORDER_QTY;
+        break;
+      }
+      case 'j': {
+        if (name.compare("ordRejReason") == 0)
+          return Field::ORD_REJ_REASON;
+        break;
+      }
+      case 'a': {
+        if (name.compare("ordStatus") == 0)
+          return Field::ORD_STATUS;
+        break;
+      }
+      case 'p': {
+        if (name.compare("ordType") == 0)
+          return Field::ORD_TYPE;
+        break;
+      }
+    }
+  }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_p(auto& name) {
-  if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 's':
-        if (name.compare("post_only") == 0)
-          return Field::POST_ONLY;
+  if (name.length() >= 4) {
+    switch (name.data()[3]) {
+      case 'O': {
+        if (name.compare("pegOffsetValue") == 0)
+          return Field::PEG_OFFSET_VALUE;
         break;
-      case 'i':
+      }
+      case 'P': {
+        if (name.compare("pegPriceType") == 0)
+          return Field::PEG_PRICE_TYPE;
+        break;
+      }
+      case 'c': {
         if (name.compare("price") == 0)
           return Field::PRICE;
         break;
-      case 'o':
-        if (name.compare("product_id") == 0)
-          return Field::PRODUCT_ID;
-        break;
+      }
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_s(auto& name) {
-  if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 't':
-        if (name.compare("settled") == 0)
-          return Field::SETTLED;
+  if (name.length() >= 2) {
+    switch (name.data()[1]) {
+      case 'e': {
+        if (name.compare("settlCurrency") == 0)
+          return Field::SETTL_CURRENCY;
         break;
-      case 'd':
+      }
+      case 'i': {
+        if (name.length() >= 7) {
+          switch (name.data()[6]) {
+            case 'C': {
+              if (name.compare("simpleCumQty") == 0)
+                return Field::SIMPLE_CUM_QTY;
+              break;
+            }
+            case 'L': {
+              if (name.compare("simpleLeavesQty") == 0)
+                return Field::SIMPLE_LEAVES_QTY;
+              break;
+            }
+            case 'O': {
+              if (name.compare("simpleOrderQty") == 0)
+                return Field::SIMPLE_ORDER_QTY;
+              break;
+            }
+          }
+        }
         if (name.compare("side") == 0)
           return Field::SIDE;
         break;
-      case 'z':
-        if (name.compare("size") == 0)
-          return Field::SIZE;
+      }
+      case 't': {
+        if (name.compare("stopPx") == 0)
+          return Field::STOP_PX;
         break;
-      case 'a':
-        if (name.compare("status") == 0)
-          return Field::STATUS;
+      }
+      case 'y': {
+        if (name.compare("symbol") == 0)
+          return Field::SYMBOL;
         break;
-      case 'p':
-        if (name.compare("stp") == 0)
-          return Field::STP;
-        break;
+      }
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_t(auto& name) {
-  if (name.length() >= 2) {
-    switch (name.data()[1]) {
-      case 'i':
-        if (name.compare("time_in_force") == 0)
+  if (name.length() >= 6) {
+    switch (name.data()[5]) {
+      case 'n': {
+        if (name.compare("timeInForce") == 0)
           return Field::TIME_IN_FORCE;
         break;
-      case 'y':
-        if (name.compare("type") == 0)
-          return Field::TYPE;
+      }
+      case 't': {
+        if (name.compare("timestamp") == 0)
+          return Field::TIMESTAMP;
         break;
+      }
+      case 'a': {
+        if (name.compare("transactTime") == 0)
+          return Field::TRANSACT_TIME;
+        break;
+      }
+      case 'e': {
+        if (name.compare("triggered") == 0)
+          return Field::TRIGGERED;
+        break;
+      }
     }
   }
+  if (name.compare("text") == 0)
+    return Field::TEXT;
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_w(auto& name) {
+  if (name.compare("workingIndicator") == 0)
+    return Field::WORKING_INDICATOR;
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
   assert(name.empty() == false);
   switch (name.data()[0]) {
+    case 'a':
+      return parse_a(name);
     case 'c':
       return parse_c(name);
+    case 'd':
+      return parse_d(name);
     case 'e':
       return parse_e(name);
-    case 'f':
-      return parse_f(name);
-    case 'i':
-      return parse_i(name);
+    case 'l':
+      return parse_l(name);
+    case 'm':
+      return parse_m(name);
+    case 'o':
+      return parse_o(name);
     case 'p':
       return parse_p(name);
     case 's':
       return parse_s(name);
     case 't':
       return parse_t(name);
+    case 'w':
+      return parse_w(name);
   }
   return Field::UNKNOWN;
 }
 
-static_assert(parse_name("created_at") == Field::CREATED_AT);
-static_assert(parse_name("executed_value") == Field::EXECUTED_VALUE);
-static_assert(parse_name("filled_size") == Field::FILLED_SIZE);
-static_assert(parse_name("fill_fees") == Field::FILL_FEES);
-static_assert(parse_name("id") == Field::ID);
-static_assert(parse_name("post_only") == Field::POST_ONLY);
+static_assert(parse_name("account") == Field::ACCOUNT);
+static_assert(parse_name("avgPx") == Field::AVG_PX);
+
+static_assert(parse_name("clOrdId") == Field::CL_ORD_ID);
+static_assert(parse_name("clOrdLinkId") == Field::CL_ORD_LINK_ID);
+static_assert(parse_name("contingencyType") == Field::CONTINGENCY_TYPE);
+static_assert(parse_name("cumQty") == Field::CUM_QTY);
+static_assert(parse_name("currency") == Field::CURRENCY);
+
+static_assert(parse_name("displayQty") == Field::DISPLAY_QTY);
+
+static_assert(parse_name("exDestination") == Field::EX_DESTINATION);
+static_assert(parse_name("execInst") == Field::EXEC_INST);
+
+static_assert(parse_name("leavesQty") == Field::LEAVES_QTY);
+
+static_assert(parse_name("multiLegReportingType") == Field::MULTI_LEG_REPORTING_TYPE);
+
+static_assert(parse_name("orderId") == Field::ORDER_ID);
+static_assert(parse_name("orderQty") == Field::ORDER_QTY);
+static_assert(parse_name("ordRejReason") == Field::ORD_REJ_REASON);
+static_assert(parse_name("ordStatus") == Field::ORD_STATUS);
+static_assert(parse_name("ordType") == Field::ORD_TYPE);
+
+static_assert(parse_name("pegOffsetValue") == Field::PEG_OFFSET_VALUE);
+static_assert(parse_name("pegPriceType") == Field::PEG_PRICE_TYPE);
 static_assert(parse_name("price") == Field::PRICE);
-static_assert(parse_name("product_id") == Field::PRODUCT_ID);
-static_assert(parse_name("settled") == Field::SETTLED);
+
+static_assert(parse_name("settlCurrency") == Field::SETTL_CURRENCY);
 static_assert(parse_name("side") == Field::SIDE);
-static_assert(parse_name("size") == Field::SIZE);
-static_assert(parse_name("status") == Field::STATUS);
-static_assert(parse_name("stp") == Field::STP);
-static_assert(parse_name("time_in_force") == Field::TIME_IN_FORCE);
-static_assert(parse_name("type") == Field::TYPE);
+static_assert(parse_name("simpleCumQty") == Field::SIMPLE_CUM_QTY);
+static_assert(parse_name("simpleLeavesQty") == Field::SIMPLE_LEAVES_QTY);
+static_assert(parse_name("simpleOrderQty") == Field::SIMPLE_ORDER_QTY);
+static_assert(parse_name("stopPx") == Field::STOP_PX);
+static_assert(parse_name("symbol") == Field::SYMBOL);
+
+static_assert(parse_name("text") == Field::TEXT);
+static_assert(parse_name("timeInForce") == Field::TIME_IN_FORCE);
+static_assert(parse_name("timestamp") == Field::TIMESTAMP);
+static_assert(parse_name("transactTime") == Field::TRANSACT_TIME);
+static_assert(parse_name("triggered") == Field::TRIGGERED);
+
+static_assert(parse_name("workingIndicator") == Field::WORKING_INDICATOR);
 
 inline void update_field(auto& result, auto& field, auto& value) {
   switch (field) {
     case Field::UNKNOWN: {
       break;
     }
-    case Field::CREATED_AT: {
-      update(result.created_at, value);
+    case Field::ACCOUNT: {
+      update(result.account, value);
       break;
     }
-    case Field::EXECUTED_VALUE: {
-      update(result.executed_value, value);
+    case Field::AVG_PX: {
+      update(result.avg_px, value);
       break;
     }
-    case Field::FILLED_SIZE: {
-      update(result.filled_size, value);
+    case Field::CL_ORD_ID: {
+      update(result.cl_ord_id, value);
       break;
     }
-    case Field::FILL_FEES: {
-      update(result.fill_fees, value);
+    case Field::CL_ORD_LINK_ID: {
+      update(result.cl_ord_link_id, value);
       break;
     }
-    case Field::ID: {
-      update(result.id, value);
+    case Field::CONTINGENCY_TYPE: {
+      update(result.contingency_type, value);
       break;
     }
-    case Field::POST_ONLY: {
-      update(result.post_only, value);
+    case Field::CUM_QTY: {
+      update(result.cum_qty, value);
+      break;
+    }
+    case Field::CURRENCY: {
+      update(result.currency, value);
+      break;
+    }
+    case Field::DISPLAY_QTY: {
+      update(result.display_qty, value);
+      break;
+    }
+    case Field::EX_DESTINATION: {
+      update(result.ex_destination, value);
+      break;
+    }
+    case Field::EXEC_INST: {
+      update(result.exec_inst, value);
+      break;
+    }
+    case Field::LEAVES_QTY: {
+      update(result.leaves_qty, value);
+      break;
+    }
+    case Field::MULTI_LEG_REPORTING_TYPE: {
+      update(result.multi_leg_reporting_type, value);
+      break;
+    }
+    case Field::ORDER_ID: {
+      update(result.order_id, value);
+      break;
+    }
+    case Field::ORDER_QTY: {
+      update(result.order_qty, value);
+      break;
+    }
+    case Field::ORD_REJ_REASON: {
+      update(result.ord_rej_reason, value);
+      break;
+    }
+    case Field::ORD_STATUS: {
+      update(result.ord_status, value);
+      break;
+    }
+    case Field::ORD_TYPE: {
+      update(result.ord_type, value);
+      break;
+    }
+    case Field::PEG_OFFSET_VALUE: {
+      update(result.peg_offset_value, value);
+      break;
+    }
+    case Field::PEG_PRICE_TYPE: {
+      update(result.peg_price_type, value);
       break;
     }
     case Field::PRICE: {
       update(result.price, value);
       break;
     }
-    case Field::PRODUCT_ID: {
-      update(result.product_id, value);
-      break;
-    }
-    case Field::SETTLED: {
-      update(result.settled, value);
+    case Field::SETTL_CURRENCY: {
+      update(result.settl_currency, value);
       break;
     }
     case Field::SIDE: {
       update(result.side, value);
       break;
     }
-    case Field::SIZE: {
-      update(result.size, value);
+    case Field::SIMPLE_CUM_QTY: {
+      update(result.simple_cum_qty, value);
       break;
     }
-    case Field::STATUS: {
-      update(result.status, value);
+    case Field::SIMPLE_LEAVES_QTY: {
+      update(result.simple_leaves_qty, value);
       break;
     }
-    case Field::STP: {
-      update(result.stp, value);
+    case Field::SIMPLE_ORDER_QTY: {
+      update(result.simple_order_qty, value);
+      break;
+    }
+    case Field::STOP_PX: {
+      update(result.stop_px, value);
+      break;
+    }
+    case Field::SYMBOL: {
+      update(result.symbol, value);
+      break;
+    }
+    case Field::TEXT: {
+      update(result.text, value);
       break;
     }
     case Field::TIME_IN_FORCE: {
       update(result.time_in_force, value);
       break;
     }
-    case Field::TYPE: {
-      update(result.type, value);
+    case Field::TIMESTAMP: {
+      update(result.timestamp, value);
+      break;
+    }
+    case Field::TRANSACT_TIME: {
+      update(result.transact_time, value);
+      break;
+    }
+    case Field::TRIGGERED: {
+      update(result.triggered, value);
+      break;
+    }
+    case Field::WORKING_INDICATOR: {
+      update(result.working_indicator, value);
       break;
     }
   }
@@ -233,18 +492,13 @@ inline void update_field(auto& result, auto& field, auto& value) {
 }  // namespace
 
 Order Order::parse(const std::string_view& message) {
-  core::json::Parser parser(message);
   Order result;
-  parse(result, parser.root<core::json::object_t>());
-  return result;
-}
-
-void Order::parse(Order& result, core::json::object_t&& object) {
-  new (&result) std::remove_reference<decltype(result)>::type {};
-  for (auto [key, value] : object) {
+  core::json::Parser parser(message);
+  for (auto [key, value] : parser.root<core::json::object_t>()) {
     auto field = parse_name(key);
     update_field(result, field, value);
   }
+  return result;
 }
 
 }  // namespace json

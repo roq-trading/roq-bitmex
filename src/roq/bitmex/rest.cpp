@@ -19,9 +19,6 @@
 #include "roq/bitmex/options.h"
 #include "roq/bitmex/random.h"
 
-#include "roq/bitmex/json/accounts.h"
-#include "roq/bitmex/json/products.h"
-#include "roq/bitmex/json/time_.h"
 #include "roq/bitmex/json/utils.h"
 
 #define PREFIX "[REST] "
@@ -226,7 +223,6 @@ Rest::Rest(
     core::ssl::Context& ssl_context)
     : _gateway(gateway),
       _access_key(config.get_api_key()),
-      _access_password(config.get_passphrase()),
       _access_secret(config.get_secret()),
       _uri(FLAGS_rest_uri),
       _base(base),
@@ -280,12 +276,14 @@ void Rest::get_products() {
       [this](const std::string_view& body) {
         _profile.products(
             [&]() {
+              /*
               core::json::Buffer buffer(_decode_buffer);
               auto products = json::Products::parse(
                   body,
                   buffer);
               VLOG(1)(PREFIX "products={}", products);
               _gateway(products);
+              */
             });
       },
       [](auto& status) {
@@ -304,12 +302,14 @@ void Rest::get_accounts() {
       [this](const std::string_view& body) {
         _profile.accounts(
             [&]() {
+              /*
               core::json::Buffer buffer(_decode_buffer);
               auto accounts = json::Accounts::parse(
                   body,
                   buffer);
               VLOG(1)(PREFIX "accounts={}", accounts);
               _gateway(accounts);
+              */
             });
       },
       [this](auto& status) {
@@ -326,8 +326,10 @@ void Rest::get_time() {
       [this](const std::string_view& body) {
         _profile.products(
             [&]() {
+              /*
               auto time = json::Time::parse(body);
               VLOG(1)(PREFIX "time={}", time);
+              */
             });
       },
       [](auto& status) {
@@ -456,13 +458,13 @@ bool Rest::request(
     // *must* be seconds (see bitmex-pro api documentation)
     auto now = std::chrono::duration_cast<std::chrono::seconds>(
         core::get_realtime_clock());
-    headers = Random::create_headers(
+    Random random(
+        _access_key,
+        _access_secret);
+    headers = random.create_headers(
         now,
         core::http::Method::GET,
-        path,
-        _access_key,
-        _access_password,
-        _access_secret);
+        path);
   }
   fmt::memory_buffer buffer;
   fmt::format_to(
