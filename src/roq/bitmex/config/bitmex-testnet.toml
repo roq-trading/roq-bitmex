@@ -11,7 +11,7 @@ symbols = ".*"
   master = true
   login = "1cfeVo42NyR7fk7b1sSF-7Ma"
   secret = "tNCVUWji1mNbS1du2-s-qKQ4quz-qWWfCesKtUsci6m99QOq"
-  symbols = [ "BTC-.*", "ETH-.*" ]
+  symbols = [ ".*", ".*" ]
 
 [users]
 
@@ -22,7 +22,7 @@ symbols = ".*"
   [users.trader]
   password = "secret"
   accounts = [ "A1" ]
-  symbols = [ "BTC-USD" ]
+  symbols = [ "XBTUSD" ]
   monitor_period_secs = 60
   ban_period_secs = 300
   request_limit = 10
@@ -38,7 +38,7 @@ symbols = ".*"
   [users.example-3]
   password = "secret"
   accounts = [ "A1" ]
-  symbols = [ "BTC-USD" ]
+  symbols = [ "XBTUSD" ]
   monitor_period_secs = 60
   ban_period_secs = 300
   request_limit = 10

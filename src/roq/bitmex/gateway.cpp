@@ -234,7 +234,8 @@ void Gateway::check_download() {
 void Gateway::download_products() {
   assert(_market_data_status == GatewayStatus::DOWNLOADING);
   LOG(INFO)("Download products...");
-  // _rest.get_products();
+  // XXX _rest.get_products();
+  _websocket.subscribe({});
   _download = Download::PRODUCTS;
 }
 

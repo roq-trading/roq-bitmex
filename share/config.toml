@@ -1,6 +1,5 @@
 symbols = [
-  "BTC-.*",
-  "ETH-.*",
+  "XBT.*",
 ]
 
 [order_templates]
@@ -12,9 +11,8 @@ symbols = [
 
   [accounts.A1]
   master = true
-  login = "YOUR_COINBASE_PRO_API_KEY_GOES_HERE"
-  password = "YOUR_COINBASE_PRO_PASSPHRASE_GOES_HERE"
-  secret = "YOUR_COINBASE_PRO_SECRET_GOES_HERE"
+  login = "YOUR_BITMEX_API_KEY_GOES_HERE"
+  secret = "YOUR_BITMEX_SECRET_GOES_HERE"
   symbols = [ "BTC-.*", "ETH-.*" ]
 
 [users]
@@ -26,7 +24,7 @@ symbols = [
   [users.trader]
   password = "secret"
   accounts = [ "A1" ]
-  symbols = [ "BTC-USD" ]
+  symbols = [ "XBTUSD" ]
   monitor_period_secs = 60
   ban_period_secs = 300
   request_limit = 10

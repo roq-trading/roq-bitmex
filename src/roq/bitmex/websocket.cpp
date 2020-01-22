@@ -55,7 +55,6 @@ static auto create_latency(
       function);
 }
 
-
 WebSocket::WebSocket(
     Gateway& gateway,
     const Config& config,
@@ -154,6 +153,17 @@ void WebSocket::subscribe(const std::vector<std::string>& symbols) {
       text);
   send(writer.finish());
   */
+  LOG(INFO)("DEBUG: subscribe");
+  auto text = fmt::format(
+      "{{"
+      "\"op\":\"subscribe\","
+      "\"args\":[\"instrument\",\"orderBookL2:XBTUSD\"]"
+      "}}");
+  core::ws::Writer writer(_encode_buffer);
+  core::ws::Encoder::text(
+      writer,
+      text);
+  send(writer.finish());
 }
 
 void WebSocket::operator()(Metrics& metrics) {
@@ -446,6 +456,7 @@ void WebSocket::operator()(const core::ws::pong_t& pong) {
 }
 
 void WebSocket::parse(const std::string_view& message) {
+  LOG(INFO)("DEBUG: message={}", message);
   _profile.parse(
       [&]() {
         try {
