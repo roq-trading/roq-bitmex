@@ -2,24 +2,13 @@
 
 #include "roq/bitmex/random.h"
 
-#include <openssl/hmac.h>
-
 #include <fmt/format.h>
 
-#include <date/date.h>
-
-#include <cinttypes>
-
-#include <random>
-#include <stdexcept>
+#include <cassert>
 
 #include "roq/core/binascii/hex.h"
 
 #include "roq/core/crypto/hmac.h"
-
-#if OPENSSL_VERSION_NUMBER < 0x10000000L
-#error "Requires at least OpenSSL version 1.0"
-#endif
 
 namespace roq {
 namespace bitmex {
@@ -44,11 +33,11 @@ std::string Random::create_signature(
     std::chrono::seconds timestamp,
     const core::http::Method& method,
     const std::string_view& path) {
-  auto t = create_timestamp_secs(timestamp);
-  auto m = std::string_view(core::http::EnumNameMethod(method));
-  _hmac.update(m);
+  auto timestamp_ = create_timestamp_secs(timestamp);
+  auto method_ = std::string_view(core::http::EnumNameMethod(method));
+  _hmac.update(method_);
   _hmac.update(path);
-  _hmac.update(t);
+  _hmac.update(timestamp_);
   std::array<char, 32> buffer;
   auto length = _hmac.digest(
       buffer.data(),
