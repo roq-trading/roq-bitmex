@@ -153,11 +153,15 @@ void WebSocket::subscribe(const std::vector<std::string>& symbols) {
       text);
   send(writer.finish());
   */
-  LOG(INFO)("DEBUG: subscribe");
+  VLOG(1)("DEBUG: subscribe");
   auto text = fmt::format(
       "{{"
       "\"op\":\"subscribe\","
-      "\"args\":[\"instrument\",\"orderBookL2:XBTUSD\"]"
+      "\"args\":["
+      "\"instrument\","
+      "\"orderBookL2\""
+      //"\"orderBookL2:XBTUSD\""
+      "]"
       "}}");
   core::ws::Writer writer(_encode_buffer);
   core::ws::Encoder::text(
@@ -456,7 +460,7 @@ void WebSocket::operator()(const core::ws::pong_t& pong) {
 }
 
 void WebSocket::parse(const std::string_view& message) {
-  LOG(INFO)("DEBUG: message={}", message);
+  VLOG(1)("DEBUG: message={}", message);
   _profile.parse(
       [&]() {
         try {

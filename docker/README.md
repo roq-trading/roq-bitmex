@@ -1,4 +1,4 @@
-# Coinbase
+# BitMEX
 
 Copyright (c) 2017-2020, Hans Erik Thrane
 All rights reserved.
@@ -17,4 +17,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Description
 
-The Coinbase gateway ...
+The BitMEX gateway ...
