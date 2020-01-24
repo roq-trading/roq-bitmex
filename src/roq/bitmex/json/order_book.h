@@ -7,6 +7,8 @@
 #include <limits>
 #include <string_view>
 
+#include "roq/core/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -19,6 +21,9 @@ struct OrderBook final {
   std::string_view symbol;
 
   static OrderBook parse(const std::string_view& message);
+  static void parse(OrderBook&, core::json::object_t&&);
+
+  static OrderBook parse(core::json::object_t& object);
 };
 
 }  // namespace json

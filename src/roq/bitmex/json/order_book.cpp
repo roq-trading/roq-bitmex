@@ -103,15 +103,32 @@ inline void update_field(auto& result, auto& field, auto& value) {
 }
 }  // namespace
 
-OrderBook OrderBook::parse(const std::string_view& message) {
-  OrderBook result;
-  core::json::Parser parser(message);
-  for (auto [key, value] : parser.root<core::json::object_t>()) {
+static void parse_helper(
+    OrderBook& result,
+    core::json::object_t& object) {
+  for (auto [key, value] : object) {
     auto field = parse_name(key);
     update_field(result, field, value);
   }
+}
+
+OrderBook OrderBook::parse(const std::string_view& message) {
+  core::json::Parser parser(message);
+  auto root = parser.root<core::json::object_t>();
+  return parse(root);
+}
+
+void OrderBook::parse(OrderBook& result, core::json::object_t&& object) {
+  new (&result) std::remove_reference<decltype(result)>::type {};
+  parse_helper(result, object);
+}
+
+OrderBook OrderBook::parse(core::json::object_t& object) {
+  OrderBook result;
+  parse_helper(result, object);
   return result;
 }
+
 
 }  // namespace json
 }  // namespace bitmex

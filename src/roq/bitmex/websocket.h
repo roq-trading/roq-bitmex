@@ -26,6 +26,8 @@
 
 #include "roq/bitmex/config.h"
 
+#include "roq/bitmex/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 
@@ -33,7 +35,8 @@ class Gateway;
 
 class WebSocket final
     : public core::net::Manager::Handler,
-      public core::http::Response::Handler {
+      public core::http::Response::Handler,
+      public json::Parser::Handler {
   enum class State {
     DISCONNECTED,
     UPGRADE_SENT,
@@ -97,6 +100,10 @@ class WebSocket final
 
   void parse(const std::string_view& message);
   void parse_helper(const std::string_view& message);
+
+  // json:
+  void operator()(const json::Instruments&) override;
+  void operator()(const json::MarketByPrice&) override;
 
  private:
   Gateway& _gateway;

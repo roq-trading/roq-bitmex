@@ -9,7 +9,10 @@ libroq_bitmex_json_la_CPPFLAGS = \
 	$(ROQ_CFLAGS)
 libroq_bitmex_json_la_SOURCES = \
 	instrument.cpp \
+	instruments.cpp \
+	market_by_price.cpp \
 	order.cpp \
 	order_book.cpp \
+	parser.cpp \
 	position.cpp \
 	utils.cpp

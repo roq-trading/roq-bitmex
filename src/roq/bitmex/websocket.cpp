@@ -471,8 +471,54 @@ void WebSocket::parse(const std::string_view& message) {
       });
 }
 
+// welcome:
+//   message={"info":string,"version":string(timestamp),"timestamp":timstamp,"docs":string,"limit":{"remaining":int}}
+// one for each subscribe argument:
+//   message={"success":bool,"subscribe":string,"request":{"op":string,"args":[...]}}
+// snapshot:
+//   message={"table":string,"action":"partial","keys":[...],"types":{...},"foreignKeys":{...},"attributes":{...},"filter":{...},"data":[{...},...]}
+// update/insert/delete:
+//   message={"table":string,"action":"update","data":[{...},...]}
+// PATTERNS:
+// "info": (initial handshake)
+// "success": OR "subscribe": (subscribe response)
+// "failure": OR "subscribe": (subscribe response)
+// "table": (subscription snapshot or update)
+// ... not verified ...
+// "now": OR "cancelTime": (cancelAllAfter response)
+// "status": OR "error": (rate limiter)
+// "error": (malformed request or not accessible)
+// shared:
+//   action
+//   + attributes
+//   * data
+//   docs
+//   failure
+//   + filter
+//   + foreign_keys
+//   + keys
+//   * request
+//   subscribe
+//   success
+//   table
+//   timestamp
+//   version
+
 void WebSocket::parse_helper(const std::string_view& message) {
-  // XXX
+  LOG(INFO)("DEBUG: {}", message);
+  core::json::Buffer buffer(_decode_buffer);
+  json::Parser::dispatch(
+      *this,
+      message,
+      buffer);
+}
+
+void WebSocket::operator()(const json::Instruments& instruments) {
+  LOG(INFO)("DEBUG: instruments={}", instruments);
+}
+
+void WebSocket::operator()(const json::MarketByPrice& market_by_price) {
+  LOG(INFO)("DEBUG: market_by_price={}", market_by_price);
 }
 
 }  // namespace bitmex

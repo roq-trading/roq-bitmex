@@ -9,6 +9,8 @@
 #include <limits>
 #include <string_view>
 
+#include "roq/core/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -119,6 +121,9 @@ struct Instrument final {
   double vwap = std::numeric_limits<double>::quiet_NaN();
 
   static Instrument parse(const std::string_view& message);
+  static void parse(Instrument&, core::json::object_t&&);
+
+  static Instrument parse(core::json::object_t& object);
 };
 
 }  // namespace json

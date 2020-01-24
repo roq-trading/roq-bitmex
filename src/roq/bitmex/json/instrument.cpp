@@ -1392,13 +1392,29 @@ inline void update_field(auto& result, auto& field, auto& value) {
 }
 }  // namespace
 
-Instrument Instrument::parse(const std::string_view& message) {
-  Instrument result;
-  core::json::Parser parser(message);
-  for (auto [key, value] : parser.root<core::json::object_t>()) {
+static void parse_helper(
+    Instrument& result,
+    core::json::object_t& object) {
+  for (auto [key, value] : object) {
     auto field = parse_name(key);
     update_field(result, field, value);
   }
+}
+
+Instrument Instrument::parse(const std::string_view& message) {
+  core::json::Parser parser(message);
+  auto root = parser.root<core::json::object_t>();
+  return parse(root);
+}
+
+void Instrument::parse(Instrument& result, core::json::object_t&& object) {
+  new (&result) std::remove_reference<decltype(result)>::type {};
+  parse_helper(result, object);
+}
+
+Instrument Instrument::parse(core::json::object_t& object) {
+  Instrument result;
+  parse_helper(result, object);
   return result;
 }
 

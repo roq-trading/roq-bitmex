@@ -27,4 +27,5 @@ roq_bitmex_test_CPPFLAGS = \
 	$(FMT_CFLAGS) \
 	$(DATE_CFLAGS)
 nodist_roq_bitmex_test_SOURCES = \
+	json_instrument.cpp \
 	main.cpp
