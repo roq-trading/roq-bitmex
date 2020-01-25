@@ -4,7 +4,6 @@
 
 #include "roq/compat.h"
 
-#include "roq/bitmex/json/instruments.h"
 #include "roq/bitmex/json/utils.h"
 
 #include "roq/logging.h"  // XXX DEBUG
@@ -13,6 +12,7 @@ namespace roq {
 namespace bitmex {
 namespace json {
 
+namespace {
 enum class Field {
   UNKNOWN,
   ACTION,
@@ -251,43 +251,6 @@ constexpr auto parse_table(const std::string_view& name) {
 static_assert(parse_table("instrument") == Table::INSTRUMENT);
 static_assert(parse_table("orderBookL2") == Table::ORDER_BOOK_L2);
 
-enum class Action {
-  UNKNOWN,
-  DELETE,
-  INSERT,
-  PARTIAL,
-  UPDATE,
-};
-
-constexpr auto parse_action(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
-    case 'd':
-      if (name.compare("delete") == 0)
-        return Action::DELETE;
-      break;
-    case 'i':
-      if (name.compare("insert") == 0)
-        return Action::INSERT;
-      break;
-    case 'p':
-      if (name.compare("partial") == 0)
-        return Action::PARTIAL;
-      break;
-    case 'u':
-      if (name.compare("update") == 0)
-        return Action::UPDATE;
-      break;
-  }
-  return Action::UNKNOWN;
-}
-
-static_assert(parse_action("delete") == Action::DELETE);
-static_assert(parse_action("insert") == Action::INSERT);
-static_assert(parse_action("partial") == Action::PARTIAL);
-static_assert(parse_action("update") == Action::UPDATE);
-
-
 void update(Type& result, const Type type) {
   assert(type != Type::UNKNOWN);
   if (result == Type::UNKNOWN) {
@@ -296,6 +259,7 @@ void update(Type& result, const Type type) {
     throw std::runtime_error("wrong type");
   }
 }
+} // namespace
 
 void Parser::dispatch(
     Parser::Handler& handler,
@@ -308,7 +272,8 @@ void Parser::dispatch(
   bool dispatched = false;
   for (int i = 0; i < 2; ++i) {
     core::json::Parser parser(message);
-    for (auto [key, value] : parser.root<core::json::object_t>()) {
+    auto root = parser.root();
+    for (auto [key, value] : std::get<core::json::object_t>(root)) {
       auto field = parse_field(key);
       LOG_IF(FATAL, field == Field::UNKNOWN)(
           "Can't parse field=\"{}\"", key);
@@ -335,19 +300,21 @@ void Parser::dispatch(
               case Table::UNKNOWN:
                 break;
               case Table::INSTRUMENT: {
-                auto instruments = Instruments::parse(
+                auto instrument = Instrument::parse(
                     std::get<core::json::array_t>(value),
-                    buffer);
+                    buffer,
+                    action);
                 dispatched = true;
-                handler(instruments);
+                handler(instrument);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
-                auto market_by_price = MarketByPrice::parse(
+                auto order_book_l2 = OrderBookL2::parse(
                     std::get<core::json::array_t>(value),
-                    buffer);
+                    buffer,
+                    action);
                 dispatched = true;
-                handler(market_by_price);
+                handler(order_book_l2);
                 break;
               }
             }

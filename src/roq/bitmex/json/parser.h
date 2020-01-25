@@ -6,8 +6,8 @@
 
 #include "roq/core/json/buffer.h"
 
-#include "roq/bitmex/json/instruments.h"
-#include "roq/bitmex/json/market_by_price.h"
+#include "roq/bitmex/json/instrument.h"
+#include "roq/bitmex/json/order_book_l2.h"
 
 #undef VERSION
 
@@ -17,8 +17,8 @@ namespace json {
 
 struct Parser final {
   struct Handler {
-    virtual void operator()(const Instruments&) = 0;
-    virtual void operator()(const MarketByPrice&) = 0;
+    virtual void operator()(const Instrument&) = 0;
+    virtual void operator()(const OrderBookL2&) = 0;
   };
 
   std::string_view action;

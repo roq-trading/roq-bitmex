@@ -1,18 +1,17 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/bitmex/json/instrument.h"
+#include "roq/bitmex/json/order_book_l2.h"
 
 #include <utility>
 
 #include "roq/core/json/array.h"
 #include "roq/core/json/parser.h"
 
-
 namespace roq {
 namespace bitmex {
 namespace json {
 
-Instrument Instrument::parse(
+OrderBookL2 OrderBookL2::parse(
     const std::string_view& message,
     core::json::Buffer& buffer,
     Action action) {
@@ -24,11 +23,11 @@ Instrument Instrument::parse(
       action);
 }
 
-Instrument Instrument::parse(
+OrderBookL2 OrderBookL2::parse(
     core::json::array_t& array,
     core::json::Buffer& buffer,
     Action action) {
-  Instrument result {
+  OrderBookL2 result {
     .action = action,
     .data = {},
   };
@@ -36,9 +35,8 @@ Instrument Instrument::parse(
       buffer,
       result.data,
       array);
-  for (auto [item, value] : data) {
+  for (auto [item, value] : data)
     item.parse(std::get<core::json::object_t>(value));
-  }
   return result;
 }
 

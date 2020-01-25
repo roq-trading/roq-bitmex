@@ -165,6 +165,43 @@ void Gateway::operator()(const WebSocket& websocket) {
   }
 }
 
+void Gateway::operator()(const json::Instrument&) {
+}
+
+void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
+  // check partial (we receive just once for all instruments)
+  roq::span data(
+      order_book_l2.data.items,
+      order_book_l2.data.length);
+  std::string_view previous;
+  for (auto& item : data) {
+    if (item.symbol.compare(previous) != 0) {
+      previous = item.symbol;
+      // XXX enqueue
+    }
+    auto iter = _price_lookup.find(item.id);
+    switch (order_book_l2.action) {
+      case json::Action::UNKNOWN:
+        LOG(FATAL)("Unexpected");
+        break;
+      case json::Action::PARTIAL:
+      case json::Action::INSERT:
+        LOG_IF(FATAL, iter != _price_lookup.end())("FOUND DUPLICATE");
+        assert(std::isnan(item.price) == false);
+        _price_lookup.emplace(item.id, item.price);
+        break;
+      case json::Action::UPDATE:
+        LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");
+        break;
+      case json::Action::DELETE:
+        LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");
+        _price_lookup.erase(iter);
+        break;
+    }
+  }
+  // XXX enqueue
+}
+
 // rest
 
 void Gateway::operator()(const Rest&) {

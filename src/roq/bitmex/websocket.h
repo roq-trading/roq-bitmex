@@ -102,8 +102,8 @@ class WebSocket final
   void parse_helper(const std::string_view& message);
 
   // json:
-  void operator()(const json::Instruments&) override;
-  void operator()(const json::MarketByPrice&) override;
+  void operator()(const json::Instrument&) override;
+  void operator()(const json::OrderBookL2&) override;
 
  private:
   Gateway& _gateway;
@@ -130,7 +130,9 @@ class WebSocket final
   } _counter;
   struct {
     core::metrics::Profile
-      parse;
+      parse,
+      instrument,
+      order_book_l2;
   } _profile;
   struct {
     core::metrics::Latency

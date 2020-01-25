@@ -13,17 +13,16 @@ namespace roq {
 namespace bitmex {
 namespace json {
 
-struct OrderBook final {
+struct OrderBookL2Item final {
   uint64_t id = 0;
   double price = std::numeric_limits<double>::quiet_NaN();
   std::string_view side;
   double size = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
 
-  static OrderBook parse(const std::string_view& message);
-  static void parse(OrderBook&, core::json::object_t&&);
+  static OrderBookL2Item parse(const std::string_view& message);
 
-  static OrderBook parse(core::json::object_t& object);
+  void parse(core::json::object_t& object);
 };
 
 }  // namespace json
@@ -31,13 +30,13 @@ struct OrderBook final {
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::bitmex::json::OrderBook> {
+struct fmt::formatter<roq::bitmex::json::OrderBookL2Item> {
   template <typename C>
   constexpr auto parse(C& ctx) {
     return ctx.begin();
   }
   template <typename C>
-  auto format(const roq::bitmex::json::OrderBook& value, C& ctx) {
+  auto format(const roq::bitmex::json::OrderBookL2Item& value, C& ctx) {
     return format_to(
         ctx.out(),
         "{{"

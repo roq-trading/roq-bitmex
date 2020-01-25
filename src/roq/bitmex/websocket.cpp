@@ -79,6 +79,8 @@ WebSocket::WebSocket(
       },
       _profile {
         .parse = create_profile("parse"),
+        .instrument = create_profile("instrument"),
+        .order_book_l2 = create_profile("order_book_l2"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -176,6 +178,8 @@ void WebSocket::operator()(Metrics& metrics) {
     .write(_counter.disconnect)
     // profile
     .write(_profile.parse)
+    .write(_profile.instrument)
+    .write(_profile.order_book_l2)
     // latency
     .write(_latency.ping)
     .write(_latency.heartbeat);
@@ -505,7 +509,7 @@ void WebSocket::parse(const std::string_view& message) {
 //   version
 
 void WebSocket::parse_helper(const std::string_view& message) {
-  LOG(INFO)("DEBUG: {}", message);
+  // LOG(INFO)("DEBUG: {}", message);
   core::json::Buffer buffer(_decode_buffer);
   json::Parser::dispatch(
       *this,
@@ -513,12 +517,14 @@ void WebSocket::parse_helper(const std::string_view& message) {
       buffer);
 }
 
-void WebSocket::operator()(const json::Instruments& instruments) {
-  LOG(INFO)("DEBUG: instruments={}", instruments);
+void WebSocket::operator()(const json::Instrument& instrument) {
+  VLOG(1)("instrument={}", instrument);
+  _gateway(instrument);
 }
 
-void WebSocket::operator()(const json::MarketByPrice& market_by_price) {
-  LOG(INFO)("DEBUG: market_by_price={}", market_by_price);
+void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
+  VLOG(1)("order_book_l2={}", order_book_l2);
+  _gateway(order_book_l2);
 }
 
 }  // namespace bitmex

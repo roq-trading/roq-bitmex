@@ -494,7 +494,8 @@ inline void update_field(auto& result, auto& field, auto& value) {
 Order Order::parse(const std::string_view& message) {
   Order result;
   core::json::Parser parser(message);
-  for (auto [key, value] : parser.root<core::json::object_t>()) {
+  auto root = parser.root();
+  for (auto [key, value] : std::get<core::json::object_t>(root)) {
     auto field = parse_name(key);
     update_field(result, field, value);
   }

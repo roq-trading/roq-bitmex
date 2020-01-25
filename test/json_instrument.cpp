@@ -7,14 +7,13 @@
 #include "roq/core/datetime.h"
 
 #include "roq/bitmex/json/instrument.h"
-#include "roq/bitmex/json/instruments.h"
 
 using namespace roq;  // NOLINT
 using namespace roq::bitmex;  // NOLINT
 
 constexpr double TOLERANCE = 1.0e-10;
 
-TEST(json_instrument, unlisted) {
+TEST(json_instrument_item, unlisted) {
   const std::string_view message =
     R"({)"
     R"("symbol":".EVOL7D",)"
@@ -121,7 +120,7 @@ TEST(json_instrument, unlisted) {
     R"("settledPrice":null,)"
     R"("timestamp":"2020-01-23T04:50:00.000Z")"
     R"(})";
-  auto obj = json::Instrument::parse(message);
+  auto obj = json::InstrumentItem::parse(message);
   EXPECT_EQ(obj.symbol, ".EVOL7D");
   EXPECT_EQ(obj.root_symbol, "EVOL");
   EXPECT_EQ(obj.state, "Unlisted");
@@ -148,7 +147,7 @@ TEST(json_instrument, unlisted) {
   EXPECT_EQ(obj.timestamp, core::datetime(2020, 1, 23, 4, 50, 0));
 }
 
-TEST(json_instrument, open) {
+TEST(json_instrument_item, open) {
   const std::string_view message =
     R"({)"
     R"("symbol":"XRPH20",)"
@@ -255,7 +254,7 @@ TEST(json_instrument, open) {
     R"("settledPrice":null,)"
     R"("timestamp":"2020-01-22T19:09:30.000Z")"
     R"(})";
-  auto obj = json::Instrument::parse(message);
+  auto obj = json::InstrumentItem::parse(message);
   EXPECT_EQ(obj.symbol, "XRPH20");
   EXPECT_EQ(obj.root_symbol, "XRP");
   EXPECT_EQ(obj.state, "Open");
@@ -332,15 +331,18 @@ TEST(json_instrument, open) {
   EXPECT_EQ(obj.timestamp, core::datetime(2020, 1, 22, 19, 9, 30));
 }
 
-TEST(json_instruments, empty) {
+TEST(json_instrument, empty) {
   const std::string_view message = "[]";
   core::utils::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
-  auto obj = json::Instruments::parse(message, decode_buffer);
+  auto obj = json::Instrument::parse(
+      message,
+      decode_buffer,
+      json::Action::PARTIAL);
   EXPECT_EQ(obj.length, 0);
 }
 
-TEST(json_instruments, simple) {
+TEST(json_instrument, simple) {
   const std::string_view message =
     R"([)"
     R"({)"
@@ -555,10 +557,16 @@ TEST(json_instruments, simple) {
     R"(])";
   core::utils::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
-  auto obj = json::Instruments::parse(message, decode_buffer);
-  EXPECT_EQ(obj.length, 2);
+  auto obj = json::Instrument::parse(
+      message,
+      decode_buffer,
+      json::Action::PARTIAL);
+  roq::span data(
+      obj.data.items,
+      obj.data.length);
+  EXPECT_EQ(data.size(), 2);
   // item #0
-  EXPECT_EQ(obj.items[0].symbol, ".EVOL7D");
+  EXPECT_EQ(data[0].symbol, ".EVOL7D");
   // item #1
-  EXPECT_EQ(obj.items[1].symbol, "XRPH20");
+  EXPECT_EQ(data[1].symbol, "XRPH20");
 }

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/bitmex/json/order_book.h"
+#include "roq/bitmex/json/order_book_l2_item.h"
 
 #include "roq/bitmex/json/utils.h"
 
@@ -103,32 +103,21 @@ inline void update_field(auto& result, auto& field, auto& value) {
 }
 }  // namespace
 
-static void parse_helper(
-    OrderBook& result,
-    core::json::object_t& object) {
-  for (auto [key, value] : object) {
-    auto field = parse_name(key);
-    update_field(result, field, value);
-  }
-}
-
-OrderBook OrderBook::parse(const std::string_view& message) {
+OrderBookL2Item OrderBookL2Item::parse(const std::string_view& message) {
   core::json::Parser parser(message);
-  auto root = parser.root<core::json::object_t>();
-  return parse(root);
-}
-
-void OrderBook::parse(OrderBook& result, core::json::object_t&& object) {
-  new (&result) std::remove_reference<decltype(result)>::type {};
-  parse_helper(result, object);
-}
-
-OrderBook OrderBook::parse(core::json::object_t& object) {
-  OrderBook result;
-  parse_helper(result, object);
+  auto root = parser.root();
+  OrderBookL2Item result;
+  result.parse(std::get<core::json::object_t>(root));
   return result;
 }
 
+void OrderBookL2Item::parse(core::json::object_t& object) {
+  (*this) = {};  // XXX not the right place to reset
+  for (auto [key, value] : object) {
+    auto field = parse_name(key);
+    update_field(*this, field, value);
+  }
+}
 
 }  // namespace json
 }  // namespace bitmex
