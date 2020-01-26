@@ -12,6 +12,9 @@
 
 #include "roq/bitmex/api/enums.h"
 
+#include "roq/bitmex/json/side.h"
+#include "roq/bitmex/json/state.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -112,6 +115,22 @@ inline void update(
     const core::json::value_t& value) {
   result = api::to_enum<std::remove_reference<decltype(result)>::type>(
       core::json::get<std::string_view>(value));
+}
+
+// json
+
+template <>
+inline void update(
+    Side& result,
+    const core::json::value_t& value) {
+  result = parse_side(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
+    State& result,
+    const core::json::value_t& value) {
+  result = parse_state(core::json::get<std::string_view>(value));
 }
 
 }  // namespace json

@@ -39,7 +39,15 @@ static_assert(parse_helper("update") == Action::UPDATE);
 }  // namespace
 
 Action parse_action(const std::string_view& name) {
-  return parse_helper(name);
+  auto result = parse_helper(name);
+#ifndef NDEBUG
+  if (result == Action::UNKNOWN) {
+    fprintf(stderr, "Can't parse action=\"%.*s\"\n",
+        static_cast<int>(name.length()), name.data());
+    assert(false);
+  }
+#endif
+  return result;
 }
 
 }  // namespace json

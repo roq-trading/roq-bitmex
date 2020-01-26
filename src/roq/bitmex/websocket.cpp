@@ -116,55 +116,28 @@ void WebSocket::operator()(const TimerEvent& event) {
   }
 }
 
-void WebSocket::subscribe(const std::vector<std::string>& symbols) {
-  /*
-  // *must* be seconds (see bitmex-pro api documentation)
-  auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(
-      core::get_realtime_clock());
-  auto signature = Random::create_signature(
-      timestamp,
-      core::http::Method::GET,
-      "/users/self/verify",
-      _access_secret);
+void WebSocket::subscribe_instrument(const std::vector<std::string>& symbols) {
   auto text = fmt::format(
       "{{"
-      "\"type\":\"subscribe\","
-      "\"product_ids\":[\"{}\"],"
-      "\"channels\":["
-      "\"full\","
-      "\"heartbeat\","
-      "\"level2\","
-      "\"matches\","
-      "\"status\","
-      "\"ticker\","
-      "\"user\""
-      "],"
-      "\"key\":\"{}\","
-      "\"signature\":\"{}\","
-      "\"timestamp\":{},"
-      "\"passphrase\":\"{}\""
-      "}}",
-      fmt::join(symbols, "\", \""),
-      _access_key,
-      signature,
-      timestamp.count(),
-      _access_password);
+      "\"op\":\"subscribe\","
+      "\"args\":"
+      "\"instrument\""
+      "}}");
   core::ws::Writer writer(_encode_buffer);
   core::ws::Encoder::text(
       writer,
       text);
   send(writer.finish());
-  */
-  VLOG(1)("DEBUG: subscribe");
+}
+
+void WebSocket::subscribe_order_book_l2(const std::vector<std::string>& symbols) {
   auto text = fmt::format(
       "{{"
       "\"op\":\"subscribe\","
-      "\"args\":["
-      "\"instrument\","
-      "\"orderBookL2\""
-      //"\"orderBookL2:XBTUSD\""
-      "]"
-      "}}");
+      "\"args\":"
+      "\"orderBookL2:{}\""
+      "}}",
+      fmt::join(symbols, ","));
   core::ws::Writer writer(_encode_buffer);
   core::ws::Encoder::text(
       writer,
@@ -266,6 +239,7 @@ void WebSocket::operator()(const core::net::Manager::Read& read) {
             reinterpret_cast<const char *>(buffer),
             length);
         break;
+      case State::AWAIT_HANDSHAKE:
       case State::READY:
         bytes = core::ws::Decoder::dispatch(
             overloaded {
@@ -417,7 +391,7 @@ void WebSocket::operator()(
   _status = core::http::Status::UNKNOWN;
   if (_connection_upgrade && _upgrade_websocket && _sec_websocket_accept) {
     LOG(INFO)(PREFIX "Upgraded");
-    (*this)(State::READY);
+    (*this)(State::AWAIT_HANDSHAKE);
   } else {
     throw std::runtime_error("Connection has not been correctly upgraded to websocket");
   }
@@ -464,7 +438,6 @@ void WebSocket::operator()(const core::ws::pong_t& pong) {
 }
 
 void WebSocket::parse(const std::string_view& message) {
-  VLOG(1)("DEBUG: message={}", message);
   _profile.parse(
       [&]() {
         try {
@@ -475,46 +448,18 @@ void WebSocket::parse(const std::string_view& message) {
       });
 }
 
-// welcome:
-//   message={"info":string,"version":string(timestamp),"timestamp":timstamp,"docs":string,"limit":{"remaining":int}}
-// one for each subscribe argument:
-//   message={"success":bool,"subscribe":string,"request":{"op":string,"args":[...]}}
-// snapshot:
-//   message={"table":string,"action":"partial","keys":[...],"types":{...},"foreignKeys":{...},"attributes":{...},"filter":{...},"data":[{...},...]}
-// update/insert/delete:
-//   message={"table":string,"action":"update","data":[{...},...]}
-// PATTERNS:
-// "info": (initial handshake)
-// "success": OR "subscribe": (subscribe response)
-// "failure": OR "subscribe": (subscribe response)
-// "table": (subscription snapshot or update)
-// ... not verified ...
-// "now": OR "cancelTime": (cancelAllAfter response)
-// "status": OR "error": (rate limiter)
-// "error": (malformed request or not accessible)
-// shared:
-//   action
-//   + attributes
-//   * data
-//   docs
-//   failure
-//   + filter
-//   + foreign_keys
-//   + keys
-//   * request
-//   subscribe
-//   success
-//   table
-//   timestamp
-//   version
-
 void WebSocket::parse_helper(const std::string_view& message) {
-  // LOG(INFO)("DEBUG: {}", message);
   core::json::Buffer buffer(_decode_buffer);
   json::Parser::dispatch(
       *this,
       message,
       buffer);
+}
+
+void WebSocket::operator()(const json::Handshake& handshake) {
+  VLOG(1)("handshake={}", handshake);
+  (*this)(State::READY);
+  _gateway(*this);
 }
 
 void WebSocket::operator()(const json::Instrument& instrument) {
@@ -525,6 +470,11 @@ void WebSocket::operator()(const json::Instrument& instrument) {
 void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
   VLOG(1)("order_book_l2={}", order_book_l2);
   _gateway(order_book_l2);
+}
+
+void WebSocket::operator()(const json::Subscribe& subscribe) {
+  VLOG(1)("subscribe={}", subscribe);
+  // TODO(thraneh): clear timeout
 }
 
 }  // namespace bitmex

@@ -153,31 +153,121 @@ void Gateway::operator()(Metrics& metrics) {
 // ws
 
 void Gateway::operator()(const WebSocket& websocket) {
+  VLOG(1)("WebSocket");
   // assert(_market_data_status == GatewayStatus::CONNECTING);
   if (websocket.ready()) {
-    // pretend the (automatic) upgrade request is the login
-    update_market_data(GatewayStatus::LOGIN_SENT);
-    begin_download();
+    if (_download == Download::NONE) {
+      // pretend the (automatic) upgrade request is the login
+      update_order_manager(GatewayStatus::LOGIN_SENT);
+      update_market_data(GatewayStatus::LOGIN_SENT);
+      begin_download();
+    }
   } else {
     update_market_data(GatewayStatus::DISCONNECTED);
     _download = Download::NONE;
     _symbols.clear();
+    _snapshot = {};
   }
 }
 
-void Gateway::operator()(const json::Instrument&) {
+void Gateway::operator()(const json::Instrument& instrument) {
+  switch (instrument.action) {
+    case json::Action::UNKNOWN:
+      LOG(FATAL)("Unexpected");
+      break;
+    case json::Action::PARTIAL:
+      if (_snapshot.instrument == false) {
+        _snapshot.instrument = true;
+        assert(_download != Download::READY);
+        roq::span data(
+            instrument.data.items,
+            instrument.data.length);
+        size_t security_count = 0;
+        for (auto& item : data) {
+          if (_dispatcher.discard_symbol(item.symbol)) {
+            VLOG(1)("Drop symbol=\"{}\"", item.symbol);
+            continue;
+          }
+          ++security_count;
+          ReferenceData reference_data {
+            .exchange = FLAGS_exchange,
+            .symbol = item.symbol,
+            .security_type = SecurityType::UNDEFINED,  // ?
+            .currency = item.quote_currency,  // XXX or position_currency?
+            .settlement_currency = item.settl_currency,
+            .commission_currency = std::string_view(),
+            .tick_size = item.tick_size,
+            .limit_up = item.limit_up_price,
+            .limit_down = item.limit_down_price,
+            .multiplier = item.multiplier,
+            .min_trade_vol = item.lot_size,  // XXX correct?
+            .option_type = OptionType::UNDEFINED,  // XXX typ?
+            .strike_currency = std::string_view(),
+            .strike_price = item.option_strike_price,
+          };
+          /* XXX typ:
+           * FFCCSX
+           * FFWCSX
+           * MRCXXX
+           * MRIXXX
+           * MRRXXX
+           */
+          enqueue(reference_data, false);
+        }
+        VLOG(1)(
+            "- securities: {} (/{})",
+            security_count,
+            data.size());
+        check_download();
+      }
+      break;
+    case json::Action::INSERT:
+      // drop
+      break;
+    case json::Action::UPDATE:
+      // drop
+      break;
+    case json::Action::DELETE:
+      // drop
+      break;
+  }
 }
 
 void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
-  // check partial (we receive just once for all instruments)
+  assert(order_book_l2.action != json::Action::UNKNOWN);
+  auto snapshot = order_book_l2.action == json::Action::PARTIAL;
+  // according to documention: drop everything received before partial
+  if (_download != Download::READY && snapshot == false)
+    return;
+  std::string_view previous;
+  size_t bid_length = 0, ask_length = 0;
   roq::span data(
       order_book_l2.data.items,
       order_book_l2.data.length);
-  std::string_view previous;
   for (auto& item : data) {
     if (item.symbol.compare(previous) != 0) {
+      if (previous.empty() == false && (bid_length + ask_length) > 0) {
+        MarketByPrice market_by_price {
+          .exchange = FLAGS_exchange,
+          .symbol = previous,
+          .bids = {
+            .items = _bid.data(),
+            .length = bid_length,
+          },
+          .asks = {
+            .items = _ask.data(),
+            .length = ask_length,
+          },
+          .snapshot = snapshot,
+          .exchange_time_utc = {},
+          };
+        VLOG(1)("market_by_price={}", market_by_price);
+        enqueue(
+            market_by_price,
+            false);
+      }
       previous = item.symbol;
-      // XXX enqueue
+      bid_length = ask_length = 0;
     }
     auto iter = _price_lookup.find(item.id);
     switch (order_book_l2.action) {
@@ -188,7 +278,7 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
       case json::Action::INSERT:
         LOG_IF(FATAL, iter != _price_lookup.end())("FOUND DUPLICATE");
         assert(std::isnan(item.price) == false);
-        _price_lookup.emplace(item.id, item.price);
+        iter = _price_lookup.emplace(item.id, item.price).first;
         break;
       case json::Action::UPDATE:
         LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");
@@ -198,8 +288,47 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
         _price_lookup.erase(iter);
         break;
     }
+    struct {
+      double price;
+      double size;
+    } update = {
+      .price = (*iter).second,
+      .size = std::isnan(item.size) ? 0.0 : item.size,
+    };
+    switch (item.side) {
+      case json::Side::BUY:
+        mbp_update(_bid, bid_length, update);
+        break;
+      case json::Side::SELL:
+        mbp_update(_ask, ask_length, update);
+        break;
+      default:
+        LOG(FATAL)("Unexpected");
+    }
   }
-  // XXX enqueue
+  if (previous.empty() == false && (bid_length + ask_length) > 0) {
+    MarketByPrice market_by_price {
+      .exchange = FLAGS_exchange,
+      .symbol = previous,
+      .bids = {
+        .items = _bid.data(),
+        .length = bid_length,
+      },
+      .asks = {
+        .items = _ask.data(),
+        .length = ask_length,
+      },
+      .snapshot = snapshot,
+      .exchange_time_utc = {},
+      };
+    VLOG(1)("market_by_price={}", market_by_price);
+    enqueue(
+        market_by_price,
+        true);
+  }
+  // download complete?
+  if (_download != Download::READY && snapshot)
+        check_download();
 }
 
 // rest
@@ -239,7 +368,9 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
 
 void Gateway::begin_download() {
   assert(_download == Download::NONE);
+  assert(_order_manager_status == GatewayStatus::LOGIN_SENT);
   assert(_market_data_status == GatewayStatus::LOGIN_SENT);
+  update_order_manager(GatewayStatus::DOWNLOADING);
   update_market_data(GatewayStatus::DOWNLOADING);
   LOG(INFO)("Download:");
   download_products();
@@ -247,46 +378,57 @@ void Gateway::begin_download() {
 
 void Gateway::check_download() {
   assert(_download != Download::NONE);
-  assert(_market_data_status == GatewayStatus::DOWNLOADING);
+  assert(_download != Download::READY);
   switch (_download) {
     case Download::NONE:
       assert(false);
       break;
     case Download::PRODUCTS: {
       LOG(INFO)("Download products COMPLETED");
-      download_accounts();
+      // download_accounts();
+      update_order_manager(GatewayStatus::READY);
+      download_order_books();
       break;
     }
     case Download::ACCOUNTS: {
       LOG(INFO)("Download accounts COMPLETED");
-      update_market_data(GatewayStatus::READY);
-      LOG(INFO)("Download COMPLETED");
-      _download = Download::NONE;
-      subscribe();
+      update_order_manager(GatewayStatus::READY);
+      download_order_books();
       break;
     }
+    case Download::ORDER_BOOKS: {
+      LOG(INFO)("Download order books COMPLETED");
+      update_market_data(GatewayStatus::READY);
+      LOG(INFO)("Download COMPLETED");
+      _download = Download::READY;
+      break;
+    }
+    case Download::READY:
+      assert(false);
+      break;
   }
 }
 
 void Gateway::download_products() {
-  assert(_market_data_status == GatewayStatus::DOWNLOADING);
+  assert(_download != Download::READY);
   LOG(INFO)("Download products...");
   // XXX _rest.get_products();
-  _websocket.subscribe({});
+  _websocket.subscribe_instrument(_symbols);
   _download = Download::PRODUCTS;
 }
 
 void Gateway::download_accounts() {
-  assert(_market_data_status == GatewayStatus::DOWNLOADING);
+  assert(_download != Download::READY);
   LOG(INFO)("Download accounts...");
   // _rest.get_accounts();
   _download = Download::ACCOUNTS;
 }
 
-void Gateway::subscribe() {
-  assert(_market_data_status == GatewayStatus::READY);
-  LOG(INFO)("Subscribe channels");
-  // _websocket.subscribe(_symbols);
+void Gateway::download_order_books() {
+  assert(_download != Download::READY);
+  LOG(INFO)("Download order books");
+  _websocket.subscribe_order_book_l2(_symbols);
+  _download = Download::ORDER_BOOKS;
 }
 
 template <typename T>

@@ -11,6 +11,8 @@
 
 #include "roq/core/json/parser.h"
 
+#include "roq/bitmex/json/state.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -101,7 +103,7 @@ struct InstrumentItem final {
   std::chrono::nanoseconds settle = {};
   double settled_price = std::numeric_limits<double>::quiet_NaN();
   double settlement_fee = std::numeric_limits<double>::quiet_NaN();
-  std::string_view state;
+  State state = State::UNKNOWN;
   std::string_view symbol;
   double taker_fee = std::numeric_limits<double>::quiet_NaN();
   bool taxed = false;
@@ -225,7 +227,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         "settle={}, "
         "settled_price={}, "
         "settlement_fee={}, "
-        "state=\"{}\", "
+        "state={}, "
         "symbol=\"{}\", "
         "taker_fee={}, "
         "taxed={}, "

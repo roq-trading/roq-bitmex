@@ -64,7 +64,7 @@ class Gateway final : public server::Handler {
   void download_products();
   void download_accounts();
 
-  void subscribe();
+  void download_order_books();
 
  private:
   template <typename T>
@@ -107,8 +107,14 @@ class Gateway final : public server::Handler {
     NONE,
     PRODUCTS,
     ACCOUNTS,
+    ORDER_BOOKS,
+    READY,
   } _download = Download::NONE;
   std::vector<std::string> _symbols;
+  struct {
+    bool instrument = false;
+    bool order_book_l2 = false;
+  } _snapshot;
   // market data
   GatewayStatus _market_data_status = GatewayStatus::DISCONNECTED;
   core::page_aligned_vector<MBPUpdate> _bid, _ask;

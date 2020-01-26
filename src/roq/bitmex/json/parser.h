@@ -2,12 +2,15 @@
 
 #pragma once
 
+#include <chrono>
 #include <string_view>
 
 #include "roq/core/json/buffer.h"
 
+#include "roq/bitmex/json/handshake.h"
 #include "roq/bitmex/json/instrument.h"
 #include "roq/bitmex/json/order_book_l2.h"
+#include "roq/bitmex/json/subscribe.h"
 
 #undef VERSION
 
@@ -17,8 +20,10 @@ namespace json {
 
 struct Parser final {
   struct Handler {
+    virtual void operator()(const Handshake&) = 0;
     virtual void operator()(const Instrument&) = 0;
     virtual void operator()(const OrderBookL2&) = 0;
+    virtual void operator()(const Subscribe&) = 0;
   };
 
   std::string_view action;
@@ -26,7 +31,7 @@ struct Parser final {
   std::string_view subscribe;
   bool success = false;
   std::string_view table;
-  std::string_view timestamp;
+  std::chrono::nanoseconds timestamp;
   std::string_view version;
 
   static void dispatch(

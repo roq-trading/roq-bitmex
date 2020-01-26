@@ -259,7 +259,7 @@ void update(Type& result, const Type type) {
     throw std::runtime_error("wrong type");
   }
 }
-} // namespace
+}  // namespace
 
 void Parser::dispatch(
     Parser::Handler& handler,
@@ -405,11 +405,22 @@ void Parser::dispatch(
         return;
       }
       case Type::INFO: {
-        LOG(INFO)("DEBUG: INFO");
+        Handshake handshake {
+          .docs = nullptr,
+          .info = nullptr,
+          .timestamp = result.timestamp,
+          .version = result.version,
+        };
+        handler(handshake);
         return;
       }
       case Type::SUBSCRIBE: {
-        LOG(INFO)("DEBUG: SUBSCRIBE");
+        Subscribe subscribe {
+          .failure = result.failure,
+          .subscribe = result.subscribe,
+          .success = result.success,
+        };
+        handler(subscribe);
         return;
       }
       case Type::TABLE: {

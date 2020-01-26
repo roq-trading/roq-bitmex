@@ -9,6 +9,8 @@
 
 #include "roq/core/json/parser.h"
 
+#include "roq/bitmex/json/side.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -16,7 +18,7 @@ namespace json {
 struct OrderBookL2Item final {
   uint64_t id = 0;
   double price = std::numeric_limits<double>::quiet_NaN();
-  std::string_view side;
+  Side side = Side::UNKNOWN;
   double size = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
 
@@ -42,7 +44,7 @@ struct fmt::formatter<roq::bitmex::json::OrderBookL2Item> {
         "{{"
         "id={}, "
         "price={}, "
-        "side=\"{}\", "
+        "side={}, "
         "size={}, "
         "symbol=\"{}\""
         "}}",

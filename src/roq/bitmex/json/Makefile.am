@@ -9,6 +9,7 @@ libroq_bitmex_json_la_CPPFLAGS = \
 	$(ROQ_CFLAGS)
 libroq_bitmex_json_la_SOURCES = \
 	action.cpp \
+	handshake.cpp \
 	instrument.cpp \
 	instrument_item.cpp \
 	order.cpp \
@@ -16,4 +17,7 @@ libroq_bitmex_json_la_SOURCES = \
 	order_book_l2_item.cpp \
 	parser.cpp \
 	position.cpp \
+	side.cpp \
+	state.cpp \
+	subscribe.cpp \
 	utils.cpp
