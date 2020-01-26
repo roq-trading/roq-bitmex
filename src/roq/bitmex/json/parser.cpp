@@ -19,13 +19,16 @@ enum class Field {
   ATTRIBUTES,
   DATA,
   DOCS,
+  ERROR,
   FAILURE,
   FILTER,
   FOREIGN_KEYS,
   INFO,
   KEYS,
   LIMIT,
+  META,
   REQUEST,
+  STATUS,
   SUBSCRIBE,
   SUCCESS,
   TABLE,
@@ -71,6 +74,12 @@ constexpr auto parse_d(auto& name) {
   return Field::UNKNOWN;
 }
 
+constexpr auto parse_e(auto& name) {
+  if (name.compare("error") == 0)
+    return Field::ERROR;
+  return Field::UNKNOWN;
+}
+
 constexpr auto parse_f(auto& name) {
   if (name.length() >= 2) {
     switch (name.data()[1]) {
@@ -112,6 +121,12 @@ constexpr auto parse_l(auto& name) {
   return Field::UNKNOWN;
 }
 
+constexpr auto parse_m(auto& name) {
+  if (name.compare("meta") == 0)
+    return Field::META;
+  return Field::UNKNOWN;
+}
+
 constexpr auto parse_r(auto& name) {
   if (name.compare("request") == 0)
     return Field::REQUEST;
@@ -121,6 +136,11 @@ constexpr auto parse_r(auto& name) {
 constexpr auto parse_s(auto& name) {
   if (name.length() >= 3) {
     switch (name.data()[2]) {
+      case 'a': {
+        if (name.compare("status") == 0)
+          return Field::STATUS;
+        break;
+      }
       case 'b': {
         if (name.compare("subscribe") == 0)
           return Field::SUBSCRIBE;
@@ -172,6 +192,8 @@ constexpr auto parse_field(const std::string_view& name) {
       return parse_a(name);
     case 'd':
       return parse_d(name);
+    case 'e':
+      return parse_e(name);
     case 'f':
       return parse_f(name);
     case 'i':
@@ -180,6 +202,8 @@ constexpr auto parse_field(const std::string_view& name) {
       return parse_k(name);
     case 'l':
       return parse_l(name);
+    case 'm':
+      return parse_m(name);
     case 'r':
       return parse_r(name);
     case 's':
@@ -198,6 +222,8 @@ static_assert(parse_field("attributes") == Field::ATTRIBUTES);
 static_assert(parse_field("data") == Field::DATA);
 static_assert(parse_field("docs") == Field::DOCS);
 
+static_assert(parse_field("error") == Field::ERROR);
+
 static_assert(parse_field("failure") == Field::FAILURE);
 static_assert(parse_field("filter") == Field::FILTER);
 static_assert(parse_field("foreignKeys") == Field::FOREIGN_KEYS);
@@ -208,8 +234,11 @@ static_assert(parse_field("keys") == Field::KEYS);
 
 static_assert(parse_field("limit") == Field::LIMIT);
 
+static_assert(parse_field("meta") == Field::META);
+
 static_assert(parse_field("request") == Field::REQUEST);
 
+static_assert(parse_field("status") == Field::STATUS);
 static_assert(parse_field("subscribe") == Field::SUBSCRIBE);
 static_assert(parse_field("success") == Field::SUCCESS);
 
@@ -229,27 +258,57 @@ enum class Type {
 
 enum class Table {
   UNKNOWN,
+  FUNDING,
   INSTRUMENT,
+  LIQUIDATION,
   ORDER_BOOK_L2,
+  QUOTE,
+  SETTLEMENT,
+  TRADE,
 };
 
 constexpr auto parse_table(const std::string_view& name) {
   assert(name.empty() == false);
   switch (name.data()[0]) {
+    case 'f':
+      if (name.compare("funding") == 0)
+        return Table::FUNDING;
+      break;
     case 'i':
       if (name.compare("instrument") == 0)
         return Table::INSTRUMENT;
+      break;
+    case 'l':
+      if (name.compare("liquidation") == 0)
+        return Table::LIQUIDATION;
       break;
     case 'o':
       if (name.compare("orderBookL2") == 0)
         return Table::ORDER_BOOK_L2;
       break;
+    case 'q':
+      if (name.compare("quote") == 0)
+        return Table::QUOTE;
+      break;
+    case 's':
+      if (name.compare("settlement") == 0)
+        return Table::SETTLEMENT;
+      break;
+    case 't':
+      if (name.compare("trade") == 0)
+        return Table::TRADE;
+      break;
   }
   return Table::UNKNOWN;
 }
 
+static_assert(parse_table("funding") == Table::FUNDING);
 static_assert(parse_table("instrument") == Table::INSTRUMENT);
+static_assert(parse_table("liquidation") == Table::LIQUIDATION);
 static_assert(parse_table("orderBookL2") == Table::ORDER_BOOK_L2);
+static_assert(parse_table("quote") == Table::QUOTE);
+static_assert(parse_table("settlement") == Table::SETTLEMENT);
+static_assert(parse_table("trade") == Table::TRADE);
 
 void update(Type& result, const Type type) {
   assert(type != Type::UNKNOWN);
@@ -299,6 +358,15 @@ void Parser::dispatch(
             switch (table) {
               case Table::UNKNOWN:
                 break;
+              case Table::FUNDING: {
+                auto funding = Funding::parse(
+                    std::get<core::json::array_t>(value),
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(funding);
+                break;
+              }
               case Table::INSTRUMENT: {
                 auto instrument = Instrument::parse(
                     std::get<core::json::array_t>(value),
@@ -306,6 +374,15 @@ void Parser::dispatch(
                     action);
                 dispatched = true;
                 handler(instrument);
+                break;
+              }
+              case Table::LIQUIDATION: {
+                auto liquidation = Liquidation::parse(
+                    std::get<core::json::array_t>(value),
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(liquidation);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
@@ -317,6 +394,33 @@ void Parser::dispatch(
                 handler(order_book_l2);
                 break;
               }
+              case Table::QUOTE: {
+                auto quote = Quote::parse(
+                    std::get<core::json::array_t>(value),
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(quote);
+                break;
+              }
+              case Table::SETTLEMENT: {
+                auto settlement = Settlement::parse(
+                    std::get<core::json::array_t>(value),
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(settlement);
+                break;
+              }
+              case Table::TRADE: {
+                auto trade = Trade::parse(
+                    std::get<core::json::array_t>(value),
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(trade);
+                break;
+              }
             }
           }
           break;
@@ -324,6 +428,11 @@ void Parser::dispatch(
         case Field::DOCS: {
           // not used
           update(type, Type::INFO);
+          break;
+        }
+        case Field::ERROR: {
+          update(result.error, value);
+          update(type, Type::ERROR);
           break;
         }
         case Field::FAILURE: {
@@ -356,9 +465,19 @@ void Parser::dispatch(
           update(type, Type::INFO);
           break;
         }
+        case Field::META: {
+          // not used
+          update(type, Type::ERROR);
+          break;
+        }
         case Field::REQUEST: {
           // not used
-          update(type, Type::SUBSCRIBE);
+          // => subscribe + error
+          break;
+        }
+        case Field::STATUS: {
+          update(result.status, value);
+          update(type, Type::ERROR);
           break;
         }
         case Field::SUBSCRIBE: {
@@ -401,7 +520,11 @@ void Parser::dispatch(
       case Type::UNKNOWN:
         throw std::runtime_error("Can't detect message type");
       case Type::ERROR: {
-        LOG(INFO)("DEBUG: ERROR");
+        Error error {
+          .error = result.error,
+          .status = result.status,
+        };
+        handler(error);
         return;
       }
       case Type::INFO: {

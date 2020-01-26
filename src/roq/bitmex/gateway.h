@@ -50,6 +50,9 @@ class Gateway final : public server::Handler {
   void operator()(const WebSocket&);
   void operator()(const json::Instrument&);
   void operator()(const json::OrderBookL2&);
+  void operator()(const json::Quote&);
+  void operator()(const json::Settlement&);
+  void operator()(const json::Trade&);
 
   // rest
   void operator()(const Rest&);
@@ -61,10 +64,10 @@ class Gateway final : public server::Handler {
   void begin_download();
   void check_download();
 
-  void download_products();
   void download_accounts();
 
-  void download_order_books();
+  void subscribe_instrument();
+  void subscribe_order_book_l2();
 
  private:
   template <typename T>
@@ -118,6 +121,7 @@ class Gateway final : public server::Handler {
   // market data
   GatewayStatus _market_data_status = GatewayStatus::DISCONNECTED;
   core::page_aligned_vector<MBPUpdate> _bid, _ask;
+  core::page_aligned_vector<Trade> _trade;
   std::unordered_map<uint64_t, double> _price_lookup;
   // order manager
   GatewayStatus _order_manager_status = GatewayStatus::DISCONNECTED;

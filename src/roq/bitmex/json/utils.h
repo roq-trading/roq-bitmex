@@ -14,6 +14,7 @@
 
 #include "roq/bitmex/json/side.h"
 #include "roq/bitmex/json/state.h"
+#include "roq/bitmex/json/utils.h"
 
 namespace roq {
 namespace bitmex {
@@ -131,6 +132,17 @@ inline void update(
     State& result,
     const core::json::value_t& value) {
   result = parse_state(core::json::get<std::string_view>(value));
+}
+
+inline roq::Side convert(json::Side side) {
+  switch (side) {
+    case json::Side::BUY:
+      return roq::Side::BUY;
+    case json::Side::SELL:
+      return roq::Side::SELL;
+    default:
+      return roq::Side::UNDEFINED;
+  }
 }
 
 }  // namespace json

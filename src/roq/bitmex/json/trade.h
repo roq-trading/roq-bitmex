@@ -5,28 +5,28 @@
 #include "roq/core/json/buffer.h"
 
 #include "roq/bitmex/json/action.h"
-#include "roq/bitmex/json/instrument_item.h"
+#include "roq/bitmex/json/trade_item.h"
 
 namespace roq {
 namespace bitmex {
 namespace json {
 
-struct Instrument final {
+struct Trade final {
   Action action = Action::UNKNOWN;
   struct {
-    InstrumentItem *items = nullptr;
+    TradeItem *items = nullptr;
     size_t length = 0;
   } data;
 
-  Instrument *items = nullptr;
+  Trade *items = nullptr;
   size_t length = 0;
 
-  static Instrument parse(
+  static Trade parse(
       const std::string_view& message,
       core::json::Buffer& buffer,
       Action action);
 
-  static Instrument parse(
+  static Trade parse(
       core::json::array_t& array,
       core::json::Buffer& buffer,
       Action action);
@@ -37,13 +37,13 @@ struct Instrument final {
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::bitmex::json::Instrument> {
+struct fmt::formatter<roq::bitmex::json::Trade> {
   template <typename C>
   constexpr auto parse(C& ctx) {
     return ctx.begin();
   }
   template <typename C>
-  auto format(const roq::bitmex::json::Instrument& value, C& ctx) {
+  auto format(const roq::bitmex::json::Trade& value, C& ctx) {
     roq::span data(
         value.data.items,
         value.data.length);

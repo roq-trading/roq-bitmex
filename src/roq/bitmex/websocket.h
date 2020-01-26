@@ -64,8 +64,11 @@ class WebSocket final
   void operator()(const StopEvent&);
   void operator()(const TimerEvent&);
 
-  void subscribe_instrument(const std::vector<std::string>& symbols);
-  void subscribe_order_book_l2(const std::vector<std::string>& symbols);
+  void subscribe(const std::string_view& topic);
+
+  void subscribe(
+      const std::string_view& topic,
+      const std::vector<std::string>& filter);
 
   void operator()(Metrics& metrics);
 
@@ -104,10 +107,16 @@ class WebSocket final
   void parse_helper(const std::string_view& message);
 
   // json:
+  void operator()(const json::Error&) override;
+  void operator()(const json::Funding&) override;
   void operator()(const json::Handshake&) override;
   void operator()(const json::Instrument&) override;
+  void operator()(const json::Liquidation&) override;
   void operator()(const json::OrderBookL2&) override;
+  void operator()(const json::Quote&) override;
+  void operator()(const json::Settlement&) override;
   void operator()(const json::Subscribe&) override;
+  void operator()(const json::Trade&) override;
 
  private:
   Gateway& _gateway;

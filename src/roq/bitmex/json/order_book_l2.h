@@ -41,14 +41,14 @@ struct fmt::formatter<roq::bitmex::json::OrderBookL2> {
   }
   template <typename C>
   auto format(const roq::bitmex::json::OrderBookL2& value, C& ctx) {
+    roq::span data(
+        value.data.items,
+        value.data.length);
     return format_to(
         ctx.out(),
         "action={}, "
         "data=[{}]",
         value.action,
-        fmt::join(
-          value.data.items,
-          value.data.items + value.data.length,
-          ", "));
+        fmt::join(data, ", "));
   }
 };

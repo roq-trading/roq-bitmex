@@ -16,6 +16,7 @@
 #include "roq/bitmex/options.h"
 
 #include "roq/bitmex/api/utils.h"
+#include "roq/bitmex/json/utils.h"
 
 namespace roq {
 namespace bitmex {
@@ -33,6 +34,24 @@ static inline void mbp_update(
     .price = item.price,
     .quantity = item.size,
   };
+  if (offset >= data.size())
+    throw std::runtime_error("Not enough space");
+}
+
+template <typename T>
+static inline void trade_update(
+    auto& data,
+    size_t& offset,
+    const T& item) {
+  auto lhs = &data[offset];
+  new (lhs) Trade {
+    .side = json::convert(item.side),  // XXX check
+    .price = item.price,
+    .quantity = item.size,
+    .trade_id = {},
+  };
+  core::copy_to(item.trd_match_id, lhs->trade_id);
+  ++offset;
   if (offset >= data.size())
     throw std::runtime_error("Not enough space");
 }
@@ -56,7 +75,8 @@ Gateway::Gateway(
           _dns_base,
           _ssl_context),
       _bid(FLAGS_max_depth),
-      _ask(FLAGS_max_depth) {
+      _ask(FLAGS_max_depth),
+      _trade(FLAGS_max_depth) {  // XXX need another flag
   LOG_IF(WARNING, FLAGS_cancel_on_disconnect == false)(
       "Orders will *NOT* be cancelled on disconnect");
 }
@@ -331,6 +351,65 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
         check_download();
 }
 
+void Gateway::operator()(const json::Quote&) {
+}
+
+void Gateway::operator()(const json::Settlement&) {
+}
+
+void Gateway::operator()(const json::Trade& trade) {
+  if (trade.action != json::Action::INSERT)
+    return;
+  std::string_view previous;
+  size_t trade_length = 0;
+  std::chrono::nanoseconds timestamp = {};
+  roq::span data(
+      trade.data.items,
+      trade.data.length);
+  for (auto& item : data) {
+    if (timestamp.count() == 0) {
+      timestamp = item.timestamp;
+    } else {
+      assert(timestamp == item.timestamp);
+    }
+    if (item.symbol.compare(previous) != 0) {
+      if (previous.empty() == false && trade_length > 0) {
+        TradeSummary trade_summary {
+          .exchange = FLAGS_exchange,
+          .symbol = previous,
+          .trades = {
+            .items = _trade.data(),
+            .length = trade_length,
+          },
+          .exchange_time_utc = timestamp,
+          };
+        VLOG(1)("trade_summary={}", trade_summary);
+        enqueue(
+            trade_summary,
+            false);
+      }
+      previous = item.symbol;
+      trade_length = 0;
+    }
+    trade_update(_trade, trade_length, item);
+  }
+  if (previous.empty() == false && trade_length > 0) {
+    TradeSummary trade_summary {
+      .exchange = FLAGS_exchange,
+      .symbol = previous,
+      .trades = {
+        .items = _trade.data(),
+        .length = trade_length,
+      },
+      .exchange_time_utc = timestamp,
+      };
+    VLOG(1)("trade_summary={}", trade_summary);
+    enqueue(
+        trade_summary,
+        true);
+  }
+}
+
 // rest
 
 void Gateway::operator()(const Rest&) {
@@ -373,7 +452,7 @@ void Gateway::begin_download() {
   update_order_manager(GatewayStatus::DOWNLOADING);
   update_market_data(GatewayStatus::DOWNLOADING);
   LOG(INFO)("Download:");
-  download_products();
+  subscribe_instrument();
 }
 
 void Gateway::check_download() {
@@ -383,17 +462,17 @@ void Gateway::check_download() {
     case Download::NONE:
       assert(false);
       break;
+    case Download::ACCOUNTS: {
+      LOG(INFO)("Download accounts COMPLETED");
+      update_order_manager(GatewayStatus::READY);
+      subscribe_order_book_l2();
+      break;
+    }
     case Download::PRODUCTS: {
       LOG(INFO)("Download products COMPLETED");
       // download_accounts();
       update_order_manager(GatewayStatus::READY);
-      download_order_books();
-      break;
-    }
-    case Download::ACCOUNTS: {
-      LOG(INFO)("Download accounts COMPLETED");
-      update_order_manager(GatewayStatus::READY);
-      download_order_books();
+      subscribe_order_book_l2();
       break;
     }
     case Download::ORDER_BOOKS: {
@@ -409,14 +488,6 @@ void Gateway::check_download() {
   }
 }
 
-void Gateway::download_products() {
-  assert(_download != Download::READY);
-  LOG(INFO)("Download products...");
-  // XXX _rest.get_products();
-  _websocket.subscribe_instrument(_symbols);
-  _download = Download::PRODUCTS;
-}
-
 void Gateway::download_accounts() {
   assert(_download != Download::READY);
   LOG(INFO)("Download accounts...");
@@ -424,11 +495,26 @@ void Gateway::download_accounts() {
   _download = Download::ACCOUNTS;
 }
 
-void Gateway::download_order_books() {
+void Gateway::subscribe_instrument() {
+  assert(_download != Download::READY);
+  LOG(INFO)("Download products...");
+  // XXX _rest.get_products();
+  _websocket.subscribe("instrument");
+  _download = Download::PRODUCTS;
+}
+
+void Gateway::subscribe_order_book_l2() {
   assert(_download != Download::READY);
   LOG(INFO)("Download order books");
-  _websocket.subscribe_order_book_l2(_symbols);
+  _websocket.subscribe("orderBookL2", _symbols);
   _download = Download::ORDER_BOOKS;
+
+  // XXX not here
+  _websocket.subscribe("funding", _symbols);
+  _websocket.subscribe("liquidation", _symbols);
+  _websocket.subscribe("quote", _symbols);
+  _websocket.subscribe("settlement", _symbols);
+  _websocket.subscribe("trade", _symbols);
 }
 
 template <typename T>

@@ -116,13 +116,14 @@ void WebSocket::operator()(const TimerEvent& event) {
   }
 }
 
-void WebSocket::subscribe_instrument(const std::vector<std::string>& symbols) {
+void WebSocket::subscribe(const std::string_view& topic) {
   auto text = fmt::format(
       "{{"
       "\"op\":\"subscribe\","
       "\"args\":"
-      "\"instrument\""
-      "}}");
+      "\"{}\""
+      "}}",
+      topic);
   core::ws::Writer writer(_encode_buffer);
   core::ws::Encoder::text(
       writer,
@@ -130,19 +131,26 @@ void WebSocket::subscribe_instrument(const std::vector<std::string>& symbols) {
   send(writer.finish());
 }
 
-void WebSocket::subscribe_order_book_l2(const std::vector<std::string>& symbols) {
-  auto text = fmt::format(
-      "{{"
-      "\"op\":\"subscribe\","
-      "\"args\":"
-      "\"orderBookL2:{}\""
-      "}}",
-      fmt::join(symbols, ","));
-  core::ws::Writer writer(_encode_buffer);
-  core::ws::Encoder::text(
-      writer,
-      text);
-  send(writer.finish());
+void WebSocket::subscribe(
+    const std::string_view& topic,
+    const std::vector<std::string>& filter) {
+  if (filter.empty()) {
+    subscribe(topic);
+  } else {
+    auto text = fmt::format(
+        "{{"
+        "\"op\":\"subscribe\","
+        "\"args\":"
+        "\"{}:{}\""
+        "}}",
+        topic,
+        fmt::join(filter, ","));
+    core::ws::Writer writer(_encode_buffer);
+    core::ws::Encoder::text(
+        writer,
+        text);
+    send(writer.finish());
+  }
 }
 
 void WebSocket::operator()(Metrics& metrics) {
@@ -456,6 +464,14 @@ void WebSocket::parse_helper(const std::string_view& message) {
       buffer);
 }
 
+void WebSocket::operator()(const json::Error& error) {
+  VLOG(1)("error={}", error);
+}
+
+void WebSocket::operator()(const json::Funding& funding) {
+  VLOG(1)("funding={}", funding);
+}
+
 void WebSocket::operator()(const json::Handshake& handshake) {
   VLOG(1)("handshake={}", handshake);
   (*this)(State::READY);
@@ -467,13 +483,43 @@ void WebSocket::operator()(const json::Instrument& instrument) {
   _gateway(instrument);
 }
 
+void WebSocket::operator()(const json::Liquidation& liquidation) {
+  VLOG(1)("liquidation={}", liquidation);
+}
+
 void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
   VLOG(1)("order_book_l2={}", order_book_l2);
   _gateway(order_book_l2);
 }
 
+void WebSocket::operator()(const json::Quote& quote) {
+  VLOG(1)("quote={}", quote);
+  _gateway(quote);
+}
+
+void WebSocket::operator()(const json::Settlement& settlement) {
+  VLOG(1)("settlement={}", settlement);
+  _gateway(settlement);
+}
+
+void WebSocket::operator()(const json::Trade& trade) {
+  VLOG(1)("trade={}", trade);
+  _gateway(trade);
+}
+
 void WebSocket::operator()(const json::Subscribe& subscribe) {
   VLOG(1)("subscribe={}", subscribe);
+  if (subscribe.success) {
+    assert(subscribe.failure == false);
+    LOG(INFO)("Successfully subscribed to topic=\"{}\"",
+        subscribe.subscribe);
+  } else if (subscribe.failure) {
+    assert(subscribe.success == false);
+    LOG(WARNING)("Failed to subscribe topic=\"{}\"",
+        subscribe.subscribe);
+  } else {
+    LOG(FATAL)("Expected success or failure");
+  }
   // TODO(thraneh): clear timeout
 }
 
