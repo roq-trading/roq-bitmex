@@ -13,6 +13,10 @@ namespace {
 constexpr auto parse_helper(const std::string_view& name) {
   assert(name.empty() == false);
   switch (name.data()[0]) {
+    case 'C':
+      if (name.compare("Closed") == 0)
+        return State::CLOSED;
+      break;
     case 'O':
       if (name.compare("Open") == 0)
         return State::OPEN;
@@ -25,6 +29,7 @@ constexpr auto parse_helper(const std::string_view& name) {
   return State::UNKNOWN;
 }
 
+static_assert(parse_helper("Closed") == State::CLOSED);
 static_assert(parse_helper("Open") == State::OPEN);
 static_assert(parse_helper("Unlisted") == State::UNLISTED);
 }  // namespace

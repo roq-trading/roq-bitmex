@@ -12,6 +12,7 @@ namespace json {
 
 enum class State {
   UNKNOWN,
+  CLOSED,
   OPEN,
   UNLISTED,
 };
@@ -21,6 +22,7 @@ extern State parse_state(const std::string_view& name);
 inline auto EnumNamesState() {
   static const std::string_view names[] = {
     "UNKNOWN",
+    "CLOSED",
     "OPEN",
     "UNLISTED",
   };

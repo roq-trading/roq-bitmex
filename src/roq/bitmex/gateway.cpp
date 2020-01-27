@@ -351,7 +351,28 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
         check_download();
 }
 
-void Gateway::operator()(const json::Quote&) {
+void Gateway::operator()(const json::Quote& quote) {
+  roq::span data(
+      quote.data.items,
+      quote.data.length);
+  for (auto& item : data) {
+    TopOfBook top_of_book {
+      .exchange = FLAGS_exchange,
+      .symbol = item.symbol,
+      .layer = {
+        .bid_price = item.bid_price,
+        .bid_quantity = item.bid_size,
+        .ask_price = item.ask_price,
+        .ask_quantity = item.ask_size,
+      },
+      .snapshot = false,  // XXX ???
+      .exchange_time_utc = item.timestamp,
+    };
+    VLOG(1)("top_of_book={}", top_of_book);
+    enqueue(
+        top_of_book,
+        true);  // XXX not always correct
+  }
 }
 
 void Gateway::operator()(const json::Settlement&) {
@@ -515,6 +536,16 @@ void Gateway::subscribe_order_book_l2() {
   _websocket.subscribe("quote", _symbols);
   _websocket.subscribe("settlement", _symbols);
   _websocket.subscribe("trade", _symbols);
+
+  // XXX private
+  // _websocket.subscribe("execution", _symbols);
+  // _websocket.subscribe("order", _symbols);
+  // _websocket.subscribe("margin", _symbols);
+  // _websocket.subscribe("position", _symbols);
+
+  // XXX other
+  // cancelAllAfter
+  // authKeyExpires
 }
 
 template <typename T>
@@ -522,7 +553,7 @@ void Gateway::enqueue(
     const T& event,
     bool is_last) {
   auto now = core::get_system_clock();
-  _dispatcher.enqueue(
+  _dispatcher(
       event,
       now,
       now,
@@ -535,7 +566,7 @@ void Gateway::enqueue(
     const T& event,
     bool is_last) {
   auto now = core::get_system_clock();
-  _dispatcher.enqueue(
+  _dispatcher(
       user_id,
       event,
       now,
