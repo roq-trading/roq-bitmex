@@ -13,13 +13,7 @@ namespace json {
 
 struct Settlement final {
   Action action = Action::UNKNOWN;
-  struct {
-    SettlementItem *items = nullptr;
-    size_t length = 0;
-  } data;
-
-  Settlement *items = nullptr;
-  size_t length = 0;
+  roq::span<SettlementItem> data;
 
   static Settlement parse(
       const std::string_view& message,
@@ -44,14 +38,11 @@ struct fmt::formatter<roq::bitmex::json::Settlement> {
   }
   template <typename C>
   auto format(const roq::bitmex::json::Settlement& value, C& ctx) {
-    roq::span data(
-        value.data.items,
-        value.data.length);
     return format_to(
         ctx.out(),
         "action={}, "
         "data=[{}]",
         value.action,
-        fmt::join(data, ", "));
+        fmt::join(value.data, ", "));
   }
 };

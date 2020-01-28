@@ -199,11 +199,8 @@ void Gateway::operator()(const json::Instrument& instrument) {
       if (_snapshot.instrument == false) {
         _snapshot.instrument = true;
         assert(_download != Download::READY);
-        roq::span data(
-            instrument.data.items,
-            instrument.data.length);
         size_t security_count = 0;
-        for (auto& item : data) {
+        for (auto& item : instrument.data) {
           if (_dispatcher.discard_symbol(item.symbol)) {
             VLOG(1)("Drop symbol=\"{}\"", item.symbol);
             continue;
@@ -237,7 +234,7 @@ void Gateway::operator()(const json::Instrument& instrument) {
         VLOG(1)(
             "- securities: {} (/{})",
             security_count,
-            data.size());
+            instrument.data.size());
         check_download();
       }
       break;
@@ -261,10 +258,7 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
     return;
   std::string_view previous;
   size_t bid_length = 0, ask_length = 0;
-  roq::span data(
-      order_book_l2.data.items,
-      order_book_l2.data.length);
-  for (auto& item : data) {
+  for (auto& item : order_book_l2.data) {
     if (item.symbol.compare(previous) != 0) {
       if (previous.empty() == false && (bid_length + ask_length) > 0) {
         MarketByPrice market_by_price {
@@ -302,10 +296,13 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
         break;
       case json::Action::UPDATE:
         LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");
+        assert(std::isnan(item.size) == false &&
+            std::fabs(item.size) > TOLERANCE);
         break;
       case json::Action::DELETE:
         LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");
-        _price_lookup.erase(iter);
+        assert(std::isnan(item.size) == true ||
+            std::fabs(item.size) < TOLERANCE);
         break;
     }
     struct {
@@ -325,6 +322,8 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
       default:
         LOG(FATAL)("Unexpected");
     }
+    if (order_book_l2.action == json::Action::DELETE)
+        _price_lookup.erase(iter);
   }
   if (previous.empty() == false && (bid_length + ask_length) > 0) {
     MarketByPrice market_by_price {
@@ -352,10 +351,7 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
 }
 
 void Gateway::operator()(const json::Quote& quote) {
-  roq::span data(
-      quote.data.items,
-      quote.data.length);
-  for (auto& item : data) {
+  for (auto& item : quote.data) {
     TopOfBook top_of_book {
       .exchange = FLAGS_exchange,
       .symbol = item.symbol,
@@ -384,10 +380,7 @@ void Gateway::operator()(const json::Trade& trade) {
   std::string_view previous;
   size_t trade_length = 0;
   std::chrono::nanoseconds timestamp = {};
-  roq::span data(
-      trade.data.items,
-      trade.data.length);
-  for (auto& item : data) {
+  for (auto& item : trade.data) {
     if (timestamp.count() == 0) {
       timestamp = item.timestamp;
     } else {

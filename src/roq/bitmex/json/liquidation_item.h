@@ -18,15 +18,16 @@ namespace bitmex {
 namespace json {
 
 struct LiquidationItem final {
+  explicit LiquidationItem(core::json::value_t& value);
+
+  LiquidationItem(const LiquidationItem&) = delete;
+  LiquidationItem(LiquidationItem&&) = delete;
+
   double leaves_qty = std::numeric_limits<double>::quiet_NaN();
   std::string_view order_id;
   double price = std::numeric_limits<double>::quiet_NaN();
   Side side = Side::UNKNOWN;
   std::string_view symbol;
-
-  static LiquidationItem parse(const std::string_view& message);
-
-  void parse(core::json::object_t& object);
 };
 
 }  // namespace json

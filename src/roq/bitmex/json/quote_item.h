@@ -16,16 +16,17 @@ namespace bitmex {
 namespace json {
 
 struct QuoteItem final {
+  explicit QuoteItem(core::json::value_t& value);
+
+  QuoteItem(const QuoteItem&) = delete;
+  QuoteItem(QuoteItem&&) = delete;
+
   double ask_price = std::numeric_limits<double>::quiet_NaN();
   double ask_size = std::numeric_limits<double>::quiet_NaN();
   double bid_price = std::numeric_limits<double>::quiet_NaN();
   double bid_size = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
   std::chrono::nanoseconds timestamp = {};
-
-  static QuoteItem parse(const std::string_view& message);
-
-  void parse(core::json::object_t& object);
 };
 
 }  // namespace json

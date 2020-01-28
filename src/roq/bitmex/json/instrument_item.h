@@ -18,6 +18,11 @@ namespace bitmex {
 namespace json {
 
 struct InstrumentItem final {
+  explicit InstrumentItem(core::json::value_t&);
+
+  InstrumentItem(const InstrumentItem&) = delete;
+  InstrumentItem(InstrumentItem&&) = delete;
+
   double ask_price = std::numeric_limits<double>::quiet_NaN();
   double bankrupt_limit_down_price = std::numeric_limits<double>::quiet_NaN();
   double bankrupt_limit_up_price = std::numeric_limits<double>::quiet_NaN();
@@ -121,10 +126,6 @@ struct InstrumentItem final {
   double volume = std::numeric_limits<double>::quiet_NaN();
   double volume_24h = std::numeric_limits<double>::quiet_NaN();
   double vwap = std::numeric_limits<double>::quiet_NaN();
-
-  static InstrumentItem parse(const std::string_view& message);
-
-  void parse(core::json::object_t& object);
 };
 
 }  // namespace json

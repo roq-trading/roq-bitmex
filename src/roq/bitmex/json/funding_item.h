@@ -16,15 +16,16 @@ namespace bitmex {
 namespace json {
 
 struct FundingItem final {
+  explicit FundingItem(core::json::value_t& value);
+
+  FundingItem(const FundingItem&) = delete;
+  FundingItem(FundingItem&&) = delete;
+
   std::chrono::nanoseconds funding_interval = {};
   double funding_rate = std::numeric_limits<double>::quiet_NaN();
   double funding_rate_daily = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
   std::chrono::nanoseconds timestamp = {};
-
-  static FundingItem parse(const std::string_view& message);
-
-  void parse(core::json::object_t& object);
 };
 
 }  // namespace json

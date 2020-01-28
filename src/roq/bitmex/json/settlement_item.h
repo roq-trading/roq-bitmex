@@ -16,6 +16,11 @@ namespace bitmex {
 namespace json {
 
 struct SettlementItem final {
+  explicit SettlementItem(core::json::value_t& value);
+
+  SettlementItem(const SettlementItem&) = delete;
+  SettlementItem(SettlementItem&&) = delete;
+
   double bankrupt = std::numeric_limits<double>::quiet_NaN();
   double option_strike_price = std::numeric_limits<double>::quiet_NaN();
   double option_underlying_price = std::numeric_limits<double>::quiet_NaN();
@@ -24,10 +29,6 @@ struct SettlementItem final {
   double tax_base = std::numeric_limits<double>::quiet_NaN();
   double tax_rate = std::numeric_limits<double>::quiet_NaN();
   std::chrono::nanoseconds timestamp = {};
-
-  static SettlementItem parse(const std::string_view& message);
-
-  void parse(core::json::object_t& object);
 };
 
 }  // namespace json

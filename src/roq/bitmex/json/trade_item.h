@@ -18,6 +18,11 @@ namespace bitmex {
 namespace json {
 
 struct TradeItem final {
+  explicit TradeItem(core::json::value_t& value);
+
+  TradeItem(const TradeItem&) = delete;
+  TradeItem(TradeItem&&) = delete;
+
   double foreign_notional = std::numeric_limits<double>::quiet_NaN();
   double gross_value = std::numeric_limits<double>::quiet_NaN();
   double home_notional = std::numeric_limits<double>::quiet_NaN();
@@ -28,10 +33,6 @@ struct TradeItem final {
   std::string_view tick_direction;
   std::chrono::nanoseconds timestamp = {};
   std::string_view trd_match_id;
-
-  static TradeItem parse(const std::string_view& message);
-
-  void parse(core::json::object_t& object);
 };
 
 }  // namespace json

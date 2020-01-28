@@ -16,15 +16,16 @@ namespace bitmex {
 namespace json {
 
 struct OrderBookL2Item final {
+  explicit OrderBookL2Item(core::json::value_t&);
+
+  OrderBookL2Item(const OrderBookL2Item&) = delete;
+  OrderBookL2Item(OrderBookL2Item&&) = delete;
+
   uint64_t id = 0;
   double price = std::numeric_limits<double>::quiet_NaN();
   Side side = Side::UNKNOWN;
   double size = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
-
-  static OrderBookL2Item parse(const std::string_view& message);
-
-  void parse(core::json::object_t& object);
 };
 
 }  // namespace json

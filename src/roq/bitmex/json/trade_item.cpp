@@ -172,17 +172,8 @@ inline void update_field(auto& result, auto& field, auto& value) {
 }
 }  // namespace
 
-TradeItem TradeItem::parse(const std::string_view& message) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  TradeItem result;
-  result.parse(std::get<core::json::object_t>(root));
-  return result;
-}
-
-void TradeItem::parse(core::json::object_t& object) {
-  (*this) = {};  // XXX not the right place to reset
-  for (auto [key, value] : object) {
+TradeItem::TradeItem(core::json::value_t& value) {
+  for (auto [key, value] : std::get<core::json::object_t>(value)) {
     auto field = parse_name(key);
     update_field(*this, field, value);
   }

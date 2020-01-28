@@ -13,13 +13,7 @@ namespace json {
 
 struct Funding final {
   Action action = Action::UNKNOWN;
-  struct {
-    FundingItem *items = nullptr;
-    size_t length = 0;
-  } data;
-
-  Funding *items = nullptr;
-  size_t length = 0;
+  roq::span<FundingItem> data;
 
   static Funding parse(
       const std::string_view& message,
@@ -44,14 +38,11 @@ struct fmt::formatter<roq::bitmex::json::Funding> {
   }
   template <typename C>
   auto format(const roq::bitmex::json::Funding& value, C& ctx) {
-    roq::span data(
-        value.data.items,
-        value.data.length);
     return format_to(
         ctx.out(),
         "action={}, "
         "data=[{}]",
         value.action,
-        fmt::join(data, ", "));
+        fmt::join(value.data, ", "));
   }
 };

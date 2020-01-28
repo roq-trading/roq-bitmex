@@ -28,18 +28,10 @@ Quote Quote::parse(
     core::json::array_t& array,
     core::json::Buffer& buffer,
     Action action) {
-  Quote result {
+  return Quote {
     .action = action,
-    .data = {},
+    .data = core::json::Array<decltype(data)>::parse(buffer, array),
   };
-  core::json::Array data(
-      buffer,
-      result.data,
-      array);
-  for (auto [item, value] : data) {
-    item.parse(std::get<core::json::object_t>(value));
-  }
-  return result;
 }
 
 }  // namespace json

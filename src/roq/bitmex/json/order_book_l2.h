@@ -13,10 +13,7 @@ namespace json {
 
 struct OrderBookL2 final {
   Action action = Action::UNKNOWN;
-  struct {
-    OrderBookL2Item *items = nullptr;
-    size_t length = 0;
-  } data;
+  roq::span<OrderBookL2Item const> data;
 
   static OrderBookL2 parse(
       const std::string_view& message,
@@ -41,14 +38,11 @@ struct fmt::formatter<roq::bitmex::json::OrderBookL2> {
   }
   template <typename C>
   auto format(const roq::bitmex::json::OrderBookL2& value, C& ctx) {
-    roq::span data(
-        value.data.items,
-        value.data.length);
     return format_to(
         ctx.out(),
         "action={}, "
         "data=[{}]",
         value.action,
-        fmt::join(data, ", "));
+        fmt::join(value.data, ", "));
   }
 };

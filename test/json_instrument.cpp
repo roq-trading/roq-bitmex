@@ -120,7 +120,7 @@ TEST(json_instrument_item, unlisted) {
     R"("settledPrice":null,)"
     R"("timestamp":"2020-01-23T04:50:00.000Z")"
     R"(})";
-  auto obj = json::InstrumentItem::parse(message);
+  auto obj = core::json::Parser::create<json::InstrumentItem>(message);
   EXPECT_EQ(obj.symbol, ".EVOL7D");
   EXPECT_EQ(obj.root_symbol, "EVOL");
   EXPECT_EQ(obj.state, json::State::UNLISTED);
@@ -254,7 +254,7 @@ TEST(json_instrument_item, open) {
     R"("settledPrice":null,)"
     R"("timestamp":"2020-01-22T19:09:30.000Z")"
     R"(})";
-  auto obj = json::InstrumentItem::parse(message);
+  auto obj = core::json::Parser::create<json::InstrumentItem>(message);
   EXPECT_EQ(obj.symbol, "XRPH20");
   EXPECT_EQ(obj.root_symbol, "XRP");
   EXPECT_EQ(obj.state, json::State::OPEN);
@@ -339,7 +339,7 @@ TEST(json_instrument, empty) {
       message,
       decode_buffer,
       json::Action::PARTIAL);
-  EXPECT_EQ(obj.length, size_t{0});
+  EXPECT_EQ(obj.data.size(), size_t{0});
 }
 
 TEST(json_instrument, simple) {
@@ -561,12 +561,9 @@ TEST(json_instrument, simple) {
       message,
       decode_buffer,
       json::Action::PARTIAL);
-  roq::span data(
-      obj.data.items,
-      obj.data.length);
-  EXPECT_EQ(data.size(), size_t{2});
+  EXPECT_EQ(obj.data.size(), size_t{2});
   // item #0
-  EXPECT_EQ(data[0].symbol, ".EVOL7D");
+  EXPECT_EQ(obj.data[0].symbol, ".EVOL7D");
   // item #1
-  EXPECT_EQ(data[1].symbol, "XRPH20");
+  EXPECT_EQ(obj.data[1].symbol, "XRPH20");
 }

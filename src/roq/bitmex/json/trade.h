@@ -13,13 +13,7 @@ namespace json {
 
 struct Trade final {
   Action action = Action::UNKNOWN;
-  struct {
-    TradeItem *items = nullptr;
-    size_t length = 0;
-  } data;
-
-  Trade *items = nullptr;
-  size_t length = 0;
+  roq::span<TradeItem> data;
 
   static Trade parse(
       const std::string_view& message,
@@ -44,14 +38,11 @@ struct fmt::formatter<roq::bitmex::json::Trade> {
   }
   template <typename C>
   auto format(const roq::bitmex::json::Trade& value, C& ctx) {
-    roq::span data(
-        value.data.items,
-        value.data.length);
     return format_to(
         ctx.out(),
         "action={}, "
         "data=[{}]",
         value.action,
-        fmt::join(data, ", "));
+        fmt::join(value.data, ", "));
   }
 };
