@@ -22,9 +22,6 @@ class Random final {
   Random(const Random&) = delete;
   Random(Random&&) = delete;
 
-  void operator=(const Random&) = delete;
-  void operator=(Random&&) = delete;
-
   std::string create_signature(
       std::chrono::seconds timestamp,
       const core::http::Method& method,

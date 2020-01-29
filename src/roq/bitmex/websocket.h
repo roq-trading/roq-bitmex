@@ -55,9 +55,6 @@ class WebSocket final
   WebSocket(const WebSocket&) = delete;
   WebSocket(WebSocket&&) = delete;
 
-  void operator=(const WebSocket&) = delete;
-  void operator=(WebSocket&&) = delete;
-
   bool ready() const;
 
   void operator()(const StartEvent&);

@@ -69,8 +69,8 @@ class HTTPConnection final : public core::http::Response::Handler {
       core::ssl::Context& ssl_context,
       core::event::Base& base);
 
-  HTTPConnection(HTTPConnection&) = delete;
-  void operator=(HTTPConnection&) = delete;
+  HTTPConnection(const HTTPConnection&) = delete;
+  HTTPConnection(HTTPConnection&&) = delete;
 
   void connect(
       core::event::DNSBase& dns_base,
@@ -134,9 +134,6 @@ class Rest final : public HTTPConnection::Handler {
 
   Rest(const Rest&) = delete;
   Rest(Rest&&) = delete;
-
-  void operator=(const Rest&) = delete;
-  void operator=(Rest&&) = delete;
 
   void operator()(const StartEvent&);
   void operator()(const StopEvent&);
