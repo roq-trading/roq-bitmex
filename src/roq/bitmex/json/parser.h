@@ -45,7 +45,7 @@ struct Parser final {
   std::string_view subscribe;
   bool success = false;
   std::string_view table;
-  std::chrono::nanoseconds timestamp;
+  std::chrono::nanoseconds timestamp = {};
   std::string_view version;
 
   static void dispatch(

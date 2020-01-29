@@ -13,7 +13,7 @@ namespace json {
 
 struct Liquidation final {
   Action action = Action::UNKNOWN;
-  roq::span<LiquidationItem> data;
+  roq::span<LiquidationItem const> data;
 
   static Liquidation parse(
       const std::string_view& message,

@@ -13,7 +13,7 @@ namespace json {
 
 struct Quote final {
   Action action = Action::UNKNOWN;
-  roq::span<QuoteItem> data;
+  roq::span<QuoteItem const> data;
 
   static Quote parse(
       const std::string_view& message,

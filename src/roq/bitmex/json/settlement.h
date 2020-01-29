@@ -13,7 +13,7 @@ namespace json {
 
 struct Settlement final {
   Action action = Action::UNKNOWN;
-  roq::span<SettlementItem> data;
+  roq::span<SettlementItem const> data;
 
   static Settlement parse(
       const std::string_view& message,

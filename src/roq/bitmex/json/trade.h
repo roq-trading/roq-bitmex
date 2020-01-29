@@ -13,7 +13,7 @@ namespace json {
 
 struct Trade final {
   Action action = Action::UNKNOWN;
-  roq::span<TradeItem> data;
+  roq::span<TradeItem const> data;
 
   static Trade parse(
       const std::string_view& message,

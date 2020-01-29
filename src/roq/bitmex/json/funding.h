@@ -13,7 +13,7 @@ namespace json {
 
 struct Funding final {
   Action action = Action::UNKNOWN;
-  roq::span<FundingItem> data;
+  roq::span<FundingItem const> data;
 
   static Funding parse(
       const std::string_view& message,
