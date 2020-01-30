@@ -330,8 +330,9 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
       default:
         LOG(FATAL)("Unexpected");
     }
-    if (order_book_l2.action == json::Action::DELETE)
-        _price_lookup.erase(iter);
+    if (order_book_l2.action == json::Action::DELETE) {
+      _price_lookup.erase(iter);
+    }
   }
   if (unlikely(success == false)) {
     LOG(FATAL)(
