@@ -26,7 +26,7 @@ constexpr auto DEFAULT_MULTIPLIER = double{1.0};
 constexpr auto TOLERANCE = double{1.0e-10};
 
 template <typename T>
-static inline void mbp_update(
+static bool mbp_update(
     auto& data,
     size_t& offset,
     const T& item) {
@@ -34,26 +34,25 @@ static inline void mbp_update(
     .price = item.price,
     .quantity = item.size,
   };
-  if (offset >= data.size())
-    throw std::runtime_error("Not enough space");
+  return offset < data.size();
 }
 
 template <typename T>
-static inline void trade_update(
+static bool trade_update(
     auto& data,
     size_t& offset,
     const T& item) {
-  auto lhs = &data[offset];
+  auto lhs = &data[offset++];
   new (lhs) Trade {
     .side = json::convert(item.side),  // XXX check
     .price = item.price,
     .quantity = item.size,
     .trade_id = {},
   };
-  core::copy_to(item.trd_match_id, lhs->trade_id);
-  ++offset;
-  if (offset >= data.size())
-    throw std::runtime_error("Not enough space");
+  core::copy_to(
+      item.trd_match_id,
+      lhs->trade_id);
+  return offset < data.size();
 }
 
 Gateway::Gateway(
@@ -76,7 +75,7 @@ Gateway::Gateway(
           _ssl_context),
       _bid(FLAGS_max_depth),
       _ask(FLAGS_max_depth),
-      _trade(FLAGS_max_depth) {  // XXX need another flag
+      _trade(FLAGS_max_trades) {
   LOG_IF(WARNING, FLAGS_cancel_on_disconnect == false)(
       "Orders will *NOT* be cancelled on disconnect");
 }
@@ -257,8 +256,11 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
   if (_download != Download::READY && snapshot == false)
     return;
   std::string_view previous;
+  bool success = true;
   size_t bid_length = 0, ask_length = 0;
   for (auto& item : order_book_l2.data) {
+    if (success == false)
+      break;
     if (item.symbol.compare(previous) != 0) {
       if (previous.empty() == false && (bid_length + ask_length) > 0) {
         MarketByPrice market_by_price {
@@ -314,16 +316,29 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
     };
     switch (item.side) {
       case json::Side::BUY:
-        mbp_update(_bid, bid_length, update);
+        success = mbp_update(
+            _bid,
+            bid_length,
+            update);
         break;
       case json::Side::SELL:
-        mbp_update(_ask, ask_length, update);
+        success = mbp_update(
+            _ask,
+            ask_length,
+            update);
         break;
       default:
         LOG(FATAL)("Unexpected");
     }
     if (order_book_l2.action == json::Action::DELETE)
         _price_lookup.erase(iter);
+  }
+  if (unlikely(success == false)) {
+    LOG(FATAL)(
+        "Insufficient bid/ask array size(s): "
+        "len(bid)={}/{}, len(ask)={}/{}",
+        bid_length, _bid.size(),
+        ask_length, _ask.size());
   }
   if (previous.empty() == false && (bid_length + ask_length) > 0) {
     MarketByPrice market_by_price {
@@ -378,9 +393,12 @@ void Gateway::operator()(const json::Trade& trade) {
   if (trade.action != json::Action::INSERT)
     return;
   std::string_view previous;
+  bool success = true;
   size_t trade_length = 0;
   std::chrono::nanoseconds timestamp = {};
   for (auto& item : trade.data) {
+    if (success == false)
+      break;
     if (timestamp.count() == 0) {
       timestamp = item.timestamp;
     } else {
@@ -405,7 +423,16 @@ void Gateway::operator()(const json::Trade& trade) {
       previous = item.symbol;
       trade_length = 0;
     }
-    trade_update(_trade, trade_length, item);
+    success = trade_update(
+        _trade,
+        trade_length,
+        item);
+  }
+  if (unlikely(success == false)) {
+    LOG(FATAL)(
+        "Insufficient trade array size: "
+        "len(trade)={}/{}",
+        trade_length, _trade.size());
   }
   if (previous.empty() == false && trade_length > 0) {
     TradeSummary trade_summary {

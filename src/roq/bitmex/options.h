@@ -12,6 +12,7 @@ DECLARE_string(ws_uri);
 DECLARE_uint64(ping_freq_secs);
 DECLARE_string(exchange);
 DECLARE_bool(cancel_on_disconnect);
+DECLARE_uint32(max_trades);
 DECLARE_uint32(encode_buffer_size);
 DECLARE_uint32(decode_buffer_size);
 DECLARE_uint64(reconnect_secs);
