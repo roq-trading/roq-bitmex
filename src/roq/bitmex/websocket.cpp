@@ -210,8 +210,11 @@ void WebSocket::send_ping() {
 void WebSocket::operator()(State state) {
   auto previous = ready();
   _state = state;
-  if (ready() != previous)
+  if (ready() != previous) {
+    if (previous)
+      ++_counter.disconnect;
     _gateway(*this);
+  }
 }
 
 void WebSocket::operator()(const core::net::Manager::Connected&) {
@@ -306,6 +309,10 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const core::http::Response::Status& status) {
   assert(_header == core::http::Header::UNKNOWN);
+  LOG(INFO)(PREFIX
+      "HTTP response status={} text=\"{}\"",
+      status.code,
+      status.text);
   _status = core::http::parse_status(status.code);
   if (_status == core::http::Status::SWITCHING_PROTOCOLS) {
     VLOG(4)(PREFIX
