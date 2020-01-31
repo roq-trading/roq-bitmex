@@ -13,7 +13,6 @@ check_PROGRAMS = roq-bitmex-test
 roq_bitmex_test_LDADD = \
 	libgtest.la \
 	$(top_builddir)/src/roq/bitmex/json/libroq-bitmex-json.la \
-	$(top_builddir)/src/roq/bitmex/api/libroq-bitmex-api.la \
 	$(DATE_LIBS) \
 	$(ROQ_CORE_LIBS) \
 	$(ROQ_API_LIBS) \

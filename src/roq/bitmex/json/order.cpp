@@ -4,9 +4,7 @@
 
 #include "roq/bitmex/json/utils.h"
 
-#ifndef NDEBUG
 #include "roq/logging.h"
-#endif
 
 namespace roq {
 namespace bitmex {
@@ -361,9 +359,7 @@ inline void update_field(
     auto& value) {
   switch (field) {
     case Field::UNKNOWN: {
-#ifndef NDEBUG
-      LOG(FATAL)("Unknown key=\"{}\"", key);
-#endif
+      DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
     }
     case Field::ACCOUNT: {

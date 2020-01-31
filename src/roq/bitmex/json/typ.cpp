@@ -4,9 +4,7 @@
 
 #include <cassert>
 
-#ifndef NDEBUG
 #include "roq/logging.h"
-#endif
 
 namespace roq {
 namespace bitmex {
@@ -90,10 +88,8 @@ static_assert(parse_helper("OPECCS") == Typ::OPECCS);
 
 Typ parse_typ(const std::string_view& name) {
   auto result = parse_helper(name);
-#ifndef NDEBUG
-  LOG_IF(FATAL, result == Typ::UNKNOWN)(
+  DLOG_IF(FATAL, result == Typ::UNKNOWN)(
       "Unknown name=\"{}\"", name);
-#endif
   return result;
 }
 

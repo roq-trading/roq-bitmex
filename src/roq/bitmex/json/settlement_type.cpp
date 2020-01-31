@@ -4,9 +4,7 @@
 
 #include <cassert>
 
-#ifndef NDEBUG
 #include "roq/logging.h"
-#endif
 
 namespace roq {
 namespace bitmex {
@@ -34,10 +32,8 @@ static_assert(parse_helper("Settlement") == SettlementType::SETTLEMENT);
 
 SettlementType parse_settlement_type(const std::string_view& name) {
   auto result = parse_helper(name);
-#ifndef NDEBUG
-  LOG_IF(FATAL, result == SettlementType::UNKNOWN)(
+  DLOG_IF(FATAL, result == SettlementType::UNKNOWN)(
       "Unknown name=\"{}\"", name);
-#endif
   return result;
 }
 

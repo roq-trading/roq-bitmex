@@ -4,9 +4,7 @@
 
 #include <cassert>
 
-#ifndef NDEBUG
 #include "roq/logging.h"
-#endif
 
 namespace roq {
 namespace bitmex {
@@ -59,10 +57,8 @@ static_assert(parse_helper("trade") == Table::TRADE);
 
 Table parse_table(const std::string_view& name) {
   auto result = parse_helper(name);
-#ifndef NDEBUG
-  LOG_IF(FATAL, result == Table::UNKNOWN)(
+  DLOG_IF(FATAL, result == Table::UNKNOWN)(
       "Can't parse name=\"{}\"", name);
-#endif
   return result;
 }
 

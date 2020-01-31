@@ -2,7 +2,6 @@ TESTS = roq-bitmex-benchmark
 bin_PROGRAMS = roq-bitmex-benchmark
 roq_bitmex_benchmark_LDADD = \
 	$(top_builddir)/src/roq/bitmex/json/libroq-bitmex-json.la \
-	$(top_builddir)/src/roq/bitmex/api/libroq-bitmex-api.la \
 	$(DATE_LIBS) \
 	$(ROQ_API_LIBS) \
 	$(ROQ_CORE_LIBS) \

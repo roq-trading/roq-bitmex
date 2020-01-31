@@ -7,9 +7,7 @@
 #include "roq/bitmex/json/table.h"
 #include "roq/bitmex/json/utils.h"
 
-#ifndef NDEBUG
 #include "roq/logging.h"
-#endif
 
 namespace roq {
 namespace bitmex {
@@ -285,9 +283,7 @@ void Parser::dispatch(
       auto field = parse_field(key);
       switch (field) {
         case Field::UNKNOWN: {
-#ifndef NDEBUG
-          LOG(FATAL)("Unknown key=\"{}\"", key);
-#endif
+          DLOG(FATAL)("Unknown key=\"{}\"", key);
           break;
         }
         case Field::ACTION: {
