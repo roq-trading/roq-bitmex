@@ -4,6 +4,10 @@
 
 #include "roq/bitmex/json/utils.h"
 
+#ifndef NDEBUG
+#include "roq/logging.h"
+#endif
+
 #ifdef VERSION
 #undef VERSION
 #endif
@@ -65,9 +69,16 @@ static_assert(parse_name("info") == Field::INFO);
 static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 static_assert(parse_name("version") == Field::VERSION);
 
-inline void update_field(auto& result, auto& field, auto& value) {
+inline void update_field(
+    auto& result,
+    auto& field,
+    auto& key,
+    auto& value) {
   switch (field) {
     case Field::UNKNOWN: {
+#ifndef NDEBUG
+      LOG(FATAL)("Unknown key=\"{}\"", key);
+#endif
       break;
     }
     case Field::DOCS: {
@@ -96,7 +107,7 @@ Handshake Handshake::parse(const std::string_view& message) {
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
     auto field = parse_name(key);
-    update_field(result, field, value);
+    update_field(result, field, key, value);
   }
   return result;
 }

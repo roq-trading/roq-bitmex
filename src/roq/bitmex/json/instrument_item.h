@@ -12,6 +12,7 @@
 #include "roq/core/json/parser.h"
 
 #include "roq/bitmex/json/state.h"
+#include "roq/bitmex/json/typ.h"
 
 namespace roq {
 namespace bitmex {
@@ -118,7 +119,7 @@ struct InstrumentItem final {
   double total_volume = std::numeric_limits<double>::quiet_NaN();
   double turnover = std::numeric_limits<double>::quiet_NaN();
   double turnover_24h = std::numeric_limits<double>::quiet_NaN();
-  std::string_view typ;
+  Typ typ = Typ::UNKNOWN;
   std::string_view underlying;
   std::string_view underlying_symbol;
   double underlying_to_position_multiplier = std::numeric_limits<double>::quiet_NaN();
@@ -238,7 +239,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         "total_volume={}, "
         "turnover={}, "
         "turnover_24h={}, "
-        "typ=\"{}\", "
+        "typ={}, "
         "underlying=\"{}\", "
         "underlying_symbol=\"{}\", "
         "underlying_to_position_multiplier={}, "

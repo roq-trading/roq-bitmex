@@ -458,7 +458,8 @@ void WebSocket::parse(const std::string_view& message) {
         try {
           parse_helper(message);
         } catch (std::exception& e) {
-          LOG(FATAL)("ERROR what=\"{}\"", e.what());
+          LOG(FATAL)(PREFIX
+              "ERROR what=\"{}\"", e.what());
         }
       });
 }
@@ -472,60 +473,73 @@ void WebSocket::parse_helper(const std::string_view& message) {
 }
 
 void WebSocket::operator()(const json::Error& error) {
-  VLOG(1)("error={}", error);
+  VLOG(1)(PREFIX
+      "error={}", error);
 }
 
 void WebSocket::operator()(const json::Funding& funding) {
-  VLOG(1)("funding={}", funding);
+  VLOG(1)(PREFIX
+      "funding={}", funding);
 }
 
 void WebSocket::operator()(const json::Handshake& handshake) {
-  VLOG(1)("handshake={}", handshake);
+  VLOG(1)(PREFIX
+      "handshake={}", handshake);
   (*this)(State::READY);
   _gateway(*this);
 }
 
 void WebSocket::operator()(const json::Instrument& instrument) {
-  VLOG(1)("instrument={}", instrument);
+  VLOG(1)(PREFIX
+      "instrument={}", instrument);
   _gateway(instrument);
 }
 
 void WebSocket::operator()(const json::Liquidation& liquidation) {
-  VLOG(1)("liquidation={}", liquidation);
+  VLOG(1)(PREFIX
+      "liquidation={}", liquidation);
 }
 
 void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
-  VLOG(1)("order_book_l2={}", order_book_l2);
+  VLOG(1)(PREFIX
+      "order_book_l2={}", order_book_l2);
   _gateway(order_book_l2);
 }
 
 void WebSocket::operator()(const json::Quote& quote) {
-  VLOG(1)("quote={}", quote);
+  VLOG(1)(PREFIX
+      "quote={}", quote);
   _gateway(quote);
 }
 
 void WebSocket::operator()(const json::Settlement& settlement) {
-  VLOG(1)("settlement={}", settlement);
+  VLOG(1)(PREFIX
+      "settlement={}", settlement);
   _gateway(settlement);
 }
 
 void WebSocket::operator()(const json::Trade& trade) {
-  VLOG(1)("trade={}", trade);
+  VLOG(1)(PREFIX
+      "trade={}", trade);
   _gateway(trade);
 }
 
 void WebSocket::operator()(const json::Subscribe& subscribe) {
-  VLOG(1)("subscribe={}", subscribe);
+  VLOG(1)(PREFIX
+      "subscribe={}", subscribe);
   if (subscribe.success) {
     assert(subscribe.failure == false);
-    LOG(INFO)("Successfully subscribed to topic=\"{}\"",
+    LOG(INFO)(PREFIX
+        "Successfully subscribed to topic=\"{}\"",
         subscribe.subscribe);
   } else if (subscribe.failure) {
     assert(subscribe.success == false);
-    LOG(WARNING)("Failed to subscribe topic=\"{}\"",
+    LOG(WARNING)(PREFIX
+        "Failed to subscribe topic=\"{}\"",
         subscribe.subscribe);
   } else {
-    LOG(FATAL)("Expected success or failure");
+    LOG(FATAL)(PREFIX
+        "Expected success or failure");
   }
   // TODO(thraneh): clear timeout
 }

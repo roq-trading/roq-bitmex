@@ -15,7 +15,6 @@
 
 #include "roq/bitmex/options.h"
 
-#include "roq/bitmex/api/utils.h"
 #include "roq/bitmex/json/utils.h"
 
 namespace roq {
@@ -173,7 +172,6 @@ void Gateway::operator()(Metrics& metrics) {
 
 void Gateway::operator()(const WebSocket& websocket) {
   VLOG(1)("WebSocket");
-  // assert(_market_data_status == GatewayStatus::CONNECTING);
   if (websocket.ready()) {
     if (_download == Download::NONE) {
       // pretend the (automatic) upgrade request is the login

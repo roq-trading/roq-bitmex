@@ -7,7 +7,6 @@
 #include "roq/core/json/array.h"
 #include "roq/core/json/parser.h"
 
-
 namespace roq {
 namespace bitmex {
 namespace json {

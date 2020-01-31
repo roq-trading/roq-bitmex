@@ -4,9 +4,12 @@
 
 #include "roq/compat.h"
 
+#include "roq/bitmex/json/table.h"
 #include "roq/bitmex/json/utils.h"
 
-#include "roq/logging.h"  // XXX DEBUG
+#ifndef NDEBUG
+#include "roq/logging.h"
+#endif
 
 namespace roq {
 namespace bitmex {
@@ -256,60 +259,6 @@ enum class Type {
   TABLE,
 };
 
-enum class Table {
-  UNKNOWN,
-  FUNDING,
-  INSTRUMENT,
-  LIQUIDATION,
-  ORDER_BOOK_L2,
-  QUOTE,
-  SETTLEMENT,
-  TRADE,
-};
-
-constexpr auto parse_table(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
-    case 'f':
-      if (name.compare("funding") == 0)
-        return Table::FUNDING;
-      break;
-    case 'i':
-      if (name.compare("instrument") == 0)
-        return Table::INSTRUMENT;
-      break;
-    case 'l':
-      if (name.compare("liquidation") == 0)
-        return Table::LIQUIDATION;
-      break;
-    case 'o':
-      if (name.compare("orderBookL2") == 0)
-        return Table::ORDER_BOOK_L2;
-      break;
-    case 'q':
-      if (name.compare("quote") == 0)
-        return Table::QUOTE;
-      break;
-    case 's':
-      if (name.compare("settlement") == 0)
-        return Table::SETTLEMENT;
-      break;
-    case 't':
-      if (name.compare("trade") == 0)
-        return Table::TRADE;
-      break;
-  }
-  return Table::UNKNOWN;
-}
-
-static_assert(parse_table("funding") == Table::FUNDING);
-static_assert(parse_table("instrument") == Table::INSTRUMENT);
-static_assert(parse_table("liquidation") == Table::LIQUIDATION);
-static_assert(parse_table("orderBookL2") == Table::ORDER_BOOK_L2);
-static_assert(parse_table("quote") == Table::QUOTE);
-static_assert(parse_table("settlement") == Table::SETTLEMENT);
-static_assert(parse_table("trade") == Table::TRADE);
-
 void update(Type& result, const Type type) {
   assert(type != Type::UNKNOWN);
   if (result == Type::UNKNOWN) {
@@ -334,18 +283,17 @@ void Parser::dispatch(
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::object_t>(root)) {
       auto field = parse_field(key);
-      LOG_IF(FATAL, field == Field::UNKNOWN)(
-          "Can't parse field=\"{}\"", key);
       switch (field) {
         case Field::UNKNOWN: {
+#ifndef NDEBUG
+          LOG(FATAL)("Unknown key=\"{}\"", key);
+#endif
           break;
         }
         case Field::ACTION: {
           update(result.action, value);
           update(type, Type::TABLE);
           action = parse_action(result.action);
-          LOG_IF(FATAL, action == Action::UNKNOWN)(
-              "Can't parse action=\"{}\"", result.action);
           break;
         }
         case Field::ATTRIBUTES: {
@@ -495,8 +443,6 @@ void Parser::dispatch(
           update(type, Type::TABLE);
           assert(table == Table::UNKNOWN);
           table = parse_table(result.table);
-          LOG_IF(FATAL, table == Table::UNKNOWN)(
-              "Can't parse table=\"{}\"", result.table);
           break;
         }
         case Field::TIMESTAMP: {

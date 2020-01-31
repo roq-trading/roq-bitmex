@@ -124,7 +124,7 @@ TEST(json_instrument_item, unlisted) {
   EXPECT_EQ(obj.symbol, ".EVOL7D");
   EXPECT_EQ(obj.root_symbol, "EVOL");
   EXPECT_EQ(obj.state, json::State::UNLISTED);
-  EXPECT_EQ(obj.typ, "MRIXXX");
+  EXPECT_EQ(obj.typ, json::Typ::MRIXXX);
   EXPECT_EQ(obj.underlying, "ETH");
   EXPECT_EQ(obj.quote_currency, "XXX");
   EXPECT_EQ(obj.reference, "BMEX");
@@ -258,7 +258,7 @@ TEST(json_instrument_item, open) {
   EXPECT_EQ(obj.symbol, "XRPH20");
   EXPECT_EQ(obj.root_symbol, "XRP");
   EXPECT_EQ(obj.state, json::State::OPEN);
-  EXPECT_EQ(obj.typ, "FFCCSX");
+  EXPECT_EQ(obj.typ, json::Typ::FFCCSX);
   EXPECT_EQ(obj.listing, core::datetime(2019, 12, 6, 4, 0, 0));
   EXPECT_EQ(obj.front, core::datetime(2020, 2, 28, 12, 0, 0));
   EXPECT_EQ(obj.expiry, core::datetime(2020, 3, 27, 12, 0, 0));

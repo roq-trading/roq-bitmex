@@ -4,8 +4,8 @@
 
 #include "roq/bitmex/json/utils.h"
 
-#ifdef VERSION
-#undef VERSION
+#ifndef NDEBUG
+#include "roq/logging.h"
 #endif
 
 namespace roq {
@@ -67,9 +67,16 @@ static_assert(parse_name("subscribe") == Field::SUBSCRIBE);
 static_assert(parse_name("success") == Field::SUCCESS);
 static_assert(parse_name("request") == Field::REQUEST);
 
-inline void update_field(auto& result, auto& field, auto& value) {
+inline void update_field(
+    auto& result,
+    auto& field,
+    auto& key,
+    auto& value) {
   switch (field) {
     case Field::UNKNOWN: {
+#ifndef NDEBUG
+      LOG(FATAL)("Unknown key=\"{}\"", key);
+#endif
       break;
     }
     case Field::FAILURE: {
@@ -98,7 +105,7 @@ Subscribe Subscribe::parse(const std::string_view& message) {
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
     auto field = parse_name(key);
-    update_field(result, field, value);
+    update_field(result, field, key, value);
   }
   return result;
 }

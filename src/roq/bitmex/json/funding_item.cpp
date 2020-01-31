@@ -4,6 +4,10 @@
 
 #include "roq/bitmex/json/utils.h"
 
+#ifndef NDEBUG
+#include "roq/logging.h"
+#endif
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -72,9 +76,16 @@ static_assert(parse_name("fundingRateDaily") == Field::FUNDING_RATE_DAILY);
 static_assert(parse_name("symbol") == Field::SYMBOL);
 static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 
-inline void update_field(auto& result, auto& field, auto& value) {
+inline void update_field(
+    auto& result,
+    auto& field,
+    auto& key,
+    auto& value) {
   switch (field) {
     case Field::UNKNOWN: {
+#ifndef NDEBUG
+      LOG(FATAL)("Unknown key=\"{}\"", key);
+#endif
       break;
     }
     case Field::FUNDING_INTERVAL: {
@@ -104,7 +115,7 @@ inline void update_field(auto& result, auto& field, auto& value) {
 FundingItem::FundingItem(core::json::value_t& value) {
   for (auto [key, value] : std::get<core::json::object_t>(value)) {
     auto field = parse_name(key);
-    update_field(*this, field, value);
+    update_field(*this, field, key, value);
   }
 }
 

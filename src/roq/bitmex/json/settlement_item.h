@@ -11,6 +11,8 @@
 
 #include "roq/core/json/parser.h"
 
+#include "roq/bitmex/json/settlement_type.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -25,6 +27,7 @@ struct SettlementItem final {
   double option_strike_price = std::numeric_limits<double>::quiet_NaN();
   double option_underlying_price = std::numeric_limits<double>::quiet_NaN();
   double settled_price = std::numeric_limits<double>::quiet_NaN();
+  SettlementType settlement_type = SettlementType::UNKNOWN;
   std::string_view symbol;
   double tax_base = std::numeric_limits<double>::quiet_NaN();
   double tax_rate = std::numeric_limits<double>::quiet_NaN();
@@ -50,6 +53,7 @@ struct fmt::formatter<roq::bitmex::json::SettlementItem> {
         "option_strike_price={}, "
         "option_underlying_price={}, "
         "settled_price={}, "
+        "settlement_type={}, "
         "symbol=\"{}\", "
         "tax_base={}, "
         "tax_rate={}, "
@@ -59,6 +63,7 @@ struct fmt::formatter<roq::bitmex::json::SettlementItem> {
         value.option_strike_price,
         value.option_underlying_price,
         value.settled_price,
+        value.settlement_type,
         value.symbol,
         value.tax_base,
         value.tax_rate,

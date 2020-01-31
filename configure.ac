@@ -15,7 +15,6 @@ AC_CONFIG_FILES([
  src/Makefile
  src/roq/Makefile
  src/roq/bitmex/Makefile
- src/roq/bitmex/api/Makefile
  src/roq/bitmex/json/Makefile
  test/Makefile
 ])

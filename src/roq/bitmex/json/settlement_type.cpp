@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/bitmex/json/side.h"
+#include "roq/bitmex/json/settlement_type.h"
 
 #include <cassert>
 
@@ -13,29 +13,29 @@ namespace bitmex {
 namespace json {
 
 namespace {
+
 constexpr auto parse_helper(const std::string_view& name) {
   assert(name.empty() == false);
   switch (name.data()[0]) {
-    case 'B':
-      if (name.compare("Buy") == 0)
-        return Side::BUY;
+    case 'R':
+      if (name.compare("Rebalance") == 0)
+        return SettlementType::REBALANCE;
       break;
     case 'S':
-      if (name.compare("Sell") == 0)
-        return Side::SELL;
+      if (name.compare("Settlement") == 0)
+        return SettlementType::SETTLEMENT;
       break;
   }
-  return Side::UNKNOWN;
+  return SettlementType::UNKNOWN;
 }
 
-static_assert(parse_helper("Buy") == Side::BUY);
-static_assert(parse_helper("Sell") == Side::SELL);
+static_assert(parse_helper("Settlement") == SettlementType::SETTLEMENT);
 }  // namespace
 
-Side parse_side(const std::string_view& name) {
+SettlementType parse_settlement_type(const std::string_view& name) {
   auto result = parse_helper(name);
 #ifndef NDEBUG
-  LOG_IF(FATAL, result == Side::UNKNOWN)(
+  LOG_IF(FATAL, result == SettlementType::UNKNOWN)(
       "Unknown name=\"{}\"", name);
 #endif
   return result;

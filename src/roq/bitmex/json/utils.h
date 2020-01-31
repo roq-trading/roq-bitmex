@@ -10,11 +10,10 @@
 
 #include "roq/core/charconv/datetime.h"
 
-#include "roq/bitmex/api/enums.h"
-
+#include "roq/bitmex/json/settlement_type.h"
 #include "roq/bitmex/json/side.h"
 #include "roq/bitmex/json/state.h"
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/typ.h"
 
 namespace roq {
 namespace bitmex {
@@ -62,63 +61,14 @@ inline void update(
       value);
 }
 
-template <>
-inline void update(
-    api::Side& result,
-    const core::json::value_t& value) {
-  result = api::to_enum<std::remove_reference<decltype(result)>::type>(
-      core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    api::OrderType& result,
-    const core::json::value_t& value) {
-  result = api::to_enum<std::remove_reference<decltype(result)>::type>(
-      core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    api::OrderStatus& result,
-    const core::json::value_t& value) {
-  result = api::to_enum<std::remove_reference<decltype(result)>::type>(
-      core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    api::TimeInForce& result,
-    const core::json::value_t& value) {
-  result = api::to_enum<std::remove_reference<decltype(result)>::type>(
-      core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    api::Reason& result,
-    const core::json::value_t& value) {
-  result = api::to_enum<std::remove_reference<decltype(result)>::type>(
-      core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    api::XStatus& result,
-    const core::json::value_t& value) {
-  result = api::to_enum<std::remove_reference<decltype(result)>::type>(
-      core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    api::StopType& result,
-    const core::json::value_t& value) {
-  result = api::to_enum<std::remove_reference<decltype(result)>::type>(
-      core::json::get<std::string_view>(value));
-}
-
 // json
+
+template <>
+inline void update(
+    SettlementType& result,
+    const core::json::value_t& value) {
+  result = parse_settlement_type(core::json::get<std::string_view>(value));
+}
 
 template <>
 inline void update(
@@ -133,6 +83,15 @@ inline void update(
     const core::json::value_t& value) {
   result = parse_state(core::json::get<std::string_view>(value));
 }
+
+template <>
+inline void update(
+    Typ& result,
+    const core::json::value_t& value) {
+  result = parse_typ(core::json::get<std::string_view>(value));
+}
+
+// utils
 
 inline roq::Side convert(json::Side side) {
   switch (side) {

@@ -4,6 +4,10 @@
 
 #include <cassert>
 
+#ifndef NDEBUG
+#include "roq/logging.h"
+#endif
+
 namespace roq {
 namespace bitmex {
 namespace json {
@@ -37,11 +41,8 @@ static_assert(parse_helper("Unlisted") == State::UNLISTED);
 State parse_state(const std::string_view& name) {
   auto result = parse_helper(name);
 #ifndef NDEBUG
-  if (result == State::UNKNOWN) {
-    fprintf(stderr, "Can't parse state=\"%.*s\"\n",
-        static_cast<int>(name.length()), name.data());
-    assert(false);
-  }
+  LOG_IF(FATAL, result == State::UNKNOWN)(
+      "Unknown name=\"{}\"", name);
 #endif
   return result;
 }

@@ -4,7 +4,9 @@
 
 #include "roq/bitmex/json/utils.h"
 
-// https://testnet.bitmex.com/api/v1/instrument/activeAndIndices
+#ifndef NDEBUG
+#include "roq/logging.h"
+#endif
 
 namespace roq {
 namespace bitmex {
@@ -971,9 +973,16 @@ static_assert(parse_name("volume") == Field::VOLUME);
 static_assert(parse_name("volume24h") == Field::VOLUME_24H);
 static_assert(parse_name("vwap") == Field::VWAP);
 
-inline void update_field(auto& result, auto& field, auto& value) {
+inline void update_field(
+    auto& result,
+    auto& field,
+    auto& key,
+    auto& value) {
   switch (field) {
     case Field::UNKNOWN: {
+#ifndef NDEBUG
+      LOG(FATAL)("Unknown key=\"{}\"", key);
+#endif
       break;
     }
     case Field::ASK_PRICE: {
@@ -1395,7 +1404,7 @@ inline void update_field(auto& result, auto& field, auto& value) {
 InstrumentItem::InstrumentItem(core::json::value_t& value) {
   for (auto [key, value] : std::get<core::json::object_t>(value)) {
     auto field = parse_name(key);
-    update_field(*this, field, value);
+    update_field(*this, field, key, value);
   }
 }
 

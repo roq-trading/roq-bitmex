@@ -26,9 +26,12 @@ libroq_bitmex_json_la_SOURCES = \
 	quote_item.cpp \
 	settlement.cpp \
 	settlement_item.cpp \
+	settlement_type.cpp \
 	side.cpp \
 	state.cpp \
 	subscribe.cpp \
+	table.cpp \
 	trade.cpp \
 	trade_item.cpp \
+	typ.cpp \
 	utils.cpp
