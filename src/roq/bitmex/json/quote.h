@@ -12,18 +12,16 @@ namespace bitmex {
 namespace json {
 
 struct Quote final {
-  Action action = Action::UNKNOWN;
+  Quote(
+      core::json::value_t& value,
+      core::json::Buffer& buffer,
+      Action action);
+
+  Quote(const Quote&) = delete;
+  Quote(Quote&&) = delete;
+
+  Action action = Action::UNDEFINED;
   roq::span<QuoteItem const> data;
-
-  static Quote parse(
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      Action action);
-
-  static Quote parse(
-      core::json::array_t& array,
-      core::json::Buffer& buffer,
-      Action action);
 };
 
 }  // namespace json

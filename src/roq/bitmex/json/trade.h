@@ -12,18 +12,16 @@ namespace bitmex {
 namespace json {
 
 struct Trade final {
-  Action action = Action::UNKNOWN;
+  Trade(
+      core::json::value_t& value,
+      core::json::Buffer& buffer,
+      Action action);
+
+  Trade(const Trade&) = delete;
+  Trade(Trade&&) = delete;
+
+  Action action = Action::UNDEFINED;
   roq::span<TradeItem const> data;
-
-  static Trade parse(
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      Action action);
-
-  static Trade parse(
-      core::json::array_t& array,
-      core::json::Buffer& buffer,
-      Action action);
 };
 
 }  // namespace json

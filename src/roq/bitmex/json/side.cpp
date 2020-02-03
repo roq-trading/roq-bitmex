@@ -11,21 +11,31 @@ namespace bitmex {
 namespace json {
 
 namespace {
+constexpr auto parse_b(const std::string_view& name) {
+  if (name.compare("Buy") == 0)
+    return Side::BUY;
+  return Side::UNKNOWN;
+}
+
+constexpr auto parse_s(const std::string_view& name) {
+  if (name.compare("Sell") == 0)
+    return Side::SELL;
+  return Side::UNKNOWN;
+}
+
 constexpr auto parse_helper(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Side::UNDEFINED;
+  switch (name[0]) {
     case 'B':
-      if (name.compare("Buy") == 0)
-        return Side::BUY;
-      break;
+      return parse_b(name);
     case 'S':
-      if (name.compare("Sell") == 0)
-        return Side::SELL;
-      break;
+      return parse_s(name);
   }
   return Side::UNKNOWN;
 }
 
+static_assert(parse_helper("") == Side::UNDEFINED);
 static_assert(parse_helper("Buy") == Side::BUY);
 static_assert(parse_helper("Sell") == Side::SELL);
 }  // namespace

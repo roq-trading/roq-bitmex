@@ -126,34 +126,29 @@ constexpr Field parse_a(auto& name) {
 
 constexpr Field parse_b(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
-      case 'a': {
+    switch (name[1]) {
+      case 'a':
         if (name.length() >= 14) {
-          switch (name.data()[13]) {
-            case 'D': {
+          switch (name[13]) {
+            case 'D':
               if (name.compare("bankruptLimitDownPrice") == 0)
                 return Field::BANKRUPT_LIMIT_DOWN_PRICE;
               break;
-            }
-            case 'U': {
+            case 'U':
               if (name.compare("bankruptLimitUpPrice") == 0)
                 return Field::BANKRUPT_LIMIT_UP_PRICE;
               break;
-            }
           }
         }
         break;
-      }
-      case 'i': {
+      case 'i':
         if (name.compare("bidPrice") == 0)
           return Field::BID_PRICE;
         break;
-      }
-      case 'u': {
+      case 'u':
         if (name.compare("buyLeg") == 0)
           return Field::BUY_LEG;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -161,22 +156,19 @@ constexpr Field parse_b(auto& name) {
 
 constexpr Field parse_c(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 'l': {
+    switch (name[2]) {
+      case 'l':
         if (name.compare("calcInterval") == 0)
           return Field::CALC_INTERVAL;
         break;
-      }
-      case 'p': {
+      case 'p':
         if (name.compare("capped") == 0)
           return Field::CAPPED;
         break;
-      }
-      case 'o': {
+      case 'o':
         if (name.compare("closingTimestamp") == 0)
           return Field::CLOSING_TIMESTAMP;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -196,74 +188,63 @@ constexpr Field parse_e(auto& name) {
 
 constexpr Field parse_f(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
+    switch (name[2]) {
       case 'i': {
         if (name.length() >= 5) {
-          switch (name.data()[4]) {
-            case 'B': {
+          switch (name[4]) {
+            case 'B':
               if (name.compare("fairBasis") == 0)
                 return Field::FAIR_BASIS;
               if (name.compare("fairBasisRate") == 0)
                 return Field::FAIR_BASIS_RATE;
               break;
-            }
-            case 'M': {
+            case 'M':
               if (name.compare("fairMethod") == 0)
                 return Field::FAIR_METHOD;
               break;
-            }
-            case 'P': {
+            case 'P':
               if (name.compare("fairPrice") == 0)
                 return Field::FAIR_PRICE;
               break;
-            }
           }
         }
         break;
       }
-      case 'r': {
+      case 'r':
         if (name.compare("foreignNotional24h") == 0)
           return Field::FOREIGN_NOTIONAL_24H;
         break;
-      }
-      case 'o': {
+      case 'o':
         if (name.compare("front") == 0)
           return Field::FRONT;
         break;
-      }
       case 'n': {
         if (name.length() >= 8) {
-          switch (name.data()[7]) {
-            case 'B': {
+          switch (name[7]) {
+            case 'B':
               if (name.compare("fundingBaseSymbol") == 0)
                 return Field::FUNDING_BASE_SYMBOL;
               break;
-            }
-            case 'I': {
+            case 'I':
               if (name.compare("fundingInterval") == 0)
                 return Field::FUNDING_INTERVAL;
               break;
-            }
-            case 'P': {
+            case 'P':
               if (name.compare("fundingPremiumSymbol") == 0)
                 return Field::FUNDING_PREMIUM_SYMBOL;
               break;
-            }
-            case 'Q': {
+            case 'Q':
               if (name.compare("fundingQuoteSymbol") == 0)
                 return Field::FUNDING_QUOTE_SYMBOL;
               break;
-            }
-            case 'R': {
+            case 'R':
               if (name.compare("fundingRate") == 0)
                 return Field::FUNDING_RATE;
               break;
-            }
-            case 'T': {
+            case 'T':
               if (name.compare("fundingTimestamp") == 0)
                 return Field::FUNDING_TIMESTAMP;
               break;
-            }
           }
         }
         break;
@@ -275,22 +256,19 @@ constexpr Field parse_f(auto& name) {
 
 constexpr Field parse_h(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
-      case 'a': {
+    switch (name[1]) {
+      case 'a':
         if (name.compare("hasLiquidity") == 0)
           return Field::HAS_LIQUIDITY;
         break;
-      }
-      case 'i': {
+      case 'i':
         if (name.compare("highPrice") == 0)
           return Field::HIGH_PRICE;
         break;
-      }
-      case 'o': {
+      case 'o':
         if (name.compare("homeNotional24h") == 0)
           return Field::HOME_NOTIONAL_24H;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -298,64 +276,53 @@ constexpr Field parse_h(auto& name) {
 
 constexpr Field parse_i(auto& name) {
   if (name.length() >= 7) {
-    switch (name.data()[6]) {
-      case 'A': {
+    switch (name[6]) {
+      case 'A':
         if (name.compare("impactAskPrice") == 0)
           return Field::IMPACT_ASK_PRICE;
         break;
-      }
-      case 'B': {
+      case 'B':
         if (name.compare("impactBidPrice") == 0)
           return Field::IMPACT_BID_PRICE;
         break;
-      }
-      case 'M': {
+      case 'M':
         if (name.compare("impactMidPrice") == 0)
           return Field::IMPACT_MID_PRICE;
         break;
-      }
-      case 't': {
+      case 't':
         if (name.length() >= 11) {
-          switch (name.data()[10]) {
-            case 'F': {
+          switch (name[10]) {
+            case 'F':
               if (name.compare("indicativeFundingRate") == 0)
                 return Field::INDICATIVE_FUNDING_RATE;
               break;
-            }
-            case 'S': {
+            case 'S':
               if (name.compare("indicativeSettlePrice") == 0)
                 return Field::INDICATIVE_SETTLE_PRICE;
               break;
-            }
-            case 'T': {
+            case 'T':
               if (name.compare("indicativeTaxRate") == 0)
                 return Field::INDICATIVE_TAX_RATE;
               break;
-            }
           }
         }
         if (name.compare("isQuanto") == 0)
           return Field::IS_QUANTO;
         break;
-      }
-
-      case 'r': {
+      case 'r':
         if (name.compare("initMargin") == 0)
           return Field::INIT_MARGIN;
         if (name.compare("isInverse") == 0)
           return Field::IS_INVERSE;
         break;
-      }
-      case 'n': {
+      case 'n':
         if (name.compare("insuranceFee") == 0)
           return Field::INSURANCE_FEE;
         break;
-      }
-      case 'e': {
+      case 'e':
         if (name.compare("inverseLeg") == 0)
           return Field::INVERSE_LEG;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -363,21 +330,19 @@ constexpr Field parse_i(auto& name) {
 
 constexpr Field parse_l(auto& name) {
   if (name.length() >= 6) {
-    switch (name.data()[5]) {
-      case 'h': {
+    switch (name[5]) {
+      case 'h':
         if (name.compare("lastChangePcnt") == 0)
           return Field::LAST_CHANGE_PCNT;
         break;
-      }
-      case 'r': {
+      case 'r':
         if (name.compare("lastPrice") == 0)
           return Field::LAST_PRICE;
         if (name.compare("lastPriceProtected") == 0)
           return Field::LAST_PRICE_PROTECTED;
         break;
-      }
-      case 'i': {
-        switch (name.data()[1]) {
+      case 'i':
+        switch (name[1]) {
           case 'a':
             if (name.compare("lastTickDirection") == 0)
               return Field::LAST_TICK_DIRECTION;
@@ -388,27 +353,22 @@ constexpr Field parse_l(auto& name) {
             break;
         }
         break;
-      }
-      case 'D': {
+      case 'D':
         if (name.compare("limitDownPrice") == 0)
           return Field::LIMIT_DOWN_PRICE;
         break;
-      }
-      case 'U': {
+      case 'U':
         if (name.compare("limitUpPrice") == 0)
           return Field::LIMIT_UP_PRICE;
         break;
-      }
-      case 'n': {
+      case 'n':
         if (name.compare("listing") == 0)
           return Field::LISTING;
         break;
-      }
-      case 'z': {
+      case 'z':
         if (name.compare("lotSize") == 0)
           return Field::LOT_SIZE;
         break;
-      }
     }
   }
   if (name.compare("limit") == 0)
@@ -418,34 +378,29 @@ constexpr Field parse_l(auto& name) {
 
 constexpr Field parse_m(auto& name) {
   if (name.length() >= 6) {
-    switch (name.data()[5]) {
-      case 'M': {
+    switch (name[5]) {
+      case 'M':
         if (name.compare("maintMargin") == 0)
           return Field::MAINT_MARGIN;
         break;
-      }
-      case 'F': {
+      case 'F':
         if (name.compare("makerFee") == 0)
           return Field::MAKER_FEE;
         break;
-      }
-      case 'e': {
+      case 'e':
         if (name.compare("markMethod") == 0)
           return Field::MARK_METHOD;
         break;
-      }
-      case 'r': {
+      case 'r':
         if (name.compare("markPrice") == 0)
           return Field::MARK_PRICE;
         break;
-      }
-      case 'd': {
+      case 'd':
         if (name.compare("maxOrderQty") == 0)
           return Field::MAX_ORDER_QTY;
         break;
-      }
-      case 'i': {
-        switch (name.data()[1]) {
+      case 'i':
+        switch (name[1]) {
           case 'a':
             if (name.compare("maxPrice") == 0)
               return Field::MAX_PRICE;
@@ -456,12 +411,10 @@ constexpr Field parse_m(auto& name) {
             break;
         }
         break;
-      }
-      case 'p': {
+      case 'p':
         if (name.compare("multiplier") == 0)
           return Field::MULTIPLIER;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -469,10 +422,10 @@ constexpr Field parse_m(auto& name) {
 
 constexpr Field parse_o(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 'e': {
+    switch (name[2]) {
+      case 'e':
         if (name.length() >= 7) {
-          switch (name.data()[6]) {
+          switch (name[6]) {
             case 'g':
               if (name.compare("openingTimestamp") == 0)
                 return Field::OPENING_TIMESTAMP;
@@ -488,10 +441,9 @@ constexpr Field parse_o(auto& name) {
           }
         }
         break;
-      }
-      case 't': {
+      case 't':
         if (name.length() >= 16) {
-          switch (name.data()[15]) {
+          switch (name[15]) {
             case 'r':
               if (name.compare("optionMultiplier") == 0)
                 return Field::OPTION_MULTIPLIER;
@@ -515,12 +467,10 @@ constexpr Field parse_o(auto& name) {
           }
         }
         break;
-      }
-      case 'p': {
+      case 'p':
         if (name.compare("multiplier") == 0)
           return Field::MULTIPLIER;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -528,25 +478,22 @@ constexpr Field parse_o(auto& name) {
 
 constexpr Field parse_p(auto& name) {
   if (name.length() >= 8) {
-    switch (name.data()[7]) {
-      case 'n': {
+    switch (name[7]) {
+      case 'n':
         if (name.compare("positionCurrency") == 0)
           return Field::POSITION_CURRENCY;
         break;
-      }
-      case 's': {
+      case 's':
         if (name.compare("prevClosePrice") == 0)
           return Field::PREV_CLOSE_PRICE;
         break;
-      }
-      case 'c': {
+      case 'c':
         if (name.compare("prevPrice24h") == 0)
           return Field::PREV_PRICE_24H;
         break;
-      }
-      case 'a': {
+      case 'a':
         if (name.length() >= 10) {
-          switch (name.data()[9]) {
+          switch (name[9]) {
             case 'T':
               if (name.compare("prevTotalTurnover") == 0)
                 return Field::PREV_TOTAL_TURNOVER;
@@ -558,17 +505,14 @@ constexpr Field parse_p(auto& name) {
           }
         }
         break;
-      }
-      case 'I': {
+      case 'I':
         if (name.compare("publishInterval") == 0)
           return Field::PUBLISH_INTERVAL;
         break;
-      }
-      case 'T': {
+      case 'T':
         if (name.compare("publishTime") == 0)
           return Field::PUBLISH_TIME;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -576,17 +520,15 @@ constexpr Field parse_p(auto& name) {
 
 constexpr Field parse_q(auto& name) {
   if (name.length() >= 6) {
-    switch (name.data()[5]) {
-      case 'C': {
+    switch (name[5]) {
+      case 'C':
         if (name.compare("quoteCurrency") == 0)
           return Field::QUOTE_CURRENCY;
         break;
-      }
-      case 'T': {
+      case 'T':
         if (name.compare("quoteToSettleMultiplier") == 0)
           return Field::QUOTE_TO_SETTLE_MULTIPLIER;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -594,51 +536,43 @@ constexpr Field parse_q(auto& name) {
 
 constexpr Field parse_r(auto& name) {
   if (name.length() >= 8) {
-    switch (name.data()[7]) {
-      case 'c': {
+    switch (name[7]) {
+      case 'c':
         if (name.length() >= 10) {
-          switch (name.data()[9]) {
-            case 'I': {
+          switch (name[9]) {
+            case 'I':
               if (name.compare("rebalanceInterval") == 0)
                 return Field::REBALANCE_INTERVAL;
               break;
-            }
-            case 'T': {
+            case 'T':
               if (name.compare("rebalanceTimestamp") == 0)
                 return Field::REBALANCE_TIMESTAMP;
               break;
-            }
-            case 'S': {
+            case 'S':
               if (name.compare("referenceSymbol") == 0)
                 return Field::REFERENCE_SYMBOL;
               break;
-            }
           }
         }
         if (name.compare("reference") == 0)
           return Field::REFERENCE;
         break;
-      }
-      case 'n': {
+      case 'n':
         if (name.compare("relistInterval") == 0)
           return Field::RELIST_INTERVAL;
         break;
-      }
-      case 'i': {
+      case 'i':
         if (name.compare("riskLimit") == 0)
           return Field::RISK_LIMIT;
         break;
-      }
-      case 'p': {
+      case 'p':
         if (name.compare("riskStep") == 0)
           return Field::RISK_STEP;
         break;
-      }
-      case 'b': {
+      case 'b':
         if (name.compare("rootSymbol") == 0)
           return Field::ROOT_SYMBOL;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -646,58 +580,49 @@ constexpr Field parse_r(auto& name) {
 
 constexpr Field parse_s(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
-      case 'e': {
+    switch (name[1]) {
+      case 'e':
         if (name.length() >= 6) {
-          switch (name.data()[5]) {
-            case 'e': {
+          switch (name[5]) {
+            case 'e':
               if (name.length() >= 7) {
-                switch (name.data()[6]) {
-                  case 'g': {
+                switch (name[6]) {
+                  case 'g':
                     if (name.compare("sellLeg") == 0)
                       return Field::SELL_LEG;
                     break;
-                  }
-                  case 'd': {
+                  case 'd':
                     if (name.compare("settledPrice") == 0)
                       return Field::SETTLED_PRICE;
                     break;
-                  }
-                  case 'm': {
+                  case 'm':
                     if (name.compare("settlementFee") == 0)
                       return Field::SETTLEMENT_FEE;
                     break;
-                  }
                 }
               }
               if (name.compare("settle") == 0)
                 return Field::SETTLE;
               break;
-            }
-            case 'o': {
+            case 'o':
               if (name.compare("sessionInterval") == 0)
                 return Field::SESSION_INTERVAL;
               break;
-            }
-            case 'C': {
+            case 'C':
               if (name.compare("settlCurrency") == 0)
                 return Field::SETTL_CURRENCY;
               break;
-            }
           }
         }
         break;
-      }
-      case 't': {
+      case 't':
         if (name.compare("state") == 0)
           return Field::STATE;
         break;
-      }
-      case 'y': {
+      case 'y':
         if (name.compare("symbol") == 0)
           return Field::SYMBOL;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -705,51 +630,43 @@ constexpr Field parse_s(auto& name) {
 
 constexpr Field parse_t(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 'k': {
+    switch (name[2]) {
+      case 'k':
         if (name.compare("takerFee") == 0)
           return Field::TAKER_FEE;
         break;
-      }
-      case 'x': {
+      case 'x':
         if (name.compare("taxed") == 0)
           return Field::TAXED;
         break;
-      }
-      case 'c': {
+      case 'c':
         if (name.compare("tickSize") == 0)
           return Field::TICK_SIZE;
         break;
-      }
-      case 'm': {
+      case 'm':
         if (name.compare("timestamp") == 0)
           return Field::TIMESTAMP;
         break;
-      }
-      case 't': {
+      case 't':
         if (name.length() >= 6) {
-          switch (name.data()[5]) {
-            case 'T': {
+          switch (name[5]) {
+            case 'T':
               if (name.compare("totalTurnover") == 0)
                 return Field::TOTAL_TURNOVER;
               break;
-            }
-            case 'V': {
+            case 'V':
               if (name.compare("totalVolume") == 0)
                 return Field::TOTAL_VOLUME;
               break;
-            }
           }
         }
         break;
-      }
-      case 'r': {
+      case 'r':
         if (name.compare("turnover") == 0)
           return Field::TURNOVER;
         if (name.compare("turnover24h") == 0)
           return Field::TURNOVER_24H;
         break;
-      }
       case 'p': {
         if (name.compare("typ") == 0)
           return Field::TYP;
@@ -762,22 +679,19 @@ constexpr Field parse_t(auto& name) {
 
 constexpr Field parse_u(auto& name) {
   if (name.length() >= 13) {
-    switch (name.data()[12]) {
-      case 'm': {
+    switch (name[12]) {
+      case 'm':
         if (name.compare("underlyingSymbol") == 0)
           return Field::UNDERLYING_SYMBOL;
         break;
-      }
-      case 'P': {
+      case 'P':
         if (name.compare("underlyingToPositionMultiplier") == 0)
           return Field::UNDERLYING_TO_POSITION_MULTIPLIER;
         break;
-      }
-      case 'S': {
+      case 'S':
         if (name.compare("underlyingToSettleMultiplier") == 0)
           return Field::UNDERLYING_TO_SETTLE_MULTIPLIER;
         break;
-      }
     }
   }
   if (name.compare("underlying") == 0)
@@ -787,19 +701,17 @@ constexpr Field parse_u(auto& name) {
 
 constexpr Field parse_v(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
-      case 'o': {
+    switch (name[1]) {
+      case 'o':
         if (name.compare("volume") == 0)
           return Field::VOLUME;
         if (name.compare("volume24h") == 0)
           return Field::VOLUME_24H;
         break;
-      }
-      case 'w': {
+      case 'w':
         if (name.compare("vwap") == 0)
           return Field::VWAP;
         break;
-      }
     }
   }
   if (name.compare("underlying") == 0)
@@ -808,8 +720,9 @@ constexpr Field parse_v(auto& name) {
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    throw std::runtime_error("Key can't be empty");
+  switch (name[0]) {
     case 'a':
       return parse_a(name);
     case 'b':
@@ -973,435 +886,329 @@ static_assert(parse_name("vwap") == Field::VWAP);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::ASK_PRICE: {
+    case Field::ASK_PRICE:
       update(result.ask_price, value);
       break;
-    }
-    case Field::BANKRUPT_LIMIT_DOWN_PRICE: {
+    case Field::BANKRUPT_LIMIT_DOWN_PRICE:
       update(result.bankrupt_limit_down_price, value);
       break;
-    }
-    case Field::BANKRUPT_LIMIT_UP_PRICE: {
+    case Field::BANKRUPT_LIMIT_UP_PRICE:
       update(result.bankrupt_limit_up_price, value);
       break;
-    }
-    case Field::BID_PRICE: {
+    case Field::BID_PRICE:
       update(result.bid_price, value);
       break;
-    }
-    case Field::BUY_LEG: {
+    case Field::BUY_LEG:
       update(result.buy_leg, value);
       break;
-    }
-    case Field::CALC_INTERVAL: {
+    case Field::CALC_INTERVAL:
       update(result.calc_interval, value);
       break;
-    }
-    case Field::CAPPED: {
+    case Field::CAPPED:
       update(result.capped, value);
       break;
-    }
-    case Field::CLOSING_TIMESTAMP: {
+    case Field::CLOSING_TIMESTAMP:
       update(result.closing_timestamp, value);
       break;
-    }
-    case Field::DELEVERAGE: {
+    case Field::DELEVERAGE:
       update(result.deleverage, value);
       break;
-    }
-    case Field::EXPIRY: {
+    case Field::EXPIRY:
       update(result.expiry, value);
       break;
-    }
-    case Field::FAIR_BASIS: {
+    case Field::FAIR_BASIS:
       update(result.fair_basis, value);
       break;
-    }
-    case Field::FAIR_BASIS_RATE: {
+    case Field::FAIR_BASIS_RATE:
       update(result.fair_basis_rate, value);
       break;
-    }
-    case Field::FAIR_METHOD: {
+    case Field::FAIR_METHOD:
       update(result.fair_method, value);
       break;
-    }
-    case Field::FAIR_PRICE: {
+    case Field::FAIR_PRICE:
       update(result.fair_price, value);
       break;
-    }
-    case Field::FOREIGN_NOTIONAL_24H: {
+    case Field::FOREIGN_NOTIONAL_24H:
       update(result.foreign_notional_24h, value);
       break;
-    }
-    case Field::FRONT: {
+    case Field::FRONT:
       update(result.front, value);
       break;
-    }
-    case Field::FUNDING_BASE_SYMBOL: {
+    case Field::FUNDING_BASE_SYMBOL:
       update(result.funding_base_symbol, value);
       break;
-    }
-    case Field::FUNDING_INTERVAL: {
+    case Field::FUNDING_INTERVAL:
       update(result.funding_interval, value);
       break;
-    }
-    case Field::FUNDING_PREMIUM_SYMBOL: {
+    case Field::FUNDING_PREMIUM_SYMBOL:
       update(result.funding_premium_symbol, value);
       break;
-    }
-    case Field::FUNDING_QUOTE_SYMBOL: {
+    case Field::FUNDING_QUOTE_SYMBOL:
       update(result.funding_quote_symbol, value);
       break;
-    }
-    case Field::FUNDING_RATE: {
+    case Field::FUNDING_RATE:
       update(result.funding_rate, value);
       break;
-    }
-    case Field::FUNDING_TIMESTAMP: {
+    case Field::FUNDING_TIMESTAMP:
       update(result.funding_timestamp, value);
       break;
-    }
-    case Field::HAS_LIQUIDITY: {
+    case Field::HAS_LIQUIDITY:
       update(result.has_liquidity, value);
       break;
-    }
-    case Field::HIGH_PRICE: {
+    case Field::HIGH_PRICE:
       update(result.high_price, value);
       break;
-    }
-    case Field::HOME_NOTIONAL_24H: {
+    case Field::HOME_NOTIONAL_24H:
       update(result.home_notional_24h, value);
       break;
-    }
-    case Field::IMPACT_ASK_PRICE: {
+    case Field::IMPACT_ASK_PRICE:
       update(result.impact_ask_price, value);
       break;
-    }
-    case Field::IMPACT_BID_PRICE: {
+    case Field::IMPACT_BID_PRICE:
       update(result.impact_bid_price, value);
       break;
-    }
-    case Field::IMPACT_MID_PRICE: {
+    case Field::IMPACT_MID_PRICE:
       update(result.impact_mid_price, value);
       break;
-    }
-    case Field::INDICATIVE_FUNDING_RATE: {
+    case Field::INDICATIVE_FUNDING_RATE:
       update(result.indicative_funding_rate, value);
       break;
-    }
-    case Field::INDICATIVE_SETTLE_PRICE: {
+    case Field::INDICATIVE_SETTLE_PRICE:
       update(result.indicative_settle_price, value);
       break;
-    }
-    case Field::INDICATIVE_TAX_RATE: {
+    case Field::INDICATIVE_TAX_RATE:
       update(result.indicative_tax_rate, value);
       break;
-    }
-    case Field::INIT_MARGIN: {
+    case Field::INIT_MARGIN:
       update(result.init_margin, value);
       break;
-    }
-    case Field::INSURANCE_FEE: {
+    case Field::INSURANCE_FEE:
       update(result.insurance_fee, value);
       break;
-    }
-    case Field::INVERSE_LEG: {
+    case Field::INVERSE_LEG:
       update(result.inverse_leg, value);
       break;
-    }
-    case Field::IS_INVERSE: {
+    case Field::IS_INVERSE:
       update(result.is_inverse, value);
       break;
-    }
-    case Field::IS_QUANTO: {
+    case Field::IS_QUANTO:
       update(result.is_quanto, value);
       break;
-    }
-    case Field::LAST_CHANGE_PCNT: {
+    case Field::LAST_CHANGE_PCNT:
       update(result.last_change_pcnt, value);
       break;
-    }
-    case Field::LAST_PRICE: {
+    case Field::LAST_PRICE:
       update(result.last_price, value);
       break;
-    }
-    case Field::LAST_PRICE_PROTECTED: {
+    case Field::LAST_PRICE_PROTECTED:
       update(result.last_price_protected, value);
       break;
-    }
-    case Field::LAST_TICK_DIRECTION: {
+    case Field::LAST_TICK_DIRECTION:
       update(result.last_tick_direction, value);
       break;
-    }
-    case Field::LIMIT: {
+    case Field::LIMIT:
       update(result.limit, value);
       break;
-    }
-    case Field::LIMIT_DOWN_PRICE: {
+    case Field::LIMIT_DOWN_PRICE:
       update(result.limit_down_price, value);
       break;
-    }
-    case Field::LIMIT_UP_PRICE: {
+    case Field::LIMIT_UP_PRICE:
       update(result.limit_up_price, value);
       break;
-    }
-    case Field::LISTING: {
+    case Field::LISTING:
       update(result.listing, value);
       break;
-    }
-    case Field::LOT_SIZE: {
+    case Field::LOT_SIZE:
       update(result.lot_size, value);
       break;
-    }
-    case Field::LOW_PRICE: {
+    case Field::LOW_PRICE:
       update(result.low_price, value);
       break;
-    }
-    case Field::MAINT_MARGIN: {
+    case Field::MAINT_MARGIN:
       update(result.maint_margin, value);
       break;
-    }
-    case Field::MAKER_FEE: {
+    case Field::MAKER_FEE:
       update(result.maker_fee, value);
       break;
-    }
-    case Field::MARK_METHOD: {
+    case Field::MARK_METHOD:
       update(result.mark_method, value);
       break;
-    }
-    case Field::MARK_PRICE: {
+    case Field::MARK_PRICE:
       update(result.mark_price, value);
       break;
-    }
-    case Field::MAX_ORDER_QTY: {
+    case Field::MAX_ORDER_QTY:
       update(result.max_order_qty, value);
       break;
-    }
-    case Field::MAX_PRICE: {
+    case Field::MAX_PRICE:
       update(result.max_price, value);
       break;
-    }
-    case Field::MID_PRICE: {
+    case Field::MID_PRICE:
       update(result.mid_price, value);
       break;
-    }
-    case Field::MULTIPLIER: {
+    case Field::MULTIPLIER:
       update(result.multiplier, value);
       break;
-    }
-    case Field::OPENING_TIMESTAMP: {
+    case Field::OPENING_TIMESTAMP:
       update(result.opening_timestamp, value);
       break;
-    }
-    case Field::OPEN_INTEREST: {
+    case Field::OPEN_INTEREST:
       update(result.open_interest, value);
       break;
-    }
-    case Field::OPEN_VALUE: {
+    case Field::OPEN_VALUE:
       update(result.open_value, value);
       break;
-    }
-    case Field::OPTION_MULTIPLIER: {
+    case Field::OPTION_MULTIPLIER:
       update(result.option_multiplier, value);
       break;
-    }
-    case Field::OPTION_STRIKE_PCNT: {
+    case Field::OPTION_STRIKE_PCNT:
       update(result.option_strike_pcnt, value);
       break;
-    }
-    case Field::OPTION_STRIKE_PRICE: {
+    case Field::OPTION_STRIKE_PRICE:
       update(result.option_strike_price, value);
       break;
-    }
-    case Field::OPTION_STRIKE_ROUND: {
+    case Field::OPTION_STRIKE_ROUND:
       update(result.option_strike_round, value);
       break;
-    }
-    case Field::OPTION_UNDERLYING_PRICE: {
+    case Field::OPTION_UNDERLYING_PRICE:
       update(result.option_underlying_price, value);
       break;
-    }
-    case Field::POSITION_CURRENCY: {
+    case Field::POSITION_CURRENCY:
       update(result.position_currency, value);
       break;
-    }
-    case Field::PREV_CLOSE_PRICE: {
+    case Field::PREV_CLOSE_PRICE:
       update(result.prev_close_price, value);
       break;
-    }
-    case Field::PREV_PRICE_24H: {
+    case Field::PREV_PRICE_24H:
       update(result.prev_price_24h, value);
       break;
-    }
-    case Field::PREV_TOTAL_TURNOVER: {
+    case Field::PREV_TOTAL_TURNOVER:
       update(result.prev_total_turnover, value);
       break;
-    }
-    case Field::PREV_TOTAL_VOLUME: {
+    case Field::PREV_TOTAL_VOLUME:
       update(result.prev_total_volume, value);
       break;
-    }
-    case Field::PUBLISH_INTERVAL: {
+    case Field::PUBLISH_INTERVAL:
       update(result.publish_interval, value);
       break;
-    }
-    case Field::PUBLISH_TIME: {
+    case Field::PUBLISH_TIME:
       update(result.publish_time, value);
       break;
-    }
-    case Field::QUOTE_CURRENCY: {
+    case Field::QUOTE_CURRENCY:
       update(result.quote_currency, value);
       break;
-    }
-    case Field::QUOTE_TO_SETTLE_MULTIPLIER: {
+    case Field::QUOTE_TO_SETTLE_MULTIPLIER:
       update(result.quote_to_settle_multiplier, value);
       break;
-    }
-    case Field::REBALANCE_INTERVAL: {
+    case Field::REBALANCE_INTERVAL:
       update(result.rebalance_interval, value);
       break;
-    }
-    case Field::REBALANCE_TIMESTAMP: {
+    case Field::REBALANCE_TIMESTAMP:
       update(result.rebalance_timestamp, value);
       break;
-    }
-    case Field::REFERENCE: {
+    case Field::REFERENCE:
       update(result.reference, value);
       break;
-    }
-    case Field::REFERENCE_SYMBOL: {
+    case Field::REFERENCE_SYMBOL:
       update(result.reference_symbol, value);
       break;
-    }
-    case Field::RELIST_INTERVAL: {
+    case Field::RELIST_INTERVAL:
       update(result.relist_interval, value);
       break;
-    }
-    case Field::RISK_LIMIT: {
+    case Field::RISK_LIMIT:
       update(result.risk_limit, value);
       break;
-    }
-    case Field::RISK_STEP: {
+    case Field::RISK_STEP:
       update(result.risk_step, value);
       break;
-    }
-    case Field::ROOT_SYMBOL: {
+    case Field::ROOT_SYMBOL:
       update(result.root_symbol, value);
       break;
-    }
-    case Field::SELL_LEG: {
+    case Field::SELL_LEG:
       update(result.sell_leg, value);
       break;
-    }
-    case Field::SESSION_INTERVAL: {
+    case Field::SESSION_INTERVAL:
       update(result.session_interval, value);
       break;
-    }
-    case Field::SETTL_CURRENCY: {
+    case Field::SETTL_CURRENCY:
       update(result.settl_currency, value);
       break;
-    }
-    case Field::SETTLE: {
+    case Field::SETTLE:
       update(result.settle, value);
       break;
-    }
-    case Field::SETTLED_PRICE: {
+    case Field::SETTLED_PRICE:
       update(result.settled_price, value);
       break;
-    }
-    case Field::SETTLEMENT_FEE: {
+    case Field::SETTLEMENT_FEE:
       update(result.settlement_fee, value);
       break;
-    }
-    case Field::STATE: {
+    case Field::STATE:
       update(result.state, value);
       break;
-    }
-    case Field::SYMBOL: {
+    case Field::SYMBOL:
       update(result.symbol, value);
       break;
-    }
-    case Field::TAKER_FEE: {
+    case Field::TAKER_FEE:
       update(result.taker_fee, value);
       break;
-    }
-    case Field::TAXED: {
+    case Field::TAXED:
       update(result.taxed, value);
       break;
-    }
-    case Field::TICK_SIZE: {
+    case Field::TICK_SIZE:
       update(result.tick_size, value);
       break;
-    }
-    case Field::TIMESTAMP: {
+    case Field::TIMESTAMP:
       update(result.timestamp, value);
       break;
-    }
-    case Field::TOTAL_TURNOVER: {
+    case Field::TOTAL_TURNOVER:
       update(result.total_turnover, value);
       break;
-    }
-    case Field::TOTAL_VOLUME: {
+    case Field::TOTAL_VOLUME:
       update(result.total_volume, value);
       break;
-    }
-    case Field::TURNOVER: {
+    case Field::TURNOVER:
       update(result.turnover, value);
       break;
-    }
-    case Field::TURNOVER_24H: {
+    case Field::TURNOVER_24H:
       update(result.turnover_24h, value);
       break;
-    }
-    case Field::TYP: {
+    case Field::TYP:
       update(result.typ, value);
       break;
-    }
-    case Field::UNDERLYING: {
+    case Field::UNDERLYING:
       update(result.underlying, value);
       break;
-    }
-    case Field::UNDERLYING_SYMBOL: {
+    case Field::UNDERLYING_SYMBOL:
       update(result.underlying_symbol, value);
       break;
-    }
-    case Field::UNDERLYING_TO_POSITION_MULTIPLIER: {
+    case Field::UNDERLYING_TO_POSITION_MULTIPLIER:
       update(result.underlying_to_position_multiplier, value);
       break;
-    }
-    case Field::UNDERLYING_TO_SETTLE_MULTIPLIER: {
+    case Field::UNDERLYING_TO_SETTLE_MULTIPLIER:
       update(result.underlying_to_settle_multiplier, value);
       break;
-    }
-    case Field::VOLUME: {
+    case Field::VOLUME:
       update(result.volume, value);
       break;
-    }
-    case Field::VOLUME_24H: {
+    case Field::VOLUME_24H:
       update(result.volume_24h, value);
       break;
-    }
-    case Field::VWAP: {
+    case Field::VWAP:
       update(result.vwap, value);
       break;
-    }
   }
 }
 }  // namespace
 
 InstrumentItem::InstrumentItem(core::json::value_t& value) {
-  for (auto [key, value] : std::get<core::json::object_t>(value)) {
-    auto field = parse_name(key);
-    update_field(*this, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(*this, key, value);
 }
 
 }  // namespace json

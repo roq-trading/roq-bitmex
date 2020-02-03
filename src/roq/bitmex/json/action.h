@@ -11,6 +11,7 @@ namespace bitmex {
 namespace json {
 
 enum class Action {
+  UNDEFINED,
   UNKNOWN,
   DELETE,
   INSERT,
@@ -22,6 +23,7 @@ extern Action parse_action(const std::string_view& name);
 
 inline auto EnumNamesAction() {
   static const std::string_view names[] = {
+    "UNDEFINED",
     "UNKNOWN",
     "DELETE",
     "INSERT",

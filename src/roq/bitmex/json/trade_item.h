@@ -27,7 +27,7 @@ struct TradeItem final {
   double gross_value = std::numeric_limits<double>::quiet_NaN();
   double home_notional = std::numeric_limits<double>::quiet_NaN();
   double price = std::numeric_limits<double>::quiet_NaN();
-  Side side = Side::UNKNOWN;
+  Side side = Side::UNDEFINED;
   double size = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
   std::string_view tick_direction;

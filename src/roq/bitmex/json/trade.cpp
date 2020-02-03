@@ -2,36 +2,18 @@
 
 #include "roq/bitmex/json/trade.h"
 
-#include <utility>
-
 #include "roq/core/json/array.h"
-#include "roq/core/json/parser.h"
-
 
 namespace roq {
 namespace bitmex {
 namespace json {
 
-Trade Trade::parse(
-    const std::string_view& message,
+Trade::Trade(
+    core::json::value_t& value,
     core::json::Buffer& buffer,
-    Action action) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  return parse(
-      std::get<core::json::array_t>(root),
-      buffer,
-      action);
-}
-
-Trade Trade::parse(
-    core::json::array_t& array,
-    core::json::Buffer& buffer,
-    Action action) {
-  return Trade {
-    .action = action,
-    .data = core::json::Array<decltype(data)>::parse(buffer, array),
-  };
+    Action action)
+    : action(action),
+      data(core::json::Array<decltype(data)>::parse(buffer, value)) {
 }
 
 }  // namespace json

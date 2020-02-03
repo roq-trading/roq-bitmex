@@ -11,28 +11,46 @@ namespace bitmex {
 namespace json {
 
 namespace {
-
+constexpr auto parse_c(const std::string_view& name) {
+  if (name.compare("Closed") == 0)
+    return State::CLOSED;
+  return State::UNKNOWN;
+}
+constexpr auto parse_o(const std::string_view& name) {
+  if (name.compare("Open") == 0)
+    return State::OPEN;
+  return State::UNKNOWN;
+}
+constexpr auto parse_s(const std::string_view& name) {
+  if (name.compare("Settled") == 0)
+    return State::SETTLED;
+  return State::UNKNOWN;
+}
+constexpr auto parse_u(const std::string_view& name) {
+  if (name.compare("Unlisted") == 0)
+    return State::UNLISTED;
+  return State::UNKNOWN;
+}
 constexpr auto parse_helper(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return State::UNDEFINED;
+  switch (name[0]) {
     case 'C':
-      if (name.compare("Closed") == 0)
-        return State::CLOSED;
-      break;
+      return parse_c(name);
     case 'O':
-      if (name.compare("Open") == 0)
-        return State::OPEN;
-      break;
+      return parse_o(name);
+    case 'S':
+      return parse_s(name);
     case 'U':
-      if (name.compare("Unlisted") == 0)
-        return State::UNLISTED;
-      break;
+      return parse_u(name);
   }
   return State::UNKNOWN;
 }
 
+static_assert(parse_helper("") == State::UNDEFINED);
 static_assert(parse_helper("Closed") == State::CLOSED);
 static_assert(parse_helper("Open") == State::OPEN);
+static_assert(parse_helper("Settled") == State::SETTLED);
 static_assert(parse_helper("Unlisted") == State::UNLISTED);
 }  // namespace
 

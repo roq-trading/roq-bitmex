@@ -6,18 +6,25 @@
 
 #include <string_view>
 
+#include "roq/core/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
 
 struct Subscribe final {
+  Subscribe() = default;
+
+  Subscribe(const Subscribe&) = delete;
+  Subscribe(Subscribe&&) = default;
+
   bool failure = false;
   std::string_view subscribe;
   bool success = false;
   // missing:
   // - request
 
-  static Subscribe parse(const std::string_view& message);
+  static Subscribe parse(core::json::value_t&);
 };
 
 }  // namespace json

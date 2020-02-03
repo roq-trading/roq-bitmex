@@ -23,7 +23,7 @@ struct OrderBookL2Item final {
 
   uint64_t id = 0;
   double price = std::numeric_limits<double>::quiet_NaN();
-  Side side = Side::UNKNOWN;
+  Side side = Side::UNDEFINED;
   double size = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
 };

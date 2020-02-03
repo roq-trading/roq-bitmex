@@ -12,18 +12,16 @@ namespace bitmex {
 namespace json {
 
 struct Instrument final {
-  Action action = Action::UNKNOWN;
+  Instrument(
+      core::json::value_t& value,
+      core::json::Buffer& buffer,
+      Action action);
+
+  Instrument(const Instrument&) = delete;
+  Instrument(Instrument&&) = delete;
+
+  Action action = Action::UNDEFINED;
   roq::span<InstrumentItem const> data;
-
-  static Instrument parse(
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      Action action);
-
-  static Instrument parse(
-      core::json::array_t& array,
-      core::json::Buffer& buffer,
-      Action action);
 };
 
 }  // namespace json

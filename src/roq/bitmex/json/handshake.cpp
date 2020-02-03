@@ -48,8 +48,9 @@ constexpr Field parse_v(auto& name) {
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'd':
       return parse_d(name);
     case 'i':
@@ -58,8 +59,9 @@ constexpr Field parse_name(const std::string_view& name) {
       return parse_t(name);
     case 'v':
       return parse_v(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("docs") == Field::DOCS);
@@ -69,42 +71,33 @@ static_assert(parse_name("version") == Field::VERSION);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::DOCS: {
+    case Field::DOCS:
       update(result.docs, value);
       break;
-    }
-    case Field::INFO: {
+    case Field::INFO:
       update(result.info, value);
       break;
-    }
-    case Field::TIMESTAMP: {
+    case Field::TIMESTAMP:
       update(result.timestamp, value);
       break;
-    }
-    case Field::VERSION: {
+    case Field::VERSION:
       update(result.version, value);
       break;
-    }
   }
 }
 }  // namespace
 
-Handshake Handshake::parse(const std::string_view& message) {
+Handshake Handshake::parse(core::json::value_t& value) {
   Handshake result;
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  for (auto [key, value] : std::get<core::json::object_t>(root)) {
-    auto field = parse_name(key);
-    update_field(result, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(result, key, value);
   return result;
 }
 

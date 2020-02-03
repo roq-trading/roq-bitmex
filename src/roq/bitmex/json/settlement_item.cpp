@@ -32,17 +32,15 @@ constexpr Field parse_b(auto& name) {
 
 constexpr Field parse_o(auto& name) {
   if (name.length() >= 7) {
-    switch (name.data()[6]) {
-      case 'S': {
+    switch (name[6]) {
+      case 'S':
         if (name.compare("optionStrikePrice") == 0)
           return Field::OPTION_STRIKE_PRICE;
         break;
-      }
-      case 'U': {
+      case 'U':
         if (name.compare("optionUnderlyingPrice") == 0)
           return Field::OPTION_UNDERLYING_PRICE;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -50,10 +48,10 @@ constexpr Field parse_o(auto& name) {
 
 constexpr Field parse_s(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
+    switch (name[1]) {
       case 'e': {
         if (name.length() >= 7) {
-          switch (name.data()[6]) {
+          switch (name[6]) {
             case 'd':
               if (name.compare("settledPrice") == 0)
                 return Field::SETTLED_PRICE;
@@ -66,11 +64,10 @@ constexpr Field parse_s(auto& name) {
         }
         break;
       }
-      case 'y': {
+      case 'y':
         if (name.compare("symbol") == 0)
           return Field::SYMBOL;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -78,30 +75,28 @@ constexpr Field parse_s(auto& name) {
 
 constexpr Field parse_t(auto& name) {
   if (name.length() >= 4) {
-    switch (name.data()[3]) {
-      case 'B': {
+    switch (name[3]) {
+      case 'B':
         if (name.compare("taxBase") == 0)
           return Field::TAX_BASE;
         break;
-      }
-      case 'R': {
+      case 'R':
         if (name.compare("taxRate") == 0)
           return Field::TAX_RATE;
         break;
-      }
-      case 'e': {
+      case 'e':
         if (name.compare("timestamp") == 0)
           return Field::TIMESTAMP;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'b':
       return parse_b(name);
     case 'o':
@@ -110,8 +105,9 @@ constexpr Field parse_name(const std::string_view& name) {
       return parse_s(name);
     case 't':
       return parse_t(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("bankrupt") == Field::BANKRUPT);
@@ -126,59 +122,47 @@ static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::BANKRUPT: {
+    case Field::BANKRUPT:
       update(result.bankrupt, value);
       break;
-    }
-    case Field::OPTION_STRIKE_PRICE: {
+    case Field::OPTION_STRIKE_PRICE:
       update(result.option_strike_price, value);
       break;
-    }
-    case Field::OPTION_UNDERLYING_PRICE: {
+    case Field::OPTION_UNDERLYING_PRICE:
       update(result.option_underlying_price, value);
       break;
-    }
-    case Field::SETTLED_PRICE: {
+    case Field::SETTLED_PRICE:
       update(result.settled_price, value);
       break;
-    }
-    case Field::SETTLEMENT_TYPE: {
+    case Field::SETTLEMENT_TYPE:
       update(result.settlement_type, value);
       break;
-    }
-    case Field::SYMBOL: {
+    case Field::SYMBOL:
       update(result.symbol, value);
       break;
-    }
-    case Field::TAX_BASE: {
+    case Field::TAX_BASE:
       update(result.tax_base, value);
       break;
-    }
-    case Field::TAX_RATE: {
+    case Field::TAX_RATE:
       update(result.tax_rate, value);
       break;
-    }
-    case Field::TIMESTAMP: {
+    case Field::TIMESTAMP:
       update(result.timestamp, value);
       break;
-    }
   }
 }
 }  // namespace
 
 SettlementItem::SettlementItem(core::json::value_t& value) {
-  for (auto [key, value] : std::get<core::json::object_t>(value)) {
-    auto field = parse_name(key);
-    update_field(*this, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(*this, key, value);
 }
 
 }  // namespace json

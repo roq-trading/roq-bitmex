@@ -12,18 +12,16 @@ namespace bitmex {
 namespace json {
 
 struct Settlement final {
-  Action action = Action::UNKNOWN;
+  Settlement(
+      core::json::value_t& value,
+      core::json::Buffer& buffer,
+      Action action);
+
+  Settlement(const Settlement&) = delete;
+  Settlement(Settlement&&) = delete;
+
+  Action action = Action::UNDEFINED;
   roq::span<SettlementItem const> data;
-
-  static Settlement parse(
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      Action action);
-
-  static Settlement parse(
-      core::json::array_t& array,
-      core::json::Buffer& buffer,
-      Action action);
 };
 
 }  // namespace json

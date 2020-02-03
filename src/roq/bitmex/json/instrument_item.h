@@ -109,7 +109,7 @@ struct InstrumentItem final {
   std::chrono::nanoseconds settle = {};
   double settled_price = std::numeric_limits<double>::quiet_NaN();
   double settlement_fee = std::numeric_limits<double>::quiet_NaN();
-  State state = State::UNKNOWN;
+  State state = State::UNDEFINED;
   std::string_view symbol;
   double taker_fee = std::numeric_limits<double>::quiet_NaN();
   bool taxed = false;
@@ -119,7 +119,7 @@ struct InstrumentItem final {
   double total_volume = std::numeric_limits<double>::quiet_NaN();
   double turnover = std::numeric_limits<double>::quiet_NaN();
   double turnover_24h = std::numeric_limits<double>::quiet_NaN();
-  Typ typ = Typ::UNKNOWN;
+  Typ typ = Typ::UNDEFINED;
   std::string_view underlying;
   std::string_view underlying_symbol;
   double underlying_to_position_multiplier = std::numeric_limits<double>::quiet_NaN();

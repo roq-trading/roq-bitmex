@@ -12,18 +12,16 @@ namespace bitmex {
 namespace json {
 
 struct OrderBookL2 final {
-  Action action = Action::UNKNOWN;
+  OrderBookL2(
+      core::json::value_t& value,
+      core::json::Buffer& buffer,
+      Action action);
+
+  OrderBookL2(const OrderBookL2&) = delete;
+  OrderBookL2(OrderBookL2&&) = delete;
+
+  Action action = Action::UNDEFINED;
   roq::span<OrderBookL2Item const> data;
-
-  static OrderBookL2 parse(
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      Action action);
-
-  static OrderBookL2 parse(
-      core::json::array_t& array,
-      core::json::Buffer& buffer,
-      Action action);
 };
 
 }  // namespace json

@@ -11,22 +11,31 @@ namespace bitmex {
 namespace json {
 
 namespace {
+constexpr auto parse_r(const std::string_view& name) {
+  if (name.compare("Rebalance") == 0)
+    return SettlementType::REBALANCE;
+  return SettlementType::UNKNOWN;
+}
+
+constexpr auto parse_s(const std::string_view& name) {
+  if (name.compare("Settlement") == 0)
+    return SettlementType::SETTLEMENT;
+  return SettlementType::UNKNOWN;
+}
 
 constexpr auto parse_helper(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return SettlementType::UNDEFINED;
+  switch (name[0]) {
     case 'R':
-      if (name.compare("Rebalance") == 0)
-        return SettlementType::REBALANCE;
-      break;
+      return parse_r(name);
     case 'S':
-      if (name.compare("Settlement") == 0)
-        return SettlementType::SETTLEMENT;
-      break;
+      return parse_s(name);
   }
   return SettlementType::UNKNOWN;
 }
 
+static_assert(parse_helper("Rebalance") == SettlementType::REBALANCE);
 static_assert(parse_helper("Settlement") == SettlementType::SETTLEMENT);
 }  // namespace
 

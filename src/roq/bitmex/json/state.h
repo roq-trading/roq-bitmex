@@ -11,9 +11,11 @@ namespace bitmex {
 namespace json {
 
 enum class State {
+  UNDEFINED,
   UNKNOWN,
   CLOSED,
   OPEN,
+  SETTLED,
   UNLISTED,
 };
 
@@ -21,9 +23,11 @@ extern State parse_state(const std::string_view& name);
 
 inline auto EnumNamesState() {
   static const std::string_view names[] = {
+    "UNDEFINED",
     "UNKNOWN",
     "CLOSED",
     "OPEN",
+    "SETTLED",
     "UNLISTED",
   };
   return names;

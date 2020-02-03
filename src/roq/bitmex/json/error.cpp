@@ -44,8 +44,9 @@ constexpr Field parse_s(auto& name) {
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'e':
       return parse_e(name);
     case 'm':
@@ -58,6 +59,7 @@ constexpr Field parse_name(const std::string_view& name) {
   return Field::UNKNOWN;
 }
 
+static_assert(parse_name("") == Field::UNKNOWN);
 static_assert(parse_name("error") == Field::ERROR);
 static_assert(parse_name("meta") == Field::META);
 static_assert(parse_name("request") == Field::REQUEST);
@@ -65,42 +67,33 @@ static_assert(parse_name("status") == Field::STATUS);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::ERROR: {
+    case Field::ERROR:
       update(result.error, value);
       break;
-    }
-    case Field::META: {
+    case Field::META:
       // do nothing
       break;
-    }
-    case Field::STATUS: {
+    case Field::STATUS:
       update(result.status, value);
       break;
-    }
-    case Field::REQUEST: {
+    case Field::REQUEST:
       // do nothing
       break;
-    }
   }
 }
 }  // namespace
 
-Error Error::parse(const std::string_view& message) {
+Error Error::parse(core::json::value_t& value) {
   Error result;
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  for (auto [key, value] : std::get<core::json::object_t>(root)) {
-    auto field = parse_name(key);
-    update_field(result, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(result, key, value);
   return result;
 }
 

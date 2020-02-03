@@ -13,7 +13,7 @@ namespace json {
 namespace {
 constexpr auto parse_f(const std::string_view& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
+    switch (name[2]) {
       case 'C':
         if (name.compare("FFCCSX") == 0)
           return Typ::FFCCSX;
@@ -29,7 +29,7 @@ constexpr auto parse_f(const std::string_view& name) {
 
 constexpr auto parse_m(const std::string_view& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
+    switch (name[2]) {
       case 'C':
         if (name.compare("MRCXXX") == 0)
           return Typ::MRCXXX;
@@ -49,7 +49,7 @@ constexpr auto parse_m(const std::string_view& name) {
 
 constexpr auto parse_o(const std::string_view& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
+    switch (name[1]) {
       case 'C':
         if (name.compare("OCECCS") == 0)
           return Typ::OCECCS;
@@ -65,8 +65,9 @@ constexpr auto parse_o(const std::string_view& name) {
 
 
 constexpr auto parse_helper(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Typ::UNDEFINED;
+  switch (name[0]) {
     case 'F':
       return parse_f(name);
     case 'M':
@@ -77,6 +78,7 @@ constexpr auto parse_helper(const std::string_view& name) {
   return Typ::UNKNOWN;
 }
 
+static_assert(parse_helper("") == Typ::UNDEFINED);
 static_assert(parse_helper("FFCCSX") == Typ::FFCCSX);
 static_assert(parse_helper("FFWCSX") == Typ::FFWCSX);
 static_assert(parse_helper("MRCXXX") == Typ::MRCXXX);

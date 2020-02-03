@@ -189,6 +189,7 @@ void Gateway::operator()(const WebSocket& websocket) {
 
 void Gateway::operator()(const json::Instrument& instrument) {
   switch (instrument.action) {
+    case json::Action::UNDEFINED:
     case json::Action::UNKNOWN:
       LOG(FATAL)("Unexpected");
       break;
@@ -206,7 +207,7 @@ void Gateway::operator()(const json::Instrument& instrument) {
           ReferenceData reference_data {
             .exchange = FLAGS_exchange,
             .symbol = item.symbol,
-            .security_type = SecurityType::UNDEFINED,  // ?
+            .security_type = SecurityType::UNDEFINED,  // XXX typ?
             .currency = item.quote_currency,  // XXX or position_currency?
             .settlement_currency = item.settl_currency,
             .commission_currency = std::string_view(),
@@ -227,6 +228,7 @@ void Gateway::operator()(const json::Instrument& instrument) {
            * MRRXXX
            */
           enqueue(reference_data, false);
+          // XXX market status <-- state (but need caching)
         }
         VLOG(1)(
             "- securities: {} (/{})",
@@ -285,14 +287,27 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
     }
     auto iter = _price_lookup.find(item.id);
     switch (order_book_l2.action) {
+      case json::Action::UNDEFINED:
       case json::Action::UNKNOWN:
         LOG(FATAL)("Unexpected");
         break;
       case json::Action::PARTIAL:
-      case json::Action::INSERT:
-        LOG_IF(FATAL, iter != _price_lookup.end())("FOUND DUPLICATE");
         assert(std::isnan(item.price) == false);
-        iter = _price_lookup.emplace(item.id, item.price).first;
+        if (iter == _price_lookup.end()) {
+          iter = _price_lookup.emplace(item.id, item.price).first;
+        } else {
+          auto diff = std::fabs(item.price - (*iter).second);
+          LOG_IF(FATAL, diff > TOLERANCE)("FOUND DUPLICATE");
+        }
+        break;
+      case json::Action::INSERT:
+        assert(std::isnan(item.price) == false);
+        if (iter == _price_lookup.end()) {
+          iter = _price_lookup.emplace(item.id, item.price).first;
+        } else {
+          auto diff = std::fabs(item.price - (*iter).second);
+          LOG_IF(FATAL, diff > TOLERANCE)("FOUND DUPLICATE");
+        }
         break;
       case json::Action::UPDATE:
         LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");

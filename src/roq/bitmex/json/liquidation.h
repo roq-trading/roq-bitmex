@@ -12,18 +12,16 @@ namespace bitmex {
 namespace json {
 
 struct Liquidation final {
-  Action action = Action::UNKNOWN;
+  Liquidation(
+      core::json::value_t& value,
+      core::json::Buffer& buffer,
+      Action action);
+
+  Liquidation(const Liquidation&) = delete;
+  Liquidation(Liquidation&&) = delete;
+
+  Action action = Action::UNDEFINED;
   roq::span<LiquidationItem const> data;
-
-  static Liquidation parse(
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      Action action);
-
-  static Liquidation parse(
-      core::json::array_t& array,
-      core::json::Buffer& buffer,
-      Action action);
 };
 
 }  // namespace json

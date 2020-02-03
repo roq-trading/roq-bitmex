@@ -27,7 +27,7 @@ constexpr Field parse_f(auto& name) {
 
 constexpr Field parse_s(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
+    switch (name[2]) {
       case 'b':
         if (name.compare("subscribe") == 0)
           return Field::SUBSCRIBE;
@@ -48,16 +48,18 @@ constexpr Field parse_r(auto& name) {
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'f':
       return parse_f(name);
     case 's':
       return parse_s(name);
     case 'r':
       return parse_r(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("failure") == Field::FAILURE);
@@ -67,42 +69,33 @@ static_assert(parse_name("request") == Field::REQUEST);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::FAILURE: {
+    case Field::FAILURE:
       update(result.failure, value);
       break;
-    }
-    case Field::SUBSCRIBE: {
+    case Field::SUBSCRIBE:
       update(result.subscribe, value);
       break;
-    }
-    case Field::SUCCESS: {
+    case Field::SUCCESS:
       update(result.success, value);
       break;
-    }
-    case Field::REQUEST: {
+    case Field::REQUEST:
       // do nothing
       break;
-    }
   }
 }
 }  // namespace
 
-Subscribe Subscribe::parse(const std::string_view& message) {
+Subscribe Subscribe::parse(core::json::value_t& value) {
   Subscribe result;
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  for (auto [key, value] : std::get<core::json::object_t>(root)) {
-    auto field = parse_name(key);
-    update_field(result, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(result, key, value);
   return result;
 }
 

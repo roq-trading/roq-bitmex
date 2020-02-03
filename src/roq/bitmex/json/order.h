@@ -8,11 +8,18 @@
 #include <limits>
 #include <string_view>
 
+#include "roq/core/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
 
 struct Order final {
+  Order() = default;
+
+  Order(const Order&) = delete;
+  Order(Order&&) = default;
+
   uint64_t account = 0;
   double avg_px = std::numeric_limits<double>::quiet_NaN();
   std::string_view cl_ord_id;
@@ -47,7 +54,7 @@ struct Order final {
   std::string_view triggered;
   bool working_indicator = false;
 
-  static Order parse(const std::string_view& message);
+  static Order parse(core::json::value_t&);
 };
 
 }  // namespace json

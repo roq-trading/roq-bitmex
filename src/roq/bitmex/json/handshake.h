@@ -7,11 +7,18 @@
 #include <chrono>
 #include <string_view>
 
+#include "roq/core/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
 
 struct Handshake final {
+  Handshake() = default;
+
+  Handshake(const Handshake&) = delete;
+  Handshake(Handshake&&) = default;
+
   std::string_view docs;
   std::string_view info;
   std::chrono::nanoseconds timestamp = {};
@@ -20,7 +27,7 @@ struct Handshake final {
   // - limit { remaining }
   // - heartbeat_enabled (?)
 
-  static Handshake parse(const std::string_view& message);
+  static Handshake parse(core::json::value_t&);
 };
 
 }  // namespace json

@@ -51,22 +51,19 @@ constexpr Field parse_p(auto& name) {
 
 constexpr Field parse_s(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 'd': {
+    switch (name[2]) {
+      case 'd':
         if (name.compare("side") == 0)
           return Field::SIDE;
         break;
-      }
-      case 'z': {
+      case 'z':
         if (name.compare("size") == 0)
           return Field::SIZE;
         break;
-      }
-      case 'm': {
+      case 'm':
         if (name.compare("symbol") == 0)
           return Field::SYMBOL;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -74,30 +71,28 @@ constexpr Field parse_s(auto& name) {
 
 constexpr Field parse_t(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 'c': {
+    switch (name[2]) {
+      case 'c':
         if (name.compare("tickDirection") == 0)
           return Field::TICK_DIRECTION;
         break;
-      }
-      case 'm': {
+      case 'm':
         if (name.compare("timestamp") == 0)
           return Field::TIMESTAMP;
         break;
-      }
-      case 'd': {
+      case 'd':
         if (name.compare("trdMatchID") == 0)
           return Field::TRD_MATCH_ID;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'f':
       return parse_f(name);
     case 'g':
@@ -110,8 +105,9 @@ constexpr Field parse_name(const std::string_view& name) {
       return parse_s(name);
     case 't':
       return parse_t(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("foreignNotional") == Field::FOREIGN_NOTIONAL);
@@ -127,63 +123,50 @@ static_assert(parse_name("trdMatchID") == Field::TRD_MATCH_ID);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::FOREIGN_NOTIONAL: {
+    case Field::FOREIGN_NOTIONAL:
       update(result.foreign_notional, value);
       break;
-    }
-    case Field::GROSS_VALUE: {
+    case Field::GROSS_VALUE:
       update(result.gross_value, value);
       break;
-    }
-    case Field::HOME_NOTIONAL: {
+    case Field::HOME_NOTIONAL:
       update(result.home_notional, value);
       break;
-    }
-    case Field::PRICE: {
+    case Field::PRICE:
       update(result.price, value);
       break;
-    }
-    case Field::SIDE: {
+    case Field::SIDE:
       update(result.side, value);
       break;
-    }
-    case Field::SIZE: {
+    case Field::SIZE:
       update(result.size, value);
       break;
-    }
-    case Field::SYMBOL: {
+    case Field::SYMBOL:
       update(result.symbol, value);
       break;
-    }
-    case Field::TICK_DIRECTION: {
+    case Field::TICK_DIRECTION:
       update(result.tick_direction, value);
       break;
-    }
-    case Field::TIMESTAMP: {
+    case Field::TIMESTAMP:
       update(result.timestamp, value);
       break;
-    }
-    case Field::TRD_MATCH_ID: {
+    case Field::TRD_MATCH_ID:
       update(result.trd_match_id, value);
       break;
-    }
   }
 }
 }  // namespace
 
 TradeItem::TradeItem(core::json::value_t& value) {
-  for (auto [key, value] : std::get<core::json::object_t>(value)) {
-    auto field = parse_name(key);
-    update_field(*this, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(*this, key, value);
 }
 
 }  // namespace json

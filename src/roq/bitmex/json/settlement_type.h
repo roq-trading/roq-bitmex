@@ -11,6 +11,7 @@ namespace bitmex {
 namespace json {
 
 enum class SettlementType {
+  UNDEFINED,
   UNKNOWN,
   REBALANCE,
   SETTLEMENT,
@@ -20,6 +21,7 @@ extern SettlementType parse_settlement_type(const std::string_view& name);
 
 inline auto EnumNamesSettlementType() {
   static const std::string_view names[] = {
+    "UNDEFINED",
     "UNKNOWN",
     "REBALANCE",
     "SETTLEMENT",

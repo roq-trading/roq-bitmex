@@ -34,38 +34,37 @@ constexpr Field parse_p(auto& name) {
 
 constexpr Field parse_s(auto& name) {
   if (name.length() >= 3) {
-    switch (name.data()[2]) {
-      case 'd': {
+    switch (name[2]) {
+      case 'd':
         if (name.compare("side") == 0)
           return Field::SIDE;
         break;
-      }
-      case 'z': {
+      case 'z':
         if (name.compare("size") == 0)
           return Field::SIZE;
         break;
-      }
-      case 'm': {
+      case 'm':
         if (name.compare("symbol") == 0)
           return Field::SYMBOL;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'i':
       return parse_i(name);
     case 'p':
       return parse_p(name);
     case 's':
       return parse_s(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("id") == Field::ID);
@@ -76,43 +75,35 @@ static_assert(parse_name("symbol") == Field::SYMBOL);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::ID: {
+    case Field::ID:
       update(result.id, value);
       break;
-    }
-    case Field::PRICE: {
+    case Field::PRICE:
       update(result.price, value);
       break;
-    }
-    case Field::SIDE: {
+    case Field::SIDE:
       update(result.side, value);
       break;
-    }
-    case Field::SIZE: {
+    case Field::SIZE:
       update(result.size, value);
       break;
-    }
-    case Field::SYMBOL: {
+    case Field::SYMBOL:
       update(result.symbol, value);
       break;
-    }
   }
 }
 }  // namespace
 
 OrderBookL2Item::OrderBookL2Item(core::json::value_t& value) {
-  for (auto [key, value] : std::get<core::json::object_t>(value)) {
-    auto field = parse_name(key);
-    update_field(*this, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(*this, key, value);
 }
 
 }  // namespace json

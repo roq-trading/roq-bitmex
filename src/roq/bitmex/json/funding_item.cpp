@@ -22,13 +22,12 @@ enum class Field {
 
 constexpr Field parse_f(auto& name) {
   if (name.length() >= 8) {
-    switch (name.data()[7]) {
-      case 'I': {
+    switch (name[7]) {
+      case 'I':
         if (name.compare("fundingInterval") == 0)
           return Field::FUNDING_INTERVAL;
         break;
-      }
-      case 'R': {
+      case 'R':
         if (name.length() > 11) {
           if (name.compare("fundingRateDaily") == 0)
             return Field::FUNDING_RATE_DAILY;
@@ -37,7 +36,6 @@ constexpr Field parse_f(auto& name) {
             return Field::FUNDING_RATE;
         }
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -56,16 +54,18 @@ constexpr Field parse_t(auto& name) {
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'f':
       return parse_f(name);
     case 's':
       return parse_s(name);
     case 't':
       return parse_t(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("fundingInterval") == Field::FUNDING_INTERVAL);
@@ -76,43 +76,35 @@ static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::FUNDING_INTERVAL: {
+    case Field::FUNDING_INTERVAL:
       update(result.funding_interval, value);
       break;
-    }
-    case Field::FUNDING_RATE: {
+    case Field::FUNDING_RATE:
       update(result.funding_rate, value);
       break;
-    }
-    case Field::FUNDING_RATE_DAILY: {
+    case Field::FUNDING_RATE_DAILY:
       update(result.funding_rate_daily, value);
       break;
-    }
-    case Field::SYMBOL: {
+    case Field::SYMBOL:
       update(result.symbol, value);
       break;
-    }
-    case Field::TIMESTAMP: {
+    case Field::TIMESTAMP:
       update(result.timestamp, value);
       break;
-    }
   }
 }
 }  // namespace
 
 FundingItem::FundingItem(core::json::value_t& value) {
-  for (auto [key, value] : std::get<core::json::object_t>(value)) {
-    auto field = parse_name(key);
-    update_field(*this, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(*this, key, value);
 }
 
 }  // namespace json

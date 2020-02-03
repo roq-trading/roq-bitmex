@@ -26,7 +26,7 @@ struct LiquidationItem final {
   double leaves_qty = std::numeric_limits<double>::quiet_NaN();
   std::string_view order_id;
   double price = std::numeric_limits<double>::quiet_NaN();
-  Side side = Side::UNKNOWN;
+  Side side = Side::UNDEFINED;
   std::string_view symbol;
 };
 

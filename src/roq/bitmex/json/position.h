@@ -9,11 +9,18 @@
 #include <limits>
 #include <string_view>
 
+#include "roq/core/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
 
 struct Position final {
+  Position() = default;
+
+  Position(const Position&) = delete;
+  Position(Position&&) = default;
+
   uint64_t account = 0;
   double avg_cost_price = std::numeric_limits<double>::quiet_NaN();
   double avg_entry_price = std::numeric_limits<double>::quiet_NaN();
@@ -106,7 +113,7 @@ struct Position final {
   double unrealised_tax = std::numeric_limits<double>::quiet_NaN();
   double var_margin = std::numeric_limits<double>::quiet_NaN();
 
-  static Position parse(const std::string_view& message);
+  static Position parse(core::json::value_t&);
 };
 
 }  // namespace json

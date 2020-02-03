@@ -13,6 +13,7 @@ namespace json {
 // note! is this really an enum? looks more like a bitmap
 
 enum class Typ {
+  UNDEFINED,
   UNKNOWN,
   FFCCSX,
   FFWCSX,
@@ -27,6 +28,7 @@ extern Typ parse_typ(const std::string_view& name);
 
 inline auto EnumNamesTyp() {
   static const std::string_view names[] = {
+    "UNDEFINED",
     "UNKNOWN",
     "FFCCSX",
     "FFWCSX",

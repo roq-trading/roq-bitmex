@@ -42,16 +42,14 @@ enum class Field {
 constexpr auto parse_a(auto& name) {
   if (name.length() >= 2) {
     switch (name.data()[1]) {
-      case 'c': {
+      case 'c':
         if (name.compare("action") == 0)
           return Field::ACTION;
         break;
-      }
-      case 't': {
+      case 't':
         if (name.compare("attributes") == 0)
           return Field::ATTRIBUTES;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -60,16 +58,14 @@ constexpr auto parse_a(auto& name) {
 constexpr auto parse_d(auto& name) {
   if (name.length() >= 2) {
     switch (name.data()[1]) {
-      case 'a': {
+      case 'a':
         if (name.compare("data") == 0)
           return Field::DATA;
         break;
-      }
-      case 'o': {
+      case 'o':
         if (name.compare("docs") == 0)
           return Field::DOCS;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -84,21 +80,18 @@ constexpr auto parse_e(auto& name) {
 constexpr auto parse_f(auto& name) {
   if (name.length() >= 2) {
     switch (name.data()[1]) {
-      case 'a': {
+      case 'a':
         if (name.compare("failure") == 0)
           return Field::FAILURE;
         break;
-      }
-      case 'i': {
+      case 'i':
         if (name.compare("filter") == 0)
           return Field::FILTER;
         break;
-      }
-      case 'o': {
+      case 'o':
         if (name.compare("foreignKeys") == 0)
           return Field::FOREIGN_KEYS;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -137,21 +130,18 @@ constexpr auto parse_r(auto& name) {
 constexpr auto parse_s(auto& name) {
   if (name.length() >= 3) {
     switch (name.data()[2]) {
-      case 'a': {
+      case 'a':
         if (name.compare("status") == 0)
           return Field::STATUS;
         break;
-      }
-      case 'b': {
+      case 'b':
         if (name.compare("subscribe") == 0)
           return Field::SUBSCRIBE;
         break;
-      }
-      case 'c': {
+      case 'c':
         if (name.compare("success") == 0)
           return Field::SUCCESS;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -160,21 +150,18 @@ constexpr auto parse_s(auto& name) {
 constexpr auto parse_t(auto& name) {
   if (name.length() >= 2) {
     switch (name.data()[1]) {
-      case 'a': {
+      case 'a':
         if (name.compare("table") == 0)
           return Field::TABLE;
         break;
-      }
-      case 'i': {
+      case 'i':
         if (name.compare("timestamp") == 0)
           return Field::TIMESTAMP;
         break;
-      }
-      case 'y': {
+      case 'y':
         if (name.compare("types") == 0)
           return Field::TYPES;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -187,7 +174,8 @@ constexpr auto parse_v(auto& name) {
 }
 
 constexpr auto parse_field(const std::string_view& name) {
-  assert(name.empty() == false);
+  if (name.empty())
+    return Field::UNKNOWN;
   switch (name.data()[0]) {
     case 'a':
       return parse_a(name);
@@ -213,8 +201,9 @@ constexpr auto parse_field(const std::string_view& name) {
       return parse_t(name);
     case 'v':
       return parse_v(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_field("action") == Field::ACTION);
@@ -282,29 +271,28 @@ void Parser::dispatch(
     for (auto [key, value] : std::get<core::json::object_t>(root)) {
       auto field = parse_field(key);
       switch (field) {
-        case Field::UNKNOWN: {
+        case Field::UNKNOWN:
           DLOG(FATAL)("Unknown key=\"{}\"", key);
           break;
-        }
-        case Field::ACTION: {
+        case Field::ACTION:
           update(result.action, value);
           update(type, Type::TABLE);
           action = parse_action(result.action);
           break;
-        }
-        case Field::ATTRIBUTES: {
+        case Field::ATTRIBUTES:
           // not used
           update(type, Type::TABLE);
           break;
-        }
-        case Field::DATA: {
-          if (action != Action::UNKNOWN) {
+        case Field::DATA:
+          if (action == Action::UNKNOWN) {
+            // not ready -- finish and try again
+          } else {
             switch (table) {
               case Table::UNKNOWN:
                 break;
               case Table::FUNDING: {
-                auto funding = Funding::parse(
-                    std::get<core::json::array_t>(value),
+                Funding funding(
+                    value,
                     buffer,
                     action);
                 dispatched = true;
@@ -312,8 +300,8 @@ void Parser::dispatch(
                 break;
               }
               case Table::INSTRUMENT: {
-                auto instrument = Instrument::parse(
-                    std::get<core::json::array_t>(value),
+                Instrument instrument(
+                    value,
                     buffer,
                     action);
                 dispatched = true;
@@ -321,8 +309,8 @@ void Parser::dispatch(
                 break;
               }
               case Table::LIQUIDATION: {
-                auto liquidation = Liquidation::parse(
-                    std::get<core::json::array_t>(value),
+                Liquidation liquidation(
+                    value,
                     buffer,
                     action);
                 dispatched = true;
@@ -330,8 +318,8 @@ void Parser::dispatch(
                 break;
               }
               case Table::ORDER_BOOK_L2: {
-                auto order_book_l2 = OrderBookL2::parse(
-                    std::get<core::json::array_t>(value),
+                OrderBookL2 order_book_l2(
+                    value,
                     buffer,
                     action);
                 dispatched = true;
@@ -339,8 +327,8 @@ void Parser::dispatch(
                 break;
               }
               case Table::QUOTE: {
-                auto quote = Quote::parse(
-                    std::get<core::json::array_t>(value),
+                Quote quote(
+                    value,
                     buffer,
                     action);
                 dispatched = true;
@@ -348,8 +336,8 @@ void Parser::dispatch(
                 break;
               }
               case Table::SETTLEMENT: {
-                auto settlement = Settlement::parse(
-                    std::get<core::json::array_t>(value),
+                Settlement settlement(
+                    value,
                     buffer,
                     action);
                 dispatched = true;
@@ -357,8 +345,8 @@ void Parser::dispatch(
                 break;
               }
               case Table::TRADE: {
-                auto trade = Trade::parse(
-                    std::get<core::json::array_t>(value),
+                Trade trade(
+                    value,
                     buffer,
                     action);
                 dispatched = true;
@@ -368,101 +356,83 @@ void Parser::dispatch(
             }
           }
           break;
-        }
-        case Field::DOCS: {
+        case Field::DOCS:
           // not used
           update(type, Type::INFO);
           break;
-        }
-        case Field::ERROR: {
+        case Field::ERROR:
           update(result.error, value);
           update(type, Type::ERROR);
           break;
-        }
-        case Field::FAILURE: {
+        case Field::FAILURE:
           update(result.failure, value);
           update(type, Type::SUBSCRIBE);
           break;
-        }
-        case Field::FILTER: {
+        case Field::FILTER:
           // not used
           update(type, Type::TABLE);
           break;
-        }
-        case Field::FOREIGN_KEYS: {
+        case Field::FOREIGN_KEYS:
           // not used
           update(type, Type::TABLE);
           break;
-        }
-        case Field::INFO: {
+        case Field::INFO:
           // not used
           update(type, Type::INFO);
           break;
-        }
-        case Field::KEYS: {
+        case Field::KEYS:
           // not used
           update(type, Type::TABLE);
           break;
-        }
-        case Field::LIMIT: {
+        case Field::LIMIT:
           // XXX should parse! "limit":{"remaining":37}
           update(type, Type::INFO);
           break;
-        }
-        case Field::META: {
+        case Field::META:
           // not used
           update(type, Type::ERROR);
           break;
-        }
-        case Field::REQUEST: {
+        case Field::REQUEST:
           // not used
           // => subscribe + error
           break;
-        }
-        case Field::STATUS: {
+        case Field::STATUS:
           update(result.status, value);
           update(type, Type::ERROR);
           break;
-        }
-        case Field::SUBSCRIBE: {
+        case Field::SUBSCRIBE:
           update(result.subscribe, value);
           update(type, Type::SUBSCRIBE);
           break;
-        }
-        case Field::SUCCESS: {
+        case Field::SUCCESS:
           update(result.success, value);
           update(type, Type::SUBSCRIBE);
           break;
-        }
-        case Field::TABLE: {
+        case Field::TABLE:
           update(result.table, value);
           update(type, Type::TABLE);
           assert(table == Table::UNKNOWN);
           table = parse_table(result.table);
           break;
-        }
-        case Field::TIMESTAMP: {
+        case Field::TIMESTAMP:
           update(result.timestamp, value);
           update(type, Type::INFO);
           break;
-        }
-        case Field::TYPES: {
+        case Field::TYPES:
           // not used
           update(type, Type::TABLE);
           break;
-        }
-        case Field::VERSION: {
+        case Field::VERSION:
           update(result.version, value);
           update(type, Type::INFO);
           break;
-        }
       }
     }
     switch (type) {
       case Type::UNKNOWN:
         throw std::runtime_error("Can't detect message type");
       case Type::ERROR: {
-        Error error {
+        Error error = {
           .error = result.error,
           .status = result.status,
         };
@@ -488,13 +458,12 @@ void Parser::dispatch(
         handler(subscribe);
         return;
       }
-      case Type::TABLE: {
+      case Type::TABLE:
         if (dispatched)
           return;
         // perhaps we were just unlucky with the ordering of keys
         // XXX increment warning counter
         break;
-      }
     }
   }
   throw std::runtime_error("Can't parse message");

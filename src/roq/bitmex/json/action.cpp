@@ -2,8 +2,6 @@
 
 #include "roq/bitmex/json/action.h"
 
-#include <cassert>
-
 #include "roq/logging.h"
 
 namespace roq {
@@ -11,29 +9,47 @@ namespace bitmex {
 namespace json {
 
 namespace {
+constexpr auto parse_d(const std::string_view& name) {
+  if (name.compare("delete") == 0)
+    return Action::DELETE;
+  return Action::UNKNOWN;
+}
+
+constexpr auto parse_i(const std::string_view& name) {
+  if (name.compare("insert") == 0)
+    return Action::INSERT;
+  return Action::UNKNOWN;
+}
+
+constexpr auto parse_p(const std::string_view& name) {
+  if (name.compare("partial") == 0)
+    return Action::PARTIAL;
+  return Action::UNKNOWN;
+}
+
+constexpr auto parse_u(const std::string_view& name) {
+  if (name.compare("update") == 0)
+    return Action::UPDATE;
+  return Action::UNKNOWN;
+}
+
 constexpr auto parse_helper(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Action::UNDEFINED;
+  switch (name[0]) {
     case 'd':
-      if (name.compare("delete") == 0)
-        return Action::DELETE;
-      break;
+      return parse_d(name);
     case 'i':
-      if (name.compare("insert") == 0)
-        return Action::INSERT;
-      break;
+      return parse_i(name);
     case 'p':
-      if (name.compare("partial") == 0)
-        return Action::PARTIAL;
-      break;
+      return parse_p(name);
     case 'u':
-      if (name.compare("update") == 0)
-        return Action::UPDATE;
-      break;
+      return parse_u(name);
   }
   return Action::UNKNOWN;
 }
 
+static_assert(parse_helper("") == Action::UNDEFINED);
 static_assert(parse_helper("delete") == Action::DELETE);
 static_assert(parse_helper("insert") == Action::INSERT);
 static_assert(parse_helper("partial") == Action::PARTIAL);
@@ -43,7 +59,7 @@ static_assert(parse_helper("update") == Action::UPDATE);
 Action parse_action(const std::string_view& name) {
   auto result = parse_helper(name);
   DLOG_IF(FATAL, result == Action::UNKNOWN)(
-      "Can't parse name=\"{}\"", name);
+      "Unknown name=\"{}\"", name);
   return result;
 }
 

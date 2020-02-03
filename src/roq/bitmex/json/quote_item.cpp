@@ -23,17 +23,15 @@ enum class Field {
 
 constexpr Field parse_a(auto& name) {
   if (name.length() >= 4) {
-    switch (name.data()[3]) {
-      case 'P': {
+    switch (name[3]) {
+      case 'P':
         if (name.compare("askPrice") == 0)
           return Field::ASK_PRICE;
         break;
-      }
-      case 'S': {
+      case 'S':
         if (name.compare("askSize") == 0)
           return Field::ASK_SIZE;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -41,17 +39,15 @@ constexpr Field parse_a(auto& name) {
 
 constexpr Field parse_b(auto& name) {
   if (name.length() >= 4) {
-    switch (name.data()[3]) {
-      case 'P': {
+    switch (name[3]) {
+      case 'P':
         if (name.compare("bidPrice") == 0)
           return Field::BID_PRICE;
         break;
-      }
-      case 'S': {
+      case 'S':
         if (name.compare("bidSize") == 0)
           return Field::BID_SIZE;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -70,8 +66,9 @@ constexpr Field parse_t(auto& name) {
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'a':
       return parse_a(name);
     case 'b':
@@ -80,8 +77,9 @@ constexpr Field parse_name(const std::string_view& name) {
       return parse_s(name);
     case 't':
       return parse_t(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("askPrice") == Field::ASK_PRICE);
@@ -93,47 +91,38 @@ static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::ASK_PRICE: {
+    case Field::ASK_PRICE:
       update(result.ask_price, value);
       break;
-    }
-    case Field::ASK_SIZE: {
+    case Field::ASK_SIZE:
       update(result.ask_size, value);
       break;
-    }
-    case Field::BID_PRICE: {
+    case Field::BID_PRICE:
       update(result.bid_price, value);
       break;
-    }
-    case Field::BID_SIZE: {
+    case Field::BID_SIZE:
       update(result.bid_size, value);
       break;
-    }
-    case Field::SYMBOL: {
+    case Field::SYMBOL:
       update(result.symbol, value);
       break;
-    }
-    case Field::TIMESTAMP: {
+    case Field::TIMESTAMP:
       update(result.timestamp, value);
       break;
-    }
   }
 }
 }  // namespace
 
 QuoteItem::QuoteItem(core::json::value_t& value) {
-  for (auto [key, value] : std::get<core::json::object_t>(value)) {
-    auto field = parse_name(key);
-    update_field(*this, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(*this, key, value);
 }
 
 }  // namespace json

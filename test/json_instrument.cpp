@@ -335,7 +335,7 @@ TEST(json_instrument, empty) {
   const std::string_view message = "[]";
   core::utils::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
-  auto obj = json::Instrument::parse(
+  auto obj = core::json::Parser::create<json::Instrument>(
       message,
       decode_buffer,
       json::Action::PARTIAL);
@@ -557,7 +557,7 @@ TEST(json_instrument, simple) {
     R"(])";
   core::utils::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
-  auto obj = json::Instrument::parse(
+  auto obj = core::json::Parser::create<json::Instrument>(
       message,
       decode_buffer,
       json::Action::PARTIAL);

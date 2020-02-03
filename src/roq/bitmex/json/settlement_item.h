@@ -27,7 +27,7 @@ struct SettlementItem final {
   double option_strike_price = std::numeric_limits<double>::quiet_NaN();
   double option_underlying_price = std::numeric_limits<double>::quiet_NaN();
   double settled_price = std::numeric_limits<double>::quiet_NaN();
-  SettlementType settlement_type = SettlementType::UNKNOWN;
+  SettlementType settlement_type = SettlementType::UNDEFINED;
   std::string_view symbol;
   double tax_base = std::numeric_limits<double>::quiet_NaN();
   double tax_rate = std::numeric_limits<double>::quiet_NaN();

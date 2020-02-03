@@ -11,6 +11,7 @@ namespace bitmex {
 namespace json {
 
 enum class Side {
+  UNDEFINED,
   UNKNOWN,
   BUY,
   SELL,
@@ -20,6 +21,7 @@ extern Side parse_side(const std::string_view& name);
 
 inline auto EnumNamesSide() {
   static const std::string_view names[] = {
+    "UNDEFINED",
     "UNKNOWN",
     "BUY",
     "SELL",

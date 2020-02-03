@@ -6,18 +6,25 @@
 
 #include <string_view>
 
+#include "roq/core/json/parser.h"
+
 namespace roq {
 namespace bitmex {
 namespace json {
 
 struct Error final {
+  Error() = default;
+
+  Error(const Error&) = delete;
+  Error(Error&&) = default;
+
   std::string_view error;
   int32_t status = 0;
   // missing:
   // - meta
   // - request
 
-  static Error parse(const std::string_view& message);
+  static Error parse(core::json::value_t&);
 };
 
 }  // namespace json

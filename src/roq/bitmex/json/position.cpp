@@ -108,22 +108,19 @@ enum class Field {
 
 constexpr Field parse_a(auto& name) {
   if (name.length() >= 4) {
-    switch (name.data()[3]) {
-      case 'o': {
+    switch (name[3]) {
+      case 'o':
         if (name.compare("account") == 0)
           return Field::ACCOUNT;
         break;
-      }
-      case 'C': {
+      case 'C':
         if (name.compare("avgCostPrice") == 0)
           return Field::AVG_COST_PRICE;
         break;
-      }
-      case 'E': {
+      case 'E':
         if (name.compare("avgEntryPrice") == 0)
           return Field::AVG_ENTRY_PRICE;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -131,17 +128,15 @@ constexpr Field parse_a(auto& name) {
 
 constexpr Field parse_b(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
-      case 'a': {
+    switch (name[1]) {
+      case 'a':
         if (name.compare("bankruptPrice") == 0)
           return Field::BANKRUPT_PRICE;
         break;
-      }
-      case 'r': {
+      case 'r':
         if (name.compare("breakEvenPrice") == 0)
           return Field::BREAK_EVEN_PRICE;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -149,49 +144,42 @@ constexpr Field parse_b(auto& name) {
 
 constexpr Field parse_c(auto& name) {
   if (name.length() >= 8) {
-    switch (name.data()[7]) {
-      case 'i': {
+    switch (name[7]) {
+      case 'i':
         if (name.compare("commission") == 0)
           return Field::COMMISSION;
         break;
-      }
-      case 'r': {
+      case 'r':
         if (name.compare("crossMargin") == 0)
           return Field::CROSS_MARGIN;
         break;
-      }
-      case 'y': {
+      case 'y':
         if (name.compare("currency") == 0)
           return Field::CURRENCY;
         break;
-      }
       case 'C': {
         if (name.length() >= 10) {
-          switch (name.data()[9]) {
-            case 'm': {
+          switch (name[9]) {
+            case 'm':
               if (name.compare("currentComm") == 0)
                 return Field::CURRENT_COMM;
               break;
-            }
-            case 's': {
+            case 's':
               if (name.compare("currentCost") == 0)
                 return Field::CURRENT_COST;
               break;
-            }
           }
         }
         break;
       }
-      case 'Q': {
+      case 'Q':
         if (name.compare("currentQty") == 0)
           return Field::CURRENT_QTY;
         break;
-      }
-      case 'T': {
+      case 'T':
         if (name.compare("currentTimestamp") == 0)
           return Field::CURRENT_TIMESTAMP;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -205,40 +193,34 @@ constexpr Field parse_d(auto& name) {
 
 constexpr Field parse_e(auto& name) {
   if (name.length() >= 8) {
-    switch (name.data()[7]) {
-      case 'C': {
+    switch (name[7]) {
+      case 'C':
         if (name.compare("execBuyCost") == 0)
           return Field::EXEC_BUY_COST;
         break;
-      }
-      case 'Q': {
+      case 'Q':
         if (name.compare("execBuyQty") == 0)
           return Field::EXEC_BUY_QTY;
         break;
-      }
-      case 'm': {
+      case 'm':
         if (name.compare("execComm") == 0)
           return Field::EXEC_COMM;
         break;
-      }
-      case 't': {
+      case 't':
         if (name.compare("execCost") == 0)
           return Field::EXEC_COST;
         break;
-      }
       case 'l': {
         if (name.length() >= 9) {
-          switch (name.data()[8]) {
-            case 'C': {
+          switch (name[8]) {
+            case 'C':
               if (name.compare("execSellCost") == 0)
                 return Field::EXEC_SELL_COST;
               break;
-            }
-            case 'Q': {
+            case 'Q':
               if (name.compare("execSellQty") == 0)
                 return Field::EXEC_SELL_QTY;
               break;
-            }
           }
         }
       }
@@ -257,26 +239,23 @@ constexpr Field parse_f(auto& name) {
 
 constexpr Field parse_g(auto& name) {
   if (name.length() >= 10) {
-    switch (name.data()[9]) {
+    switch (name[9]) {
       case 'C': {
-        switch (name.data()[5]) {
-          case 'E': {
+        switch (name[5]) {
+          case 'E':
             if (name.compare("grossExecCost") == 0)
               return Field::GROSS_EXEC_COST;
             break;
-          }
-          case 'O': {
+          case 'O':
             if (name.compare("grossOpenCost") == 0)
               return Field::GROSS_OPEN_COST;
             break;
-          }
         }
       }
-      case 'P': {
+      case 'P':
         if (name.compare("grossOpenPremium") == 0)
           return Field::GROSS_OPEN_PREMIUM;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -290,33 +269,30 @@ constexpr Field parse_h(auto& name) {
 
 constexpr Field parse_i(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
+    switch (name[1]) {
       case 'n': {
         if (name.length() >= 3) {
-          switch (name.data()[2]) {
-            case 'd': {
+          switch (name[2]) {
+            case 'd':
               if (name.compare("indicativeTax") == 0)
                 return Field::INDICATIVE_TAX;
               if (name.compare("indicativeTaxRate") == 0)
                 return Field::INDICATIVE_TAX_RATE;
               break;
-            }
-            case 'i': {
+            case 'i':
               if (name.compare("initMargin") == 0)
                 return Field::INIT_MARGIN;
               if (name.compare("initMarginReq") == 0)
                 return Field::INIT_MARGIN_REQ;
               break;
-            }
           }
         }
         break;
       }
-      case 's': {
+      case 's':
         if (name.compare("isOpen") == 0)
           return Field::IS_OPEN;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -324,32 +300,27 @@ constexpr Field parse_i(auto& name) {
 
 constexpr Field parse_l(auto& name) {
   if (name.length() >= 5) {
-    switch (name.data()[4]) {
-      case 'P': {
+    switch (name[4]) {
+      case 'P':
         if (name.compare("lastPrice") == 0)
           return Field::LAST_PRICE;
         break;
-      }
-      case 'V': {
+      case 'V':
         if (name.compare("lastValue") == 0)
           return Field::LAST_VALUE;
         break;
-      }
-      case 'r': {
+      case 'r':
         if (name.compare("leverage") == 0)
           return Field::LEVERAGE;
         break;
-      }
-      case 'i': {
+      case 'i':
         if (name.compare("liquidationPrice") == 0)
           return Field::LIQUIDATION_PRICE;
         break;
-      }
-      case 'B': {
+      case 'B':
         if (name.compare("longBankrupt") == 0)
           return Field::LONG_BANKRUPT;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -357,29 +328,25 @@ constexpr Field parse_l(auto& name) {
 
 constexpr Field parse_m(auto& name) {
   if (name.length() >= 5) {
-    switch (name.data()[4]) {
-      case 't': {
+    switch (name[4]) {
+      case 't':
         if (name.compare("maintMargin") == 0)
           return Field::MAINT_MARGIN;
         if (name.compare("maintMarginReq") == 0)
           return Field::MAINT_MARGIN_REQ;
         break;
-      }
-      case 'i': {
+      case 'i':
         if (name.compare("marginCallPrice") == 0)
           return Field::MARGIN_CALL_PRICE;
         break;
-      }
-      case 'P': {
+      case 'P':
         if (name.compare("markPrice") == 0)
           return Field::MARK_PRICE;
         break;
-      }
-      case 'V': {
+      case 'V':
         if (name.compare("markValue") == 0)
           return Field::MARK_VALUE;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -387,72 +354,62 @@ constexpr Field parse_m(auto& name) {
 
 constexpr Field parse_o(auto& name) {
   if (name.length() >= 10) {
-    switch (name.data()[9]) {
+    switch (name[9]) {
       case 'm': {
-        switch (name.data()[7]) {
-          case 'C': {
+        switch (name[7]) {
+          case 'C':
             if (name.compare("openingComm") == 0)
               return Field::OPENING_COMM;
             break;
-          }
-          case 'T': {
+          case 'T':
             if (name.compare("openingTimestamp") == 0)
               return Field::OPENING_TIMESTAMP;
             break;
-          }
         }
         break;
       }
-      case 's': {
+      case 's':
         if (name.compare("openingCost") == 0)
           return Field::OPENING_COST;
         break;
-      }
-      case 'y': {
+      case 'y':
         if (name.compare("openingQty") == 0)
           return Field::OPENING_QTY;
         break;
-      }
       case 'B': {
         if (name.length() >= 13) {
-          switch (name.data()[12]) {
-            case'C': {
+          switch (name[12]) {
+            case'C':
               if (name.compare("openOrderBuyCost") == 0)
                 return Field::OPEN_ORDER_BUY_COST;
               break;
-            }
-            case'P': {
+            case'P':
               if (name.compare("openOrderBuyPremium") == 0)
                 return Field::OPEN_ORDER_BUY_PREMIUM;
               break;
-            }
-            case'Q': {
+            case'Q':
               if (name.compare("openOrderBuyQty") == 0)
                 return Field::OPEN_ORDER_BUY_QTY;
               break;
-            }
           }
         }
         break;
       }
       case 'S': {
         if (name.length() >= 14) {
-          switch (name.data()[13]) {
-            case'C': {
+          switch (name[13]) {
+            case'C':
               if (name.compare("openOrderSellCost") == 0)
                 return Field::OPEN_ORDER_SELL_COST;
               break;
-            }
-            case'P': {
+            case'P':
               if (name.compare("openOrderSellPremium") == 0)
                 return Field::OPEN_ORDER_SELL_PREMIUM;
               break;
-            }
-            case'Q': {
+            case'Q':
               if (name.compare("openOrderSellQty") == 0)
                 return Field::OPEN_ORDER_SELL_QTY;
               break;
-            }
           }
         }
         break;
@@ -464,84 +421,72 @@ constexpr Field parse_o(auto& name) {
 
 constexpr Field parse_p(auto& name) {
   if (name.length() >= 6) {
-    switch (name.data()[5]) {
+    switch (name[5]) {
       case 'l': {
-        switch (name.data()[1]) {
-          case 'o': {
+        switch (name[1]) {
+          case 'o':
             if (name.compare("posAllowance") == 0)
               return Field::POS_ALLOWANCE;
             break;
-          }
-          case 'r': {
+          case 'r':
             if (name.compare("prevClosePrice") == 0)
               return Field::PREV_CLOSE_PRICE;
             break;
-          }
         }
         break;
       }
-      case 'm': {
+      case 'm':
         if (name.compare("posComm") == 0)
           return Field::POS_COMM;
         break;
-      }
       case 's': {
-        switch (name.data()[3]) {
-          case 'C': {
+        switch (name[3]) {
+          case 'C':
             if (name.compare("posCost") == 0)
               return Field::POS_COST;
             if (name.compare("posCost2") == 0)
               return Field::POS_COST2;
             break;
-          }
-          case 'L': {
+          case 'L':
             if (name.compare("posLoss") == 0)
               return Field::POS_LOSS;
             break;
-          }
         }
         break;
       }
-      case 'o': {
+      case 'o':
         if (name.compare("posCross") == 0)
           return Field::POS_CROSS;
         break;
-      }
       case 'i': {
-        switch (name.data()[3]) {
-          case 'I': {
+        switch (name[3]) {
+          case 'I':
             if (name.compare("posInit") == 0)
               return Field::POS_INIT;
             break;
-          }
-          case 'M': {
+          case 'M':
             if (name.compare("posMaint") == 0)
               return Field::POS_MAINT;
             break;
-          }
         }
         break;
       }
-      case 'r': {
+      case 'r':
         if (name.compare("posMargin") == 0)
           return Field::POS_MARGIN;
         break;
-      }
-      case 'a': {
+      case 'a':
         if (name.compare("posState") == 0)
           return Field::POS_STATE;
         break;
-      }
-      case 'e': {
+      case 'e':
         if (name.compare("prevRealisedPnl") == 0)
           return Field::PREV_REALISED_PNL;
         break;
-      }
-      case 'n': {
+      case 'n':
         if (name.compare("prevUnrealisedPnl") == 0)
           return Field::PREV_UNREALISED_PNL;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -555,49 +500,42 @@ constexpr Field parse_q(auto& name) {
 
 constexpr Field parse_r(auto& name) {
   if (name.length() >= 7) {
-    switch (name.data()[6]) {
+    switch (name[6]) {
       case 'e': {
         if (name.length() >= 9) {
-          switch (name.data()[8]) {
-            case 'C': {
+          switch (name[8]) {
+            case 'C':
               if (name.compare("realisedCost") == 0)
                 return Field::REALISED_COST;
               break;
-            }
-            case 'G': {
+            case 'G':
               if (name.compare("realisedGrossPnl") == 0)
                 return Field::REALISED_GROSS_PNL;
               break;
-            }
-            case 'P': {
+            case 'P':
               if (name.compare("realisedPnl") == 0)
                 return Field::REALISED_PNL;
               break;
-            }
-            case 'T': {
+            case 'T':
               if (name.compare("realisedTax") == 0)
                 return Field::REALISED_TAX;
               break;
-            }
           }
         }
         break;
       }
-      case 'n': {
+      case 'n':
         if (name.compare("rebalancedPnl") == 0)
           return Field::REBALANCED_PNL;
         break;
-      }
-      case 'm': {
+      case 'm':
         if (name.compare("riskLimit") == 0)
           return Field::RISK_LIMIT;
         break;
-      }
-      case 'l': {
+      case 'l':
         if (name.compare("riskValue") == 0)
           return Field::RISK_VALUE;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -605,51 +543,44 @@ constexpr Field parse_r(auto& name) {
 
 constexpr Field parse_s(auto& name) {
   if (name.length() >= 2) {
-    switch (name.data()[1]) {
-      case 'e': {
+    switch (name[1]) {
+      case 'e':
         if (name.compare("sessionMargin") == 0)
           return Field::SESSION_MARGIN;
         break;
-      }
-      case 'h': {
+      case 'h':
         if (name.compare("shortBankrupt") == 0)
           return Field::SHORT_BANKRUPT;
         break;
-      }
       case 'i': {
         if (name.length() >= 7) {
-          switch (name.data()[6]) {
-            case 'C': {
+          switch (name[6]) {
+            case 'C':
               if (name.compare("simpleCost") == 0)
                 return Field::SIMPLE_COST;
               break;
-            }
-            case 'P': {
+            case 'P':
               if (name.compare("simplePnl") == 0)
                 return Field::SIMPLE_PNL;
               if (name.compare("simplePnlPcnt") == 0)
                 return Field::SIMPLE_PNL_PCNT;
               break;
-            }
-            case 'Q': {
+            case 'Q':
               if (name.compare("simpleQty") == 0)
                 return Field::SIMPLE_QTY;
               break;
-            }
-            case 'V': {
+            case 'V':
               if (name.compare("simpleValue") == 0)
                 return Field::SIMPLE_VALUE;
               break;
-            }
           }
         }
         break;
       }
-      case 'y': {
+      case 'y':
         if (name.compare("symbol") == 0)
           return Field::SYMBOL;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -657,27 +588,23 @@ constexpr Field parse_s(auto& name) {
 
 constexpr Field parse_t(auto& name) {
   if (name.length() >= 4) {
-    switch (name.data()[3]) {
-      case 'g': {
+    switch (name[3]) {
+      case 'g':
         if (name.compare("targetExcessMargin") == 0)
           return Field::TARGET_EXCESS_MARGIN;
         break;
-      }
-      case 'a': {
+      case 'a':
         if (name.compare("taxableMargin") == 0)
           return Field::TAXABLE_MARGIN;
         break;
-      }
-      case 'B': {
+      case 'B':
         if (name.compare("taxBase") == 0)
           return Field::TAX_BASE;
         break;
-      }
-      case 'e': {
+      case 'e':
         if (name.compare("timestamp") == 0)
           return Field::TIMESTAMP;
         break;
-      }
     }
   }
   return Field::UNKNOWN;
@@ -685,34 +612,29 @@ constexpr Field parse_t(auto& name) {
 
 constexpr Field parse_u(auto& name) {
   if (name.length() >= 11) {
-    switch (name.data()[10]) {
-      case 'C': {
+    switch (name[10]) {
+      case 'C':
         if (name.compare("unrealisedCost") == 0)
           return Field::UNREALISED_COST;
         break;
-      }
-      case 'G': {
+      case 'G':
         if (name.compare("unrealisedGrossPnl") == 0)
           return Field::UNREALISED_GROSS_PNL;
         break;
-      }
-      case 'P': {
+      case 'P':
         if (name.compare("unrealisedPnl") == 0)
           return Field::UNREALISED_PNL;
         if (name.compare("unrealisedPnlPcnt") == 0)
           return Field::UNREALISED_PNL_PCNT;
         break;
-      }
-      case 'R': {
+      case 'R':
         if (name.compare("unrealisedRoqPcnt") == 0)
           return Field::UNREALISED_ROQ_PCNT;
         break;
-      }
-      case 'T': {
+      case 'T':
         if (name.compare("unrealisedTax") == 0)
           return Field::UNREALISED_TAX;
         break;
-      }
     }
   }
   if (name.compare("underlying") == 0)
@@ -727,8 +649,9 @@ constexpr Field parse_v(auto& name) {
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  assert(name.empty() == false);
-  switch (name.data()[0]) {
+  if (name.empty())
+    return Field::UNKNOWN;
+  switch (name[0]) {
     case 'a':
       return parse_a(name);
     case 'b':
@@ -767,8 +690,9 @@ constexpr Field parse_name(const std::string_view& name) {
       return parse_u(name);
     case 'v':
       return parse_v(name);
+    default:
+      return Field::UNKNOWN;
   }
-  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("account") == Field::ACCOUNT);
@@ -883,390 +807,294 @@ static_assert(parse_name("varMargin") == Field::VAR_MARGIN);
 
 inline void update_field(
     auto& result,
-    auto& field,
     auto& key,
     auto& value) {
+  auto field = parse_name(key);
   switch (field) {
-    case Field::UNKNOWN: {
+    case Field::UNKNOWN:
       DLOG(FATAL)("Unknown key=\"{}\"", key);
       break;
-    }
-    case Field::ACCOUNT: {
+    case Field::ACCOUNT:
       update(result.account, value);
       break;
-    }
-    case Field::AVG_COST_PRICE: {
+    case Field::AVG_COST_PRICE:
       update(result.avg_cost_price, value);
       break;
-    }
-    case Field::AVG_ENTRY_PRICE: {
+    case Field::AVG_ENTRY_PRICE:
       update(result.avg_entry_price, value);
       break;
-    }
-    case Field::BANKRUPT_PRICE: {
+    case Field::BANKRUPT_PRICE:
       update(result.bankrupt_price, value);
       break;
-    }
-    case Field::BREAK_EVEN_PRICE: {
+    case Field::BREAK_EVEN_PRICE:
       update(result.break_even_price, value);
       break;
-    }
-    case Field::COMMISSION: {
+    case Field::COMMISSION:
       update(result.commission, value);
       break;
-    }
-    case Field::CROSS_MARGIN: {
+    case Field::CROSS_MARGIN:
       update(result.cross_margin, value);
       break;
-    }
-    case Field::CURRENCY: {
+    case Field::CURRENCY:
       update(result.currency, value);
       break;
-    }
-    case Field::CURRENT_COMM: {
+    case Field::CURRENT_COMM:
       update(result.current_comm, value);
       break;
-    }
-    case Field::CURRENT_COST: {
+    case Field::CURRENT_COST:
       update(result.current_cost, value);
       break;
-    }
-    case Field::CURRENT_QTY: {
+    case Field::CURRENT_QTY:
       update(result.current_qty, value);
       break;
-    }
-    case Field::CURRENT_TIMESTAMP: {
+    case Field::CURRENT_TIMESTAMP:
       update(result.current_timestamp, value);
       break;
-    }
-    case Field::DELEVERAGE_PERCENTILE: {
+    case Field::DELEVERAGE_PERCENTILE:
       update(result.deleverage_percentile, value);
       break;
-    }
-    case Field::EXEC_BUY_COST: {
+    case Field::EXEC_BUY_COST:
       update(result.exec_buy_cost, value);
       break;
-    }
-    case Field::EXEC_BUY_QTY: {
+    case Field::EXEC_BUY_QTY:
       update(result.exec_buy_qty, value);
       break;
-    }
-    case Field::EXEC_COMM: {
+    case Field::EXEC_COMM:
       update(result.exec_comm, value);
       break;
-    }
-    case Field::EXEC_COST: {
+    case Field::EXEC_COST:
       update(result.exec_cost, value);
       break;
-    }
-    case Field::EXEC_QTY: {
+    case Field::EXEC_QTY:
       update(result.exec_qty, value);
       break;
-    }
-    case Field::EXEC_SELL_COST: {
+    case Field::EXEC_SELL_COST:
       update(result.exec_sell_cost, value);
       break;
-    }
-    case Field::EXEC_SELL_QTY: {
+    case Field::EXEC_SELL_QTY:
       update(result.exec_sell_qty, value);
       break;
-    }
-    case Field::FOREIGN_NOTIONAL: {
+    case Field::FOREIGN_NOTIONAL:
       update(result.foreign_notional, value);
       break;
-    }
-    case Field::GROSS_EXEC_COST: {
+    case Field::GROSS_EXEC_COST:
       update(result.gross_exec_cost, value);
       break;
-    }
-    case Field::GROSS_OPEN_COST: {
+    case Field::GROSS_OPEN_COST:
       update(result.gross_open_cost, value);
       break;
-    }
-    case Field::GROSS_OPEN_PREMIUM: {
+    case Field::GROSS_OPEN_PREMIUM:
       update(result.gross_open_premium, value);
       break;
-    }
-    case Field::HOME_NOTIONAL: {
+    case Field::HOME_NOTIONAL:
       update(result.home_notional, value);
       break;
-    }
-    case Field::INDICATIVE_TAX: {
+    case Field::INDICATIVE_TAX:
       update(result.indicative_tax, value);
       break;
-    }
-    case Field::INDICATIVE_TAX_RATE: {
+    case Field::INDICATIVE_TAX_RATE:
       update(result.indicative_tax_rate, value);
       break;
-    }
-    case Field::INIT_MARGIN: {
+    case Field::INIT_MARGIN:
       update(result.init_margin, value);
       break;
-    }
-    case Field::INIT_MARGIN_REQ: {
+    case Field::INIT_MARGIN_REQ:
       update(result.init_margin_req, value);
       break;
-    }
-    case Field::IS_OPEN: {
+    case Field::IS_OPEN:
       update(result.is_open, value);
       break;
-    }
-    case Field::LAST_PRICE: {
+    case Field::LAST_PRICE:
       update(result.last_price, value);
       break;
-    }
-    case Field::LAST_VALUE: {
+    case Field::LAST_VALUE:
       update(result.last_value, value);
       break;
-    }
-    case Field::LEVERAGE: {
+    case Field::LEVERAGE:
       update(result.leverage, value);
       break;
-    }
-    case Field::LIQUIDATION_PRICE: {
+    case Field::LIQUIDATION_PRICE:
       update(result.liquidation_price, value);
       break;
-    }
-    case Field::LONG_BANKRUPT: {
+    case Field::LONG_BANKRUPT:
       update(result.long_bankrupt, value);
       break;
-    }
-    case Field::MAINT_MARGIN: {
+    case Field::MAINT_MARGIN:
       update(result.maint_margin, value);
       break;
-    }
-    case Field::MAINT_MARGIN_REQ: {
+    case Field::MAINT_MARGIN_REQ:
       update(result.maint_margin_req, value);
       break;
-    }
-    case Field::MARGIN_CALL_PRICE: {
+    case Field::MARGIN_CALL_PRICE:
       update(result.margin_call_price, value);
       break;
-    }
-    case Field::MARK_PRICE: {
+    case Field::MARK_PRICE:
       update(result.mark_price, value);
       break;
-    }
-    case Field::MARK_VALUE: {
+    case Field::MARK_VALUE:
       update(result.mark_value, value);
       break;
-    }
-    case Field::OPENING_COMM: {
+    case Field::OPENING_COMM:
       update(result.opening_comm, value);
       break;
-    }
-    case Field::OPENING_COST: {
+    case Field::OPENING_COST:
       update(result.opening_cost, value);
       break;
-    }
-    case Field::OPENING_QTY: {
+    case Field::OPENING_QTY:
       update(result.opening_qty, value);
       break;
-    }
-    case Field::OPENING_TIMESTAMP: {
+    case Field::OPENING_TIMESTAMP:
       update(result.opening_timestamp, value);
       break;
-    }
-    case Field::OPEN_ORDER_BUY_COST: {
+    case Field::OPEN_ORDER_BUY_COST:
       update(result.open_order_buy_cost, value);
       break;
-    }
-    case Field::OPEN_ORDER_BUY_PREMIUM: {
+    case Field::OPEN_ORDER_BUY_PREMIUM:
       update(result.open_order_buy_premium, value);
       break;
-    }
-    case Field::OPEN_ORDER_BUY_QTY: {
+    case Field::OPEN_ORDER_BUY_QTY:
       update(result.open_order_buy_qty, value);
       break;
-    }
-    case Field::OPEN_ORDER_SELL_COST: {
+    case Field::OPEN_ORDER_SELL_COST:
       update(result.open_order_sell_cost, value);
       break;
-    }
-    case Field::OPEN_ORDER_SELL_PREMIUM: {
+    case Field::OPEN_ORDER_SELL_PREMIUM:
       update(result.open_order_sell_premium, value);
       break;
-    }
-    case Field::OPEN_ORDER_SELL_QTY: {
+    case Field::OPEN_ORDER_SELL_QTY:
       update(result.open_order_sell_qty, value);
       break;
-    }
-    case Field::POS_ALLOWANCE: {
+    case Field::POS_ALLOWANCE:
       update(result.pos_allowance, value);
       break;
-    }
-    case Field::POS_COMM: {
+    case Field::POS_COMM:
       update(result.pos_comm, value);
       break;
-    }
-    case Field::POS_COST: {
+    case Field::POS_COST:
       update(result.pos_cost, value);
       break;
-    }
-    case Field::POS_COST2: {
+    case Field::POS_COST2:
       update(result.pos_cost2, value);
       break;
-    }
-    case Field::POS_CROSS: {
+    case Field::POS_CROSS:
       update(result.pos_cross, value);
       break;
-    }
-    case Field::POS_INIT: {
+    case Field::POS_INIT:
       update(result.pos_init, value);
       break;
-    }
-    case Field::POS_LOSS: {
+    case Field::POS_LOSS:
       update(result.pos_loss, value);
       break;
-    }
-    case Field::POS_MAINT: {
+    case Field::POS_MAINT:
       update(result.pos_maint, value);
       break;
-    }
-    case Field::POS_MARGIN: {
+    case Field::POS_MARGIN:
       update(result.pos_margin, value);
       break;
-    }
-    case Field::POS_STATE: {
+    case Field::POS_STATE:
       update(result.pos_state, value);
       break;
-    }
-    case Field::PREV_CLOSE_PRICE: {
+    case Field::PREV_CLOSE_PRICE:
       update(result.prev_close_price, value);
       break;
-    }
-    case Field::PREV_REALISED_PNL: {
+    case Field::PREV_REALISED_PNL:
       update(result.prev_realised_pnl, value);
       break;
-    }
-    case Field::PREV_UNREALISED_PNL: {
+    case Field::PREV_UNREALISED_PNL:
       update(result.prev_unrealised_pnl, value);
       break;
-    }
-    case Field::QUOTE_CURRENCY: {
+    case Field::QUOTE_CURRENCY:
       update(result.quote_currency, value);
       break;
-    }
-    case Field::REALISED_COST: {
+    case Field::REALISED_COST:
       update(result.realised_cost, value);
       break;
-    }
-    case Field::REALISED_GROSS_PNL: {
+    case Field::REALISED_GROSS_PNL:
       update(result.realised_gross_pnl, value);
       break;
-    }
-    case Field::REALISED_PNL: {
+    case Field::REALISED_PNL:
       update(result.realised_pnl, value);
       break;
-    }
-    case Field::REALISED_TAX: {
+    case Field::REALISED_TAX:
       update(result.realised_tax, value);
       break;
-    }
-    case Field::REBALANCED_PNL: {
+    case Field::REBALANCED_PNL:
       update(result.rebalanced_pnl, value);
       break;
-    }
-    case Field::RISK_LIMIT: {
+    case Field::RISK_LIMIT:
       update(result.risk_limit, value);
       break;
-    }
-    case Field::RISK_VALUE: {
+    case Field::RISK_VALUE:
       update(result.risk_value, value);
       break;
-    }
-    case Field::SESSION_MARGIN: {
+    case Field::SESSION_MARGIN:
       update(result.session_margin, value);
       break;
-    }
-    case Field::SHORT_BANKRUPT: {
+    case Field::SHORT_BANKRUPT:
       update(result.short_bankrupt, value);
       break;
-    }
-    case Field::SIMPLE_COST: {
+    case Field::SIMPLE_COST:
       update(result.simple_cost, value);
       break;
-    }
-    case Field::SIMPLE_PNL: {
+    case Field::SIMPLE_PNL:
       update(result.simple_pnl, value);
       break;
-    }
-    case Field::SIMPLE_PNL_PCNT: {
+    case Field::SIMPLE_PNL_PCNT:
       update(result.simple_pnl_pcnt, value);
       break;
-    }
-    case Field::SIMPLE_QTY: {
+    case Field::SIMPLE_QTY:
       update(result.simple_qty, value);
       break;
-    }
-    case Field::SIMPLE_VALUE: {
+    case Field::SIMPLE_VALUE:
       update(result.simple_value, value);
       break;
-    }
-    case Field::SYMBOL: {
+    case Field::SYMBOL:
       update(result.symbol, value);
       break;
-    }
-    case Field::TARGET_EXCESS_MARGIN: {
+    case Field::TARGET_EXCESS_MARGIN:
       update(result.target_excess_margin, value);
       break;
-    }
-    case Field::TAXABLE_MARGIN: {
+    case Field::TAXABLE_MARGIN:
       update(result.taxable_margin, value);
       break;
-    }
-    case Field::TAX_BASE: {
+    case Field::TAX_BASE:
       update(result.tax_base, value);
       break;
-    }
-    case Field::TIMESTAMP: {
+    case Field::TIMESTAMP:
       update(result.timestamp, value);
       break;
-    }
-    case Field::UNDERLYING: {
+    case Field::UNDERLYING:
       update(result.underlying, value);
       break;
-    }
-    case Field::UNREALISED_COST: {
+    case Field::UNREALISED_COST:
       update(result.unrealised_cost, value);
       break;
-    }
-    case Field::UNREALISED_GROSS_PNL: {
+    case Field::UNREALISED_GROSS_PNL:
       update(result.unrealised_gross_pnl, value);
       break;
-    }
-    case Field::UNREALISED_PNL: {
+    case Field::UNREALISED_PNL:
       update(result.unrealised_pnl, value);
       break;
-    }
-    case Field::UNREALISED_PNL_PCNT: {
+    case Field::UNREALISED_PNL_PCNT:
       update(result.unrealised_pnl_pcnt, value);
       break;
-    }
-    case Field::UNREALISED_ROQ_PCNT: {
+    case Field::UNREALISED_ROQ_PCNT:
       update(result.unrealised_roq_pcnt, value);
       break;
-    }
-    case Field::UNREALISED_TAX: {
+    case Field::UNREALISED_TAX:
       update(result.unrealised_tax, value);
       break;
-    }
-    case Field::VAR_MARGIN: {
+    case Field::VAR_MARGIN:
       update(result.var_margin, value);
       break;
-    }
   }
 }
 }  // namespace
 
-Position Position::parse(const std::string_view& message) {
+Position Position::parse(core::json::value_t& value) {
   Position result;
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  for (auto [key, value] : std::get<core::json::object_t>(root)) {
-    auto field = parse_name(key);
-    update_field(result, field, key, value);
-  }
+  for (auto [key, value] : std::get<core::json::object_t>(value))
+    update_field(result, key, value);
   return result;
 }
 
