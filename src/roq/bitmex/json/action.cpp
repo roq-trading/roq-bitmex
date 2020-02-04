@@ -59,7 +59,8 @@ static_assert(parse_helper("update") == Action::UPDATE);
 Action parse_action(const std::string_view& name) {
   auto result = parse_helper(name);
   DLOG_IF(FATAL, result == Action::UNKNOWN)(
-      "Unknown name=\"{}\"", name);
+      FMT_STRING("Unknown name=\"{}\""),
+      name);
   return result;
 }
 

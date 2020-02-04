@@ -42,7 +42,8 @@ static_assert(parse_helper("Settlement") == SettlementType::SETTLEMENT);
 SettlementType parse_settlement_type(const std::string_view& name) {
   auto result = parse_helper(name);
   DLOG_IF(FATAL, result == SettlementType::UNKNOWN)(
-      "Unknown name=\"{}\"", name);
+      FMT_STRING("Unknown name=\"{}\""),
+      name);
   return result;
 }
 

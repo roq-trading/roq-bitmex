@@ -43,7 +43,8 @@ static_assert(parse_helper("Sell") == Side::SELL);
 Side parse_side(const std::string_view& name) {
   auto result = parse_helper(name);
   DLOG_IF(FATAL, result == Side::UNKNOWN)(
-      "Unknown name=\"{}\"", name);
+      FMT_STRING("Unknown name=\"{}\""),
+      name);
   return result;
 }
 

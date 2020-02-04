@@ -91,7 +91,8 @@ static_assert(parse_helper("OPECCS") == Typ::OPECCS);
 Typ parse_typ(const std::string_view& name) {
   auto result = parse_helper(name);
   DLOG_IF(FATAL, result == Typ::UNKNOWN)(
-      "Unknown name=\"{}\"", name);
+      FMT_STRING("Unknown name=\"{}\""),
+      name);
   return result;
 }
 

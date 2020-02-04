@@ -16,7 +16,7 @@ namespace bitmex {
 static auto create_timestamp_secs(
     std::chrono::seconds value) {
   return fmt::format(
-      "{}",
+      FMT_STRING("{}"),
       value.count());
 }
 
@@ -57,9 +57,10 @@ std::string Random::create_headers(
       method,
       path);
   return fmt::format(
-      "api-signature: {}\r\n"
-      "api-expires: {}\r\n"
-      "api-key: {}\r\n",
+      FMT_STRING(
+        "api-signature: {}\r\n"
+        "api-expires: {}\r\n"
+        "api-key: {}\r\n"),
       signature,
       timestamp.count(),
       _key);

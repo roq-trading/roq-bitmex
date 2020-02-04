@@ -88,7 +88,8 @@ static_assert(parse_helper("trade") == Table::TRADE);
 Table parse_table(const std::string_view& name) {
   auto result = parse_helper(name);
   DLOG_IF(FATAL, result == Table::UNKNOWN)(
-      "Unknown name=\"{}\"", name);
+      FMT_STRING("Unknown name=\"{}\""),
+      name);
   return result;
 }
 

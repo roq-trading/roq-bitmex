@@ -272,7 +272,9 @@ void Parser::dispatch(
       auto field = parse_field(key);
       switch (field) {
         case Field::UNKNOWN:
-          DLOG(FATAL)("Unknown key=\"{}\"", key);
+          DLOG(FATAL)(
+              FMT_STRING("Unknown key=\"{}\""),
+              key);
           break;
         case Field::ACTION:
           update(result.action, value);

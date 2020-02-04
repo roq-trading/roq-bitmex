@@ -57,7 +57,8 @@ static_assert(parse_helper("Unlisted") == State::UNLISTED);
 State parse_state(const std::string_view& name) {
   auto result = parse_helper(name);
   DLOG_IF(FATAL, result == State::UNKNOWN)(
-      "Unknown name=\"{}\"", name);
+      FMT_STRING("Unknown name=\"{}\""),
+      name);
   return result;
 }
 

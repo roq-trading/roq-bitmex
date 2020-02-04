@@ -69,6 +69,19 @@ class Gateway final : public server::Handler {
   void subscribe_instrument();
   void subscribe_order_book_l2();
 
+  std::pair<double, double> find_price(
+      json::Action action,
+      uint64_t id,
+      double price,
+      double size);
+
+  void publish_market_by_price(
+      const std::string_view& symbol,
+      size_t bid_length,
+      size_t ask_length,
+      bool snapshot,
+      bool is_last);
+
  private:
   template <typename T>
   void enqueue(

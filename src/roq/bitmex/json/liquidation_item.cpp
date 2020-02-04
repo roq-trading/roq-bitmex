@@ -84,7 +84,9 @@ inline void update_field(
   auto field = parse_name(key);
   switch (field) {
     case Field::UNKNOWN:
-      DLOG(FATAL)("Unknown key=\"{}\"", key);
+      DLOG(FATAL)(
+          FMT_STRING("Unknown key=\"{}\""),
+          key);
       break;
     case Field::LEAVES_QTY:
       update(result.leaves_qty, value);

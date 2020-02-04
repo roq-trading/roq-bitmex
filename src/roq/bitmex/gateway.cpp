@@ -29,10 +29,12 @@ static bool mbp_update(
     auto& data,
     size_t& offset,
     const T& item) {
-  new (&data[offset++]) MBPUpdate {
-    .price = item.price,
-    .quantity = item.size,
+  auto lhs = &data[offset];
+  new (lhs) MBPUpdate {
+    .price = item.first,
+    .quantity = item.second,
   };
+  ++offset;
   return offset < data.size();
 }
 
@@ -41,7 +43,7 @@ static bool trade_update(
     auto& data,
     size_t& offset,
     const T& item) {
-  auto lhs = &data[offset++];
+  auto lhs = &data[offset];
   new (lhs) Trade {
     .side = json::convert(item.side),  // XXX check
     .price = item.price,
@@ -51,6 +53,7 @@ static bool trade_update(
   core::copy_to(
       item.trd_match_id,
       lhs->trade_id);
+  ++offset;
   return offset < data.size();
 }
 
@@ -200,7 +203,9 @@ void Gateway::operator()(const json::Instrument& instrument) {
         size_t security_count = 0;
         for (auto& item : instrument.data) {
           if (_dispatcher.discard_symbol(item.symbol)) {
-            VLOG(1)("Drop symbol=\"{}\"", item.symbol);
+            VLOG(1)(
+                FMT_STRING("Drop symbol=\"{}\""),
+                item.symbol);
             continue;
           }
           ++security_count;
@@ -220,18 +225,11 @@ void Gateway::operator()(const json::Instrument& instrument) {
             .strike_currency = std::string_view(),
             .strike_price = item.option_strike_price,
           };
-          /* XXX typ:
-           * FFCCSX
-           * FFWCSX
-           * MRCXXX
-           * MRIXXX
-           * MRRXXX
-           */
           enqueue(reference_data, false);
           // XXX market status <-- state (but need caching)
         }
         VLOG(1)(
-            "- securities: {} (/{})",
+            FMT_STRING("- securities: {} (/{})"),
             security_count,
             instrument.data.size());
         check_download();
@@ -252,8 +250,11 @@ void Gateway::operator()(const json::Instrument& instrument) {
 void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
   assert(order_book_l2.action != json::Action::UNKNOWN);
   auto snapshot = order_book_l2.action == json::Action::PARTIAL;
-  // according to documention: drop everything received before partial
-  if (_download != Download::READY && snapshot == false)
+  // note!
+  //   first partial update will include *all* instruments
+  //   drop everything received before partial (see: API documentation)
+  if (snapshot == false &&
+      _download != Download::READY)
     return;
   std::string_view previous;
   bool success = true;
@@ -261,122 +262,60 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
   for (auto& item : order_book_l2.data) {
     if (success == false)
       break;
-    if (item.symbol.compare(previous) != 0) {
-      if (previous.empty() == false && (bid_length + ask_length) > 0) {
-        MarketByPrice market_by_price {
-          .exchange = FLAGS_exchange,
-          .symbol = previous,
-          .bids = {
-            .items = _bid.data(),
-            .length = bid_length,
-          },
-          .asks = {
-            .items = _ask.data(),
-            .length = ask_length,
-          },
-          .snapshot = snapshot,
-          .exchange_time_utc = {},
-          };
-        VLOG(1)("market_by_price={}", market_by_price);
-        enqueue(
-            market_by_price,
-            false);
-      }
+    if (previous.empty())
+      previous = item.symbol;
+    else if (previous.compare(item.symbol) != 0) {
+      publish_market_by_price(
+          previous,
+          bid_length,
+          ask_length,
+          snapshot,
+          false);
       previous = item.symbol;
       bid_length = ask_length = 0;
     }
-    auto iter = _price_lookup.find(item.id);
-    switch (order_book_l2.action) {
-      case json::Action::UNDEFINED:
-      case json::Action::UNKNOWN:
-        LOG(FATAL)("Unexpected");
-        break;
-      case json::Action::PARTIAL:
-        assert(std::isnan(item.price) == false);
-        if (iter == _price_lookup.end()) {
-          iter = _price_lookup.emplace(item.id, item.price).first;
-        } else {
-          auto diff = std::fabs(item.price - (*iter).second);
-          LOG_IF(FATAL, diff > TOLERANCE)("FOUND DUPLICATE");
-        }
-        break;
-      case json::Action::INSERT:
-        assert(std::isnan(item.price) == false);
-        if (iter == _price_lookup.end()) {
-          iter = _price_lookup.emplace(item.id, item.price).first;
-        } else {
-          auto diff = std::fabs(item.price - (*iter).second);
-          LOG_IF(FATAL, diff > TOLERANCE)("FOUND DUPLICATE");
-        }
-        break;
-      case json::Action::UPDATE:
-        LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");
-        assert(std::isnan(item.size) == false &&
-            std::fabs(item.size) > TOLERANCE);
-        break;
-      case json::Action::DELETE:
-        LOG_IF(FATAL, iter == _price_lookup.end())("NO LOOKUP");
-        assert(std::isnan(item.size) == true ||
-            std::fabs(item.size) < TOLERANCE);
-        break;
-    }
-    struct {
-      double price;
-      double size;
-    } update = {
-      .price = (*iter).second,
-      .size = std::isnan(item.size) ? 0.0 : item.size,
-    };
+    auto price_size = find_price(
+        order_book_l2.action,
+        item.id,
+        item.price,
+        item.size);
     switch (item.side) {
       case json::Side::BUY:
         success = mbp_update(
             _bid,
             bid_length,
-            update);
+            price_size);
         break;
       case json::Side::SELL:
         success = mbp_update(
             _ask,
             ask_length,
-            update);
+            price_size);
         break;
       default:
         LOG(FATAL)("Unexpected");
     }
-    if (order_book_l2.action == json::Action::DELETE) {
-      _price_lookup.erase(iter);
-    }
   }
   if (unlikely(success == false)) {
     LOG(FATAL)(
-        "Insufficient bid/ask array size(s): "
-        "len(bid)={}/{}, len(ask)={}/{}",
-        bid_length, _bid.size(),
-        ask_length, _ask.size());
+        FMT_STRING(
+          "Insufficient bid/ask array size(s): "
+          "len(bid)={}/{}, len(ask)={}/{}"),
+        bid_length,
+        _bid.size(),
+        ask_length,
+        _ask.size());
   }
-  if (previous.empty() == false && (bid_length + ask_length) > 0) {
-    MarketByPrice market_by_price {
-      .exchange = FLAGS_exchange,
-      .symbol = previous,
-      .bids = {
-        .items = _bid.data(),
-        .length = bid_length,
-      },
-      .asks = {
-        .items = _ask.data(),
-        .length = ask_length,
-      },
-      .snapshot = snapshot,
-      .exchange_time_utc = {},
-      };
-    VLOG(1)("market_by_price={}", market_by_price);
-    enqueue(
-        market_by_price,
-        true);
-  }
+  assert(previous.empty() == false);
+  publish_market_by_price(
+      previous,
+      bid_length,
+      ask_length,
+      snapshot,
+      true);
   // download complete?
-  if (_download != Download::READY && snapshot)
-        check_download();
+  if (snapshot && _download != Download::READY)
+    check_download();
 }
 
 void Gateway::operator()(const json::Quote& quote) {
@@ -393,7 +332,7 @@ void Gateway::operator()(const json::Quote& quote) {
       .snapshot = false,  // XXX ???
       .exchange_time_utc = item.timestamp,
     };
-    VLOG(1)("top_of_book={}", top_of_book);
+    VLOG(1)(FMT_STRING("top_of_book={}"), top_of_book);
     enqueue(
         top_of_book,
         true);  // XXX not always correct
@@ -429,7 +368,7 @@ void Gateway::operator()(const json::Trade& trade) {
           },
           .exchange_time_utc = timestamp,
           };
-        VLOG(1)("trade_summary={}", trade_summary);
+        VLOG(1)(FMT_STRING("trade_summary={}"), trade_summary);
         enqueue(
             trade_summary,
             false);
@@ -444,9 +383,11 @@ void Gateway::operator()(const json::Trade& trade) {
   }
   if (unlikely(success == false)) {
     LOG(FATAL)(
-        "Insufficient trade array size: "
-        "len(trade)={}/{}",
-        trade_length, _trade.size());
+        FMT_STRING(
+          "Insufficient trade array size: "
+          "len(trade)={}/{}"),
+        trade_length,
+        _trade.size());
   }
   if (previous.empty() == false && trade_length > 0) {
     TradeSummary trade_summary {
@@ -458,7 +399,7 @@ void Gateway::operator()(const json::Trade& trade) {
       },
       .exchange_time_utc = timestamp,
       };
-    VLOG(1)("trade_summary={}", trade_summary);
+    VLOG(1)(FMT_STRING("trade_summary={}"), trade_summary);
     enqueue(
         trade_summary,
         true);
@@ -483,7 +424,7 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
   enqueue(
       market_data_status,
       true);
-  LOG(INFO)("market_data_status={}", _market_data_status);
+  LOG(INFO)(FMT_STRING("market_data_status={}"), _market_data_status);
 }
 
 void Gateway::update_order_manager(GatewayStatus gateway_status) {
@@ -497,7 +438,7 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
   enqueue(
       order_manager_status,
       true);
-  LOG(INFO)("order_manager_status={}", _order_manager_status);
+  LOG(INFO)(FMT_STRING("order_manager_status={}"), _order_manager_status);
 }
 
 void Gateway::begin_download() {
@@ -580,6 +521,97 @@ void Gateway::subscribe_order_book_l2() {
   // XXX other
   // cancelAllAfter
   // authKeyExpires
+}
+
+std::pair<double, double> Gateway::find_price(
+    json::Action action,
+    uint64_t id,
+    double price,
+    double size) {
+  auto result = std::numeric_limits<double>::quiet_NaN();
+  auto iter = _price_lookup.find(id);
+  switch (action) {
+    case json::Action::UNDEFINED:
+    case json::Action::UNKNOWN:
+      LOG(FATAL)("Unexpected");
+      break;
+    case json::Action::PARTIAL:
+      LOG_IF(FATAL, std::isfinite(price) == false)(
+          FMT_STRING("id={} price={}: expected finite"), id, price);
+      if (iter == _price_lookup.end()) {
+        iter = _price_lookup.emplace(id, price).first;
+      } else {
+        auto diff = std::fabs(price - (*iter).second);
+        LOG_IF(FATAL, diff > TOLERANCE)(
+            FMT_STRING("id={} price={}: id already exists as price={}"),
+            id, price, (*iter).second);
+      }
+      result = (*iter).second;
+      break;
+    case json::Action::INSERT:
+      LOG_IF(FATAL, std::isfinite(price) == false)(
+          FMT_STRING("id={} price={}"), id, price);
+      if (iter == _price_lookup.end()) {
+        iter = _price_lookup.emplace(id, price).first;
+      } else {
+        auto diff = std::fabs(price - (*iter).second);
+        LOG_IF(FATAL, diff > TOLERANCE)(
+            FMT_STRING("id={} price={}: id already exists as price={}"),
+            id, price, (*iter).second);
+      }
+      result = (*iter).second;
+      break;
+    case json::Action::UPDATE:
+      LOG_IF(FATAL, iter == _price_lookup.end())(
+            FMT_STRING("id={} price={}: doesn't exist"), id, price);
+      LOG_IF(FATAL, std::isnan(price) == false)(
+          FMT_STRING("id={} price={}: expected nan"), id, price);
+      LOG_IF(FATAL, std::isnan(size) || std::fabs(size) < TOLERANCE)(
+          FMT_STRING("id={} price={} : expected size"), id, price);
+      result = (*iter).second;
+      break;
+    case json::Action::DELETE:
+      LOG_IF(FATAL, iter == _price_lookup.end())(
+            FMT_STRING("id={} price={}: id doesn't exist"), id, price);
+      LOG_IF(FATAL, std::isnan(size) == false && std::fabs(size) > TOLERANCE)(
+          FMT_STRING("id={} price={} : expected size"), id, price);
+      result = (*iter).second;
+      _price_lookup.erase(iter);
+      break;
+  }
+  assert(std::isnan(result) == false);
+  return std::make_pair(
+      result,
+      std::isnan(size) ? 0.0 : size);
+}
+
+void Gateway::publish_market_by_price(
+    const std::string_view& symbol,
+    size_t bid_length,
+    size_t ask_length,
+    bool snapshot,
+    bool is_last) {
+  assert(symbol.empty() == false);
+  if ((bid_length + ask_length) == 0)
+    return;
+  MarketByPrice market_by_price {
+    .exchange = FLAGS_exchange,
+    .symbol = symbol,
+    .bids = {
+      .items = _bid.data(),
+      .length = bid_length,
+    },
+    .asks = {
+      .items = _ask.data(),
+      .length = ask_length,
+    },
+    .snapshot = snapshot,
+    .exchange_time_utc = {},
+    };
+  VLOG(1)(FMT_STRING("market_by_price={}"), market_by_price);
+  enqueue(
+      market_by_price,
+      is_last);
 }
 
 template <typename T>

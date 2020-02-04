@@ -60,9 +60,10 @@ HTTPConnection::HTTPConnection(
 void HTTPConnection::connect(
     core::event::DNSBase& dns_base,
     const core::URI& uri) {
-  LOG(INFO)(PREFIX
-      "Connecting to host=\"{}\", port={}",
-      uri.host, uri.get_port_with_default());
+  LOG(INFO)(
+      FMT_STRING(PREFIX "Connecting to host=\"{}\", port={}"),
+      uri.host,
+      uri.get_port_with_default());
   assert(_state == State::DISCONNECTED);
   _buffer_event.connect(
       dns_base,
@@ -73,8 +74,9 @@ void HTTPConnection::connect(
 }
 
 void HTTPConnection::write(const void *data, size_t length) {
-  VLOG(4)(PREFIX
-      "send(length={})", length);
+  VLOG(4)(
+      FMT_STRING(PREFIX "send(length={})"),
+      length);
   _buffer_event.write(data, length);
   _buffer_event.flush(EV_WRITE, BEV_FLUSH);
 }
@@ -95,7 +97,9 @@ void HTTPConnection::on_read() {
         bytes);
     _buffer.drain(length);
   } catch (std::exception& e) {
-    LOG(ERROR)(PREFIX "Exception: what=\"{}\"", e.what());
+    LOG(ERROR)(
+        FMT_STRING(PREFIX "Exception: what=\"{}\""),
+        e.what());
     stop();
   }
 }
@@ -242,7 +246,7 @@ Rest::Rest(
         .ping = create_latency("ping"),
       } {
   LOG_IF(FATAL, _uri.scheme.compare("https") != 0)(
-      "Expected URI scheme to be \"https\" (got \"{}\")",
+      FMT_STRING("Expected URI scheme to be \"https\" (got \"{}\")"),
       _uri.scheme);
 }
 
@@ -287,7 +291,9 @@ void Rest::get_products() {
             });
       },
       [](auto& status) {
-        LOG(WARNING)(PREFIX "HTTP status={}", status);
+        LOG(WARNING)(
+            FMT_STRING(PREFIX "HTTP status={}"),
+            status);
         LOG(WARNING)(PREFIX "Unable to get products");
         LOG(FATAL)(PREFIX "Unexpected -- now what?");  // FIXME(thraneh): ...
       });
@@ -313,7 +319,9 @@ void Rest::get_accounts() {
             });
       },
       [this](auto& status) {
-        LOG(WARNING)(PREFIX "HTTP status={}", status);
+        LOG(WARNING)(
+            FMT_STRING(PREFIX "HTTP status={}"),
+            status);
         LOG(WARNING)(PREFIX "Unable to get accounts");
         LOG(FATAL)(PREFIX "Unexpected -- now what?");  // FIXME(thraneh): ...
       });
@@ -333,7 +341,9 @@ void Rest::get_time() {
             });
       },
       [](auto& status) {
-        LOG(WARNING)(PREFIX "HTTP status={}", status);
+        LOG(WARNING)(
+            FMT_STRING(PREFIX "HTTP status={}"),
+            status);
         LOG(WARNING)(PREFIX "Unable to get products");
         LOG(FATAL)(PREFIX "Unexpected -- now what?");  // FIXME(thraneh): ...
       });
@@ -344,7 +354,9 @@ void Rest::get(
     bool authenticate,
     success_t&& success,
     failure_t&& failure) {
-  LOG(INFO)(PREFIX "GET {}", uri);
+  LOG(INFO)(
+      FMT_STRING(PREFIX "GET {}"),
+      uri);
   auto create_time = core::get_system_clock();
   switch (_state) {
     case State::DISCONNECTED:
@@ -446,7 +458,10 @@ bool Rest::request(
     const core::http::Method& method,
     const std::string_view& path,
     bool authenticate) {
-  LOG(INFO)(PREFIX "Sending method={} path=\"{}\"", method, path);
+  LOG(INFO)(
+      FMT_STRING(PREFIX "Sending method={} path=\"{}\""),
+      method,
+      path);
   assert(_state == State::CONNECTED);
   assert(_connection);
   if (throttle()) {
@@ -483,7 +498,9 @@ bool Rest::request(
   std::string_view request(
       buffer.data(),
       buffer.size());
-  VLOG(1)(PREFIX "{}", request);
+  VLOG(1)(
+      FMT_STRING(PREFIX "{}"),
+      request);
   _connection->write(
       request.data(),
       request.length());
@@ -535,12 +552,13 @@ bool Rest::remove_one(
     const core::http::Status& status,
     const std::string_view& body) {
   if (_sent.empty()) {
-    LOG(WARNING)(PREFIX
-        "Unexpected body={}", body);
+    LOG(WARNING)(
+        FMT_STRING(PREFIX "Unexpected body={}"),
+        body);
     return false;
   }
   auto now = core::get_system_clock();
-  VLOG(3)("body=\"{}\"", body);
+  VLOG(3)(FMT_STRING("body=\"{}\""), body);
   auto& front = _sent.front();
   try {
     auto create_time = std::get<0>(front);
@@ -560,7 +578,7 @@ bool Rest::remove_one(
           });
     }
   } catch (std::exception& e) {
-    LOG(WARNING)("exception, what=\"{}\"", e.what());
+    LOG(WARNING)(FMT_STRING("exception, what=\"{}\""), e.what());
   }
   _sent.pop_front();
   return true;
