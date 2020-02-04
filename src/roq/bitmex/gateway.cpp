@@ -476,6 +476,13 @@ void Gateway::check_download() {
       update_market_data(GatewayStatus::READY);
       LOG(INFO)("Download COMPLETED");
       _download = Download::READY;
+      LOG(INFO)("********************************************");
+      LOG(INFO)("***   DEFAULT LOGGING IS NOW MINIMAL     ***");
+      LOG(INFO)("***                                      ***");
+      LOG(INFO)("***   verbose logging can be enabled     ***");
+      LOG(INFO)("***   by setting the ROQ_v environment   ***");
+      LOG(INFO)("***   variable to a non-zero value       ***");
+      LOG(INFO)("********************************************");
       break;
     }
     case Download::READY:
