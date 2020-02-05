@@ -143,6 +143,8 @@ class Rest final : public HTTPConnection::Handler {
 
   void operator()(Metrics& metrics);
 
+  void create_order(const CreateOrder& create_order);
+
   void get_products();
   void get_accounts();
 

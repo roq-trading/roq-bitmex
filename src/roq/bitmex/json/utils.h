@@ -122,6 +122,43 @@ inline roq::TradingStatus convert(State state) {
   return roq::TradingStatus::UNDEFINED;
 }
 
+inline std::string_view c_str(roq::Side side) {
+  switch (side) {
+    case roq::Side::BUY:
+      return "Buy";
+    case roq::Side::SELL:
+      return "Sell";
+    default:
+      return std::string_view {};
+  }
+}
+
+inline std::string_view c_str(roq::OrderType order_type) {
+  switch (order_type) {
+    case roq::OrderType::MARKET:
+      return "Market";
+    case roq::OrderType::LIMIT:
+      return "Limit";
+    default:
+      return std::string_view {};
+  }
+}
+
+inline std::string_view c_str(roq::TimeInForce time_in_force) {
+  switch (time_in_force) {
+    case roq::TimeInForce::FOK:
+      return "FillOrKill";
+    case roq::TimeInForce::IOC:
+      return "ImmediateOrCancel";
+    case roq::TimeInForce::GFD:
+      return "Day";
+    case roq::TimeInForce::GTC:
+      return "GoodTillCancel";
+    default:
+      return std::string_view {};
+  }
+}
+
 }  // namespace json
 }  // namespace bitmex
 }  // namespace roq

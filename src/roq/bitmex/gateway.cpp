@@ -131,7 +131,7 @@ void Gateway::operator()(const CreateOrderEvent& event) {
         std::move(order_mapping)).first;
     // XXX fix this... replacing previous variable
     auto& order_mapping = (*iter).second;
-    LOG(FATAL)("NOT IMPLEMENTED");
+    _rest.create_order(create_order);
   }
 }
 

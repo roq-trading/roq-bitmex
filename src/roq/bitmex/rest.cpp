@@ -271,6 +271,34 @@ void Rest::operator()(Metrics& metrics) {
     .write(_latency.ping);
 }
 
+void Rest::create_order(const CreateOrder& create_order) {
+  // XXX use encode buffer
+  auto message = fmt::format(
+      FMT_STRING(
+        R"({{)"
+        R"("clOrdID":"{}",)"
+        R"("symbol":"{}",)"
+        R"("side":"{}",)"
+        R"("price":{},)"
+        R"("orderQty":{},)"
+        R"("ordType":"{}",)"
+        R"("timeInForce":"{}")"
+        R"(}})"),
+      std::string_view(),  // cl_ord_id,
+      create_order.symbol,
+      json::c_str(create_order.side),
+      create_order.price,
+      create_order.quantity,
+      json::c_str(create_order.order_type),
+      json::c_str(create_order.time_in_force));
+  // POST
+  std::string_view url = "/order";
+  LOG(FATAL)(
+      FMT_STRING("POST {} {}"),
+      url,
+      message);
+}
+
 void Rest::get_products() {
   get(
       "/products",
@@ -295,8 +323,7 @@ void Rest::get_products() {
         LOG(WARNING)("Unable to get products");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
-  // DEBUG
-  get_time();
+  get_time();  // XXX DEBUG
 }
 
 void Rest::get_accounts() {
