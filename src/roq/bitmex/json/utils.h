@@ -104,6 +104,24 @@ inline roq::Side convert(json::Side side) {
   }
 }
 
+inline roq::TradingStatus convert(State state) {
+  switch (state) {
+    case State::UNDEFINED:
+      break;
+    case State::UNKNOWN:
+      break;
+    case State::CLOSED:
+      return roq::TradingStatus::CLOSED;
+    case State::OPEN:
+      return roq::TradingStatus::OPEN;
+    case State::SETTLED:
+      break;
+    case State::UNLISTED:
+      break;
+  }
+  return roq::TradingStatus::UNDEFINED;
+}
+
 }  // namespace json
 }  // namespace bitmex
 }  // namespace roq

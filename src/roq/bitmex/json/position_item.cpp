@@ -101,7 +101,7 @@ enum class Field {
   UNREALISED_GROSS_PNL,
   UNREALISED_PNL,
   UNREALISED_PNL_PCNT,
-  UNREALISED_ROQ_PCNT,
+  UNREALISED_ROE_PCNT,
   UNREALISED_TAX,
   VAR_MARGIN,
 };
@@ -628,8 +628,8 @@ constexpr Field parse_u(auto& name) {
           return Field::UNREALISED_PNL_PCNT;
         break;
       case 'R':
-        if (name.compare("unrealisedRoqPcnt") == 0)
-          return Field::UNREALISED_ROQ_PCNT;
+        if (name.compare("unrealisedRoePcnt") == 0)
+          return Field::UNREALISED_ROE_PCNT;
         break;
       case 'T':
         if (name.compare("unrealisedTax") == 0)
@@ -800,7 +800,7 @@ static_assert(parse_name("unrealisedCost") == Field::UNREALISED_COST);
 static_assert(parse_name("unrealisedGrossPnl") == Field::UNREALISED_GROSS_PNL);
 static_assert(parse_name("unrealisedPnl") == Field::UNREALISED_PNL);
 static_assert(parse_name("unrealisedPnlPcnt") == Field::UNREALISED_PNL_PCNT);
-static_assert(parse_name("unrealisedRoqPcnt") == Field::UNREALISED_ROQ_PCNT);
+static_assert(parse_name("unrealisedRoePcnt") == Field::UNREALISED_ROE_PCNT);
 static_assert(parse_name("unrealisedTax") == Field::UNREALISED_TAX);
 
 static_assert(parse_name("varMargin") == Field::VAR_MARGIN);
@@ -1080,8 +1080,8 @@ inline void update_field(
     case Field::UNREALISED_PNL_PCNT:
       update(result.unrealised_pnl_pcnt, value);
       break;
-    case Field::UNREALISED_ROQ_PCNT:
-      update(result.unrealised_roq_pcnt, value);
+    case Field::UNREALISED_ROE_PCNT:
+      update(result.unrealised_roe_pcnt, value);
       break;
     case Field::UNREALISED_TAX:
       update(result.unrealised_tax, value);

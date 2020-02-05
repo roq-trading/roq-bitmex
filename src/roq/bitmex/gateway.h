@@ -22,6 +22,7 @@
 #include "roq/bitmex/random.h"
 
 #include "roq/bitmex/order_mapping.h"
+#include "roq/bitmex/product.h"
 #include "roq/bitmex/rest.h"
 #include "roq/bitmex/websocket.h"
 
@@ -72,6 +73,8 @@ class Gateway final : public server::Handler {
 
   void subscribe_instrument();
   void subscribe_order_book_l2();
+
+  const Product& find_product(const json::InstrumentItem&);
 
   std::pair<double, double> find_price(
       json::Action action,
@@ -132,6 +135,8 @@ class Gateway final : public server::Handler {
     ORDER_BOOKS,
     READY,
   } _download = Download::NONE;
+  // reference data
+  core::hash::map<std::string, Product> _product_cache;
   std::vector<std::string> _symbols;
   struct {
     bool instrument = false;

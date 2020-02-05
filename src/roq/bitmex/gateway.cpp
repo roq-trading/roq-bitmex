@@ -214,24 +214,11 @@ void Gateway::operator()(const json::Instrument& instrument) {
             continue;
           }
           ++security_count;
-          ReferenceData reference_data {
-            .exchange = FLAGS_exchange,
-            .symbol = item.symbol,
-            .security_type = SecurityType::UNDEFINED,  // XXX typ?
-            .currency = item.quote_currency,  // XXX or position_currency?
-            .settlement_currency = item.settl_currency,
-            .commission_currency = std::string_view(),
-            .tick_size = item.tick_size,
-            .limit_up = item.limit_up_price,
-            .limit_down = item.limit_down_price,
-            .multiplier = item.multiplier,
-            .min_trade_vol = item.lot_size,  // XXX correct?
-            .option_type = OptionType::UNDEFINED,  // XXX typ?
-            .strike_currency = std::string_view(),
-            .strike_price = item.option_strike_price,
-          };
+          auto& product = find_product(item);
+          auto reference_data = product.create_reference_data(item);
           enqueue(reference_data, false);
-          // XXX market status <-- state (but need caching)
+          auto market_status = product.create_market_status(item);
+          enqueue(market_status, true);
         }
         VLOG(1)(
             FMT_STRING("- securities: {} (/{})"),
@@ -243,9 +230,17 @@ void Gateway::operator()(const json::Instrument& instrument) {
     case json::Action::INSERT:
       // drop
       break;
-    case json::Action::UPDATE:
-      // drop
+    case json::Action::UPDATE: {
+      for (auto& item : instrument.data) {
+        if (_dispatcher.discard_symbol(item.symbol))
+          continue;
+        auto& product = find_product(item);
+        // XXX check if dirty
+        auto market_status = product.create_market_status(item);
+        enqueue(market_status, true);
+      }
       break;
+    }
     case json::Action::DELETE:
       // drop
       break;
@@ -537,6 +532,19 @@ void Gateway::subscribe_order_book_l2() {
   // XXX other
   // cancelAllAfter
   // authKeyExpires
+}
+
+const Product& Gateway::find_product(const json::InstrumentItem& item) {
+  auto iter = _product_cache.find(item.symbol);
+  if (iter == _product_cache.end()) {
+    iter = _product_cache.emplace(
+        std::string(item.symbol),
+        item).first;
+  } else {
+    (*iter).second.update(item);
+  }
+  assert(iter != _product_cache.end());
+  return (*iter).second;
 }
 
 std::pair<double, double> Gateway::find_price(

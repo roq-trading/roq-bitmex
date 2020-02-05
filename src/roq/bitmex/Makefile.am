@@ -38,6 +38,7 @@ roq_bitmex_SOURCES = \
 	gateway.cpp \
 	options.cpp \
 	order_mapping.cpp \
+	product.cpp \
 	random.cpp \
 	rest.cpp \
 	websocket.cpp \

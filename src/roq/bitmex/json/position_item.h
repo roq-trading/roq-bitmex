@@ -109,7 +109,7 @@ struct PositionItem final {
   double unrealised_gross_pnl = std::numeric_limits<double>::quiet_NaN();
   double unrealised_pnl = std::numeric_limits<double>::quiet_NaN();
   double unrealised_pnl_pcnt = std::numeric_limits<double>::quiet_NaN();
-  double unrealised_roq_pcnt = std::numeric_limits<double>::quiet_NaN();
+  double unrealised_roe_pcnt = std::numeric_limits<double>::quiet_NaN();
   double unrealised_tax = std::numeric_limits<double>::quiet_NaN();
   double var_margin = std::numeric_limits<double>::quiet_NaN();
 };
@@ -217,7 +217,7 @@ struct fmt::formatter<roq::bitmex::json::PositionItem> {
         "unrealised_gross_pnl={}, "
         "unrealised_pnl={}, "
         "unrealised_pnl_pcnt={}, "
-        "unrealised_roq_pcnt={}, "
+        "unrealised_roe_pcnt={}, "
         "unrealised_tax={}, "
         "var_margin={}"
         "}}",
@@ -309,7 +309,7 @@ struct fmt::formatter<roq::bitmex::json::PositionItem> {
         value.unrealised_gross_pnl,
         value.unrealised_pnl,
         value.unrealised_pnl_pcnt,
-        value.unrealised_roq_pcnt,
+        value.unrealised_roe_pcnt,
         value.unrealised_tax,
         value.var_margin);
   }
