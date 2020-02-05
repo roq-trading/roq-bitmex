@@ -12,10 +12,14 @@ namespace json {
 
 enum class Table {
   UNKNOWN,
+  EXECUTION,
   FUNDING,
   INSTRUMENT,
   LIQUIDATION,
+  MARGIN,
+  ORDER,
   ORDER_BOOK_L2,
+  POSITION,
   QUOTE,
   SETTLEMENT,
   TRADE,
@@ -26,10 +30,14 @@ extern Table parse_table(const std::string_view& name);
 inline auto EnumNamesTable() {
   static const std::string_view names[] = {
     "UNKNOWN",
+    "EXECUTION",
     "FUNDING",
     "INSTRUMENT",
     "LIQUIDATION",
+    "MARGIN",
+    "ORDER",
     "ORDER_BOOK_L2",
+    "POSITION",
     "QUOTE",
     "SETTLEMENT",
     "TRADE",

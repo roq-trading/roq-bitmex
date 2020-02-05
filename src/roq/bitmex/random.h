@@ -23,12 +23,12 @@ class Random final {
   Random(const Random&) = delete;
 
   std::string create_signature(
-      std::chrono::seconds timestamp,
+      std::chrono::seconds expires,
       const core::http::Method& method,
       const std::string_view& path);
 
   std::string create_headers(
-      std::chrono::seconds timestamp,
+      std::chrono::seconds expires,
       const core::http::Method& method,
       const std::string_view& path);
 

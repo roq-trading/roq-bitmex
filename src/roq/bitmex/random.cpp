@@ -30,15 +30,15 @@ Random::Random(
 }
 
 std::string Random::create_signature(
-    std::chrono::seconds timestamp,
+    std::chrono::seconds expires,
     const core::http::Method& method,
     const std::string_view& path) {
-  auto timestamp_ = create_timestamp_secs(timestamp);
+  auto expires_ = create_timestamp_secs(expires);
   auto method_ = std::string_view(core::http::EnumNameMethod(method));
   _hmac.clear();
   _hmac.update(method_);
   _hmac.update(path);
-  _hmac.update(timestamp_);
+  _hmac.update(expires_);
   std::array<char, 32> buffer;
   auto length = _hmac.digest(
       buffer.data(),
@@ -50,11 +50,11 @@ std::string Random::create_signature(
 }
 
 std::string Random::create_headers(
-    std::chrono::seconds timestamp,
+    std::chrono::seconds expires,
     const core::http::Method& method,
     const std::string_view& path) {
   auto signature = create_signature(
-      timestamp,
+      expires,
       method,
       path);
   return fmt::format(
@@ -63,7 +63,7 @@ std::string Random::create_headers(
         "api-expires: {}\r\n"
         "api-key: {}\r\n"),
       signature,
-      timestamp.count(),
+      expires.count(),
       _key);
 }
 

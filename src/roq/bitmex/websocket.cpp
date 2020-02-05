@@ -175,11 +175,18 @@ void WebSocket::send_upgrade_request() {
   auto key = core::ws::Random::create_sec_websocket_key();
   assert(_response_key.empty());
   _response_key = core::ws::Random::create_response(key);
+  auto expires = std::chrono::duration_cast<std::chrono::seconds>(
+      core::get_realtime_clock() + std::chrono::seconds {5});
+  auto headers = _random.create_headers(
+      expires,
+      core::http::Method::GET,
+      "/realtime");
   core::ws::Writer writer(_encode_buffer);
   core::ws::Upgrade::create(
       writer,
       core::URI(FLAGS_ws_uri),
-      key);
+      key,
+      headers);
   send(writer.finish());
 }
 
@@ -459,6 +466,9 @@ void WebSocket::operator()(const core::ws::pong_t& pong) {
 }
 
 void WebSocket::parse(const std::string_view& message) {
+  VLOG(4)(
+      FMT_STRING("message={}"),
+      message);
   _profile.parse(
       [&]() {
         try {
@@ -480,9 +490,15 @@ void WebSocket::parse_helper(const std::string_view& message) {
 }
 
 void WebSocket::operator()(const json::Error& error) {
-  VLOG(1)(
+  LOG(FATAL)(
       FMT_STRING("error={}"),
       error);
+}
+
+void WebSocket::operator()(const json::Execution& execution) {
+  VLOG(1)(
+      FMT_STRING("execution={}"),
+      execution);
 }
 
 void WebSocket::operator()(const json::Funding& funding) {
@@ -512,11 +528,31 @@ void WebSocket::operator()(const json::Liquidation& liquidation) {
       liquidation);
 }
 
+void WebSocket::operator()(const json::Margin& margin) {
+  VLOG(1)(
+      FMT_STRING("margin={}"),
+      margin);
+}
+
+void WebSocket::operator()(const json::Order& order) {
+  VLOG(1)(
+      FMT_STRING("order={}"),
+      order);
+  _gateway(order);
+}
+
 void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
   VLOG(1)(
       FMT_STRING("order_book_l2={}"),
       order_book_l2);
   _gateway(order_book_l2);
+}
+
+void WebSocket::operator()(const json::Position& position) {
+  VLOG(1)(
+      FMT_STRING("position={}"),
+      position);
+  _gateway(position);
 }
 
 void WebSocket::operator()(const json::Quote& quote) {

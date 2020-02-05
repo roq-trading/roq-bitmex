@@ -292,6 +292,15 @@ void Parser::dispatch(
             switch (table) {
               case Table::UNKNOWN:
                 break;
+              case Table::EXECUTION: {
+                Execution execution(
+                    value,
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(execution);
+                break;
+              }
               case Table::FUNDING: {
                 Funding funding(
                     value,
@@ -319,6 +328,24 @@ void Parser::dispatch(
                 handler(liquidation);
                 break;
               }
+              case Table::MARGIN: {
+                Margin margin(
+                    value,
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(margin);
+                break;
+              }
+              case Table::ORDER: {
+                Order order(
+                    value,
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(order);
+                break;
+              }
               case Table::ORDER_BOOK_L2: {
                 OrderBookL2 order_book_l2(
                     value,
@@ -326,6 +353,15 @@ void Parser::dispatch(
                     action);
                 dispatched = true;
                 handler(order_book_l2);
+                break;
+              }
+              case Table::POSITION: {
+                Position position(
+                    value,
+                    buffer,
+                    action);
+                dispatched = true;
+                handler(position);
                 break;
               }
               case Table::QUOTE: {

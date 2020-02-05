@@ -5,23 +5,23 @@
 #include "roq/core/json/buffer.h"
 
 #include "roq/bitmex/json/action.h"
-#include "roq/bitmex/json/position_item.h"
+#include "roq/bitmex/json/margin_item.h"
 
 namespace roq {
 namespace bitmex {
 namespace json {
 
-struct Position final {
-  Position(
+struct Margin final {
+  Margin(
       core::json::value_t& value,
       core::json::Buffer& buffer,
       Action action);
 
-  Position(const Position&) = delete;
-  Position(Position&&) = delete;
+  Margin(const Margin&) = delete;
+  Margin(Margin&&) = delete;
 
   Action action = Action::UNDEFINED;
-  roq::span<PositionItem const> data;
+  roq::span<MarginItem const> data;
 };
 
 }  // namespace json
@@ -29,13 +29,13 @@ struct Position final {
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::bitmex::json::Position> {
+struct fmt::formatter<roq::bitmex::json::Margin> {
   template <typename C>
   constexpr auto parse(C& ctx) {
     return ctx.begin();
   }
   template <typename C>
-  auto format(const roq::bitmex::json::Position& value, C& ctx) {
+  auto format(const roq::bitmex::json::Margin& value, C& ctx) {
     return format_to(
         ctx.out(),
         "action={}, "

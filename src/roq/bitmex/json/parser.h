@@ -8,11 +8,15 @@
 #include "roq/core/json/buffer.h"
 
 #include "roq/bitmex/json/error.h"
+#include "roq/bitmex/json/execution.h"
 #include "roq/bitmex/json/funding.h"
 #include "roq/bitmex/json/handshake.h"
 #include "roq/bitmex/json/instrument.h"
 #include "roq/bitmex/json/liquidation.h"
+#include "roq/bitmex/json/margin.h"
+#include "roq/bitmex/json/order.h"
 #include "roq/bitmex/json/order_book_l2.h"
+#include "roq/bitmex/json/position.h"
 #include "roq/bitmex/json/quote.h"
 #include "roq/bitmex/json/settlement.h"
 #include "roq/bitmex/json/subscribe.h"
@@ -27,11 +31,15 @@ namespace json {
 struct Parser final {
   struct Handler {
     virtual void operator()(const Error&) = 0;
+    virtual void operator()(const Execution&) = 0;
     virtual void operator()(const Funding&) = 0;
     virtual void operator()(const Handshake&) = 0;
     virtual void operator()(const Instrument&) = 0;
     virtual void operator()(const Liquidation&) = 0;
+    virtual void operator()(const Margin&) = 0;
+    virtual void operator()(const Order&) = 0;
     virtual void operator()(const OrderBookL2&) = 0;
+    virtual void operator()(const Position&) = 0;
     virtual void operator()(const Quote&) = 0;
     virtual void operator()(const Settlement&) = 0;
     virtual void operator()(const Subscribe&) = 0;

@@ -107,11 +107,15 @@ class WebSocket final
 
   // json:
   void operator()(const json::Error&) override;
+  void operator()(const json::Execution&) override;
   void operator()(const json::Funding&) override;
   void operator()(const json::Handshake&) override;
   void operator()(const json::Instrument&) override;
   void operator()(const json::Liquidation&) override;
+  void operator()(const json::Margin&) override;
+  void operator()(const json::Order&) override;
   void operator()(const json::OrderBookL2&) override;
+  void operator()(const json::Position&) override;
   void operator()(const json::Quote&) override;
   void operator()(const json::Settlement&) override;
   void operator()(const json::Subscribe&) override;

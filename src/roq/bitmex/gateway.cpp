@@ -252,6 +252,9 @@ void Gateway::operator()(const json::Instrument& instrument) {
   }
 }
 
+void Gateway::operator()(const json::Order&) {
+}
+
 void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
   assert(order_book_l2.action != json::Action::UNKNOWN);
   auto snapshot = order_book_l2.action == json::Action::PARTIAL;
@@ -267,9 +270,9 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
   for (auto& item : order_book_l2.data) {
     if (success == false)
       break;
-    if (previous.empty())
+    if (previous.empty()) {
       previous = item.symbol;
-    else if (previous.compare(item.symbol) != 0) {
+    } else if (previous.compare(item.symbol) != 0) {
       publish_market_by_price(
           previous,
           bid_length,
@@ -321,6 +324,9 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
   // download complete?
   if (snapshot && _download != Download::READY)
     check_download();
+}
+
+void Gateway::operator()(const json::Position&) {
 }
 
 void Gateway::operator()(const json::Quote& quote) {
@@ -523,13 +529,11 @@ void Gateway::subscribe_order_book_l2() {
   _websocket.subscribe("quote", _symbols);
   _websocket.subscribe("settlement", _symbols);
   _websocket.subscribe("trade", _symbols);
-
   // XXX private
-  // _websocket.subscribe("execution", _symbols);
-  // _websocket.subscribe("order", _symbols);
-  // _websocket.subscribe("margin", _symbols);
-  // _websocket.subscribe("position", _symbols);
-
+  _websocket.subscribe("execution", _symbols);
+  _websocket.subscribe("order", _symbols);
+  _websocket.subscribe("margin", _symbols);
+  _websocket.subscribe("position", _symbols);
   // XXX other
   // cancelAllAfter
   // authKeyExpires

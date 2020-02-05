@@ -10,6 +10,8 @@ libroq_bitmex_json_la_CPPFLAGS = \
 libroq_bitmex_json_la_SOURCES = \
 	action.cpp \
 	error.cpp \
+	execution.cpp \
+	execution_item.cpp \
 	funding.cpp \
 	funding_item.cpp \
 	handshake.cpp \
@@ -17,11 +19,15 @@ libroq_bitmex_json_la_SOURCES = \
 	instrument_item.cpp \
 	liquidation.cpp \
 	liquidation_item.cpp \
-	order.cpp \
+	margin.cpp \
+	margin_item.cpp \
 	order_book_l2.cpp \
 	order_book_l2_item.cpp \
+	order.cpp \
+	order_item.cpp \
 	parser.cpp \
 	position.cpp \
+	position_item.cpp \
 	quote.cpp \
 	quote_item.cpp \
 	settlement.cpp \

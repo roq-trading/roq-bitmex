@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/bitmex/json/order.h"
+#include "roq/bitmex/json/execution.h"
 
 #include <utility>
 
@@ -10,7 +10,7 @@ namespace roq {
 namespace bitmex {
 namespace json {
 
-Order::Order(
+Execution::Execution(
     core::json::value_t& value,
     core::json::Buffer& buffer,
     Action action)
