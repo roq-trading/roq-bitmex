@@ -32,6 +32,7 @@
 #include "roq/core/ws/decoder.h"
 
 #include "roq/bitmex/config.h"
+#include "roq/bitmex/random.h"
 
 namespace roq {
 namespace bitmex {
@@ -128,6 +129,7 @@ class Rest final : public HTTPConnection::Handler {
   Rest(
       Gateway& gateway,
       const Config& config,
+      Random& random,
       core::event::Base& base,
       core::event::DNSBase& dns_base,
       core::ssl::Context& ssl_context);
@@ -196,9 +198,9 @@ class Rest final : public HTTPConnection::Handler {
  private:
   Gateway& _gateway;
   // config
-  const std::string _access_key;
-  const std::string _access_secret;
   const core::URI _uri;
+  // authentication
+  Random& _random;
   // async
   core::event::Base& _base;
   core::event::DNSBase& _dns_base;

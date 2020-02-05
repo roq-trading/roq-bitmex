@@ -29,8 +29,8 @@ static bool mbp_update(
     auto& data,
     size_t& offset,
     const T& item) {
-  auto lhs = &data[offset];
-  new (lhs) MBPUpdate {
+  auto& obj = data[offset];
+  new (&obj) MBPUpdate {
     .price = item.first,
     .quantity = item.second,
   };
@@ -43,8 +43,8 @@ static bool trade_update(
     auto& data,
     size_t& offset,
     const T& item) {
-  auto lhs = &data[offset];
-  new (lhs) Trade {
+  auto& obj = data[offset];
+  new (&obj) Trade {
     .side = json::convert(item.side),  // XXX check
     .price = item.price,
     .quantity = item.size,
@@ -52,7 +52,7 @@ static bool trade_update(
   };
   core::copy_to(
       item.trd_match_id,
-      lhs->trade_id);
+      obj.trade_id);
   ++offset;
   return offset < data.size();
 }
@@ -62,16 +62,21 @@ Gateway::Gateway(
     const Config& config)
     : _dispatcher(dispatcher),
       _account(config.get_account()),
+      _random(
+          config.get_api_key(),
+          config.get_secret()),
       _dns_base(_base, true),
       _websocket(
           *this,
           config,
+          _random,
           _base,
           _dns_base,
           _ssl_context),
       _rest(
           *this,
           config,
+          _random,
           _base,
           _dns_base,
           _ssl_context),
@@ -601,6 +606,9 @@ void Gateway::publish_market_by_price(
   assert(symbol.empty() == false);
   if ((bid_length + ask_length) == 0)
     return;
+  LOG_IF(INFO, snapshot)(
+      FMT_STRING("Received market data snapshot for symbol=\"{}\""),
+      symbol);
   MarketByPrice market_by_price {
     .exchange = FLAGS_exchange,
     .symbol = symbol,

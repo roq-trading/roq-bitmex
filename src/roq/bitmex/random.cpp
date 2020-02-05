@@ -35,6 +35,7 @@ std::string Random::create_signature(
     const std::string_view& path) {
   auto timestamp_ = create_timestamp_secs(timestamp);
   auto method_ = std::string_view(core::http::EnumNameMethod(method));
+  _hmac.clear();
   _hmac.update(method_);
   _hmac.update(path);
   _hmac.update(timestamp_);

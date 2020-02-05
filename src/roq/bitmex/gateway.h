@@ -18,6 +18,7 @@
 #include "roq/core/event/dns_base.h"
 
 #include "roq/bitmex/config.h"
+#include "roq/bitmex/random.h"
 
 #include "roq/bitmex/order_mapping.h"
 #include "roq/bitmex/rest.h"
@@ -110,6 +111,8 @@ class Gateway final : public server::Handler {
   server::Dispatcher& _dispatcher;
   // config
   const std::string _account;
+  // authentication
+  Random _random;
   // async
   core::event::Base _base;
   core::event::DNSBase _dns_base;

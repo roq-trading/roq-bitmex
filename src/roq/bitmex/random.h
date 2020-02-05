@@ -19,8 +19,8 @@ class Random final {
       const std::string_view& key,
       const std::string_view& secret);
 
-  Random(const Random&) = delete;
   Random(Random&&) = delete;
+  Random(const Random&) = delete;
 
   std::string create_signature(
       std::chrono::seconds timestamp,

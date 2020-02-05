@@ -24,8 +24,6 @@
 #include "roq/bitmex/options.h"
 #include "roq/bitmex/random.h"
 
-#define PREFIX "[WS] "
-
 namespace roq {
 namespace bitmex {
 
@@ -58,12 +56,12 @@ static auto create_latency(
 WebSocket::WebSocket(
     Gateway& gateway,
     const Config& config,
+    Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
     core::ssl::Context& ssl_context)
     : _gateway(gateway),
-      _access_key(config.get_api_key()),
-      _access_secret(config.get_secret()),
+      _random(random),
       _connection_factory(
           base,
           dns_base,
@@ -173,7 +171,7 @@ void WebSocket::send(const core::utils::Message& message) {
 }
 
 void WebSocket::send_upgrade_request() {
-  LOG(INFO)(PREFIX "Sending upgrade request");
+  LOG(INFO)("Sending upgrade request");
   auto key = core::ws::Random::create_sec_websocket_key();
   assert(_response_key.empty());
   _response_key = core::ws::Random::create_response(key);
@@ -243,7 +241,7 @@ void WebSocket::operator()(const core::net::Manager::Read& read) {
     size_t bytes = 0;
     switch (_state) {
       case State::DISCONNECTED:
-        LOG(FATAL)(PREFIX "Unexpected");
+        LOG(FATAL)("Unexpected");
         break;
       case State::UPGRADE_SENT:
         bytes = _response->dispatch(
@@ -255,13 +253,13 @@ void WebSocket::operator()(const core::net::Manager::Read& read) {
         bytes = core::ws::Decoder::dispatch(
             overloaded {
               [](const core::ws::continuation_t&) {
-                LOG(FATAL)(PREFIX "Unexpected");
+                LOG(FATAL)("Unexpected");
               },
               [this](const core::ws::text_t& text) {
                 (*this)(text);
               },
               [](const core::ws::binary_t&) {
-                LOG(FATAL)(PREFIX "Unexpected");
+                LOG(FATAL)("Unexpected");
               },
               [this](const core::ws::close_t& close) {
                 (*this)(close);
@@ -277,7 +275,7 @@ void WebSocket::operator()(const core::net::Manager::Read& read) {
             length);
         break;
       default:
-        LOG(FATAL)(PREFIX "Unexpected");
+        LOG(FATAL)("Unexpected");
     }
     assert(bytes <= length);
     if (bytes == 0)
@@ -307,13 +305,13 @@ void WebSocket::operator()(
     const core::http::Response::Status& status) {
   assert(_header == core::http::Header::UNKNOWN);
   LOG(INFO)(
-      FMT_STRING(PREFIX "HTTP response status={} text=\"{}\""),
+      FMT_STRING("HTTP response status={} text=\"{}\""),
       status.code,
       status.text);
   _status = core::http::parse_status(status.code);
   if (_status == core::http::Status::SWITCHING_PROTOCOLS) {
     VLOG(4)(
-        FMT_STRING(PREFIX "status={} ({})"),
+        FMT_STRING("status={} ({})"),
         status.code,
         _status);
   } else {
@@ -338,41 +336,41 @@ void WebSocket::operator()(
   switch (_header) {
     case core::http::Header::CONNECTION: {
       VLOG(4)(
-          FMT_STRING(PREFIX "{}=\"{}\""),
+          FMT_STRING("{}=\"{}\""),
           _header,
           header_value.text);
       if (header_value.text.compare("upgrade") == 0) {
         _connection_upgrade = true;
       } else {
         LOG(WARNING)(
-            FMT_STRING(PREFIX "Expected \"upgrade\", got \"{}\""),
+            FMT_STRING("Expected \"upgrade\", got \"{}\""),
             header_value.text);
       }
       break;
     }
     case core::http::Header::UPGRADE: {
       VLOG(4)(
-          FMT_STRING(PREFIX "{}=\"{}\""),
+          FMT_STRING("{}=\"{}\""),
           _header,
           header_value.text);
       if (header_value.text.compare("websocket") == 0) {
         _upgrade_websocket = true;
       } else {
         LOG(WARNING)(
-            FMT_STRING(PREFIX "Expected \"websocket\", got \"{}\""),
+            FMT_STRING("Expected \"websocket\", got \"{}\""),
             header_value.text);
       }
       break;
     }
     case core::http::Header::SEC_WEBSOCKET_ACCEPT: {
       VLOG(4)(
-          FMT_STRING(PREFIX "{}=\"{}\""),
+          FMT_STRING("{}=\"{}\""),
           _header, header_value.text);
       if (header_value.text.compare(_response_key) == 0) {
         _sec_websocket_accept = true;
       } else {
         LOG(WARNING)(
-            FMT_STRING(PREFIX "Expected \"websocket\", got \"{}\""),
+            FMT_STRING("Expected \"websocket\", got \"{}\""),
             header_value.text);
       }
       break;
@@ -391,19 +389,19 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const core::http::Response::ChunkHeader&) {
   assert(_header == core::http::Header::UNKNOWN);
-  LOG(WARNING)(PREFIX "Unexpected [chunk header]");
+  LOG(WARNING)("Unexpected [chunk header]");
 }
 
 void WebSocket::operator()(
     const core::http::Response::Body&) {
   assert(_header == core::http::Header::UNKNOWN);
-  LOG(WARNING)(PREFIX "Unexpected [body]");
+  LOG(WARNING)("Unexpected [body]");
 }
 
 void WebSocket::operator()(
     const core::http::Response::ChunkComplete&) {
   assert(_header == core::http::Header::UNKNOWN);
-  LOG(WARNING)(PREFIX "Unexpected [chunk complete]");
+  LOG(WARNING)("Unexpected [chunk complete]");
 }
 
 void WebSocket::operator()(
@@ -411,7 +409,7 @@ void WebSocket::operator()(
   assert(_header == core::http::Header::UNKNOWN);
   _status = core::http::Status::UNKNOWN;
   if (_connection_upgrade && _upgrade_websocket && _sec_websocket_accept) {
-    LOG(INFO)(PREFIX "Upgraded");
+    LOG(INFO)("Upgraded");
     (*this)(State::AWAIT_HANDSHAKE);
   } else {
     throw std::runtime_error("Connection has not been correctly upgraded to websocket");
@@ -421,19 +419,19 @@ void WebSocket::operator()(
 // ws
 
 void WebSocket::operator()(const core::ws::text_t& text) {
-  LOG_IF(WARNING, text.last == false)(PREFIX "message is fragmented");
+  LOG_IF(WARNING, text.last == false)("message is fragmented");
   parse(text.payload);
 }
 
 void WebSocket::operator()(const core::ws::close_t& close) {
   LOG(WARNING)(
-      FMT_STRING(PREFIX "close reason={}"),
+      FMT_STRING("close reason={}"),
       close.reason);
 }
 
 void WebSocket::operator()(const core::ws::ping_t& ping) {
   VLOG(1)(
-      FMT_STRING(PREFIX "ping(length={})"),
+      FMT_STRING("ping(length={})"),
       ping.length);
   core::ws::Writer writer(_encode_buffer);
   core::ws::Encoder::pong(
@@ -446,7 +444,7 @@ void WebSocket::operator()(const core::ws::ping_t& ping) {
 void WebSocket::operator()(const core::ws::pong_t& pong) {
   auto now = core::get_system_clock();
   VLOG(3)(
-      FMT_STRING(PREFIX "pong(length={})"),
+      FMT_STRING("pong(length={})"),
       pong.length);
   if (pong.length) {
     std::string_view text(
@@ -467,7 +465,7 @@ void WebSocket::parse(const std::string_view& message) {
           parse_helper(message);
         } catch (std::exception& e) {
           LOG(FATAL)(
-              FMT_STRING(PREFIX "ERROR what=\"{}\""),
+              FMT_STRING("ERROR what=\"{}\""),
               e.what());
         }
       });
@@ -483,19 +481,19 @@ void WebSocket::parse_helper(const std::string_view& message) {
 
 void WebSocket::operator()(const json::Error& error) {
   VLOG(1)(
-      FMT_STRING(PREFIX "error={}"),
+      FMT_STRING("error={}"),
       error);
 }
 
 void WebSocket::operator()(const json::Funding& funding) {
   VLOG(1)(
-      FMT_STRING(PREFIX "funding={}"),
+      FMT_STRING("funding={}"),
       funding);
 }
 
 void WebSocket::operator()(const json::Handshake& handshake) {
   VLOG(1)(
-      FMT_STRING(PREFIX "handshake={}"),
+      FMT_STRING("handshake={}"),
       handshake);
   (*this)(State::READY);
   _gateway(*this);
@@ -503,61 +501,61 @@ void WebSocket::operator()(const json::Handshake& handshake) {
 
 void WebSocket::operator()(const json::Instrument& instrument) {
   VLOG(1)(
-      FMT_STRING(PREFIX "instrument={}"),
+      FMT_STRING("instrument={}"),
       instrument);
   _gateway(instrument);
 }
 
 void WebSocket::operator()(const json::Liquidation& liquidation) {
   VLOG(1)(
-      FMT_STRING(PREFIX "liquidation={}"),
+      FMT_STRING("liquidation={}"),
       liquidation);
 }
 
 void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
   VLOG(1)(
-      FMT_STRING(PREFIX "order_book_l2={}"),
+      FMT_STRING("order_book_l2={}"),
       order_book_l2);
   _gateway(order_book_l2);
 }
 
 void WebSocket::operator()(const json::Quote& quote) {
   VLOG(1)(
-      FMT_STRING(PREFIX "quote={}"),
+      FMT_STRING("quote={}"),
       quote);
   _gateway(quote);
 }
 
 void WebSocket::operator()(const json::Settlement& settlement) {
   VLOG(1)(
-      FMT_STRING(PREFIX "settlement={}"),
+      FMT_STRING("settlement={}"),
       settlement);
   _gateway(settlement);
 }
 
 void WebSocket::operator()(const json::Trade& trade) {
   VLOG(1)(
-      FMT_STRING(PREFIX "trade={}"),
+      FMT_STRING("trade={}"),
       trade);
   _gateway(trade);
 }
 
 void WebSocket::operator()(const json::Subscribe& subscribe) {
   VLOG(1)(
-      FMT_STRING(PREFIX "subscribe={}"),
+      FMT_STRING("subscribe={}"),
       subscribe);
   if (subscribe.success) {
     assert(subscribe.failure == false);
     LOG(INFO)(
-        FMT_STRING(PREFIX "Successfully subscribed to topic=\"{}\""),
+        FMT_STRING("Successfully subscribed to topic=\"{}\""),
         subscribe.subscribe);
   } else if (subscribe.failure) {
     assert(subscribe.success == false);
     LOG(WARNING)(
-        FMT_STRING(PREFIX "Failed to subscribe topic=\"{}\""),
+        FMT_STRING("Failed to subscribe topic=\"{}\""),
         subscribe.subscribe);
   } else {
-    LOG(FATAL)(PREFIX "Expected success or failure");
+    LOG(FATAL)("Expected success or failure");
   }
   // TODO(thraneh): clear timeout
 }

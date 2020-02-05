@@ -21,8 +21,6 @@
 
 #include "roq/bitmex/json/utils.h"
 
-#define PREFIX "[REST] "
-
 namespace roq {
 namespace bitmex {
 
@@ -61,7 +59,7 @@ void HTTPConnection::connect(
     core::event::DNSBase& dns_base,
     const core::URI& uri) {
   LOG(INFO)(
-      FMT_STRING(PREFIX "Connecting to host=\"{}\", port={}"),
+      FMT_STRING("Connecting to host=\"{}\", port={}"),
       uri.host,
       uri.get_port_with_default());
   assert(_state == State::DISCONNECTED);
@@ -75,7 +73,7 @@ void HTTPConnection::connect(
 
 void HTTPConnection::write(const void *data, size_t length) {
   VLOG(4)(
-      FMT_STRING(PREFIX "send(length={})"),
+      FMT_STRING("send(length={})"),
       length);
   _buffer_event.write(data, length);
   _buffer_event.flush(EV_WRITE, BEV_FLUSH);
@@ -98,7 +96,7 @@ void HTTPConnection::on_read() {
     _buffer.drain(length);
   } catch (std::exception& e) {
     LOG(ERROR)(
-        FMT_STRING(PREFIX "Exception: what=\"{}\""),
+        FMT_STRING("Exception: what=\"{}\""),
         e.what());
     stop();
   }
@@ -222,13 +220,13 @@ static auto create_latency(
 Rest::Rest(
     Gateway& gateway,
     const Config& config,
+    Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
     core::ssl::Context& ssl_context)
     : _gateway(gateway),
-      _access_key(config.get_api_key()),
-      _access_secret(config.get_secret()),
       _uri(FLAGS_rest_uri),
+      _random(random),
       _base(base),
       _dns_base(dns_base),
       _ssl_context(ssl_context),
@@ -285,17 +283,17 @@ void Rest::get_products() {
               auto products = json::Products::parse(
                   body,
                   buffer);
-              VLOG(1)(PREFIX "products={}", products);
+              VLOG(1)("products={}", products);
               _gateway(products);
               */
             });
       },
       [](auto& status) {
         LOG(WARNING)(
-            FMT_STRING(PREFIX "HTTP status={}"),
+            FMT_STRING("HTTP status={}"),
             status);
-        LOG(WARNING)(PREFIX "Unable to get products");
-        LOG(FATAL)(PREFIX "Unexpected -- now what?");  // FIXME(thraneh): ...
+        LOG(WARNING)("Unable to get products");
+        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
   // DEBUG
   get_time();
@@ -313,17 +311,17 @@ void Rest::get_accounts() {
               auto accounts = json::Accounts::parse(
                   body,
                   buffer);
-              VLOG(1)(PREFIX "accounts={}", accounts);
+              VLOG(1)("accounts={}", accounts);
               _gateway(accounts);
               */
             });
       },
       [this](auto& status) {
         LOG(WARNING)(
-            FMT_STRING(PREFIX "HTTP status={}"),
+            FMT_STRING("HTTP status={}"),
             status);
-        LOG(WARNING)(PREFIX "Unable to get accounts");
-        LOG(FATAL)(PREFIX "Unexpected -- now what?");  // FIXME(thraneh): ...
+        LOG(WARNING)("Unable to get accounts");
+        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
 }
 
@@ -336,16 +334,16 @@ void Rest::get_time() {
             [&]() {
               /*
               auto time = json::Time::parse(body);
-              VLOG(1)(PREFIX "time={}", time);
+              VLOG(1)("time={}", time);
               */
             });
       },
       [](auto& status) {
         LOG(WARNING)(
-            FMT_STRING(PREFIX "HTTP status={}"),
+            FMT_STRING("HTTP status={}"),
             status);
-        LOG(WARNING)(PREFIX "Unable to get products");
-        LOG(FATAL)(PREFIX "Unexpected -- now what?");  // FIXME(thraneh): ...
+        LOG(WARNING)("Unable to get products");
+        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
 }
 
@@ -355,7 +353,7 @@ void Rest::get(
     success_t&& success,
     failure_t&& failure) {
   LOG(INFO)(
-      FMT_STRING(PREFIX "GET {}"),
+      FMT_STRING("GET {}"),
       uri);
   auto create_time = core::get_system_clock();
   switch (_state) {
@@ -392,7 +390,7 @@ void Rest::get(
       }
       break;
     default:
-      LOG(FATAL)(PREFIX "Unexpected");
+      LOG(FATAL)("Unexpected");
   }
 }
 
@@ -409,7 +407,7 @@ void Rest::on_timer() {
       break;
     case State::DISCONNECTING:
       assert(_connection);
-      LOG(INFO)(PREFIX "Disconnected");
+      LOG(INFO)("Disconnected");
       _connection.reset();
       _state = State::DISCONNECTED;
       break;
@@ -421,7 +419,7 @@ void Rest::check_timeout() {
   auto now = core::get_system_clock();
   if ((now - _window) < TIMEOUT_SECONDS)
     return;
-  LOG(INFO)(PREFIX "Disconnecting...");
+  LOG(INFO)("Disconnecting...");
   _state = State::DISCONNECTING;
   _connection->stop();
 }
@@ -459,13 +457,13 @@ bool Rest::request(
     const std::string_view& path,
     bool authenticate) {
   LOG(INFO)(
-      FMT_STRING(PREFIX "Sending method={} path=\"{}\""),
+      FMT_STRING("Sending method={} path=\"{}\""),
       method,
       path);
   assert(_state == State::CONNECTED);
   assert(_connection);
   if (throttle()) {
-    LOG(WARNING)(PREFIX "Request is pending due to throttling");
+    LOG(WARNING)("Request is pending due to throttling");
     return false;
   }
   std::string headers;
@@ -473,10 +471,7 @@ bool Rest::request(
     // *must* be seconds (see bitmex-pro api documentation)
     auto now = std::chrono::duration_cast<std::chrono::seconds>(
         core::get_realtime_clock());
-    Random random(
-        _access_key,
-        _access_secret);
-    headers = random.create_headers(
+    headers = _random.create_headers(
         now,
         core::http::Method::GET,
         path);
@@ -499,7 +494,7 @@ bool Rest::request(
       buffer.data(),
       buffer.size());
   VLOG(1)(
-      FMT_STRING(PREFIX "{}"),
+      FMT_STRING("{}"),
       request);
   _connection->write(
       request.data(),
@@ -553,7 +548,7 @@ bool Rest::remove_one(
     const std::string_view& body) {
   if (_sent.empty()) {
     LOG(WARNING)(
-        FMT_STRING(PREFIX "Unexpected body={}"),
+        FMT_STRING("Unexpected body={}"),
         body);
     return false;
   }
