@@ -105,7 +105,10 @@ class WebSocket final
   void parse(const std::string_view& message);
   void parse_helper(const std::string_view& message);
 
+  void send_cancel_all_after();
+
   // json:
+  void operator()(const json::CancelAllAfter&) override;
   void operator()(const json::Error&) override;
   void operator()(const json::Execution&) override;
   void operator()(const json::Funding&) override;
@@ -137,6 +140,7 @@ class WebSocket final
   std::string _response_key;
   std::unique_ptr<core::http::Response> _response;
   std::chrono::nanoseconds _next_heartbeat = {};
+  std::chrono::nanoseconds _next_cancel_all_after = {};
   // other
   core::stack::Buffer<char, 32> _buffer;
   // metrics
@@ -147,8 +151,21 @@ class WebSocket final
   struct {
     core::metrics::Profile
       parse,
+      cancel_all_after,
+      error,
+      execution,
+      funding,
+      handshake,
       instrument,
-      order_book_l2;
+      liquidation,
+      margin,
+      order,
+      order_book_l2,
+      position,
+      quote,
+      settlement,
+      subscribe,
+      trade;
   } _profile;
   struct {
     core::metrics::Latency

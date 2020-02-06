@@ -7,6 +7,7 @@
 
 #include "roq/core/json/buffer.h"
 
+#include "roq/bitmex/json/cancel_all_after.h"
 #include "roq/bitmex/json/error.h"
 #include "roq/bitmex/json/execution.h"
 #include "roq/bitmex/json/funding.h"
@@ -30,6 +31,7 @@ namespace json {
 
 struct Parser final {
   struct Handler {
+    virtual void operator()(const CancelAllAfter&) = 0;
     virtual void operator()(const Error&) = 0;
     virtual void operator()(const Execution&) = 0;
     virtual void operator()(const Funding&) = 0;
@@ -47,8 +49,10 @@ struct Parser final {
   };
 
   std::string_view action;
+  std::chrono::nanoseconds cancel_time = {};
   std::string_view error;
   bool failure = false;
+  std::chrono::nanoseconds now = {};
   int32_t status = 0;
   std::string_view subscribe;
   bool success = false;

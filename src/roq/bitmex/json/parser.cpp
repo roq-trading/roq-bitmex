@@ -18,6 +18,7 @@ enum class Field {
   UNKNOWN,
   ACTION,
   ATTRIBUTES,
+  CANCEL_TIME,
   DATA,
   DOCS,
   ERROR,
@@ -27,6 +28,7 @@ enum class Field {
   INFO,
   KEYS,
   LIMIT,
+  NOW,
   META,
   REQUEST,
   STATUS,
@@ -52,6 +54,12 @@ constexpr auto parse_a(auto& name) {
         break;
     }
   }
+  return Field::UNKNOWN;
+}
+
+constexpr auto parse_c(auto& name) {
+  if (name.compare("cancelTime") == 0)
+    return Field::CANCEL_TIME;
   return Field::UNKNOWN;
 }
 
@@ -121,6 +129,12 @@ constexpr auto parse_m(auto& name) {
   return Field::UNKNOWN;
 }
 
+constexpr auto parse_n(auto& name) {
+  if (name.compare("now") == 0)
+    return Field::NOW;
+  return Field::UNKNOWN;
+}
+
 constexpr auto parse_r(auto& name) {
   if (name.compare("request") == 0)
     return Field::REQUEST;
@@ -177,30 +191,20 @@ constexpr auto parse_field(const std::string_view& name) {
   if (name.empty())
     return Field::UNKNOWN;
   switch (name.data()[0]) {
-    case 'a':
-      return parse_a(name);
-    case 'd':
-      return parse_d(name);
-    case 'e':
-      return parse_e(name);
-    case 'f':
-      return parse_f(name);
-    case 'i':
-      return parse_i(name);
-    case 'k':
-      return parse_k(name);
-    case 'l':
-      return parse_l(name);
-    case 'm':
-      return parse_m(name);
-    case 'r':
-      return parse_r(name);
-    case 's':
-      return parse_s(name);
-    case 't':
-      return parse_t(name);
-    case 'v':
-      return parse_v(name);
+    case 'a': return parse_a(name);
+    case 'c': return parse_c(name);
+    case 'd': return parse_d(name);
+    case 'e': return parse_e(name);
+    case 'f': return parse_f(name);
+    case 'i': return parse_i(name);
+    case 'k': return parse_k(name);
+    case 'l': return parse_l(name);
+    case 'm': return parse_m(name);
+    case 'n': return parse_n(name);
+    case 'r': return parse_r(name);
+    case 's': return parse_s(name);
+    case 't': return parse_t(name);
+    case 'v': return parse_v(name);
     default:
       return Field::UNKNOWN;
   }
@@ -208,6 +212,8 @@ constexpr auto parse_field(const std::string_view& name) {
 
 static_assert(parse_field("action") == Field::ACTION);
 static_assert(parse_field("attributes") == Field::ATTRIBUTES);
+
+static_assert(parse_field("cancelTime") == Field::CANCEL_TIME);
 
 static_assert(parse_field("data") == Field::DATA);
 static_assert(parse_field("docs") == Field::DOCS);
@@ -226,6 +232,8 @@ static_assert(parse_field("limit") == Field::LIMIT);
 
 static_assert(parse_field("meta") == Field::META);
 
+static_assert(parse_field("now") == Field::NOW);
+
 static_assert(parse_field("request") == Field::REQUEST);
 
 static_assert(parse_field("status") == Field::STATUS);
@@ -240,6 +248,7 @@ static_assert(parse_field("version") == Field::VERSION);
 
 enum class Type {
   UNKNOWN,
+  CANCEL_ALL_AFTER,
   ERROR,
   INFO,
   SUBSCRIBE,
@@ -284,6 +293,10 @@ void Parser::dispatch(
         case Field::ATTRIBUTES:
           // not used
           update(type, Type::TABLE);
+          break;
+        case Field::CANCEL_TIME:
+          update(result.cancel_time, value);
+          update(type, Type::CANCEL_ALL_AFTER);
           break;
         case Field::DATA:
           if (action == Action::UNKNOWN) {
@@ -430,6 +443,10 @@ void Parser::dispatch(
           // not used
           update(type, Type::ERROR);
           break;
+        case Field::NOW:
+          update(result.now, value);
+          update(type, Type::CANCEL_ALL_AFTER);
+          break;
         case Field::REQUEST:
           // not used
           // => subscribe + error
@@ -469,6 +486,14 @@ void Parser::dispatch(
     switch (type) {
       case Type::UNKNOWN:
         throw std::runtime_error("Can't detect message type");
+      case Type::CANCEL_ALL_AFTER: {
+        CancelAllAfter cancel_all_after = {
+          .cancel_time = result.cancel_time,
+          .now = result.now,
+        };
+        handler(cancel_all_after);
+        return;
+      }
       case Type::ERROR: {
         Error error = {
           .error = result.error,

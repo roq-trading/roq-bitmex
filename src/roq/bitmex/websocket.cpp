@@ -77,8 +77,21 @@ WebSocket::WebSocket(
       },
       _profile {
         .parse = create_profile("parse"),
+        .cancel_all_after = create_profile("cancel_all_after"),
+        .error = create_profile("error"),
+        .execution = create_profile("execution"),
+        .funding = create_profile("funding"),
+        .handshake = create_profile("handshake"),
         .instrument = create_profile("instrument"),
+        .liquidation = create_profile("liquidation"),
+        .margin = create_profile("margin"),
+        .order = create_profile("order"),
         .order_book_l2 = create_profile("order_book_l2"),
+        .position = create_profile("position"),
+        .quote = create_profile("quote"),
+        .settlement = create_profile("settlement"),
+        .subscribe = create_profile("subscribe"),
+        .trade = create_profile("trade"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -106,6 +119,11 @@ void WebSocket::operator()(const TimerEvent& event) {
         _next_heartbeat = now +
           std::chrono::seconds { FLAGS_ping_freq_secs };
         send_ping();
+      }
+      if (_next_cancel_all_after <= now) {
+        _next_cancel_all_after = now +
+          std::chrono::seconds { FLAGS_cancel_all_after_secs / 4 };
+        send_cancel_all_after();
       }
       break;
     }
@@ -159,8 +177,21 @@ void WebSocket::operator()(Metrics& metrics) {
     .write(_counter.disconnect)
     // profile
     .write(_profile.parse)
+    .write(_profile.cancel_all_after)
+    .write(_profile.error)
+    .write(_profile.execution)
+    .write(_profile.funding)
+    .write(_profile.handshake)
     .write(_profile.instrument)
+    .write(_profile.liquidation)
+    .write(_profile.margin)
+    .write(_profile.order)
     .write(_profile.order_book_l2)
+    .write(_profile.position)
+    .write(_profile.quote)
+    .write(_profile.settlement)
+    .write(_profile.subscribe)
+    .write(_profile.trade)
     // latency
     .write(_latency.ping)
     .write(_latency.heartbeat);
@@ -234,6 +265,8 @@ void WebSocket::operator()(const core::net::Manager::Connected&) {
 void WebSocket::operator()(const core::net::Manager::Disconnected&) {
   _response_key.clear();
   _response.reset();
+  _next_heartbeat = {};
+  _next_cancel_all_after = {};
   (*this)(State::DISCONNECTED);
   ++_counter.disconnect;
 }
@@ -489,111 +522,178 @@ void WebSocket::parse_helper(const std::string_view& message) {
       buffer);
 }
 
+void WebSocket::send_cancel_all_after() {
+  auto text = fmt::format(
+      FMT_STRING(
+        "{{"
+        "\"op\":\"cancelAllAfter\","
+        "\"args\":{}"
+        "}}"),
+      FLAGS_cancel_all_after_secs);
+  core::ws::Writer writer(_encode_buffer);
+  core::ws::Encoder::text(
+      writer,
+      text);
+  send(writer.finish());
+}
+
+void WebSocket::operator()(
+    const json::CancelAllAfter& cancel_all_after) {
+  _profile.cancel_all_after(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("cancel_all_after={}"),
+            cancel_all_after);
+      });
+}
+
 void WebSocket::operator()(const json::Error& error) {
-  LOG(FATAL)(
-      FMT_STRING("error={}"),
-      error);
+  _profile.error(
+      [&]() {
+        LOG(FATAL)(
+            FMT_STRING("error={}"),
+            error);
+      });
 }
 
 void WebSocket::operator()(const json::Execution& execution) {
-  VLOG(1)(
-      FMT_STRING("execution={}"),
-      execution);
+  _profile.execution(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("execution={}"),
+            execution);
+      });
 }
 
 void WebSocket::operator()(const json::Funding& funding) {
-  VLOG(1)(
-      FMT_STRING("funding={}"),
-      funding);
+  _profile.funding(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("funding={}"),
+            funding);
+      });
 }
 
 void WebSocket::operator()(const json::Handshake& handshake) {
-  VLOG(1)(
-      FMT_STRING("handshake={}"),
-      handshake);
-  (*this)(State::READY);
-  _gateway(*this);
+  _profile.handshake(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("handshake={}"),
+            handshake);
+        (*this)(State::READY);
+        _gateway(*this);
+      });
 }
 
 void WebSocket::operator()(const json::Instrument& instrument) {
-  VLOG(1)(
-      FMT_STRING("instrument={}"),
-      instrument);
-  _gateway(instrument);
+  _profile.instrument(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("instrument={}"),
+            instrument);
+        _gateway(instrument);
+      });
 }
 
 void WebSocket::operator()(const json::Liquidation& liquidation) {
-  VLOG(1)(
-      FMT_STRING("liquidation={}"),
-      liquidation);
+  _profile.liquidation(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("liquidation={}"),
+            liquidation);
+      });
 }
 
 void WebSocket::operator()(const json::Margin& margin) {
-  VLOG(1)(
-      FMT_STRING("margin={}"),
-      margin);
+  _profile.margin(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("margin={}"),
+            margin);
+      });
 }
 
 void WebSocket::operator()(const json::Order& order) {
-  VLOG(1)(
-      FMT_STRING("order={}"),
-      order);
-  _gateway(order);
+  _profile.order(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("order={}"),
+            order);
+        _gateway(order);
+      });
 }
 
 void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
-  VLOG(1)(
-      FMT_STRING("order_book_l2={}"),
-      order_book_l2);
-  _gateway(order_book_l2);
+  _profile.order_book_l2(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("order_book_l2={}"),
+            order_book_l2);
+        _gateway(order_book_l2);
+      });
 }
 
 void WebSocket::operator()(const json::Position& position) {
-  VLOG(1)(
-      FMT_STRING("position={}"),
-      position);
-  _gateway(position);
+  _profile.position(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("position={}"),
+            position);
+        _gateway(position);
+      });
 }
 
 void WebSocket::operator()(const json::Quote& quote) {
-  VLOG(1)(
-      FMT_STRING("quote={}"),
-      quote);
-  _gateway(quote);
+  _profile.quote(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("quote={}"),
+            quote);
+        _gateway(quote);
+      });
 }
 
 void WebSocket::operator()(const json::Settlement& settlement) {
-  VLOG(1)(
-      FMT_STRING("settlement={}"),
-      settlement);
-  _gateway(settlement);
-}
-
-void WebSocket::operator()(const json::Trade& trade) {
-  VLOG(1)(
-      FMT_STRING("trade={}"),
-      trade);
-  _gateway(trade);
+  _profile.settlement(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("settlement={}"),
+            settlement);
+        _gateway(settlement);
+      });
 }
 
 void WebSocket::operator()(const json::Subscribe& subscribe) {
-  VLOG(1)(
-      FMT_STRING("subscribe={}"),
-      subscribe);
-  if (subscribe.success) {
-    assert(subscribe.failure == false);
-    LOG(INFO)(
-        FMT_STRING("Successfully subscribed to topic=\"{}\""),
-        subscribe.subscribe);
-  } else if (subscribe.failure) {
-    assert(subscribe.success == false);
-    LOG(WARNING)(
-        FMT_STRING("Failed to subscribe topic=\"{}\""),
-        subscribe.subscribe);
-  } else {
-    LOG(FATAL)("Expected success or failure");
-  }
-  // TODO(thraneh): clear timeout
+  _profile.subscribe(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("subscribe={}"),
+            subscribe);
+        if (subscribe.success) {
+          assert(subscribe.failure == false);
+          LOG(INFO)(
+              FMT_STRING("Successfully subscribed to topic=\"{}\""),
+              subscribe.subscribe);
+        } else if (subscribe.failure) {
+          assert(subscribe.success == false);
+          LOG(WARNING)(
+              FMT_STRING("Failed to subscribe topic=\"{}\""),
+              subscribe.subscribe);
+        } else {
+          LOG(FATAL)("Expected success or failure");
+        }
+        // TODO(thraneh): clear timeout
+      });
+}
+
+void WebSocket::operator()(const json::Trade& trade) {
+  _profile.trade(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("trade={}"),
+            trade);
+        _gateway(trade);
+      });
 }
 
 }  // namespace bitmex

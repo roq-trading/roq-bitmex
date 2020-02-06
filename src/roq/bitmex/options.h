@@ -17,6 +17,8 @@ DECLARE_uint32(encode_buffer_size);
 DECLARE_uint32(decode_buffer_size);
 DECLARE_uint64(reconnect_secs);
 
+DECLARE_uint32(cancel_all_after_secs);
+
 // external
 
 DECLARE_string(name);

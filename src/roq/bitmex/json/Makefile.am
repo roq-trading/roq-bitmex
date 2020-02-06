@@ -9,6 +9,7 @@ libroq_bitmex_json_la_CPPFLAGS = \
 	$(ROQ_CFLAGS)
 libroq_bitmex_json_la_SOURCES = \
 	action.cpp \
+	cancel_all_after.cpp \
 	error.cpp \
 	execution.cpp \
 	execution_item.cpp \

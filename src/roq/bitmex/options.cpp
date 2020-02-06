@@ -46,3 +46,7 @@ DEFINE_uint32(decode_buffer_size,
 DEFINE_uint64(reconnect_secs,
     uint64_t{3},
     "time before reconnect (seconds)");
+
+DEFINE_uint32(cancel_all_after_secs,
+    uint32_t{60},
+    "cancel all after (seconds)");
