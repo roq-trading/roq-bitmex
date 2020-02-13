@@ -1,0 +1,16 @@
+{
+"type": "json::item",
+"name": "TradeItem",
+"values": {
+	"foreignNotional": "double",
+	"grossValue": "double",
+	"homeNotional": "double",
+	"price": "double",
+	"side": "Side",
+	"size": "double",
+	"symbol": "std::string_view",
+	"tickDirection": "std::string_view",
+	"timestamp": "std::chrono::nanoseconds",
+	"trdMatchID": "std::string_view"
+}
+}

@@ -161,20 +161,17 @@ class Rest final : public HTTPConnection::Handler {
 
   void get(
       const std::string_view& uri,
-      bool authenticate,
       success_t&& success,
       failure_t&& failure);
 
   bool request(
       const core::http::Method& method,
-      const std::string_view& uri,
-      bool authenticate);
+      const std::string_view& uri);
 
   bool throttle();
 
   void make_pending(
       const std::string_view& uri,
-      bool authenticate,
       std::chrono::nanoseconds create_time,
       success_t&& success,
       failure_t&& failure);
@@ -234,7 +231,6 @@ class Rest final : public HTTPConnection::Handler {
   std::list<
     std::tuple<
       std::string,
-      bool,
       std::chrono::nanoseconds,
       success_t,
       failure_t> > _waiting;

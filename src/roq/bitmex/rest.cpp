@@ -302,7 +302,6 @@ void Rest::create_order(const CreateOrder& create_order) {
 void Rest::get_products() {
   get(
       "/products",
-      false,
       [this](const std::string_view& body) {
         _profile.products(
             [&]() {
@@ -329,7 +328,6 @@ void Rest::get_products() {
 void Rest::get_accounts() {
   get(
       "/accounts",
-      true,
       [this](const std::string_view& body) {
         _profile.accounts(
             [&]() {
@@ -355,7 +353,6 @@ void Rest::get_accounts() {
 void Rest::get_time() {
   get(
       "/time",
-      false,
       [this](const std::string_view& body) {
         _profile.products(
             [&]() {
@@ -376,7 +373,6 @@ void Rest::get_time() {
 
 void Rest::get(
     const std::string_view& uri,
-    bool authenticate,
     success_t&& success,
     failure_t&& failure) {
   LOG(INFO)(
@@ -391,7 +387,6 @@ void Rest::get(
     case State::CONNECTING:
       make_pending(
           uri,
-          authenticate,
           create_time,
           std::move(success),
           std::move(failure));
@@ -400,8 +395,7 @@ void Rest::get(
       if (_waiting.empty() &&
           request(
             core::http::Method::GET,
-            uri,
-            authenticate)) {
+            uri)) {
         make_sent(
             create_time,
             create_time,
@@ -410,7 +404,6 @@ void Rest::get(
       } else {
         make_pending(
             uri,
-            authenticate,
             create_time,
             std::move(success),
             std::move(failure));
@@ -467,22 +460,20 @@ void Rest::process_pending() {
     auto& front = _waiting.front();
     if (request(
           core::http::Method::GET,
-          std::get<0>(front),
-          std::get<1>(front)) == false)
+          std::get<0>(front)) == false)
       return;
     make_sent(
-        std::get<2>(front),
+        std::get<1>(front),
         core::get_system_clock(),
-        std::move(std::get<3>(front)),
-        std::move(std::get<4>(front)));
+        std::move(std::get<2>(front)),
+        std::move(std::get<3>(front)));
     _waiting.pop_front();
   }
 }
 
 bool Rest::request(
     const core::http::Method& method,
-    const std::string_view& path,
-    bool authenticate) {
+    const std::string_view& path) {
   LOG(INFO)(
       FMT_STRING("Sending method={} path=\"{}\""),
       method,
@@ -493,16 +484,13 @@ bool Rest::request(
     LOG(WARNING)("Request is pending due to throttling");
     return false;
   }
-  std::string headers;
-  if (authenticate) {
-    // *must* be seconds (see bitmex-pro api documentation)
-    auto now = std::chrono::duration_cast<std::chrono::seconds>(
-        core::get_realtime_clock());
-    headers = _random.create_headers(
-        now,
-        core::http::Method::GET,
-        path);
-  }
+  // *must* be seconds (see bitmex-pro api documentation)
+  auto now = std::chrono::duration_cast<std::chrono::seconds>(
+      core::get_realtime_clock());
+  auto headers = _random.create_headers(
+      now,
+      core::http::Method::GET,
+      path);
   fmt::memory_buffer buffer;
   fmt::format_to(
       buffer,
@@ -544,14 +532,12 @@ bool Rest::throttle() {
 
 void Rest::make_pending(
     const std::string_view& uri,
-    bool authenticate,
     std::chrono::nanoseconds create_time,
     success_t&& success,
     failure_t&& failure) {
   _waiting.push_back(
       std::make_tuple(
           std::string(uri),
-          authenticate,
           create_time,
           std::move(success),
           std::move(failure)));
