@@ -21,65 +21,117 @@ enum class Field {
   TIMESTAMP,
 };
 
-constexpr Field parse_a(auto& name) {
-  if (name.length() >= 4) {
+constexpr Field parse_askP(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[4] == 'r' &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'e') {
+    return Field::ASK_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_askS(const std::string_view& name) {
+  if (name.length() == 7 &&
+      name[4] == 'i' &&
+      name[5] == 'z' &&
+      name[6] == 'e') {
+    return Field::ASK_SIZE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_a(const std::string_view& name) {
+  if (name.length() >= 4 &&
+      name[1] == 's' &&
+      name[2] == 'k') {
     switch (name[3]) {
       case 'P':
-        if (name.compare("askPrice") == 0)
-          return Field::ASK_PRICE;
-        break;
+        return parse_askP(name);
       case 'S':
-        if (name.compare("askSize") == 0)
-          return Field::ASK_SIZE;
-        break;
+        return parse_askS(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_b(auto& name) {
-  if (name.length() >= 4) {
+constexpr Field parse_bidP(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[4] == 'r' &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'e') {
+    return Field::BID_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_bidS(const std::string_view& name) {
+  if (name.length() == 7 &&
+      name[4] == 'i' &&
+      name[5] == 'z' &&
+      name[6] == 'e') {
+    return Field::BID_SIZE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_b(const std::string_view& name) {
+  if (name.length() >= 4 &&
+      name[1] == 'i' &&
+      name[2] == 'd') {
     switch (name[3]) {
       case 'P':
-        if (name.compare("bidPrice") == 0)
-          return Field::BID_PRICE;
-        break;
+        return parse_bidP(name);
       case 'S':
-        if (name.compare("bidSize") == 0)
-          return Field::BID_SIZE;
-        break;
+        return parse_bidS(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_s(auto& name) {
-  if (name.compare("symbol") == 0)
+constexpr Field parse_s(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[1] == 'y' &&
+      name[2] == 'm' &&
+      name[3] == 'b' &&
+      name[4] == 'o' &&
+      name[5] == 'l') {
     return Field::SYMBOL;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_t(auto& name) {
-  if (name.compare("timestamp") == 0)
+constexpr Field parse_t(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[1] == 'i' &&
+      name[2] == 'm' &&
+      name[3] == 'e' &&
+      name[4] == 's' &&
+      name[5] == 't' &&
+      name[6] == 'a' &&
+      name[7] == 'm' &&
+      name[8] == 'p') {
     return Field::TIMESTAMP;
+  }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  if (name.empty())
-    return Field::UNKNOWN;
-  switch (name[0]) {
-    case 'a':
-      return parse_a(name);
-    case 'b':
-      return parse_b(name);
-    case 's':
-      return parse_s(name);
-    case 't':
-      return parse_t(name);
-    default:
-      return Field::UNKNOWN;
+  if (name.length() > 0) {
+    switch (name[0]) {
+      case 'a':
+        return parse_a(name);
+      case 'b':
+        return parse_b(name);
+      case 's':
+        return parse_s(name);
+      case 't':
+        return parse_t(name);
+    }
   }
+  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("askPrice") == Field::ASK_PRICE);
@@ -89,7 +141,7 @@ static_assert(parse_name("bidSize") == Field::BID_SIZE);
 static_assert(parse_name("symbol") == Field::SYMBOL);
 static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 
-inline void update_field(
+void update_field(
     auto& result,
     auto& key,
     auto& value) {

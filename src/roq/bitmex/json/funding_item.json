@@ -1,0 +1,11 @@
+{
+"type": "json::item",
+"name": "FundingItem",
+"values": {
+	"fundingInterval": "std::chrono::nanoseconds",
+	"fundingRateDaily": "double",
+	"fundingRate": "double",
+	"symbol": "std::string_view",
+	"timestamp": "std::chrono::nanoseconds"
+}
+}

@@ -1,0 +1,10 @@
+{
+"type": "enum",
+"name": "Action",
+"values": [
+       	"delete",
+       	"insert",
+       	"partial",
+       	"update"
+]
+}

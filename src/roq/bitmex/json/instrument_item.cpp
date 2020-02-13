@@ -27,7 +27,7 @@ enum class Field {
   FAIR_BASIS_RATE,
   FAIR_METHOD,
   FAIR_PRICE,
-  FOREIGN_NOTIONAL_24H,
+  FOREIGN_NOTIONAL24H,
   FRONT,
   FUNDING_BASE_SYMBOL,
   FUNDING_INTERVAL,
@@ -37,7 +37,7 @@ enum class Field {
   FUNDING_TIMESTAMP,
   HAS_LIQUIDITY,
   HIGH_PRICE,
-  HOME_NOTIONAL_24H,
+  HOME_NOTIONAL24H,
   IMPACT_ASK_PRICE,
   IMPACT_BID_PRICE,
   IMPACT_MID_PRICE,
@@ -67,9 +67,9 @@ enum class Field {
   MAX_PRICE,
   MID_PRICE,
   MULTIPLIER,
-  OPENING_TIMESTAMP,
   OPEN_INTEREST,
   OPEN_VALUE,
+  OPENING_TIMESTAMP,
   OPTION_MULTIPLIER,
   OPTION_STRIKE_PCNT,
   OPTION_STRIKE_PRICE,
@@ -77,7 +77,7 @@ enum class Field {
   OPTION_UNDERLYING_PRICE,
   POSITION_CURRENCY,
   PREV_CLOSE_PRICE,
-  PREV_PRICE_24H,
+  PREV_PRICE24H,
   PREV_TOTAL_TURNOVER,
   PREV_TOTAL_VOLUME,
   PUBLISH_INTERVAL,
@@ -107,682 +107,2197 @@ enum class Field {
   TOTAL_TURNOVER,
   TOTAL_VOLUME,
   TURNOVER,
-  TURNOVER_24H,
+  TURNOVER24H,
   TYP,
   UNDERLYING,
   UNDERLYING_SYMBOL,
   UNDERLYING_TO_POSITION_MULTIPLIER,
   UNDERLYING_TO_SETTLE_MULTIPLIER,
   VOLUME,
-  VOLUME_24H,
+  VOLUME24H,
   VWAP,
 };
 
-constexpr Field parse_a(auto& name) {
-  if (name.compare("askPrice") == 0)
+constexpr Field parse_a(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[1] == 's' &&
+      name[2] == 'k' &&
+      name[3] == 'P' &&
+      name[4] == 'r' &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'e') {
     return Field::ASK_PRICE;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_b(auto& name) {
-  if (name.length() >= 2) {
-    switch (name[1]) {
-      case 'a':
-        if (name.length() >= 14) {
-          switch (name[13]) {
-            case 'D':
-              if (name.compare("bankruptLimitDownPrice") == 0)
-                return Field::BANKRUPT_LIMIT_DOWN_PRICE;
-              break;
-            case 'U':
-              if (name.compare("bankruptLimitUpPrice") == 0)
-                return Field::BANKRUPT_LIMIT_UP_PRICE;
-              break;
-          }
-        }
-        break;
-      case 'i':
-        if (name.compare("bidPrice") == 0)
-          return Field::BID_PRICE;
-        break;
-      case 'u':
-        if (name.compare("buyLeg") == 0)
-          return Field::BUY_LEG;
-        break;
+constexpr Field parse_bankruptLimitD(const std::string_view& name) {
+  if (name.length() == 22 &&
+      name[14] == 'o' &&
+      name[15] == 'w' &&
+      name[16] == 'n' &&
+      name[17] == 'P' &&
+      name[18] == 'r' &&
+      name[19] == 'i' &&
+      name[20] == 'c' &&
+      name[21] == 'e') {
+    return Field::BANKRUPT_LIMIT_DOWN_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_bankruptLimitU(const std::string_view& name) {
+  if (name.length() == 20 &&
+      name[14] == 'p' &&
+      name[15] == 'P' &&
+      name[16] == 'r' &&
+      name[17] == 'i' &&
+      name[18] == 'c' &&
+      name[19] == 'e') {
+    return Field::BANKRUPT_LIMIT_UP_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ba(const std::string_view& name) {
+  if (name.length() >= 14 &&
+      name[2] == 'n' &&
+      name[3] == 'k' &&
+      name[4] == 'r' &&
+      name[5] == 'u' &&
+      name[6] == 'p' &&
+      name[7] == 't' &&
+      name[8] == 'L' &&
+      name[9] == 'i' &&
+      name[10] == 'm' &&
+      name[11] == 'i' &&
+      name[12] == 't') {
+    switch (name[13]) {
+      case 'D':
+        return parse_bankruptLimitD(name);
+      case 'U':
+        return parse_bankruptLimitU(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_c(auto& name) {
-  if (name.length() >= 3) {
+constexpr Field parse_bi(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[2] == 'd' &&
+      name[3] == 'P' &&
+      name[4] == 'r' &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'e') {
+    return Field::BID_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_bu(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[2] == 'y' &&
+      name[3] == 'L' &&
+      name[4] == 'e' &&
+      name[5] == 'g') {
+    return Field::BUY_LEG;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_b(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'a':
+        return parse_ba(name);
+      case 'i':
+        return parse_bi(name);
+      case 'u':
+        return parse_bu(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_cal(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[3] == 'c' &&
+      name[4] == 'I' &&
+      name[5] == 'n' &&
+      name[6] == 't' &&
+      name[7] == 'e' &&
+      name[8] == 'r' &&
+      name[9] == 'v' &&
+      name[10] == 'a' &&
+      name[11] == 'l') {
+    return Field::CALC_INTERVAL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_cap(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[3] == 'p' &&
+      name[4] == 'e' &&
+      name[5] == 'd') {
+    return Field::CAPPED;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ca(const std::string_view& name) {
+  if (name.length() > 2) {
     switch (name[2]) {
       case 'l':
-        if (name.compare("calcInterval") == 0)
-          return Field::CALC_INTERVAL;
-        break;
+        return parse_cal(name);
       case 'p':
-        if (name.compare("capped") == 0)
-          return Field::CAPPED;
-        break;
-      case 'o':
-        if (name.compare("closingTimestamp") == 0)
-          return Field::CLOSING_TIMESTAMP;
-        break;
+        return parse_cap(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_d(auto& name) {
-  if (name.compare("deleverage") == 0)
-    return Field::DELEVERAGE;
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_e(auto& name) {
-  if (name.compare("expiry") == 0)
-    return Field::EXPIRY;
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_f(auto& name) {
-  if (name.length() >= 3) {
-    switch (name[2]) {
-      case 'i': {
-        if (name.length() >= 5) {
-          switch (name[4]) {
-            case 'B':
-              if (name.compare("fairBasis") == 0)
-                return Field::FAIR_BASIS;
-              if (name.compare("fairBasisRate") == 0)
-                return Field::FAIR_BASIS_RATE;
-              break;
-            case 'M':
-              if (name.compare("fairMethod") == 0)
-                return Field::FAIR_METHOD;
-              break;
-            case 'P':
-              if (name.compare("fairPrice") == 0)
-                return Field::FAIR_PRICE;
-              break;
-          }
-        }
-        break;
-      }
-      case 'r':
-        if (name.compare("foreignNotional24h") == 0)
-          return Field::FOREIGN_NOTIONAL_24H;
-        break;
-      case 'o':
-        if (name.compare("front") == 0)
-          return Field::FRONT;
-        break;
-      case 'n': {
-        if (name.length() >= 8) {
-          switch (name[7]) {
-            case 'B':
-              if (name.compare("fundingBaseSymbol") == 0)
-                return Field::FUNDING_BASE_SYMBOL;
-              break;
-            case 'I':
-              if (name.compare("fundingInterval") == 0)
-                return Field::FUNDING_INTERVAL;
-              break;
-            case 'P':
-              if (name.compare("fundingPremiumSymbol") == 0)
-                return Field::FUNDING_PREMIUM_SYMBOL;
-              break;
-            case 'Q':
-              if (name.compare("fundingQuoteSymbol") == 0)
-                return Field::FUNDING_QUOTE_SYMBOL;
-              break;
-            case 'R':
-              if (name.compare("fundingRate") == 0)
-                return Field::FUNDING_RATE;
-              break;
-            case 'T':
-              if (name.compare("fundingTimestamp") == 0)
-                return Field::FUNDING_TIMESTAMP;
-              break;
-          }
-        }
-        break;
-      }
-    }
+constexpr Field parse_cl(const std::string_view& name) {
+  if (name.length() == 16 &&
+      name[2] == 'o' &&
+      name[3] == 's' &&
+      name[4] == 'i' &&
+      name[5] == 'n' &&
+      name[6] == 'g' &&
+      name[7] == 'T' &&
+      name[8] == 'i' &&
+      name[9] == 'm' &&
+      name[10] == 'e' &&
+      name[11] == 's' &&
+      name[12] == 't' &&
+      name[13] == 'a' &&
+      name[14] == 'm' &&
+      name[15] == 'p') {
+    return Field::CLOSING_TIMESTAMP;
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_h(auto& name) {
-  if (name.length() >= 2) {
+constexpr Field parse_c(const std::string_view& name) {
+  if (name.length() > 1) {
     switch (name[1]) {
       case 'a':
-        if (name.compare("hasLiquidity") == 0)
-          return Field::HAS_LIQUIDITY;
-        break;
-      case 'i':
-        if (name.compare("highPrice") == 0)
-          return Field::HIGH_PRICE;
-        break;
-      case 'o':
-        if (name.compare("homeNotional24h") == 0)
-          return Field::HOME_NOTIONAL_24H;
-        break;
+        return parse_ca(name);
+      case 'l':
+        return parse_cl(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_i(auto& name) {
-  if (name.length() >= 7) {
+constexpr Field parse_d(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[1] == 'e' &&
+      name[2] == 'l' &&
+      name[3] == 'e' &&
+      name[4] == 'v' &&
+      name[5] == 'e' &&
+      name[6] == 'r' &&
+      name[7] == 'a' &&
+      name[8] == 'g' &&
+      name[9] == 'e') {
+    return Field::DELEVERAGE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_e(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[1] == 'x' &&
+      name[2] == 'p' &&
+      name[3] == 'i' &&
+      name[4] == 'r' &&
+      name[5] == 'y') {
+    return Field::EXPIRY;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fairBasis(const std::string_view& name) {
+  if (name.length() == 13 &&
+      name[9] == 'R' &&
+      name[10] == 'a' &&
+      name[11] == 't' &&
+      name[12] == 'e') {
+    return Field::FAIR_BASIS_RATE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fairB(const std::string_view& name) {
+  if (name.length() >= 9 &&
+      name[5] == 'a' &&
+      name[6] == 's' &&
+      name[7] == 'i' &&
+      name[8] == 's') {
+    if (name.length() == 9)
+      return Field::FAIR_BASIS;
+    return parse_fairBasis(name);
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fairM(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[5] == 'e' &&
+      name[6] == 't' &&
+      name[7] == 'h' &&
+      name[8] == 'o' &&
+      name[9] == 'd') {
+    return Field::FAIR_METHOD;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fairP(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[5] == 'r' &&
+      name[6] == 'i' &&
+      name[7] == 'c' &&
+      name[8] == 'e') {
+    return Field::FAIR_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fa(const std::string_view& name) {
+  if (name.length() >= 5 &&
+      name[2] == 'i' &&
+      name[3] == 'r') {
+    switch (name[4]) {
+      case 'B':
+        return parse_fairB(name);
+      case 'M':
+        return parse_fairM(name);
+      case 'P':
+        return parse_fairP(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fo(const std::string_view& name) {
+  if (name.length() == 18 &&
+      name[2] == 'r' &&
+      name[3] == 'e' &&
+      name[4] == 'i' &&
+      name[5] == 'g' &&
+      name[6] == 'n' &&
+      name[7] == 'N' &&
+      name[8] == 'o' &&
+      name[9] == 't' &&
+      name[10] == 'i' &&
+      name[11] == 'o' &&
+      name[12] == 'n' &&
+      name[13] == 'a' &&
+      name[14] == 'l' &&
+      name[15] == '2' &&
+      name[16] == '4' &&
+      name[17] == 'h') {
+    return Field::FOREIGN_NOTIONAL24H;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fr(const std::string_view& name) {
+  if (name.length() == 5 &&
+      name[2] == 'o' &&
+      name[3] == 'n' &&
+      name[4] == 't') {
+    return Field::FRONT;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fundingB(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[8] == 'a' &&
+      name[9] == 's' &&
+      name[10] == 'e' &&
+      name[11] == 'S' &&
+      name[12] == 'y' &&
+      name[13] == 'm' &&
+      name[14] == 'b' &&
+      name[15] == 'o' &&
+      name[16] == 'l') {
+    return Field::FUNDING_BASE_SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fundingI(const std::string_view& name) {
+  if (name.length() == 15 &&
+      name[8] == 'n' &&
+      name[9] == 't' &&
+      name[10] == 'e' &&
+      name[11] == 'r' &&
+      name[12] == 'v' &&
+      name[13] == 'a' &&
+      name[14] == 'l') {
+    return Field::FUNDING_INTERVAL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fundingP(const std::string_view& name) {
+  if (name.length() == 20 &&
+      name[8] == 'r' &&
+      name[9] == 'e' &&
+      name[10] == 'm' &&
+      name[11] == 'i' &&
+      name[12] == 'u' &&
+      name[13] == 'm' &&
+      name[14] == 'S' &&
+      name[15] == 'y' &&
+      name[16] == 'm' &&
+      name[17] == 'b' &&
+      name[18] == 'o' &&
+      name[19] == 'l') {
+    return Field::FUNDING_PREMIUM_SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fundingQ(const std::string_view& name) {
+  if (name.length() == 18 &&
+      name[8] == 'u' &&
+      name[9] == 'o' &&
+      name[10] == 't' &&
+      name[11] == 'e' &&
+      name[12] == 'S' &&
+      name[13] == 'y' &&
+      name[14] == 'm' &&
+      name[15] == 'b' &&
+      name[16] == 'o' &&
+      name[17] == 'l') {
+    return Field::FUNDING_QUOTE_SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fundingR(const std::string_view& name) {
+  if (name.length() == 11 &&
+      name[8] == 'a' &&
+      name[9] == 't' &&
+      name[10] == 'e') {
+    return Field::FUNDING_RATE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fundingT(const std::string_view& name) {
+  if (name.length() == 16 &&
+      name[8] == 'i' &&
+      name[9] == 'm' &&
+      name[10] == 'e' &&
+      name[11] == 's' &&
+      name[12] == 't' &&
+      name[13] == 'a' &&
+      name[14] == 'm' &&
+      name[15] == 'p') {
+    return Field::FUNDING_TIMESTAMP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_fu(const std::string_view& name) {
+  if (name.length() >= 8 &&
+      name[2] == 'n' &&
+      name[3] == 'd' &&
+      name[4] == 'i' &&
+      name[5] == 'n' &&
+      name[6] == 'g') {
+    switch (name[7]) {
+      case 'B':
+        return parse_fundingB(name);
+      case 'I':
+        return parse_fundingI(name);
+      case 'P':
+        return parse_fundingP(name);
+      case 'Q':
+        return parse_fundingQ(name);
+      case 'R':
+        return parse_fundingR(name);
+      case 'T':
+        return parse_fundingT(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_f(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'a':
+        return parse_fa(name);
+      case 'o':
+        return parse_fo(name);
+      case 'r':
+        return parse_fr(name);
+      case 'u':
+        return parse_fu(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ha(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[2] == 's' &&
+      name[3] == 'L' &&
+      name[4] == 'i' &&
+      name[5] == 'q' &&
+      name[6] == 'u' &&
+      name[7] == 'i' &&
+      name[8] == 'd' &&
+      name[9] == 'i' &&
+      name[10] == 't' &&
+      name[11] == 'y') {
+    return Field::HAS_LIQUIDITY;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_hi(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[2] == 'g' &&
+      name[3] == 'h' &&
+      name[4] == 'P' &&
+      name[5] == 'r' &&
+      name[6] == 'i' &&
+      name[7] == 'c' &&
+      name[8] == 'e') {
+    return Field::HIGH_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ho(const std::string_view& name) {
+  if (name.length() == 15 &&
+      name[2] == 'm' &&
+      name[3] == 'e' &&
+      name[4] == 'N' &&
+      name[5] == 'o' &&
+      name[6] == 't' &&
+      name[7] == 'i' &&
+      name[8] == 'o' &&
+      name[9] == 'n' &&
+      name[10] == 'a' &&
+      name[11] == 'l' &&
+      name[12] == '2' &&
+      name[13] == '4' &&
+      name[14] == 'h') {
+    return Field::HOME_NOTIONAL24H;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_h(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'a':
+        return parse_ha(name);
+      case 'i':
+        return parse_hi(name);
+      case 'o':
+        return parse_ho(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_impactA(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[7] == 's' &&
+      name[8] == 'k' &&
+      name[9] == 'P' &&
+      name[10] == 'r' &&
+      name[11] == 'i' &&
+      name[12] == 'c' &&
+      name[13] == 'e') {
+    return Field::IMPACT_ASK_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_impactB(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[7] == 'i' &&
+      name[8] == 'd' &&
+      name[9] == 'P' &&
+      name[10] == 'r' &&
+      name[11] == 'i' &&
+      name[12] == 'c' &&
+      name[13] == 'e') {
+    return Field::IMPACT_BID_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_impactM(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[7] == 'i' &&
+      name[8] == 'd' &&
+      name[9] == 'P' &&
+      name[10] == 'r' &&
+      name[11] == 'i' &&
+      name[12] == 'c' &&
+      name[13] == 'e') {
+    return Field::IMPACT_MID_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_im(const std::string_view& name) {
+  if (name.length() >= 7 &&
+      name[2] == 'p' &&
+      name[3] == 'a' &&
+      name[4] == 'c' &&
+      name[5] == 't') {
     switch (name[6]) {
       case 'A':
-        if (name.compare("impactAskPrice") == 0)
-          return Field::IMPACT_ASK_PRICE;
-        break;
+        return parse_impactA(name);
       case 'B':
-        if (name.compare("impactBidPrice") == 0)
-          return Field::IMPACT_BID_PRICE;
-        break;
+        return parse_impactB(name);
       case 'M':
-        if (name.compare("impactMidPrice") == 0)
-          return Field::IMPACT_MID_PRICE;
-        break;
-      case 't':
-        if (name.length() >= 11) {
-          switch (name[10]) {
-            case 'F':
-              if (name.compare("indicativeFundingRate") == 0)
-                return Field::INDICATIVE_FUNDING_RATE;
-              break;
-            case 'S':
-              if (name.compare("indicativeSettlePrice") == 0)
-                return Field::INDICATIVE_SETTLE_PRICE;
-              break;
-            case 'T':
-              if (name.compare("indicativeTaxRate") == 0)
-                return Field::INDICATIVE_TAX_RATE;
-              break;
-          }
-        }
-        if (name.compare("isQuanto") == 0)
-          return Field::IS_QUANTO;
-        break;
-      case 'r':
-        if (name.compare("initMargin") == 0)
-          return Field::INIT_MARGIN;
-        if (name.compare("isInverse") == 0)
-          return Field::IS_INVERSE;
-        break;
-      case 'n':
-        if (name.compare("insuranceFee") == 0)
-          return Field::INSURANCE_FEE;
-        break;
-      case 'e':
-        if (name.compare("inverseLeg") == 0)
-          return Field::INVERSE_LEG;
-        break;
+        return parse_impactM(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_l(auto& name) {
-  if (name.length() >= 6) {
-    switch (name[5]) {
-      case 'h':
-        if (name.compare("lastChangePcnt") == 0)
-          return Field::LAST_CHANGE_PCNT;
-        break;
-      case 'r':
-        if (name.compare("lastPrice") == 0)
-          return Field::LAST_PRICE;
-        if (name.compare("lastPriceProtected") == 0)
-          return Field::LAST_PRICE_PROTECTED;
-        break;
-      case 'i':
-        switch (name[1]) {
-          case 'a':
-            if (name.compare("lastTickDirection") == 0)
-              return Field::LAST_TICK_DIRECTION;
-            break;
-          case 'o':
-            if (name.compare("lowPrice") == 0)
-              return Field::LOW_PRICE;
-            break;
-        }
-        break;
-      case 'D':
-        if (name.compare("limitDownPrice") == 0)
-          return Field::LIMIT_DOWN_PRICE;
-        break;
-      case 'U':
-        if (name.compare("limitUpPrice") == 0)
-          return Field::LIMIT_UP_PRICE;
-        break;
-      case 'n':
-        if (name.compare("listing") == 0)
-          return Field::LISTING;
-        break;
-      case 'z':
-        if (name.compare("lotSize") == 0)
-          return Field::LOT_SIZE;
-        break;
-    }
+constexpr Field parse_indicativeF(const std::string_view& name) {
+  if (name.length() == 21 &&
+      name[11] == 'u' &&
+      name[12] == 'n' &&
+      name[13] == 'd' &&
+      name[14] == 'i' &&
+      name[15] == 'n' &&
+      name[16] == 'g' &&
+      name[17] == 'R' &&
+      name[18] == 'a' &&
+      name[19] == 't' &&
+      name[20] == 'e') {
+    return Field::INDICATIVE_FUNDING_RATE;
   }
-  if (name.compare("limit") == 0)
-    return Field::LIMIT;
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_m(auto& name) {
-  if (name.length() >= 6) {
-    switch (name[5]) {
-      case 'M':
-        if (name.compare("maintMargin") == 0)
-          return Field::MAINT_MARGIN;
-        break;
+constexpr Field parse_indicativeS(const std::string_view& name) {
+  if (name.length() == 21 &&
+      name[11] == 'e' &&
+      name[12] == 't' &&
+      name[13] == 't' &&
+      name[14] == 'l' &&
+      name[15] == 'e' &&
+      name[16] == 'P' &&
+      name[17] == 'r' &&
+      name[18] == 'i' &&
+      name[19] == 'c' &&
+      name[20] == 'e') {
+    return Field::INDICATIVE_SETTLE_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_indicativeT(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[11] == 'a' &&
+      name[12] == 'x' &&
+      name[13] == 'R' &&
+      name[14] == 'a' &&
+      name[15] == 't' &&
+      name[16] == 'e') {
+    return Field::INDICATIVE_TAX_RATE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ind(const std::string_view& name) {
+  if (name.length() >= 11 &&
+      name[3] == 'i' &&
+      name[4] == 'c' &&
+      name[5] == 'a' &&
+      name[6] == 't' &&
+      name[7] == 'i' &&
+      name[8] == 'v' &&
+      name[9] == 'e') {
+    switch (name[10]) {
       case 'F':
-        if (name.compare("makerFee") == 0)
-          return Field::MAKER_FEE;
-        break;
-      case 'e':
-        if (name.compare("markMethod") == 0)
-          return Field::MARK_METHOD;
-        break;
-      case 'r':
-        if (name.compare("markPrice") == 0)
-          return Field::MARK_PRICE;
-        break;
-      case 'd':
-        if (name.compare("maxOrderQty") == 0)
-          return Field::MAX_ORDER_QTY;
-        break;
-      case 'i':
-        switch (name[1]) {
-          case 'a':
-            if (name.compare("maxPrice") == 0)
-              return Field::MAX_PRICE;
-            break;
-          case 'i':
-            if (name.compare("midPrice") == 0)
-              return Field::MID_PRICE;
-            break;
-        }
-        break;
-      case 'p':
-        if (name.compare("multiplier") == 0)
-          return Field::MULTIPLIER;
-        break;
-    }
-  }
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_o(auto& name) {
-  if (name.length() >= 3) {
-    switch (name[2]) {
-      case 'e':
-        if (name.length() >= 7) {
-          switch (name[6]) {
-            case 'g':
-              if (name.compare("openingTimestamp") == 0)
-                return Field::OPENING_TIMESTAMP;
-              break;
-            case 't':
-              if (name.compare("openInterest") == 0)
-                return Field::OPEN_INTEREST;
-              break;
-            case 'l':
-              if (name.compare("openValue") == 0)
-                return Field::OPEN_VALUE;
-              break;
-          }
-        }
-        break;
-      case 't':
-        if (name.length() >= 16) {
-          switch (name[15]) {
-            case 'r':
-              if (name.compare("optionMultiplier") == 0)
-                return Field::OPTION_MULTIPLIER;
-              break;
-            case 't':
-              if (name.compare("optionStrikePcnt") == 0)
-                return Field::OPTION_STRIKE_PCNT;
-              break;
-            case 'c':
-              if (name.compare("optionStrikePrice") == 0)
-                return Field::OPTION_STRIKE_PRICE;
-              break;
-            case 'n':
-              if (name.compare("optionStrikeRound") == 0)
-                return Field::OPTION_STRIKE_ROUND;
-              break;
-            case 'g':
-              if (name.compare("optionUnderlyingPrice") == 0)
-                return Field::OPTION_UNDERLYING_PRICE;
-              break;
-          }
-        }
-        break;
-      case 'p':
-        if (name.compare("multiplier") == 0)
-          return Field::MULTIPLIER;
-        break;
-    }
-  }
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_p(auto& name) {
-  if (name.length() >= 8) {
-    switch (name[7]) {
-      case 'n':
-        if (name.compare("positionCurrency") == 0)
-          return Field::POSITION_CURRENCY;
-        break;
-      case 's':
-        if (name.compare("prevClosePrice") == 0)
-          return Field::PREV_CLOSE_PRICE;
-        break;
-      case 'c':
-        if (name.compare("prevPrice24h") == 0)
-          return Field::PREV_PRICE_24H;
-        break;
-      case 'a':
-        if (name.length() >= 10) {
-          switch (name[9]) {
-            case 'T':
-              if (name.compare("prevTotalTurnover") == 0)
-                return Field::PREV_TOTAL_TURNOVER;
-              break;
-            case 'V':
-              if (name.compare("prevTotalVolume") == 0)
-                return Field::PREV_TOTAL_VOLUME;
-              break;
-          }
-        }
-        break;
-      case 'I':
-        if (name.compare("publishInterval") == 0)
-          return Field::PUBLISH_INTERVAL;
-        break;
-      case 'T':
-        if (name.compare("publishTime") == 0)
-          return Field::PUBLISH_TIME;
-        break;
-    }
-  }
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_q(auto& name) {
-  if (name.length() >= 6) {
-    switch (name[5]) {
-      case 'C':
-        if (name.compare("quoteCurrency") == 0)
-          return Field::QUOTE_CURRENCY;
-        break;
-      case 'T':
-        if (name.compare("quoteToSettleMultiplier") == 0)
-          return Field::QUOTE_TO_SETTLE_MULTIPLIER;
-        break;
-    }
-  }
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_r(auto& name) {
-  if (name.length() >= 8) {
-    switch (name[7]) {
-      case 'c':
-        if (name.length() >= 10) {
-          switch (name[9]) {
-            case 'I':
-              if (name.compare("rebalanceInterval") == 0)
-                return Field::REBALANCE_INTERVAL;
-              break;
-            case 'T':
-              if (name.compare("rebalanceTimestamp") == 0)
-                return Field::REBALANCE_TIMESTAMP;
-              break;
-            case 'S':
-              if (name.compare("referenceSymbol") == 0)
-                return Field::REFERENCE_SYMBOL;
-              break;
-          }
-        }
-        if (name.compare("reference") == 0)
-          return Field::REFERENCE;
-        break;
-      case 'n':
-        if (name.compare("relistInterval") == 0)
-          return Field::RELIST_INTERVAL;
-        break;
-      case 'i':
-        if (name.compare("riskLimit") == 0)
-          return Field::RISK_LIMIT;
-        break;
-      case 'p':
-        if (name.compare("riskStep") == 0)
-          return Field::RISK_STEP;
-        break;
-      case 'b':
-        if (name.compare("rootSymbol") == 0)
-          return Field::ROOT_SYMBOL;
-        break;
-    }
-  }
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_s(auto& name) {
-  if (name.length() >= 2) {
-    switch (name[1]) {
-      case 'e':
-        if (name.length() >= 6) {
-          switch (name[5]) {
-            case 'e':
-              if (name.length() >= 7) {
-                switch (name[6]) {
-                  case 'g':
-                    if (name.compare("sellLeg") == 0)
-                      return Field::SELL_LEG;
-                    break;
-                  case 'd':
-                    if (name.compare("settledPrice") == 0)
-                      return Field::SETTLED_PRICE;
-                    break;
-                  case 'm':
-                    if (name.compare("settlementFee") == 0)
-                      return Field::SETTLEMENT_FEE;
-                    break;
-                }
-              }
-              if (name.compare("settle") == 0)
-                return Field::SETTLE;
-              break;
-            case 'o':
-              if (name.compare("sessionInterval") == 0)
-                return Field::SESSION_INTERVAL;
-              break;
-            case 'C':
-              if (name.compare("settlCurrency") == 0)
-                return Field::SETTL_CURRENCY;
-              break;
-          }
-        }
-        break;
-      case 't':
-        if (name.compare("state") == 0)
-          return Field::STATE;
-        break;
-      case 'y':
-        if (name.compare("symbol") == 0)
-          return Field::SYMBOL;
-        break;
-    }
-  }
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_t(auto& name) {
-  if (name.length() >= 3) {
-    switch (name[2]) {
-      case 'k':
-        if (name.compare("takerFee") == 0)
-          return Field::TAKER_FEE;
-        break;
-      case 'x':
-        if (name.compare("taxed") == 0)
-          return Field::TAXED;
-        break;
-      case 'c':
-        if (name.compare("tickSize") == 0)
-          return Field::TICK_SIZE;
-        break;
-      case 'm':
-        if (name.compare("timestamp") == 0)
-          return Field::TIMESTAMP;
-        break;
-      case 't':
-        if (name.length() >= 6) {
-          switch (name[5]) {
-            case 'T':
-              if (name.compare("totalTurnover") == 0)
-                return Field::TOTAL_TURNOVER;
-              break;
-            case 'V':
-              if (name.compare("totalVolume") == 0)
-                return Field::TOTAL_VOLUME;
-              break;
-          }
-        }
-        break;
-      case 'r':
-        if (name.compare("turnover") == 0)
-          return Field::TURNOVER;
-        if (name.compare("turnover24h") == 0)
-          return Field::TURNOVER_24H;
-        break;
-      case 'p': {
-        if (name.compare("typ") == 0)
-          return Field::TYP;
-        break;
-      }
-    }
-  }
-  return Field::UNKNOWN;
-}
-
-constexpr Field parse_u(auto& name) {
-  if (name.length() >= 13) {
-    switch (name[12]) {
-      case 'm':
-        if (name.compare("underlyingSymbol") == 0)
-          return Field::UNDERLYING_SYMBOL;
-        break;
-      case 'P':
-        if (name.compare("underlyingToPositionMultiplier") == 0)
-          return Field::UNDERLYING_TO_POSITION_MULTIPLIER;
-        break;
+        return parse_indicativeF(name);
       case 'S':
-        if (name.compare("underlyingToSettleMultiplier") == 0)
-          return Field::UNDERLYING_TO_SETTLE_MULTIPLIER;
-        break;
+        return parse_indicativeS(name);
+      case 'T':
+        return parse_indicativeT(name);
     }
   }
-  if (name.compare("underlying") == 0)
-    return Field::UNDERLYING;
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_v(auto& name) {
-  if (name.length() >= 2) {
+constexpr Field parse_ini(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[3] == 't' &&
+      name[4] == 'M' &&
+      name[5] == 'a' &&
+      name[6] == 'r' &&
+      name[7] == 'g' &&
+      name[8] == 'i' &&
+      name[9] == 'n') {
+    return Field::INIT_MARGIN;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ins(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[3] == 'u' &&
+      name[4] == 'r' &&
+      name[5] == 'a' &&
+      name[6] == 'n' &&
+      name[7] == 'c' &&
+      name[8] == 'e' &&
+      name[9] == 'F' &&
+      name[10] == 'e' &&
+      name[11] == 'e') {
+    return Field::INSURANCE_FEE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_inv(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[3] == 'e' &&
+      name[4] == 'r' &&
+      name[5] == 's' &&
+      name[6] == 'e' &&
+      name[7] == 'L' &&
+      name[8] == 'e' &&
+      name[9] == 'g') {
+    return Field::INVERSE_LEG;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_in(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'd':
+        return parse_ind(name);
+      case 'i':
+        return parse_ini(name);
+      case 's':
+        return parse_ins(name);
+      case 'v':
+        return parse_inv(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_isI(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[3] == 'n' &&
+      name[4] == 'v' &&
+      name[5] == 'e' &&
+      name[6] == 'r' &&
+      name[7] == 's' &&
+      name[8] == 'e') {
+    return Field::IS_INVERSE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_isQ(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[3] == 'u' &&
+      name[4] == 'a' &&
+      name[5] == 'n' &&
+      name[6] == 't' &&
+      name[7] == 'o') {
+    return Field::IS_QUANTO;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_is(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'I':
+        return parse_isI(name);
+      case 'Q':
+        return parse_isQ(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_i(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'm':
+        return parse_im(name);
+      case 'n':
+        return parse_in(name);
+      case 's':
+        return parse_is(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lastC(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[5] == 'h' &&
+      name[6] == 'a' &&
+      name[7] == 'n' &&
+      name[8] == 'g' &&
+      name[9] == 'e' &&
+      name[10] == 'P' &&
+      name[11] == 'c' &&
+      name[12] == 'n' &&
+      name[13] == 't') {
+    return Field::LAST_CHANGE_PCNT;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lastPrice(const std::string_view& name) {
+  if (name.length() == 18 &&
+      name[9] == 'P' &&
+      name[10] == 'r' &&
+      name[11] == 'o' &&
+      name[12] == 't' &&
+      name[13] == 'e' &&
+      name[14] == 'c' &&
+      name[15] == 't' &&
+      name[16] == 'e' &&
+      name[17] == 'd') {
+    return Field::LAST_PRICE_PROTECTED;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lastP(const std::string_view& name) {
+  if (name.length() >= 9 &&
+      name[5] == 'r' &&
+      name[6] == 'i' &&
+      name[7] == 'c' &&
+      name[8] == 'e') {
+    if (name.length() == 9)
+      return Field::LAST_PRICE;
+    return parse_lastPrice(name);
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lastT(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'k' &&
+      name[8] == 'D' &&
+      name[9] == 'i' &&
+      name[10] == 'r' &&
+      name[11] == 'e' &&
+      name[12] == 'c' &&
+      name[13] == 't' &&
+      name[14] == 'i' &&
+      name[15] == 'o' &&
+      name[16] == 'n') {
+    return Field::LAST_TICK_DIRECTION;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_la(const std::string_view& name) {
+  if (name.length() >= 5 &&
+      name[2] == 's' &&
+      name[3] == 't') {
+    switch (name[4]) {
+      case 'C':
+        return parse_lastC(name);
+      case 'P':
+        return parse_lastP(name);
+      case 'T':
+        return parse_lastT(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_limitD(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[6] == 'o' &&
+      name[7] == 'w' &&
+      name[8] == 'n' &&
+      name[9] == 'P' &&
+      name[10] == 'r' &&
+      name[11] == 'i' &&
+      name[12] == 'c' &&
+      name[13] == 'e') {
+    return Field::LIMIT_DOWN_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_limitU(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[6] == 'p' &&
+      name[7] == 'P' &&
+      name[8] == 'r' &&
+      name[9] == 'i' &&
+      name[10] == 'c' &&
+      name[11] == 'e') {
+    return Field::LIMIT_UP_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_limit(const std::string_view& name) {
+  if (name.length() > 5) {
+    switch (name[5]) {
+      case 'D':
+        return parse_limitD(name);
+      case 'U':
+        return parse_limitU(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lim(const std::string_view& name) {
+  if (name.length() >= 5 &&
+      name[3] == 'i' &&
+      name[4] == 't') {
+    if (name.length() == 5)
+      return Field::LIMIT;
+    return parse_limit(name);
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lis(const std::string_view& name) {
+  if (name.length() == 7 &&
+      name[3] == 't' &&
+      name[4] == 'i' &&
+      name[5] == 'n' &&
+      name[6] == 'g') {
+    return Field::LISTING;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_li(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'm':
+        return parse_lim(name);
+      case 's':
+        return parse_lis(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lot(const std::string_view& name) {
+  if (name.length() == 7 &&
+      name[3] == 'S' &&
+      name[4] == 'i' &&
+      name[5] == 'z' &&
+      name[6] == 'e') {
+    return Field::LOT_SIZE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_low(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[3] == 'P' &&
+      name[4] == 'r' &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'e') {
+    return Field::LOW_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_lo(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 't':
+        return parse_lot(name);
+      case 'w':
+        return parse_low(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_l(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'a':
+        return parse_la(name);
+      case 'i':
+        return parse_li(name);
+      case 'o':
+        return parse_lo(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_mai(const std::string_view& name) {
+  if (name.length() == 11 &&
+      name[3] == 'n' &&
+      name[4] == 't' &&
+      name[5] == 'M' &&
+      name[6] == 'a' &&
+      name[7] == 'r' &&
+      name[8] == 'g' &&
+      name[9] == 'i' &&
+      name[10] == 'n') {
+    return Field::MAINT_MARGIN;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_mak(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[3] == 'e' &&
+      name[4] == 'r' &&
+      name[5] == 'F' &&
+      name[6] == 'e' &&
+      name[7] == 'e') {
+    return Field::MAKER_FEE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_markM(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[5] == 'e' &&
+      name[6] == 't' &&
+      name[7] == 'h' &&
+      name[8] == 'o' &&
+      name[9] == 'd') {
+    return Field::MARK_METHOD;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_markP(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[5] == 'r' &&
+      name[6] == 'i' &&
+      name[7] == 'c' &&
+      name[8] == 'e') {
+    return Field::MARK_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_mar(const std::string_view& name) {
+  if (name.length() >= 5 &&
+      name[3] == 'k') {
+    switch (name[4]) {
+      case 'M':
+        return parse_markM(name);
+      case 'P':
+        return parse_markP(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_maxO(const std::string_view& name) {
+  if (name.length() == 11 &&
+      name[4] == 'r' &&
+      name[5] == 'd' &&
+      name[6] == 'e' &&
+      name[7] == 'r' &&
+      name[8] == 'Q' &&
+      name[9] == 't' &&
+      name[10] == 'y') {
+    return Field::MAX_ORDER_QTY;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_maxP(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[4] == 'r' &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'e') {
+    return Field::MAX_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_max(const std::string_view& name) {
+  if (name.length() > 3) {
+    switch (name[3]) {
+      case 'O':
+        return parse_maxO(name);
+      case 'P':
+        return parse_maxP(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ma(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'i':
+        return parse_mai(name);
+      case 'k':
+        return parse_mak(name);
+      case 'r':
+        return parse_mar(name);
+      case 'x':
+        return parse_max(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_mi(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[2] == 'd' &&
+      name[3] == 'P' &&
+      name[4] == 'r' &&
+      name[5] == 'i' &&
+      name[6] == 'c' &&
+      name[7] == 'e') {
+    return Field::MID_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_mu(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[2] == 'l' &&
+      name[3] == 't' &&
+      name[4] == 'i' &&
+      name[5] == 'p' &&
+      name[6] == 'l' &&
+      name[7] == 'i' &&
+      name[8] == 'e' &&
+      name[9] == 'r') {
+    return Field::MULTIPLIER;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_m(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'a':
+        return parse_ma(name);
+      case 'i':
+        return parse_mi(name);
+      case 'u':
+        return parse_mu(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_openI(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[5] == 'n' &&
+      name[6] == 't' &&
+      name[7] == 'e' &&
+      name[8] == 'r' &&
+      name[9] == 'e' &&
+      name[10] == 's' &&
+      name[11] == 't') {
+    return Field::OPEN_INTEREST;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_openV(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[5] == 'a' &&
+      name[6] == 'l' &&
+      name[7] == 'u' &&
+      name[8] == 'e') {
+    return Field::OPEN_VALUE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_openi(const std::string_view& name) {
+  if (name.length() == 16 &&
+      name[5] == 'n' &&
+      name[6] == 'g' &&
+      name[7] == 'T' &&
+      name[8] == 'i' &&
+      name[9] == 'm' &&
+      name[10] == 'e' &&
+      name[11] == 's' &&
+      name[12] == 't' &&
+      name[13] == 'a' &&
+      name[14] == 'm' &&
+      name[15] == 'p') {
+    return Field::OPENING_TIMESTAMP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ope(const std::string_view& name) {
+  if (name.length() >= 5 &&
+      name[3] == 'n') {
+    switch (name[4]) {
+      case 'I':
+        return parse_openI(name);
+      case 'V':
+        return parse_openV(name);
+      case 'i':
+        return parse_openi(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionM(const std::string_view& name) {
+  if (name.length() == 16 &&
+      name[7] == 'u' &&
+      name[8] == 'l' &&
+      name[9] == 't' &&
+      name[10] == 'i' &&
+      name[11] == 'p' &&
+      name[12] == 'l' &&
+      name[13] == 'i' &&
+      name[14] == 'e' &&
+      name[15] == 'r') {
+    return Field::OPTION_MULTIPLIER;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionStrikePc(const std::string_view& name) {
+  if (name.length() == 16 &&
+      name[14] == 'n' &&
+      name[15] == 't') {
+    return Field::OPTION_STRIKE_PCNT;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionStrikePr(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[14] == 'i' &&
+      name[15] == 'c' &&
+      name[16] == 'e') {
+    return Field::OPTION_STRIKE_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionStrikeP(const std::string_view& name) {
+  if (name.length() > 13) {
+    switch (name[13]) {
+      case 'c':
+        return parse_optionStrikePc(name);
+      case 'r':
+        return parse_optionStrikePr(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionStrikeR(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[13] == 'o' &&
+      name[14] == 'u' &&
+      name[15] == 'n' &&
+      name[16] == 'd') {
+    return Field::OPTION_STRIKE_ROUND;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionS(const std::string_view& name) {
+  if (name.length() >= 13 &&
+      name[7] == 't' &&
+      name[8] == 'r' &&
+      name[9] == 'i' &&
+      name[10] == 'k' &&
+      name[11] == 'e') {
+    switch (name[12]) {
+      case 'P':
+        return parse_optionStrikeP(name);
+      case 'R':
+        return parse_optionStrikeR(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionU(const std::string_view& name) {
+  if (name.length() == 21 &&
+      name[7] == 'n' &&
+      name[8] == 'd' &&
+      name[9] == 'e' &&
+      name[10] == 'r' &&
+      name[11] == 'l' &&
+      name[12] == 'y' &&
+      name[13] == 'i' &&
+      name[14] == 'n' &&
+      name[15] == 'g' &&
+      name[16] == 'P' &&
+      name[17] == 'r' &&
+      name[18] == 'i' &&
+      name[19] == 'c' &&
+      name[20] == 'e') {
+    return Field::OPTION_UNDERLYING_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_opt(const std::string_view& name) {
+  if (name.length() >= 7 &&
+      name[3] == 'i' &&
+      name[4] == 'o' &&
+      name[5] == 'n') {
+    switch (name[6]) {
+      case 'M':
+        return parse_optionM(name);
+      case 'S':
+        return parse_optionS(name);
+      case 'U':
+        return parse_optionU(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_o(const std::string_view& name) {
+  if (name.length() >= 3 &&
+      name[1] == 'p') {
+    switch (name[2]) {
+      case 'e':
+        return parse_ope(name);
+      case 't':
+        return parse_opt(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_po(const std::string_view& name) {
+  if (name.length() == 16 &&
+      name[2] == 's' &&
+      name[3] == 'i' &&
+      name[4] == 't' &&
+      name[5] == 'i' &&
+      name[6] == 'o' &&
+      name[7] == 'n' &&
+      name[8] == 'C' &&
+      name[9] == 'u' &&
+      name[10] == 'r' &&
+      name[11] == 'r' &&
+      name[12] == 'e' &&
+      name[13] == 'n' &&
+      name[14] == 'c' &&
+      name[15] == 'y') {
+    return Field::POSITION_CURRENCY;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_prevC(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[5] == 'l' &&
+      name[6] == 'o' &&
+      name[7] == 's' &&
+      name[8] == 'e' &&
+      name[9] == 'P' &&
+      name[10] == 'r' &&
+      name[11] == 'i' &&
+      name[12] == 'c' &&
+      name[13] == 'e') {
+    return Field::PREV_CLOSE_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_prevP(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[5] == 'r' &&
+      name[6] == 'i' &&
+      name[7] == 'c' &&
+      name[8] == 'e' &&
+      name[9] == '2' &&
+      name[10] == '4' &&
+      name[11] == 'h') {
+    return Field::PREV_PRICE24H;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_prevTotalT(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[10] == 'u' &&
+      name[11] == 'r' &&
+      name[12] == 'n' &&
+      name[13] == 'o' &&
+      name[14] == 'v' &&
+      name[15] == 'e' &&
+      name[16] == 'r') {
+    return Field::PREV_TOTAL_TURNOVER;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_prevTotalV(const std::string_view& name) {
+  if (name.length() == 15 &&
+      name[10] == 'o' &&
+      name[11] == 'l' &&
+      name[12] == 'u' &&
+      name[13] == 'm' &&
+      name[14] == 'e') {
+    return Field::PREV_TOTAL_VOLUME;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_prevT(const std::string_view& name) {
+  if (name.length() >= 10 &&
+      name[5] == 'o' &&
+      name[6] == 't' &&
+      name[7] == 'a' &&
+      name[8] == 'l') {
+    switch (name[9]) {
+      case 'T':
+        return parse_prevTotalT(name);
+      case 'V':
+        return parse_prevTotalV(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_pr(const std::string_view& name) {
+  if (name.length() >= 5 &&
+      name[2] == 'e' &&
+      name[3] == 'v') {
+    switch (name[4]) {
+      case 'C':
+        return parse_prevC(name);
+      case 'P':
+        return parse_prevP(name);
+      case 'T':
+        return parse_prevT(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_publishI(const std::string_view& name) {
+  if (name.length() == 15 &&
+      name[8] == 'n' &&
+      name[9] == 't' &&
+      name[10] == 'e' &&
+      name[11] == 'r' &&
+      name[12] == 'v' &&
+      name[13] == 'a' &&
+      name[14] == 'l') {
+    return Field::PUBLISH_INTERVAL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_publishT(const std::string_view& name) {
+  if (name.length() == 11 &&
+      name[8] == 'i' &&
+      name[9] == 'm' &&
+      name[10] == 'e') {
+    return Field::PUBLISH_TIME;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_pu(const std::string_view& name) {
+  if (name.length() >= 8 &&
+      name[2] == 'b' &&
+      name[3] == 'l' &&
+      name[4] == 'i' &&
+      name[5] == 's' &&
+      name[6] == 'h') {
+    switch (name[7]) {
+      case 'I':
+        return parse_publishI(name);
+      case 'T':
+        return parse_publishT(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_p(const std::string_view& name) {
+  if (name.length() > 1) {
     switch (name[1]) {
       case 'o':
-        if (name.compare("volume") == 0)
-          return Field::VOLUME;
-        if (name.compare("volume24h") == 0)
-          return Field::VOLUME_24H;
-        break;
-      case 'w':
-        if (name.compare("vwap") == 0)
-          return Field::VWAP;
-        break;
+        return parse_po(name);
+      case 'r':
+        return parse_pr(name);
+      case 'u':
+        return parse_pu(name);
     }
   }
-  if (name.compare("underlying") == 0)
-    return Field::UNDERLYING;
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_quoteC(const std::string_view& name) {
+  if (name.length() == 13 &&
+      name[6] == 'u' &&
+      name[7] == 'r' &&
+      name[8] == 'r' &&
+      name[9] == 'e' &&
+      name[10] == 'n' &&
+      name[11] == 'c' &&
+      name[12] == 'y') {
+    return Field::QUOTE_CURRENCY;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_quoteT(const std::string_view& name) {
+  if (name.length() == 23 &&
+      name[6] == 'o' &&
+      name[7] == 'S' &&
+      name[8] == 'e' &&
+      name[9] == 't' &&
+      name[10] == 't' &&
+      name[11] == 'l' &&
+      name[12] == 'e' &&
+      name[13] == 'M' &&
+      name[14] == 'u' &&
+      name[15] == 'l' &&
+      name[16] == 't' &&
+      name[17] == 'i' &&
+      name[18] == 'p' &&
+      name[19] == 'l' &&
+      name[20] == 'i' &&
+      name[21] == 'e' &&
+      name[22] == 'r') {
+    return Field::QUOTE_TO_SETTLE_MULTIPLIER;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_q(const std::string_view& name) {
+  if (name.length() >= 6 &&
+      name[1] == 'u' &&
+      name[2] == 'o' &&
+      name[3] == 't' &&
+      name[4] == 'e') {
+    switch (name[5]) {
+      case 'C':
+        return parse_quoteC(name);
+      case 'T':
+        return parse_quoteT(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_rebalanceI(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[10] == 'n' &&
+      name[11] == 't' &&
+      name[12] == 'e' &&
+      name[13] == 'r' &&
+      name[14] == 'v' &&
+      name[15] == 'a' &&
+      name[16] == 'l') {
+    return Field::REBALANCE_INTERVAL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_rebalanceT(const std::string_view& name) {
+  if (name.length() == 18 &&
+      name[10] == 'i' &&
+      name[11] == 'm' &&
+      name[12] == 'e' &&
+      name[13] == 's' &&
+      name[14] == 't' &&
+      name[15] == 'a' &&
+      name[16] == 'm' &&
+      name[17] == 'p') {
+    return Field::REBALANCE_TIMESTAMP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_reb(const std::string_view& name) {
+  if (name.length() >= 10 &&
+      name[3] == 'a' &&
+      name[4] == 'l' &&
+      name[5] == 'a' &&
+      name[6] == 'n' &&
+      name[7] == 'c' &&
+      name[8] == 'e') {
+    switch (name[9]) {
+      case 'I':
+        return parse_rebalanceI(name);
+      case 'T':
+        return parse_rebalanceT(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_reference(const std::string_view& name) {
+  if (name.length() == 15 &&
+      name[9] == 'S' &&
+      name[10] == 'y' &&
+      name[11] == 'm' &&
+      name[12] == 'b' &&
+      name[13] == 'o' &&
+      name[14] == 'l') {
+    return Field::REFERENCE_SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ref(const std::string_view& name) {
+  if (name.length() >= 9 &&
+      name[3] == 'e' &&
+      name[4] == 'r' &&
+      name[5] == 'e' &&
+      name[6] == 'n' &&
+      name[7] == 'c' &&
+      name[8] == 'e') {
+    if (name.length() == 9)
+      return Field::REFERENCE;
+    return parse_reference(name);
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_rel(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[3] == 'i' &&
+      name[4] == 's' &&
+      name[5] == 't' &&
+      name[6] == 'I' &&
+      name[7] == 'n' &&
+      name[8] == 't' &&
+      name[9] == 'e' &&
+      name[10] == 'r' &&
+      name[11] == 'v' &&
+      name[12] == 'a' &&
+      name[13] == 'l') {
+    return Field::RELIST_INTERVAL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_re(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'b':
+        return parse_reb(name);
+      case 'f':
+        return parse_ref(name);
+      case 'l':
+        return parse_rel(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_riskL(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[5] == 'i' &&
+      name[6] == 'm' &&
+      name[7] == 'i' &&
+      name[8] == 't') {
+    return Field::RISK_LIMIT;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_riskS(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[5] == 't' &&
+      name[6] == 'e' &&
+      name[7] == 'p') {
+    return Field::RISK_STEP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ri(const std::string_view& name) {
+  if (name.length() >= 5 &&
+      name[2] == 's' &&
+      name[3] == 'k') {
+    switch (name[4]) {
+      case 'L':
+        return parse_riskL(name);
+      case 'S':
+        return parse_riskS(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ro(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[2] == 'o' &&
+      name[3] == 't' &&
+      name[4] == 'S' &&
+      name[5] == 'y' &&
+      name[6] == 'm' &&
+      name[7] == 'b' &&
+      name[8] == 'o' &&
+      name[9] == 'l') {
+    return Field::ROOT_SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_r(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'e':
+        return parse_re(name);
+      case 'i':
+        return parse_ri(name);
+      case 'o':
+        return parse_ro(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_sel(const std::string_view& name) {
+  if (name.length() == 7 &&
+      name[3] == 'l' &&
+      name[4] == 'L' &&
+      name[5] == 'e' &&
+      name[6] == 'g') {
+    return Field::SELL_LEG;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ses(const std::string_view& name) {
+  if (name.length() == 15 &&
+      name[3] == 's' &&
+      name[4] == 'i' &&
+      name[5] == 'o' &&
+      name[6] == 'n' &&
+      name[7] == 'I' &&
+      name[8] == 'n' &&
+      name[9] == 't' &&
+      name[10] == 'e' &&
+      name[11] == 'r' &&
+      name[12] == 'v' &&
+      name[13] == 'a' &&
+      name[14] == 'l') {
+    return Field::SESSION_INTERVAL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_settlC(const std::string_view& name) {
+  if (name.length() == 13 &&
+      name[6] == 'u' &&
+      name[7] == 'r' &&
+      name[8] == 'r' &&
+      name[9] == 'e' &&
+      name[10] == 'n' &&
+      name[11] == 'c' &&
+      name[12] == 'y') {
+    return Field::SETTL_CURRENCY;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_settled(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[7] == 'P' &&
+      name[8] == 'r' &&
+      name[9] == 'i' &&
+      name[10] == 'c' &&
+      name[11] == 'e') {
+    return Field::SETTLED_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_settlem(const std::string_view& name) {
+  if (name.length() == 13 &&
+      name[7] == 'e' &&
+      name[8] == 'n' &&
+      name[9] == 't' &&
+      name[10] == 'F' &&
+      name[11] == 'e' &&
+      name[12] == 'e') {
+    return Field::SETTLEMENT_FEE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_settle(const std::string_view& name) {
+  if (name.length() >= 6) {
+    if (name.length() == 6)
+      return Field::SETTLE;
+    switch (name[6]) {
+      case 'd':
+        return parse_settled(name);
+      case 'm':
+        return parse_settlem(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_set(const std::string_view& name) {
+  if (name.length() >= 6 &&
+      name[3] == 't' &&
+      name[4] == 'l') {
+    switch (name[5]) {
+      case 'C':
+        return parse_settlC(name);
+      case 'e':
+        return parse_settle(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_se(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'l':
+        return parse_sel(name);
+      case 's':
+        return parse_ses(name);
+      case 't':
+        return parse_set(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_st(const std::string_view& name) {
+  if (name.length() == 5 &&
+      name[2] == 'a' &&
+      name[3] == 't' &&
+      name[4] == 'e') {
+    return Field::STATE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_sy(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[2] == 'm' &&
+      name[3] == 'b' &&
+      name[4] == 'o' &&
+      name[5] == 'l') {
+    return Field::SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_s(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'e':
+        return parse_se(name);
+      case 't':
+        return parse_st(name);
+      case 'y':
+        return parse_sy(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tak(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[3] == 'e' &&
+      name[4] == 'r' &&
+      name[5] == 'F' &&
+      name[6] == 'e' &&
+      name[7] == 'e') {
+    return Field::TAKER_FEE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tax(const std::string_view& name) {
+  if (name.length() == 5 &&
+      name[3] == 'e' &&
+      name[4] == 'd') {
+    return Field::TAXED;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ta(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'k':
+        return parse_tak(name);
+      case 'x':
+        return parse_tax(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tic(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[3] == 'k' &&
+      name[4] == 'S' &&
+      name[5] == 'i' &&
+      name[6] == 'z' &&
+      name[7] == 'e') {
+    return Field::TICK_SIZE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tim(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[3] == 'e' &&
+      name[4] == 's' &&
+      name[5] == 't' &&
+      name[6] == 'a' &&
+      name[7] == 'm' &&
+      name[8] == 'p') {
+    return Field::TIMESTAMP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ti(const std::string_view& name) {
+  if (name.length() > 2) {
+    switch (name[2]) {
+      case 'c':
+        return parse_tic(name);
+      case 'm':
+        return parse_tim(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_totalT(const std::string_view& name) {
+  if (name.length() == 13 &&
+      name[6] == 'u' &&
+      name[7] == 'r' &&
+      name[8] == 'n' &&
+      name[9] == 'o' &&
+      name[10] == 'v' &&
+      name[11] == 'e' &&
+      name[12] == 'r') {
+    return Field::TOTAL_TURNOVER;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_totalV(const std::string_view& name) {
+  if (name.length() == 11 &&
+      name[6] == 'o' &&
+      name[7] == 'l' &&
+      name[8] == 'u' &&
+      name[9] == 'm' &&
+      name[10] == 'e') {
+    return Field::TOTAL_VOLUME;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_to(const std::string_view& name) {
+  if (name.length() >= 6 &&
+      name[2] == 't' &&
+      name[3] == 'a' &&
+      name[4] == 'l') {
+    switch (name[5]) {
+      case 'T':
+        return parse_totalT(name);
+      case 'V':
+        return parse_totalV(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_turnover(const std::string_view& name) {
+  if (name.length() == 11 &&
+      name[8] == '2' &&
+      name[9] == '4' &&
+      name[10] == 'h') {
+    return Field::TURNOVER24H;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tu(const std::string_view& name) {
+  if (name.length() >= 8 &&
+      name[2] == 'r' &&
+      name[3] == 'n' &&
+      name[4] == 'o' &&
+      name[5] == 'v' &&
+      name[6] == 'e' &&
+      name[7] == 'r') {
+    if (name.length() == 8)
+      return Field::TURNOVER;
+    return parse_turnover(name);
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ty(const std::string_view& name) {
+  if (name.length() == 3 &&
+      name[2] == 'p') {
+    return Field::TYP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_t(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'a':
+        return parse_ta(name);
+      case 'i':
+        return parse_ti(name);
+      case 'o':
+        return parse_to(name);
+      case 'u':
+        return parse_tu(name);
+      case 'y':
+        return parse_ty(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_underlyingS(const std::string_view& name) {
+  if (name.length() == 16 &&
+      name[11] == 'y' &&
+      name[12] == 'm' &&
+      name[13] == 'b' &&
+      name[14] == 'o' &&
+      name[15] == 'l') {
+    return Field::UNDERLYING_SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_underlyingToP(const std::string_view& name) {
+  if (name.length() == 30 &&
+      name[13] == 'o' &&
+      name[14] == 's' &&
+      name[15] == 'i' &&
+      name[16] == 't' &&
+      name[17] == 'i' &&
+      name[18] == 'o' &&
+      name[19] == 'n' &&
+      name[20] == 'M' &&
+      name[21] == 'u' &&
+      name[22] == 'l' &&
+      name[23] == 't' &&
+      name[24] == 'i' &&
+      name[25] == 'p' &&
+      name[26] == 'l' &&
+      name[27] == 'i' &&
+      name[28] == 'e' &&
+      name[29] == 'r') {
+    return Field::UNDERLYING_TO_POSITION_MULTIPLIER;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_underlyingToS(const std::string_view& name) {
+  if (name.length() == 28 &&
+      name[13] == 'e' &&
+      name[14] == 't' &&
+      name[15] == 't' &&
+      name[16] == 'l' &&
+      name[17] == 'e' &&
+      name[18] == 'M' &&
+      name[19] == 'u' &&
+      name[20] == 'l' &&
+      name[21] == 't' &&
+      name[22] == 'i' &&
+      name[23] == 'p' &&
+      name[24] == 'l' &&
+      name[25] == 'i' &&
+      name[26] == 'e' &&
+      name[27] == 'r') {
+    return Field::UNDERLYING_TO_SETTLE_MULTIPLIER;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_underlyingT(const std::string_view& name) {
+  if (name.length() >= 13 &&
+      name[11] == 'o') {
+    switch (name[12]) {
+      case 'P':
+        return parse_underlyingToP(name);
+      case 'S':
+        return parse_underlyingToS(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_underlying(const std::string_view& name) {
+  if (name.length() > 10) {
+    switch (name[10]) {
+      case 'S':
+        return parse_underlyingS(name);
+      case 'T':
+        return parse_underlyingT(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_u(const std::string_view& name) {
+  if (name.length() >= 10 &&
+      name[1] == 'n' &&
+      name[2] == 'd' &&
+      name[3] == 'e' &&
+      name[4] == 'r' &&
+      name[5] == 'l' &&
+      name[6] == 'y' &&
+      name[7] == 'i' &&
+      name[8] == 'n' &&
+      name[9] == 'g') {
+    if (name.length() == 10)
+      return Field::UNDERLYING;
+    return parse_underlying(name);
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_volume(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[6] == '2' &&
+      name[7] == '4' &&
+      name[8] == 'h') {
+    return Field::VOLUME24H;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_vo(const std::string_view& name) {
+  if (name.length() >= 6 &&
+      name[2] == 'l' &&
+      name[3] == 'u' &&
+      name[4] == 'm' &&
+      name[5] == 'e') {
+    if (name.length() == 6)
+      return Field::VOLUME;
+    return parse_volume(name);
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_vw(const std::string_view& name) {
+  if (name.length() == 4 &&
+      name[2] == 'a' &&
+      name[3] == 'p') {
+    return Field::VWAP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_v(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'o':
+        return parse_vo(name);
+      case 'w':
+        return parse_vw(name);
+    }
+  }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  if (name.empty())
-    throw std::runtime_error("Key can't be empty");
-  switch (name[0]) {
-    case 'a':
-      return parse_a(name);
-    case 'b':
-      return parse_b(name);
-    case 'c':
-      return parse_c(name);
-    case 'd':
-      return parse_d(name);
-    case 'e':
-      return parse_e(name);
-    case 'f':
-      return parse_f(name);
-    case 'h':
-      return parse_h(name);
-    case 'i':
-      return parse_i(name);
-    case 'l':
-      return parse_l(name);
-    case 'm':
-      return parse_m(name);
-    case 'o':
-      return parse_o(name);
-    case 'p':
-      return parse_p(name);
-    case 'q':
-      return parse_q(name);
-    case 'r':
-      return parse_r(name);
-    case 's':
-      return parse_s(name);
-    case 't':
-      return parse_t(name);
-    case 'u':
-      return parse_u(name);
-    case 'v':
-      return parse_v(name);
+  if (name.length() > 0) {
+    switch (name[0]) {
+      case 'a':
+        return parse_a(name);
+      case 'b':
+        return parse_b(name);
+      case 'c':
+        return parse_c(name);
+      case 'd':
+        return parse_d(name);
+      case 'e':
+        return parse_e(name);
+      case 'f':
+        return parse_f(name);
+      case 'h':
+        return parse_h(name);
+      case 'i':
+        return parse_i(name);
+      case 'l':
+        return parse_l(name);
+      case 'm':
+        return parse_m(name);
+      case 'o':
+        return parse_o(name);
+      case 'p':
+        return parse_p(name);
+      case 'q':
+        return parse_q(name);
+      case 'r':
+        return parse_r(name);
+      case 's':
+        return parse_s(name);
+      case 't':
+        return parse_t(name);
+      case 'u':
+        return parse_u(name);
+      case 'v':
+        return parse_v(name);
+    }
   }
   return Field::UNKNOWN;
 }
 
 static_assert(parse_name("askPrice") == Field::ASK_PRICE);
-
 static_assert(parse_name("bankruptLimitDownPrice") == Field::BANKRUPT_LIMIT_DOWN_PRICE);
 static_assert(parse_name("bankruptLimitUpPrice") == Field::BANKRUPT_LIMIT_UP_PRICE);
 static_assert(parse_name("bidPrice") == Field::BID_PRICE);
 static_assert(parse_name("buyLeg") == Field::BUY_LEG);
-
 static_assert(parse_name("calcInterval") == Field::CALC_INTERVAL);
 static_assert(parse_name("capped") == Field::CAPPED);
 static_assert(parse_name("closingTimestamp") == Field::CLOSING_TIMESTAMP);
-
 static_assert(parse_name("deleverage") == Field::DELEVERAGE);
-
 static_assert(parse_name("expiry") == Field::EXPIRY);
-
 static_assert(parse_name("fairBasis") == Field::FAIR_BASIS);
 static_assert(parse_name("fairBasisRate") == Field::FAIR_BASIS_RATE);
 static_assert(parse_name("fairMethod") == Field::FAIR_METHOD);
 static_assert(parse_name("fairPrice") == Field::FAIR_PRICE);
-static_assert(parse_name("foreignNotional24h") == Field::FOREIGN_NOTIONAL_24H);
+static_assert(parse_name("foreignNotional24h") == Field::FOREIGN_NOTIONAL24H);
 static_assert(parse_name("front") == Field::FRONT);
 static_assert(parse_name("fundingBaseSymbol") == Field::FUNDING_BASE_SYMBOL);
 static_assert(parse_name("fundingInterval") == Field::FUNDING_INTERVAL);
@@ -790,11 +2305,9 @@ static_assert(parse_name("fundingPremiumSymbol") == Field::FUNDING_PREMIUM_SYMBO
 static_assert(parse_name("fundingQuoteSymbol") == Field::FUNDING_QUOTE_SYMBOL);
 static_assert(parse_name("fundingRate") == Field::FUNDING_RATE);
 static_assert(parse_name("fundingTimestamp") == Field::FUNDING_TIMESTAMP);
-
 static_assert(parse_name("hasLiquidity") == Field::HAS_LIQUIDITY);
 static_assert(parse_name("highPrice") == Field::HIGH_PRICE);
-static_assert(parse_name("homeNotional24h") == Field::HOME_NOTIONAL_24H);
-
+static_assert(parse_name("homeNotional24h") == Field::HOME_NOTIONAL24H);
 static_assert(parse_name("impactAskPrice") == Field::IMPACT_ASK_PRICE);
 static_assert(parse_name("impactBidPrice") == Field::IMPACT_BID_PRICE);
 static_assert(parse_name("impactMidPrice") == Field::IMPACT_MID_PRICE);
@@ -806,7 +2319,6 @@ static_assert(parse_name("insuranceFee") == Field::INSURANCE_FEE);
 static_assert(parse_name("inverseLeg") == Field::INVERSE_LEG);
 static_assert(parse_name("isInverse") == Field::IS_INVERSE);
 static_assert(parse_name("isQuanto") == Field::IS_QUANTO);
-
 static_assert(parse_name("lastChangePcnt") == Field::LAST_CHANGE_PCNT);
 static_assert(parse_name("lastPrice") == Field::LAST_PRICE);
 static_assert(parse_name("lastPriceProtected") == Field::LAST_PRICE_PROTECTED);
@@ -817,7 +2329,6 @@ static_assert(parse_name("limitUpPrice") == Field::LIMIT_UP_PRICE);
 static_assert(parse_name("listing") == Field::LISTING);
 static_assert(parse_name("lotSize") == Field::LOT_SIZE);
 static_assert(parse_name("lowPrice") == Field::LOW_PRICE);
-
 static_assert(parse_name("maintMargin") == Field::MAINT_MARGIN);
 static_assert(parse_name("makerFee") == Field::MAKER_FEE);
 static_assert(parse_name("markMethod") == Field::MARK_METHOD);
@@ -826,27 +2337,23 @@ static_assert(parse_name("maxOrderQty") == Field::MAX_ORDER_QTY);
 static_assert(parse_name("maxPrice") == Field::MAX_PRICE);
 static_assert(parse_name("midPrice") == Field::MID_PRICE);
 static_assert(parse_name("multiplier") == Field::MULTIPLIER);
-
-static_assert(parse_name("openingTimestamp") == Field::OPENING_TIMESTAMP);
 static_assert(parse_name("openInterest") == Field::OPEN_INTEREST);
 static_assert(parse_name("openValue") == Field::OPEN_VALUE);
+static_assert(parse_name("openingTimestamp") == Field::OPENING_TIMESTAMP);
 static_assert(parse_name("optionMultiplier") == Field::OPTION_MULTIPLIER);
 static_assert(parse_name("optionStrikePcnt") == Field::OPTION_STRIKE_PCNT);
 static_assert(parse_name("optionStrikePrice") == Field::OPTION_STRIKE_PRICE);
 static_assert(parse_name("optionStrikeRound") == Field::OPTION_STRIKE_ROUND);
 static_assert(parse_name("optionUnderlyingPrice") == Field::OPTION_UNDERLYING_PRICE);
-
 static_assert(parse_name("positionCurrency") == Field::POSITION_CURRENCY);
 static_assert(parse_name("prevClosePrice") == Field::PREV_CLOSE_PRICE);
-static_assert(parse_name("prevPrice24h") == Field::PREV_PRICE_24H);
+static_assert(parse_name("prevPrice24h") == Field::PREV_PRICE24H);
 static_assert(parse_name("prevTotalTurnover") == Field::PREV_TOTAL_TURNOVER);
 static_assert(parse_name("prevTotalVolume") == Field::PREV_TOTAL_VOLUME);
 static_assert(parse_name("publishInterval") == Field::PUBLISH_INTERVAL);
 static_assert(parse_name("publishTime") == Field::PUBLISH_TIME);
-
 static_assert(parse_name("quoteCurrency") == Field::QUOTE_CURRENCY);
 static_assert(parse_name("quoteToSettleMultiplier") == Field::QUOTE_TO_SETTLE_MULTIPLIER);
-
 static_assert(parse_name("rebalanceInterval") == Field::REBALANCE_INTERVAL);
 static_assert(parse_name("rebalanceTimestamp") == Field::REBALANCE_TIMESTAMP);
 static_assert(parse_name("reference") == Field::REFERENCE);
@@ -855,7 +2362,6 @@ static_assert(parse_name("relistInterval") == Field::RELIST_INTERVAL);
 static_assert(parse_name("riskLimit") == Field::RISK_LIMIT);
 static_assert(parse_name("riskStep") == Field::RISK_STEP);
 static_assert(parse_name("rootSymbol") == Field::ROOT_SYMBOL);
-
 static_assert(parse_name("sellLeg") == Field::SELL_LEG);
 static_assert(parse_name("sessionInterval") == Field::SESSION_INTERVAL);
 static_assert(parse_name("settlCurrency") == Field::SETTL_CURRENCY);
@@ -864,7 +2370,6 @@ static_assert(parse_name("settledPrice") == Field::SETTLED_PRICE);
 static_assert(parse_name("settlementFee") == Field::SETTLEMENT_FEE);
 static_assert(parse_name("state") == Field::STATE);
 static_assert(parse_name("symbol") == Field::SYMBOL);
-
 static_assert(parse_name("takerFee") == Field::TAKER_FEE);
 static_assert(parse_name("taxed") == Field::TAXED);
 static_assert(parse_name("tickSize") == Field::TICK_SIZE);
@@ -872,19 +2377,17 @@ static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 static_assert(parse_name("totalTurnover") == Field::TOTAL_TURNOVER);
 static_assert(parse_name("totalVolume") == Field::TOTAL_VOLUME);
 static_assert(parse_name("turnover") == Field::TURNOVER);
-static_assert(parse_name("turnover24h") == Field::TURNOVER_24H);
+static_assert(parse_name("turnover24h") == Field::TURNOVER24H);
 static_assert(parse_name("typ") == Field::TYP);
-
 static_assert(parse_name("underlying") == Field::UNDERLYING);
 static_assert(parse_name("underlyingSymbol") == Field::UNDERLYING_SYMBOL);
 static_assert(parse_name("underlyingToPositionMultiplier") == Field::UNDERLYING_TO_POSITION_MULTIPLIER);
 static_assert(parse_name("underlyingToSettleMultiplier") == Field::UNDERLYING_TO_SETTLE_MULTIPLIER);
-
 static_assert(parse_name("volume") == Field::VOLUME);
-static_assert(parse_name("volume24h") == Field::VOLUME_24H);
+static_assert(parse_name("volume24h") == Field::VOLUME24H);
 static_assert(parse_name("vwap") == Field::VWAP);
 
-inline void update_field(
+void update_field(
     auto& result,
     auto& key,
     auto& value) {
@@ -937,8 +2440,8 @@ inline void update_field(
     case Field::FAIR_PRICE:
       update(result.fair_price, value);
       break;
-    case Field::FOREIGN_NOTIONAL_24H:
-      update(result.foreign_notional_24h, value);
+    case Field::FOREIGN_NOTIONAL24H:
+      update(result.foreign_notional24h, value);
       break;
     case Field::FRONT:
       update(result.front, value);
@@ -967,8 +2470,8 @@ inline void update_field(
     case Field::HIGH_PRICE:
       update(result.high_price, value);
       break;
-    case Field::HOME_NOTIONAL_24H:
-      update(result.home_notional_24h, value);
+    case Field::HOME_NOTIONAL24H:
+      update(result.home_notional24h, value);
       break;
     case Field::IMPACT_ASK_PRICE:
       update(result.impact_ask_price, value);
@@ -1057,14 +2560,14 @@ inline void update_field(
     case Field::MULTIPLIER:
       update(result.multiplier, value);
       break;
-    case Field::OPENING_TIMESTAMP:
-      update(result.opening_timestamp, value);
-      break;
     case Field::OPEN_INTEREST:
       update(result.open_interest, value);
       break;
     case Field::OPEN_VALUE:
       update(result.open_value, value);
+      break;
+    case Field::OPENING_TIMESTAMP:
+      update(result.opening_timestamp, value);
       break;
     case Field::OPTION_MULTIPLIER:
       update(result.option_multiplier, value);
@@ -1087,8 +2590,8 @@ inline void update_field(
     case Field::PREV_CLOSE_PRICE:
       update(result.prev_close_price, value);
       break;
-    case Field::PREV_PRICE_24H:
-      update(result.prev_price_24h, value);
+    case Field::PREV_PRICE24H:
+      update(result.prev_price24h, value);
       break;
     case Field::PREV_TOTAL_TURNOVER:
       update(result.prev_total_turnover, value);
@@ -1177,8 +2680,8 @@ inline void update_field(
     case Field::TURNOVER:
       update(result.turnover, value);
       break;
-    case Field::TURNOVER_24H:
-      update(result.turnover_24h, value);
+    case Field::TURNOVER24H:
+      update(result.turnover24h, value);
       break;
     case Field::TYP:
       update(result.typ, value);
@@ -1198,8 +2701,8 @@ inline void update_field(
     case Field::VOLUME:
       update(result.volume, value);
       break;
-    case Field::VOLUME_24H:
-      update(result.volume_24h, value);
+    case Field::VOLUME24H:
+      update(result.volume24h, value);
       break;
     case Field::VWAP:
       update(result.vwap, value);

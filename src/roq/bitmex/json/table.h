@@ -11,6 +11,7 @@ namespace bitmex {
 namespace json {
 
 enum class Table {
+  UNDEFINED,
   UNKNOWN,
   EXECUTION,
   FUNDING,
@@ -29,6 +30,7 @@ extern Table parse_table(const std::string_view& name);
 
 inline auto EnumNamesTable() {
   static const std::string_view names[] = {
+    "UNDEFINED",
     "UNKNOWN",
     "EXECUTION",
     "FUNDING",
@@ -56,16 +58,17 @@ inline auto EnumNameTable(Table e) {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::Table> {
-  template <typename T>
-  constexpr auto parse(T& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename T>
-  auto format(const roq::bitmex::json::Table value, T& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::Table value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{}",
         roq::bitmex::json::EnumNameTable(value));
   }
 };
-

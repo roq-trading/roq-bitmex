@@ -1,0 +1,12 @@
+{
+"type": "json::item",
+"name": "QuoteItem",
+"values": {
+	"askPrice": "double",
+	"askSize": "double",
+	"bidPrice": "double",
+	"bidSize": "double",
+	"symbol": "std::string_view",
+	"timestamp": "std::chrono::nanoseconds"
+}
+}

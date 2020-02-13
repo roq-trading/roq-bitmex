@@ -1,0 +1,13 @@
+{
+"type": "enum",
+"name": "Typ",
+"values": [
+	"FFCCSX",
+	"FFWCSX",
+	"MRCXXX",
+	"MRIXXX",
+	"MRRXXX",
+	"OCECCS",
+	"OPECCS"
+]
+}

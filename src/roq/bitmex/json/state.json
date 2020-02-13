@@ -1,0 +1,10 @@
+{
+"type": "enum",
+"name": "State",
+"values": [
+       	"Closed",
+       	"Open",
+       	"Settled",
+       	"Unlisted"
+]
+}

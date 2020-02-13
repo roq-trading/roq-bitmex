@@ -35,14 +35,16 @@ struct QuoteItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::QuoteItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::QuoteItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::QuoteItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "ask_price={}, "
         "ask_size={}, "

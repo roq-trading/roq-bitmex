@@ -22,7 +22,7 @@ struct MarginItem final {
   MarginItem(MarginItem&&) = delete;
 
   uint64_t account = 0;
-  std::string_view action;  // XXX Action action = Action::UNDEFINED;
+  std::string_view action;
   double amount = std::numeric_limits<double>::quiet_NaN();
   double available_margin = std::numeric_limits<double>::quiet_NaN();
   double commission = std::numeric_limits<double>::quiet_NaN();
@@ -70,14 +70,16 @@ struct MarginItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::MarginItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::MarginItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::MarginItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "account={}, "
         "action=\"{}\", "
@@ -164,4 +166,3 @@ struct fmt::formatter<roq::bitmex::json::MarginItem> {
         value.withdrawable_margin);
   }
 };
-

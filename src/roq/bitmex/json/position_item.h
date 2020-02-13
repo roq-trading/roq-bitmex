@@ -19,7 +19,7 @@ struct PositionItem final {
   explicit PositionItem(core::json::value_t& value);
 
   PositionItem(const PositionItem&) = delete;
-  PositionItem(PositionItem&&) = default;
+  PositionItem(PositionItem&&) = delete;
 
   uint64_t account = 0;
   double avg_cost_price = std::numeric_limits<double>::quiet_NaN();
@@ -61,16 +61,16 @@ struct PositionItem final {
   double margin_call_price = std::numeric_limits<double>::quiet_NaN();
   double mark_price = std::numeric_limits<double>::quiet_NaN();
   double mark_value = std::numeric_limits<double>::quiet_NaN();
-  double opening_comm = std::numeric_limits<double>::quiet_NaN();
-  double opening_cost = std::numeric_limits<double>::quiet_NaN();
-  double opening_qty = std::numeric_limits<double>::quiet_NaN();
-  std::chrono::nanoseconds opening_timestamp = {};
   double open_order_buy_cost = std::numeric_limits<double>::quiet_NaN();
   double open_order_buy_premium = std::numeric_limits<double>::quiet_NaN();
   double open_order_buy_qty = std::numeric_limits<double>::quiet_NaN();
   double open_order_sell_cost = std::numeric_limits<double>::quiet_NaN();
   double open_order_sell_premium = std::numeric_limits<double>::quiet_NaN();
   double open_order_sell_qty = std::numeric_limits<double>::quiet_NaN();
+  double opening_comm = std::numeric_limits<double>::quiet_NaN();
+  double opening_cost = std::numeric_limits<double>::quiet_NaN();
+  double opening_qty = std::numeric_limits<double>::quiet_NaN();
+  std::chrono::nanoseconds opening_timestamp = {};
   double pos_allowance = std::numeric_limits<double>::quiet_NaN();
   double pos_comm = std::numeric_limits<double>::quiet_NaN();
   double pos_cost = std::numeric_limits<double>::quiet_NaN();
@@ -100,9 +100,9 @@ struct PositionItem final {
   double simple_qty = std::numeric_limits<double>::quiet_NaN();
   double simple_value = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
-  double target_excess_margin;
-  double taxable_margin = std::numeric_limits<double>::quiet_NaN();
+  double target_excess_margin = std::numeric_limits<double>::quiet_NaN();
   double tax_base = std::numeric_limits<double>::quiet_NaN();
+  double taxable_margin = std::numeric_limits<double>::quiet_NaN();
   std::chrono::nanoseconds timestamp = {};
   std::string_view underlying;
   double unrealised_cost = std::numeric_limits<double>::quiet_NaN();
@@ -120,14 +120,16 @@ struct PositionItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::PositionItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::PositionItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::PositionItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "account={}, "
         "avg_cost_price={}, "
@@ -169,16 +171,16 @@ struct fmt::formatter<roq::bitmex::json::PositionItem> {
         "margin_call_price={}, "
         "mark_price={}, "
         "mark_value={}, "
-        "opening_comm={}, "
-        "opening_cost={}, "
-        "opening_qty={}, "
-        "opening_timestamp={}, "
         "open_order_buy_cost={}, "
         "open_order_buy_premium={}, "
         "open_order_buy_qty={}, "
         "open_order_sell_cost={}, "
         "open_order_sell_premium={}, "
         "open_order_sell_qty={}, "
+        "opening_comm={}, "
+        "opening_cost={}, "
+        "opening_qty={}, "
+        "opening_timestamp={}, "
         "pos_allowance={}, "
         "pos_comm={}, "
         "pos_cost={}, "
@@ -209,8 +211,8 @@ struct fmt::formatter<roq::bitmex::json::PositionItem> {
         "simple_value={}, "
         "symbol=\"{}\", "
         "target_excess_margin={}, "
-        "taxable_margin={}, "
         "tax_base={}, "
+        "taxable_margin={}, "
         "timestamp={}, "
         "underlying=\"{}\", "
         "unrealised_cost={}, "
@@ -261,16 +263,16 @@ struct fmt::formatter<roq::bitmex::json::PositionItem> {
         value.margin_call_price,
         value.mark_price,
         value.mark_value,
-        value.opening_comm,
-        value.opening_cost,
-        value.opening_qty,
-        value.opening_timestamp,
         value.open_order_buy_cost,
         value.open_order_buy_premium,
         value.open_order_buy_qty,
         value.open_order_sell_cost,
         value.open_order_sell_premium,
         value.open_order_sell_qty,
+        value.opening_comm,
+        value.opening_cost,
+        value.opening_qty,
+        value.opening_timestamp,
         value.pos_allowance,
         value.pos_comm,
         value.pos_cost,
@@ -301,8 +303,8 @@ struct fmt::formatter<roq::bitmex::json::PositionItem> {
         value.simple_value,
         value.symbol,
         value.target_excess_margin,
-        value.taxable_margin,
         value.tax_base,
+        value.taxable_margin,
         value.timestamp,
         value.underlying,
         value.unrealised_cost,

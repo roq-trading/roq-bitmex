@@ -303,6 +303,7 @@ void Parser::dispatch(
             // not ready -- finish and try again
           } else {
             switch (table) {
+              case Table::UNDEFINED:
               case Table::UNKNOWN:
                 break;
               case Table::EXECUTION: {

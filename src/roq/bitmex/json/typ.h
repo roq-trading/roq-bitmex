@@ -10,8 +10,6 @@ namespace roq {
 namespace bitmex {
 namespace json {
 
-// note! is this really an enum? looks more like a bitmap
-
 enum class Typ {
   UNDEFINED,
   UNKNOWN,
@@ -52,16 +50,17 @@ inline auto EnumNameTyp(Typ e) {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::Typ> {
-  template <typename T>
-  constexpr auto parse(T& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename T>
-  auto format(const roq::bitmex::json::Typ value, T& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::Typ value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{}",
         roq::bitmex::json::EnumNameTyp(value));
   }
 };
-

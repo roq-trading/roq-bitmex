@@ -1,0 +1,17 @@
+{
+"type": "enum",
+"name": "Table",
+"values": [
+       	"execution",
+       	"funding",
+       	"instrument",
+       	"liquidation",
+       	"margin",
+       	"order",
+       	"orderBookL2",
+       	"position",
+       	"quote",
+       	"settlement",
+       	"trade"
+]
+}

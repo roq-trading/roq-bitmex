@@ -19,7 +19,7 @@ namespace bitmex {
 namespace json {
 
 struct InstrumentItem final {
-  explicit InstrumentItem(core::json::value_t&);
+  explicit InstrumentItem(core::json::value_t& value);
 
   InstrumentItem(const InstrumentItem&) = delete;
   InstrumentItem(InstrumentItem&&) = delete;
@@ -38,7 +38,7 @@ struct InstrumentItem final {
   double fair_basis_rate = std::numeric_limits<double>::quiet_NaN();
   std::string_view fair_method;
   double fair_price = std::numeric_limits<double>::quiet_NaN();
-  double foreign_notional_24h = std::numeric_limits<double>::quiet_NaN();
+  double foreign_notional24h = std::numeric_limits<double>::quiet_NaN();
   std::chrono::nanoseconds front = {};
   std::string_view funding_base_symbol;
   std::chrono::nanoseconds funding_interval = {};
@@ -48,7 +48,7 @@ struct InstrumentItem final {
   std::chrono::nanoseconds funding_timestamp = {};
   bool has_liquidity = false;
   double high_price = std::numeric_limits<double>::quiet_NaN();
-  double home_notional_24h = std::numeric_limits<double>::quiet_NaN();
+  double home_notional24h = std::numeric_limits<double>::quiet_NaN();
   double impact_ask_price = std::numeric_limits<double>::quiet_NaN();
   double impact_bid_price = std::numeric_limits<double>::quiet_NaN();
   double impact_mid_price = std::numeric_limits<double>::quiet_NaN();
@@ -78,9 +78,9 @@ struct InstrumentItem final {
   double max_price = std::numeric_limits<double>::quiet_NaN();
   double mid_price = std::numeric_limits<double>::quiet_NaN();
   double multiplier = std::numeric_limits<double>::quiet_NaN();
-  std::chrono::nanoseconds opening_timestamp = {};
   double open_interest = std::numeric_limits<double>::quiet_NaN();
   double open_value = std::numeric_limits<double>::quiet_NaN();
+  std::chrono::nanoseconds opening_timestamp = {};
   double option_multiplier = std::numeric_limits<double>::quiet_NaN();
   double option_strike_pcnt = std::numeric_limits<double>::quiet_NaN();
   double option_strike_price = std::numeric_limits<double>::quiet_NaN();
@@ -88,7 +88,7 @@ struct InstrumentItem final {
   double option_underlying_price = std::numeric_limits<double>::quiet_NaN();
   std::string_view position_currency;
   double prev_close_price = std::numeric_limits<double>::quiet_NaN();
-  double prev_price_24h = std::numeric_limits<double>::quiet_NaN();
+  double prev_price24h = std::numeric_limits<double>::quiet_NaN();
   double prev_total_turnover = std::numeric_limits<double>::quiet_NaN();
   double prev_total_volume = std::numeric_limits<double>::quiet_NaN();
   std::chrono::nanoseconds publish_interval = {};
@@ -118,14 +118,14 @@ struct InstrumentItem final {
   double total_turnover = std::numeric_limits<double>::quiet_NaN();
   double total_volume = std::numeric_limits<double>::quiet_NaN();
   double turnover = std::numeric_limits<double>::quiet_NaN();
-  double turnover_24h = std::numeric_limits<double>::quiet_NaN();
+  double turnover24h = std::numeric_limits<double>::quiet_NaN();
   Typ typ = Typ::UNDEFINED;
   std::string_view underlying;
   std::string_view underlying_symbol;
   double underlying_to_position_multiplier = std::numeric_limits<double>::quiet_NaN();
   double underlying_to_settle_multiplier = std::numeric_limits<double>::quiet_NaN();
   double volume = std::numeric_limits<double>::quiet_NaN();
-  double volume_24h = std::numeric_limits<double>::quiet_NaN();
+  double volume24h = std::numeric_limits<double>::quiet_NaN();
   double vwap = std::numeric_limits<double>::quiet_NaN();
 };
 
@@ -135,14 +135,16 @@ struct InstrumentItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::InstrumentItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::InstrumentItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "ask_price={}, "
         "bankrupt_limit_down_price={}, "
@@ -158,7 +160,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         "fair_basis_rate={}, "
         "fair_method=\"{}\", "
         "fair_price={}, "
-        "foreign_notional_24h={}, "
+        "foreign_notional24h={}, "
         "front={}, "
         "funding_base_symbol=\"{}\", "
         "funding_interval={}, "
@@ -168,7 +170,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         "funding_timestamp={}, "
         "has_liquidity={}, "
         "high_price={}, "
-        "home_notional_24h={}, "
+        "home_notional24h={}, "
         "impact_ask_price={}, "
         "impact_bid_price={}, "
         "impact_mid_price={}, "
@@ -198,9 +200,9 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         "max_price={}, "
         "mid_price={}, "
         "multiplier={}, "
-        "opening_timestamp={}, "
         "open_interest={}, "
         "open_value={}, "
+        "opening_timestamp={}, "
         "option_multiplier={}, "
         "option_strike_pcnt={}, "
         "option_strike_price={}, "
@@ -208,7 +210,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         "option_underlying_price={}, "
         "position_currency=\"{}\", "
         "prev_close_price={}, "
-        "prev_price_24h={}, "
+        "prev_price24h={}, "
         "prev_total_turnover={}, "
         "prev_total_volume={}, "
         "publish_interval={}, "
@@ -238,14 +240,14 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         "total_turnover={}, "
         "total_volume={}, "
         "turnover={}, "
-        "turnover_24h={}, "
+        "turnover24h={}, "
         "typ={}, "
         "underlying=\"{}\", "
         "underlying_symbol=\"{}\", "
         "underlying_to_position_multiplier={}, "
         "underlying_to_settle_multiplier={}, "
         "volume={}, "
-        "volume_24h={}, "
+        "volume24h={}, "
         "vwap={}"
         "}}",
         value.ask_price,
@@ -262,7 +264,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         value.fair_basis_rate,
         value.fair_method,
         value.fair_price,
-        value.foreign_notional_24h,
+        value.foreign_notional24h,
         value.front,
         value.funding_base_symbol,
         value.funding_interval,
@@ -272,7 +274,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         value.funding_timestamp,
         value.has_liquidity,
         value.high_price,
-        value.home_notional_24h,
+        value.home_notional24h,
         value.impact_ask_price,
         value.impact_bid_price,
         value.impact_mid_price,
@@ -302,9 +304,9 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         value.max_price,
         value.mid_price,
         value.multiplier,
-        value.opening_timestamp,
         value.open_interest,
         value.open_value,
+        value.opening_timestamp,
         value.option_multiplier,
         value.option_strike_pcnt,
         value.option_strike_price,
@@ -312,7 +314,7 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         value.option_underlying_price,
         value.position_currency,
         value.prev_close_price,
-        value.prev_price_24h,
+        value.prev_price24h,
         value.prev_total_turnover,
         value.prev_total_volume,
         value.publish_interval,
@@ -342,14 +344,14 @@ struct fmt::formatter<roq::bitmex::json::InstrumentItem> {
         value.total_turnover,
         value.total_volume,
         value.turnover,
-        value.turnover_24h,
+        value.turnover24h,
         value.typ,
         value.underlying,
         value.underlying_symbol,
         value.underlying_to_position_multiplier,
         value.underlying_to_settle_multiplier,
         value.volume,
-        value.volume_24h,
+        value.volume24h,
         value.vwap);
   }
 };

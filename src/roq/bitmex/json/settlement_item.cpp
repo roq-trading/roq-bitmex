@@ -24,90 +24,213 @@ enum class Field {
   TIMESTAMP,
 };
 
-constexpr Field parse_b(auto& name) {
-  if (name.compare("bankrupt") == 0)
+constexpr Field parse_b(const std::string_view& name) {
+  if (name.length() == 8 &&
+      name[1] == 'a' &&
+      name[2] == 'n' &&
+      name[3] == 'k' &&
+      name[4] == 'r' &&
+      name[5] == 'u' &&
+      name[6] == 'p' &&
+      name[7] == 't') {
     return Field::BANKRUPT;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_o(auto& name) {
-  if (name.length() >= 7) {
+constexpr Field parse_optionS(const std::string_view& name) {
+  if (name.length() == 17 &&
+      name[7] == 't' &&
+      name[8] == 'r' &&
+      name[9] == 'i' &&
+      name[10] == 'k' &&
+      name[11] == 'e' &&
+      name[12] == 'P' &&
+      name[13] == 'r' &&
+      name[14] == 'i' &&
+      name[15] == 'c' &&
+      name[16] == 'e') {
+    return Field::OPTION_STRIKE_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_optionU(const std::string_view& name) {
+  if (name.length() == 21 &&
+      name[7] == 'n' &&
+      name[8] == 'd' &&
+      name[9] == 'e' &&
+      name[10] == 'r' &&
+      name[11] == 'l' &&
+      name[12] == 'y' &&
+      name[13] == 'i' &&
+      name[14] == 'n' &&
+      name[15] == 'g' &&
+      name[16] == 'P' &&
+      name[17] == 'r' &&
+      name[18] == 'i' &&
+      name[19] == 'c' &&
+      name[20] == 'e') {
+    return Field::OPTION_UNDERLYING_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_o(const std::string_view& name) {
+  if (name.length() >= 7 &&
+      name[1] == 'p' &&
+      name[2] == 't' &&
+      name[3] == 'i' &&
+      name[4] == 'o' &&
+      name[5] == 'n') {
     switch (name[6]) {
       case 'S':
-        if (name.compare("optionStrikePrice") == 0)
-          return Field::OPTION_STRIKE_PRICE;
-        break;
+        return parse_optionS(name);
       case 'U':
-        if (name.compare("optionUnderlyingPrice") == 0)
-          return Field::OPTION_UNDERLYING_PRICE;
-        break;
+        return parse_optionU(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_s(auto& name) {
-  if (name.length() >= 2) {
+constexpr Field parse_settled(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[7] == 'P' &&
+      name[8] == 'r' &&
+      name[9] == 'i' &&
+      name[10] == 'c' &&
+      name[11] == 'e') {
+    return Field::SETTLED_PRICE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_settlem(const std::string_view& name) {
+  if (name.length() == 14 &&
+      name[7] == 'e' &&
+      name[8] == 'n' &&
+      name[9] == 't' &&
+      name[10] == 'T' &&
+      name[11] == 'y' &&
+      name[12] == 'p' &&
+      name[13] == 'e') {
+    return Field::SETTLEMENT_TYPE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_se(const std::string_view& name) {
+  if (name.length() >= 7 &&
+      name[2] == 't' &&
+      name[3] == 't' &&
+      name[4] == 'l' &&
+      name[5] == 'e') {
+    switch (name[6]) {
+      case 'd':
+        return parse_settled(name);
+      case 'm':
+        return parse_settlem(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_sy(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[2] == 'm' &&
+      name[3] == 'b' &&
+      name[4] == 'o' &&
+      name[5] == 'l') {
+    return Field::SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_s(const std::string_view& name) {
+  if (name.length() > 1) {
     switch (name[1]) {
-      case 'e': {
-        if (name.length() >= 7) {
-          switch (name[6]) {
-            case 'd':
-              if (name.compare("settledPrice") == 0)
-                return Field::SETTLED_PRICE;
-              break;
-            case 'm':
-              if (name.compare("settlementType") == 0)
-                return Field::SETTLEMENT_TYPE;
-              break;
-          }
-        }
-        break;
-      }
+      case 'e':
+        return parse_se(name);
       case 'y':
-        if (name.compare("symbol") == 0)
-          return Field::SYMBOL;
-        break;
+        return parse_sy(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_t(auto& name) {
-  if (name.length() >= 4) {
+constexpr Field parse_taxB(const std::string_view& name) {
+  if (name.length() == 7 &&
+      name[4] == 'a' &&
+      name[5] == 's' &&
+      name[6] == 'e') {
+    return Field::TAX_BASE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_taxR(const std::string_view& name) {
+  if (name.length() == 7 &&
+      name[4] == 'a' &&
+      name[5] == 't' &&
+      name[6] == 'e') {
+    return Field::TAX_RATE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ta(const std::string_view& name) {
+  if (name.length() >= 4 &&
+      name[2] == 'x') {
     switch (name[3]) {
       case 'B':
-        if (name.compare("taxBase") == 0)
-          return Field::TAX_BASE;
-        break;
+        return parse_taxB(name);
       case 'R':
-        if (name.compare("taxRate") == 0)
-          return Field::TAX_RATE;
-        break;
-      case 'e':
-        if (name.compare("timestamp") == 0)
-          return Field::TIMESTAMP;
-        break;
+        return parse_taxR(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ti(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[2] == 'm' &&
+      name[3] == 'e' &&
+      name[4] == 's' &&
+      name[5] == 't' &&
+      name[6] == 'a' &&
+      name[7] == 'm' &&
+      name[8] == 'p') {
+    return Field::TIMESTAMP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_t(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'a':
+        return parse_ta(name);
+      case 'i':
+        return parse_ti(name);
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  if (name.empty())
-    return Field::UNKNOWN;
-  switch (name[0]) {
-    case 'b':
-      return parse_b(name);
-    case 'o':
-      return parse_o(name);
-    case 's':
-      return parse_s(name);
-    case 't':
-      return parse_t(name);
-    default:
-      return Field::UNKNOWN;
+  if (name.length() > 0) {
+    switch (name[0]) {
+      case 'b':
+        return parse_b(name);
+      case 'o':
+        return parse_o(name);
+      case 's':
+        return parse_s(name);
+      case 't':
+        return parse_t(name);
+    }
   }
+  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("bankrupt") == Field::BANKRUPT);
@@ -120,7 +243,7 @@ static_assert(parse_name("taxBase") == Field::TAX_BASE);
 static_assert(parse_name("taxRate") == Field::TAX_RATE);
 static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 
-inline void update_field(
+void update_field(
     auto& result,
     auto& key,
     auto& value) {

@@ -25,89 +25,210 @@ enum class Field {
   TRD_MATCH_ID,
 };
 
-constexpr Field parse_f(auto& name) {
-  if (name.compare("foreignNotional") == 0)
+constexpr Field parse_f(const std::string_view& name) {
+  if (name.length() == 15 &&
+      name[1] == 'o' &&
+      name[2] == 'r' &&
+      name[3] == 'e' &&
+      name[4] == 'i' &&
+      name[5] == 'g' &&
+      name[6] == 'n' &&
+      name[7] == 'N' &&
+      name[8] == 'o' &&
+      name[9] == 't' &&
+      name[10] == 'i' &&
+      name[11] == 'o' &&
+      name[12] == 'n' &&
+      name[13] == 'a' &&
+      name[14] == 'l') {
     return Field::FOREIGN_NOTIONAL;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_g(auto& name) {
-  if (name.compare("grossValue") == 0)
+constexpr Field parse_g(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[1] == 'r' &&
+      name[2] == 'o' &&
+      name[3] == 's' &&
+      name[4] == 's' &&
+      name[5] == 'V' &&
+      name[6] == 'a' &&
+      name[7] == 'l' &&
+      name[8] == 'u' &&
+      name[9] == 'e') {
     return Field::GROSS_VALUE;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_h(auto& name) {
-  if (name.compare("homeNotional") == 0)
+constexpr Field parse_h(const std::string_view& name) {
+  if (name.length() == 12 &&
+      name[1] == 'o' &&
+      name[2] == 'm' &&
+      name[3] == 'e' &&
+      name[4] == 'N' &&
+      name[5] == 'o' &&
+      name[6] == 't' &&
+      name[7] == 'i' &&
+      name[8] == 'o' &&
+      name[9] == 'n' &&
+      name[10] == 'a' &&
+      name[11] == 'l') {
     return Field::HOME_NOTIONAL;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_p(auto& name) {
-  if (name.compare("price") == 0)
+constexpr Field parse_p(const std::string_view& name) {
+  if (name.length() == 5 &&
+      name[1] == 'r' &&
+      name[2] == 'i' &&
+      name[3] == 'c' &&
+      name[4] == 'e') {
     return Field::PRICE;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_s(auto& name) {
-  if (name.length() >= 3) {
+constexpr Field parse_sid(const std::string_view& name) {
+  if (name.length() == 4 &&
+      name[3] == 'e') {
+    return Field::SIDE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_siz(const std::string_view& name) {
+  if (name.length() == 4 &&
+      name[3] == 'e') {
+    return Field::SIZE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_si(const std::string_view& name) {
+  if (name.length() > 2) {
     switch (name[2]) {
       case 'd':
-        if (name.compare("side") == 0)
-          return Field::SIDE;
-        break;
+        return parse_sid(name);
       case 'z':
-        if (name.compare("size") == 0)
-          return Field::SIZE;
-        break;
-      case 'm':
-        if (name.compare("symbol") == 0)
-          return Field::SYMBOL;
-        break;
+        return parse_siz(name);
     }
   }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_t(auto& name) {
-  if (name.length() >= 3) {
+constexpr Field parse_sy(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[2] == 'm' &&
+      name[3] == 'b' &&
+      name[4] == 'o' &&
+      name[5] == 'l') {
+    return Field::SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_s(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'i':
+        return parse_si(name);
+      case 'y':
+        return parse_sy(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tic(const std::string_view& name) {
+  if (name.length() == 13 &&
+      name[3] == 'k' &&
+      name[4] == 'D' &&
+      name[5] == 'i' &&
+      name[6] == 'r' &&
+      name[7] == 'e' &&
+      name[8] == 'c' &&
+      name[9] == 't' &&
+      name[10] == 'i' &&
+      name[11] == 'o' &&
+      name[12] == 'n') {
+    return Field::TICK_DIRECTION;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tim(const std::string_view& name) {
+  if (name.length() == 9 &&
+      name[3] == 'e' &&
+      name[4] == 's' &&
+      name[5] == 't' &&
+      name[6] == 'a' &&
+      name[7] == 'm' &&
+      name[8] == 'p') {
+    return Field::TIMESTAMP;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_ti(const std::string_view& name) {
+  if (name.length() > 2) {
     switch (name[2]) {
       case 'c':
-        if (name.compare("tickDirection") == 0)
-          return Field::TICK_DIRECTION;
-        break;
+        return parse_tic(name);
       case 'm':
-        if (name.compare("timestamp") == 0)
-          return Field::TIMESTAMP;
-        break;
-      case 'd':
-        if (name.compare("trdMatchID") == 0)
-          return Field::TRD_MATCH_ID;
-        break;
+        return parse_tim(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_tr(const std::string_view& name) {
+  if (name.length() == 10 &&
+      name[2] == 'd' &&
+      name[3] == 'M' &&
+      name[4] == 'a' &&
+      name[5] == 't' &&
+      name[6] == 'c' &&
+      name[7] == 'h' &&
+      name[8] == 'I' &&
+      name[9] == 'D') {
+    return Field::TRD_MATCH_ID;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_t(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'i':
+        return parse_ti(name);
+      case 'r':
+        return parse_tr(name);
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  if (name.empty())
-    return Field::UNKNOWN;
-  switch (name[0]) {
-    case 'f':
-      return parse_f(name);
-    case 'g':
-      return parse_g(name);
-    case 'h':
-      return parse_h(name);
-    case 'p':
-      return parse_p(name);
-    case 's':
-      return parse_s(name);
-    case 't':
-      return parse_t(name);
-    default:
-      return Field::UNKNOWN;
+  if (name.length() > 0) {
+    switch (name[0]) {
+      case 'f':
+        return parse_f(name);
+      case 'g':
+        return parse_g(name);
+      case 'h':
+        return parse_h(name);
+      case 'p':
+        return parse_p(name);
+      case 's':
+        return parse_s(name);
+      case 't':
+        return parse_t(name);
+    }
   }
+  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("foreignNotional") == Field::FOREIGN_NOTIONAL);
@@ -121,7 +242,7 @@ static_assert(parse_name("tickDirection") == Field::TICK_DIRECTION);
 static_assert(parse_name("timestamp") == Field::TIMESTAMP);
 static_assert(parse_name("trdMatchID") == Field::TRD_MATCH_ID);
 
-inline void update_field(
+void update_field(
     auto& result,
     auto& key,
     auto& value) {

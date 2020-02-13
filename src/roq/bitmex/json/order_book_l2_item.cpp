@@ -20,51 +20,88 @@ enum class Field {
   SYMBOL,
 };
 
-constexpr Field parse_i(auto& name) {
-  if (name.compare("id") == 0)
+constexpr Field parse_i(const std::string_view& name) {
+  if (name.length() == 2 &&
+      name[1] == 'd') {
     return Field::ID;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_p(auto& name) {
-  if (name.compare("price") == 0)
+constexpr Field parse_p(const std::string_view& name) {
+  if (name.length() == 5 &&
+      name[1] == 'r' &&
+      name[2] == 'i' &&
+      name[3] == 'c' &&
+      name[4] == 'e') {
     return Field::PRICE;
+  }
   return Field::UNKNOWN;
 }
 
-constexpr Field parse_s(auto& name) {
-  if (name.length() >= 3) {
+constexpr Field parse_sid(const std::string_view& name) {
+  if (name.length() == 4 &&
+      name[3] == 'e') {
+    return Field::SIDE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_siz(const std::string_view& name) {
+  if (name.length() == 4 &&
+      name[3] == 'e') {
+    return Field::SIZE;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_si(const std::string_view& name) {
+  if (name.length() > 2) {
     switch (name[2]) {
       case 'd':
-        if (name.compare("side") == 0)
-          return Field::SIDE;
-        break;
+        return parse_sid(name);
       case 'z':
-        if (name.compare("size") == 0)
-          return Field::SIZE;
-        break;
-      case 'm':
-        if (name.compare("symbol") == 0)
-          return Field::SYMBOL;
-        break;
+        return parse_siz(name);
+    }
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_sy(const std::string_view& name) {
+  if (name.length() == 6 &&
+      name[2] == 'm' &&
+      name[3] == 'b' &&
+      name[4] == 'o' &&
+      name[5] == 'l') {
+    return Field::SYMBOL;
+  }
+  return Field::UNKNOWN;
+}
+
+constexpr Field parse_s(const std::string_view& name) {
+  if (name.length() > 1) {
+    switch (name[1]) {
+      case 'i':
+        return parse_si(name);
+      case 'y':
+        return parse_sy(name);
     }
   }
   return Field::UNKNOWN;
 }
 
 constexpr Field parse_name(const std::string_view& name) {
-  if (name.empty())
-    return Field::UNKNOWN;
-  switch (name[0]) {
-    case 'i':
-      return parse_i(name);
-    case 'p':
-      return parse_p(name);
-    case 's':
-      return parse_s(name);
-    default:
-      return Field::UNKNOWN;
+  if (name.length() > 0) {
+    switch (name[0]) {
+      case 'i':
+        return parse_i(name);
+      case 'p':
+        return parse_p(name);
+      case 's':
+        return parse_s(name);
+    }
   }
+  return Field::UNKNOWN;
 }
 
 static_assert(parse_name("id") == Field::ID);
@@ -73,7 +110,7 @@ static_assert(parse_name("side") == Field::SIDE);
 static_assert(parse_name("size") == Field::SIZE);
 static_assert(parse_name("symbol") == Field::SYMBOL);
 
-inline void update_field(
+void update_field(
     auto& result,
     auto& key,
     auto& value) {

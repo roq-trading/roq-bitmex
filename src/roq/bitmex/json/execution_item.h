@@ -44,11 +44,11 @@ struct ExecutionItem final {
   double last_qty = std::numeric_limits<double>::quiet_NaN();
   double leaves_qty = std::numeric_limits<double>::quiet_NaN();
   std::string_view multi_leg_reporting_type;
-  std::string_view order_id;
-  double order_qty = std::numeric_limits<double>::quiet_NaN();
   std::string_view ord_rej_reason;
   std::string_view ord_status;
   std::string_view ord_type;
+  std::string_view order_id;
+  double order_qty = std::numeric_limits<double>::quiet_NaN();
   double peg_offset_value = std::numeric_limits<double>::quiet_NaN();
   std::string_view peg_price_type;
   double price = std::numeric_limits<double>::quiet_NaN();
@@ -76,14 +76,16 @@ struct ExecutionItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::ExecutionItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::ExecutionItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::ExecutionItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "account={}, "
         "avg_px={}, "
@@ -108,11 +110,11 @@ struct fmt::formatter<roq::bitmex::json::ExecutionItem> {
         "last_qty={}, "
         "leaves_qty={}, "
         "multi_leg_reporting_type=\"{}\", "
-        "order_id=\"{}\", "
-        "order_qty={}, "
         "ord_rej_reason=\"{}\", "
         "ord_status=\"{}\", "
         "ord_type=\"{}\", "
+        "order_id=\"{}\", "
+        "order_qty={}, "
         "peg_offset_value={}, "
         "peg_price_type=\"{}\", "
         "price={}, "
@@ -156,11 +158,11 @@ struct fmt::formatter<roq::bitmex::json::ExecutionItem> {
         value.last_qty,
         value.leaves_qty,
         value.multi_leg_reporting_type,
-        value.order_id,
-        value.order_qty,
         value.ord_rej_reason,
         value.ord_status,
         value.ord_type,
+        value.order_id,
+        value.order_qty,
         value.peg_offset_value,
         value.peg_price_type,
         value.price,

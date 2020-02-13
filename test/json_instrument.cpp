@@ -137,7 +137,7 @@ TEST(json_instrument_item, unlisted) {
   EXPECT_EQ(obj.capped, false);
   EXPECT_EQ(obj.taxed, false);
   EXPECT_EQ(obj.deleverage, false);
-  EXPECT_NEAR(obj.prev_price_24h, 7.34, TOLERANCE);
+  EXPECT_NEAR(obj.prev_price24h, 7.34, TOLERANCE);
   EXPECT_NEAR(obj.last_price, 6.93, TOLERANCE);
   EXPECT_EQ(obj.last_tick_direction, "ZeroMinusTick");
   EXPECT_NEAR(obj.last_change_pcnt, -0.0559, TOLERANCE);
@@ -297,14 +297,14 @@ TEST(json_instrument_item, open) {
   EXPECT_NEAR(obj.prev_total_volume, 26517101.0, TOLERANCE);
   EXPECT_NEAR(obj.total_volume, 26517103.0, TOLERANCE);
   EXPECT_NEAR(obj.volume, 2.0, TOLERANCE);
-  EXPECT_NEAR(obj.volume_24h, 84425.0, TOLERANCE);
+  EXPECT_NEAR(obj.volume24h, 84425.0, TOLERANCE);
   EXPECT_NEAR(obj.prev_total_turnover, 72134564731.0, TOLERANCE);
   EXPECT_NEAR(obj.total_turnover, 72134570075.0, TOLERANCE);
   EXPECT_NEAR(obj.turnover, 5344.0, TOLERANCE);
-  EXPECT_NEAR(obj.turnover_24h, 228958667.0, TOLERANCE);
-  EXPECT_NEAR(obj.home_notional_24h, 84425.0, TOLERANCE);
-  EXPECT_NEAR(obj.foreign_notional_24h, 2.28958667, TOLERANCE);
-  EXPECT_NEAR(obj.prev_price_24h, 0.00002725, TOLERANCE);
+  EXPECT_NEAR(obj.turnover24h, 228958667.0, TOLERANCE);
+  EXPECT_NEAR(obj.home_notional24h, 84425.0, TOLERANCE);
+  EXPECT_NEAR(obj.foreign_notional24h, 2.28958667, TOLERANCE);
+  EXPECT_NEAR(obj.prev_price24h, 0.00002725, TOLERANCE);
   EXPECT_NEAR(obj.vwap, 0.00002712, TOLERANCE);
   EXPECT_NEAR(obj.high_price, 0.00002775, TOLERANCE);
   EXPECT_NEAR(obj.low_price, 0.00002672, TOLERANCE);

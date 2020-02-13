@@ -40,14 +40,16 @@ struct SettlementItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::SettlementItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::SettlementItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::SettlementItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "bankrupt={}, "
         "option_strike_price={}, "

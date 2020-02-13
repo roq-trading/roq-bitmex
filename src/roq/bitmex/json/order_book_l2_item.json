@@ -1,0 +1,11 @@
+{
+"type": "json::item",
+"name": "OrderBookL2Item",
+"values": {
+	"id": "uint64_t",
+	"price": "double",
+	"side": "Side",
+	"size": "double",
+	"symbol": "std::string_view"
+}
+}

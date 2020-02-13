@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 
 #include <chrono>
@@ -18,7 +19,7 @@ struct OrderItem final {
   explicit OrderItem(core::json::value_t& value);
 
   OrderItem(const OrderItem&) = delete;
-  OrderItem(OrderItem&&) = default;
+  OrderItem(OrderItem&&) = delete;
 
   uint64_t account = 0;
   double avg_px = std::numeric_limits<double>::quiet_NaN();
@@ -32,11 +33,11 @@ struct OrderItem final {
   std::string_view exec_inst;
   double leaves_qty = std::numeric_limits<double>::quiet_NaN();
   std::string_view multi_leg_reporting_type;
-  std::string_view order_id;
-  double order_qty = std::numeric_limits<double>::quiet_NaN();
   std::string_view ord_rej_reason;
   std::string_view ord_status;
   std::string_view ord_type;
+  std::string_view order_id;
+  double order_qty = std::numeric_limits<double>::quiet_NaN();
   double peg_offset_value = std::numeric_limits<double>::quiet_NaN();
   std::string_view peg_price_type;
   double price = std::numeric_limits<double>::quiet_NaN();
@@ -44,7 +45,6 @@ struct OrderItem final {
   std::string_view side;
   double simple_cum_qty = std::numeric_limits<double>::quiet_NaN();
   double simple_leaves_qty = std::numeric_limits<double>::quiet_NaN();
-  double simple_order_qty = std::numeric_limits<double>::quiet_NaN();
   double stop_px = std::numeric_limits<double>::quiet_NaN();
   std::string_view symbol;
   std::string_view text;
@@ -61,14 +61,16 @@ struct OrderItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::OrderItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::OrderItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::OrderItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "account={}, "
         "avg_px={}, "
@@ -82,11 +84,11 @@ struct fmt::formatter<roq::bitmex::json::OrderItem> {
         "exec_inst=\"{}\", "
         "leaves_qty={}, "
         "multi_leg_reporting_type=\"{}\", "
-        "order_id=\"{}\", "
-        "order_qty={}, "
         "ord_rej_reason=\"{}\", "
         "ord_status=\"{}\", "
         "ord_type=\"{}\", "
+        "order_id=\"{}\", "
+        "order_qty={}, "
         "peg_offset_value={}, "
         "peg_price_type=\"{}\", "
         "price={}, "
@@ -94,7 +96,6 @@ struct fmt::formatter<roq::bitmex::json::OrderItem> {
         "side=\"{}\", "
         "simple_cum_qty={}, "
         "simple_leaves_qty={}, "
-        "simple_order_qty={}, "
         "stop_px={}, "
         "symbol=\"{}\", "
         "text=\"{}\", "
@@ -102,7 +103,7 @@ struct fmt::formatter<roq::bitmex::json::OrderItem> {
         "timestamp={}, "
         "transact_time={}, "
         "triggered=\"{}\", "
-        "working_indicator={}, "
+        "working_indicator={}"
         "}}",
         value.account,
         value.avg_px,
@@ -116,11 +117,11 @@ struct fmt::formatter<roq::bitmex::json::OrderItem> {
         value.exec_inst,
         value.leaves_qty,
         value.multi_leg_reporting_type,
-        value.order_id,
-        value.order_qty,
         value.ord_rej_reason,
         value.ord_status,
         value.ord_type,
+        value.order_id,
+        value.order_qty,
         value.peg_offset_value,
         value.peg_price_type,
         value.price,
@@ -128,7 +129,6 @@ struct fmt::formatter<roq::bitmex::json::OrderItem> {
         value.side,
         value.simple_cum_qty,
         value.simple_leaves_qty,
-        value.simple_order_qty,
         value.stop_px,
         value.symbol,
         value.text,
@@ -139,4 +139,3 @@ struct fmt::formatter<roq::bitmex::json::OrderItem> {
         value.working_indicator);
   }
 };
-

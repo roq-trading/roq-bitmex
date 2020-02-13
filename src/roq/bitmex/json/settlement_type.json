@@ -1,0 +1,8 @@
+{
+"type": "enum",
+"name": "SettlementType",
+"values": [
+       	"Rebalance",
+       	"Settlement"
+]
+}

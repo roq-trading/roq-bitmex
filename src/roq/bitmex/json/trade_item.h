@@ -41,14 +41,16 @@ struct TradeItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::TradeItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::TradeItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::TradeItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "foreign_notional={}, "
         "gross_value={}, "

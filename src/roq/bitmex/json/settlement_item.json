@@ -1,0 +1,15 @@
+{
+"type": "json::item",
+"name": "SettlementItem",
+"values": {
+	"bankrupt": "double",
+	"optionStrikePrice": "double",
+	"optionUnderlyingPrice": "double",
+	"settledPrice": "double",
+	"settlementType": "SettlementType",
+	"symbol": "std::string_view",
+	"taxBase": "double",
+	"taxRate": "double",
+	"timestamp": "std::chrono::nanoseconds"
+}
+}

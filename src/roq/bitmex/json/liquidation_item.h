@@ -36,14 +36,16 @@ struct LiquidationItem final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::LiquidationItem> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::LiquidationItem& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::LiquidationItem& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "leaves_qty={}, "
         "order_id=\"{}\", "

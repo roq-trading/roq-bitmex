@@ -1,5 +1,8 @@
 {
 "type": "enum",
 "name": "Side",
-"values": [ "buy", "sell" ]
+"values": [
+       	"Buy",
+       	"Sell"
+]
 }

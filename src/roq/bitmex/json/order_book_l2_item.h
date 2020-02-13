@@ -2,8 +2,10 @@
 
 #pragma once
 
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 
+#include <chrono>
 #include <limits>
 #include <string_view>
 
@@ -16,7 +18,7 @@ namespace bitmex {
 namespace json {
 
 struct OrderBookL2Item final {
-  explicit OrderBookL2Item(core::json::value_t&);
+  explicit OrderBookL2Item(core::json::value_t& value);
 
   OrderBookL2Item(const OrderBookL2Item&) = delete;
   OrderBookL2Item(OrderBookL2Item&&) = delete;
@@ -34,14 +36,16 @@ struct OrderBookL2Item final {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::OrderBookL2Item> {
-  template <typename C>
-  constexpr auto parse(C& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename C>
-  auto format(const roq::bitmex::json::OrderBookL2Item& value, C& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::OrderBookL2Item& value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{{"
         "id={}, "
         "price={}, "

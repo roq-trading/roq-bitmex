@@ -44,16 +44,17 @@ inline auto EnumNameState(State e) {
 
 template <>
 struct fmt::formatter<roq::bitmex::json::State> {
-  template <typename T>
-  constexpr auto parse(T& ctx) {
-    return ctx.begin();
+  template <typename Context>
+  constexpr auto parse(Context& context) {
+    return context.begin();
   }
-  template <typename T>
-  auto format(const roq::bitmex::json::State value, T& ctx) {
+  template <typename Context>
+  auto format(
+      const roq::bitmex::json::State value,
+      Context& context) {
     return format_to(
-        ctx.out(),
+        context.out(),
         "{}",
         roq::bitmex::json::EnumNameState(value));
   }
 };
-
