@@ -6,6 +6,8 @@ error.cpp
 error.h
 execution_item.cpp
 execution_item.h
+field.cpp
+field.h
 funding_item.cpp
 funding_item.h
 handshake.cpp

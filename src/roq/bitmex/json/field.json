@@ -1,0 +1,28 @@
+{
+"type": "enum",
+"name": "Field",
+"values": [
+	"action",
+	"attributes",
+	"cancelTime",
+	"data",
+	"docs",
+	"error",
+	"failure",
+	"filter",
+	"foreignKeys",
+	"info",
+	"keys",
+	"limit",
+	"meta",
+	"now",
+	"request",
+	"status",
+	"subscribe",
+	"success",
+	"table",
+	"timestamp",
+	"types",
+	"version"
+]
+}
