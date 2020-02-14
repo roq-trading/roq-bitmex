@@ -7,6 +7,10 @@ libroq_bitmex_json_la_CPPFLAGS = \
 	-I$(top_srcdir)/src \
 	$(LIBCONFIG_CFLAGS) \
 	$(ROQ_CFLAGS)
+BUILT_SOURCES = \
+	side.h \
+	side.cpp
+CLEANFILES = $(BUILT_SOURCES)
 libroq_bitmex_json_la_SOURCES = \
 	action.cpp \
 	cancel_all_after.cpp \
@@ -42,3 +46,9 @@ libroq_bitmex_json_la_SOURCES = \
 	trade_item.cpp \
 	typ.cpp \
 	utils.cpp
+
+.json.h:
+	@abs_top_builddir@/autogen/autogen.py --namespace=bitmex/json --type h --spec $< > $@
+
+.json.cpp:
+	@abs_top_builddir@/autogen/autogen.py --namespace=bitmex/json --type cpp --spec $< > $@

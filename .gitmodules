@@ -6,3 +6,7 @@
 	path = m4
 	url = https://github.com/roq-trading/roq-m4
 	ignore = dirty
+[submodule "roq-autogen"]
+	path = autogen
+	url = ssh://git@quinclas.ch:1975/roq-trading/roq-autogen.git
+	ignore = dirty
