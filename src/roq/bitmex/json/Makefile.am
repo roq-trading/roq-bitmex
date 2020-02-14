@@ -7,7 +7,7 @@ libroq_bitmex_json_la_CPPFLAGS = \
 	-I$(top_srcdir)/src \
 	$(LIBCONFIG_CFLAGS) \
 	$(ROQ_CFLAGS)
-CLEANFILES = \
+BUILT_SOURCES = \
 	action.cpp \
 	action.h \
 	cancel_all_after.cpp \
@@ -52,6 +52,7 @@ CLEANFILES = \
 	trade_item.h \
 	typ.cpp \
 	typ.h
+CLEANFILES = $(BUILT_SOURCES)
 libroq_bitmex_json_la_SOURCES = \
 	action.cpp \
 	cancel_all_after.cpp \
