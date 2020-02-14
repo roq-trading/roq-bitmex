@@ -8,8 +8,40 @@ libroq_bitmex_json_la_CPPFLAGS = \
 	$(LIBCONFIG_CFLAGS) \
 	$(ROQ_CFLAGS)
 BUILT_SOURCES = \
+	action.cpp \
+	action.h \
+	execution_item.cpp \
+	execution_item.h \
+	funding_item.cpp \
+	funding_item.h \
+	instrument_item.cpp \
+	instrument_item.h \
+	liquidation_item.cpp \
+	liquidation_item.h \
+	margin_item.cpp \
+	margin_item.h \
+	order_book_l2_item.cpp \
+	order_book_l2_item.h \
+	order_item.cpp \
+	order_item.h \
+	position_item.cpp \
+	position_item.h \
+	quote_item.cpp \
+	quote_item.h \
+	settlement_item.cpp \
+	settlement_item.h \
+	settlement_type.cpp \
+	settlement_type.h \
+	side.cpp \
 	side.h \
-	side.cpp
+	state.cpp \
+	state.h \
+	table.cpp \
+	table.h \
+	trade_item.cpp \
+	trade_item.h \
+	typ.cpp \
+	typ.h
 CLEANFILES = $(BUILT_SOURCES)
 libroq_bitmex_json_la_SOURCES = \
 	action.cpp \
