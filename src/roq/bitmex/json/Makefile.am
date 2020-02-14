@@ -58,6 +58,7 @@ libroq_bitmex_json_la_SOURCES = \
 	error.cpp \
 	execution.cpp \
 	execution_item.cpp \
+	field.cpp \
 	funding.cpp \
 	funding_item.cpp \
 	handshake.cpp \
