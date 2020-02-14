@@ -10,10 +10,16 @@ libroq_bitmex_json_la_CPPFLAGS = \
 BUILT_SOURCES = \
 	action.cpp \
 	action.h \
+	cancel_all_after.cpp \
+	cancel_all_after.h \
+	error.cpp \
+	error.h \
 	execution_item.cpp \
 	execution_item.h \
 	funding_item.cpp \
 	funding_item.h \
+	handshake.cpp \
+	handshake.h \
 	instrument_item.cpp \
 	instrument_item.h \
 	liquidation_item.cpp \
@@ -36,6 +42,8 @@ BUILT_SOURCES = \
 	side.h \
 	state.cpp \
 	state.h \
+	subscribe.cpp \
+	subscribe.h \
 	table.cpp \
 	table.h \
 	trade_item.cpp \

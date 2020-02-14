@@ -1,0 +1,10 @@
+{
+"type": "json::struct",
+"name": "Subscribe",
+"values": {
+	"failure": "bool",
+	"request": null,
+	"subscribe": "std::string_view",
+	"success": "bool"
+}
+}

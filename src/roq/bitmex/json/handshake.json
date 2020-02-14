@@ -1,0 +1,10 @@
+{
+"type": "json::struct",
+"name": "Handshake",
+"values": {
+	"docs": "std::string_view",
+	"info": "std::string_view",
+	"timestamp": "std::chrono::nanoseconds",
+	"version": "std::string_view"
+}
+}
