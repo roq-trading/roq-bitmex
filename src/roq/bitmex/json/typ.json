@@ -1,13 +1,13 @@
 {
-"type": "enum",
 "name": "Typ",
+"type": "enum",
 "values": [
-	"FFCCSX",
-	"FFWCSX",
-	"MRCXXX",
-	"MRIXXX",
-	"MRRXXX",
-	"OCECCS",
-	"OPECCS"
+	{ "name": "FFCCSX" },
+	{ "name": "FFWCSX" },
+	{ "name": "MRCXXX" },
+	{ "name": "MRIXXX" },
+	{ "name": "MRRXXX" },
+	{ "name": "OCECCS" },
+	{ "name": "OPECCS" }
 ]
 }

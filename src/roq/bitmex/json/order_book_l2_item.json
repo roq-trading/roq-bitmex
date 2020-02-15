@@ -1,11 +1,11 @@
 {
-"type": "json::item",
 "name": "OrderBookL2Item",
-"values": {
-	"id": "uint64_t",
-	"price": "double",
-	"side": "Side",
-	"size": "double",
-	"symbol": "std::string_view"
-}
+"type": "json::item",
+"values": [
+	{ "name": "id", "type": "uint64_t" },
+	{ "name": "price", "type": "double" },
+	{ "name": "side", "type": "Side" },
+	{ "name": "size", "type": "double" },
+	{ "name": "symbol", "type": "std::string_view" }
+]
 }

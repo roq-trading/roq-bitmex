@@ -1,10 +1,10 @@
 {
-"type": "enum",
 "name": "Action",
+"type": "enum",
 "values": [
-       	"delete",
-       	"insert",
-       	"partial",
-       	"update"
+	{ "name": "delete" },
+	{ "name": "insert" },
+	{ "name": "partial" },
+	{ "name": "update" }
 ]
 }

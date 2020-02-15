@@ -1,11 +1,11 @@
 {
-"type": "json::item",
 "name": "LiquidationItem",
-"values": {
-	"leavesQty": "double",
-	"orderID": "std::string_view",
-	"price": "double",
-	"side": "Side",
-	"symbol": "std::string_view"
-}
+"type": "json::item",
+"values": [
+	{ "name": "leavesQty", "type": "double" },
+	{ "name": "orderID", "type": "std::string_view" },
+	{ "name": "price", "type": "double" },
+	{ "name": "side", "type": "Side" },
+	{ "name": "symbol", "type": "std::string_view" }
+]
 }

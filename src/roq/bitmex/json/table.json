@@ -1,17 +1,17 @@
 {
-"type": "enum",
 "name": "Table",
+"type": "enum",
 "values": [
-       	"execution",
-       	"funding",
-       	"instrument",
-       	"liquidation",
-       	"margin",
-       	"order",
-       	"orderBookL2",
-       	"position",
-       	"quote",
-       	"settlement",
-       	"trade"
+	{ "name": "execution" },
+	{ "name": "funding" },
+	{ "name": "instrument" },
+	{ "name": "liquidation" },
+	{ "name": "margin" },
+	{ "name": "order" },
+	{ "name": "orderBookL2" },
+	{ "name": "position" },
+	{ "name": "quote" },
+	{ "name": "settlement" },
+	{ "name": "trade" }
 ]
 }

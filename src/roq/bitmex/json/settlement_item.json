@@ -1,15 +1,15 @@
 {
-"type": "json::item",
 "name": "SettlementItem",
-"values": {
-	"bankrupt": "double",
-	"optionStrikePrice": "double",
-	"optionUnderlyingPrice": "double",
-	"settledPrice": "double",
-	"settlementType": "SettlementType",
-	"symbol": "std::string_view",
-	"taxBase": "double",
-	"taxRate": "double",
-	"timestamp": "std::chrono::nanoseconds"
-}
+"type": "json::item",
+"values": [
+	{ "name": "bankrupt", "type": "double" },
+	{ "name": "optionStrikePrice", "type": "double" },
+	{ "name": "optionUnderlyingPrice", "type": "double" },
+	{ "name": "settledPrice", "type": "double" },
+	{ "name": "settlementType", "type": "SettlementType" },
+	{ "name": "symbol", "type": "std::string_view" },
+	{ "name": "taxBase", "type": "double" },
+	{ "name": "taxRate", "type": "double" },
+	{ "name": "timestamp", "type": "std::chrono::nanoseconds" }
+]
 }

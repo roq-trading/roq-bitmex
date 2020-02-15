@@ -1,11 +1,11 @@
 {
-"type": "json::item",
 "name": "FundingItem",
-"values": {
-	"fundingInterval": "std::chrono::nanoseconds",
-	"fundingRateDaily": "double",
-	"fundingRate": "double",
-	"symbol": "std::string_view",
-	"timestamp": "std::chrono::nanoseconds"
-}
+"type": "json::item",
+"values": [
+	{ "name": "fundingInterval", "type": "std::chrono::nanoseconds" },
+	{ "name": "fundingRateDaily", "type": "double" },
+	{ "name": "fundingRate", "type": "double" },
+	{ "name": "symbol", "type": "std::string_view" },
+	{ "name": "timestamp", "type": "std::chrono::nanoseconds" }
+]
 }

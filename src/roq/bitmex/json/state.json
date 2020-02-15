@@ -1,10 +1,10 @@
 {
-"type": "enum",
 "name": "State",
+"type": "enum",
 "values": [
-       	"Closed",
-       	"Open",
-       	"Settled",
-       	"Unlisted"
+	{ "name": "Closed" },
+	{ "name": "Open" },
+	{ "name": "Settled" },
+	{ "name": "Unlisted" }
 ]
 }

@@ -1,12 +1,12 @@
 {
-"type": "json::item",
 "name": "QuoteItem",
-"values": {
-	"askPrice": "double",
-	"askSize": "double",
-	"bidPrice": "double",
-	"bidSize": "double",
-	"symbol": "std::string_view",
-	"timestamp": "std::chrono::nanoseconds"
-}
+"type": "json::item",
+"values": [
+	{ "name": "askPrice", "type": "double" },
+	{ "name": "askSize", "type": "double" },
+	{ "name": "bidPrice", "type": "double" },
+	{ "name": "bidSize", "type": "double" },
+	{ "name": "symbol", "type": "std::string_view" },
+	{ "name": "timestamp", "type": "std::chrono::nanoseconds" }
+]
 }

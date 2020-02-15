@@ -1,8 +1,8 @@
 {
-"type": "enum",
 "name": "SettlementType",
+"type": "enum",
 "values": [
-       	"Rebalance",
-       	"Settlement"
+	{ "name": "Rebalance" },
+	{ "name": "Settlement" }
 ]
 }

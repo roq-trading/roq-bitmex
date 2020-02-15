@@ -1,16 +1,16 @@
 {
-"type": "json::item",
 "name": "TradeItem",
-"values": {
-	"foreignNotional": "double",
-	"grossValue": "double",
-	"homeNotional": "double",
-	"price": "double",
-	"side": "Side",
-	"size": "double",
-	"symbol": "std::string_view",
-	"tickDirection": "std::string_view",
-	"timestamp": "std::chrono::nanoseconds",
-	"trdMatchID": "std::string_view"
-}
+"type": "json::item",
+"values": [
+	{ "name": "foreignNotional", "type": "double" },
+	{ "name": "grossValue", "type": "double" },
+	{ "name": "homeNotional", "type": "double" },
+	{ "name": "price", "type": "double" },
+	{ "name": "side", "type": "Side" },
+	{ "name": "size", "type": "double" },
+	{ "name": "symbol", "type": "std::string_view" },
+	{ "name": "tickDirection", "type": "std::string_view" },
+	{ "name": "timestamp", "type": "std::chrono::nanoseconds" },
+	{ "name": "trdMatchID", "type": "std::string_view" }
+]
 }

@@ -1,10 +1,10 @@
 {
-"type": "json::struct",
 "name": "Error",
-"values": {
-	"error": "std::string_view",
-	"meta": null,
-	"request": null,
-	"status": "int32_t"
-}
+"type": "json::struct",
+"values": [
+	{ "name": "error", "type": "std::string_view" },
+	{ "name": "meta" },
+	{ "name": "request" },
+	{ "name": "status", "type": "int32_t" }
+]
 }
