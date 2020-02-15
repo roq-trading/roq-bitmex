@@ -164,14 +164,23 @@ class Rest final : public HTTPConnection::Handler {
       success_t&& success,
       failure_t&& failure);
 
+  void post(
+      const std::string_view& uri,
+      const std::string_view& body,
+      success_t&& success,
+      failure_t&& failure);
+
   bool request(
-      const core::http::Method& method,
-      const std::string_view& uri);
+      core::http::Method method,
+      const std::string_view& path,
+      const std::string_view& body);
 
   bool throttle();
 
   void make_pending(
+      core::http::Method,
       const std::string_view& uri,
+      const std::string_view& body,
       std::chrono::nanoseconds create_time,
       success_t&& success,
       failure_t&& failure);
@@ -219,7 +228,8 @@ class Rest final : public HTTPConnection::Handler {
       success,
       failure,
       products,
-      accounts;
+      accounts,
+      create_order;
   } _profile;
   struct {
     core::metrics::Latency
@@ -230,7 +240,9 @@ class Rest final : public HTTPConnection::Handler {
   // request pipeline
   std::list<
     std::tuple<
-      std::string,
+      core::http::Method,
+      std::string,  // uri
+      std::string,  // body
       std::chrono::nanoseconds,
       success_t,
       failure_t> > _waiting;

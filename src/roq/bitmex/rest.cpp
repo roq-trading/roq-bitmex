@@ -239,6 +239,7 @@ Rest::Rest(
         .failure = create_profile("failure"),
         .products = create_profile("products"),
         .accounts = create_profile("accounts"),
+        .create_order = create_profile("create_order"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -291,12 +292,32 @@ void Rest::create_order(const CreateOrder& create_order) {
       create_order.quantity,
       json::c_str(create_order.order_type),
       json::c_str(create_order.time_in_force));
-  // POST
-  std::string_view url = "/order";
-  LOG(FATAL)(
-      FMT_STRING("POST {} {}"),
-      url,
-      message);
+  post(
+      "/order",
+      message,
+      [this](const std::string_view& body) {
+        _profile.create_order(
+            [&]() {
+              LOG(FATAL)(
+                  FMT_STRING("body=\"{}\""),
+                  body);
+              /*
+              core::json::Buffer buffer(_decode_buffer);
+              auto products = json::Products::parse(
+                  body,
+                  buffer);
+              VLOG(1)("products={}", products);
+              _gateway(products);
+              */
+            });
+      },
+      [](auto& status) {
+        LOG(WARNING)(
+            FMT_STRING("HTTP status={}"),
+            status);
+        LOG(WARNING)("Unable to create order");
+        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
+      });
 }
 
 void Rest::get_products() {
@@ -386,7 +407,9 @@ void Rest::get(
     case State::DISCONNECTING:  // will fail in order
     case State::CONNECTING:
       make_pending(
+          core::http::Method::GET,
           uri,
+          std::string_view(),
           create_time,
           std::move(success),
           std::move(failure));
@@ -395,7 +418,8 @@ void Rest::get(
       if (_waiting.empty() &&
           request(
             core::http::Method::GET,
-            uri)) {
+            uri,
+            std::string_view())) {
         make_sent(
             create_time,
             create_time,
@@ -403,7 +427,58 @@ void Rest::get(
             std::move(failure));
       } else {
         make_pending(
+            core::http::Method::GET,
             uri,
+            std::string_view(),
+            create_time,
+            std::move(success),
+            std::move(failure));
+      }
+      break;
+    default:
+      LOG(FATAL)("Unexpected");
+  }
+}
+
+void Rest::post(
+    const std::string_view& uri,
+    const std::string_view& body,
+    success_t&& success,
+    failure_t&& failure) {
+  LOG(INFO)(
+      FMT_STRING("POST {}"),
+      uri);
+  auto create_time = core::get_system_clock();
+  switch (_state) {
+    case State::DISCONNECTED:
+      connect();
+      [[ fallthrough ]];
+    case State::DISCONNECTING:  // will fail in order
+    case State::CONNECTING:
+      make_pending(
+          core::http::Method::POST,
+          uri,
+          body,
+          create_time,
+          std::move(success),
+          std::move(failure));
+      break;
+    case State::CONNECTED:
+      if (_waiting.empty() &&
+          request(
+            core::http::Method::POST,
+            uri,
+            body)) {
+        make_sent(
+            create_time,
+            create_time,
+            std::move(success),
+            std::move(failure));
+      } else {
+        make_pending(
+            core::http::Method::POST,
+            uri,
+            body,
             create_time,
             std::move(success),
             std::move(failure));
@@ -458,22 +533,24 @@ void Rest::connect() {
 void Rest::process_pending() {
   while (_waiting.empty() == false) {
     auto& front = _waiting.front();
-    if (request(
-          core::http::Method::GET,
-          std::get<0>(front)) == false)
+    if (false == request(
+          std::get<0>(front),  // method
+          std::get<1>(front),  // uri
+          std::get<2>(front)))  // body
       return;
     make_sent(
-        std::get<1>(front),
-        core::get_system_clock(),
-        std::move(std::get<2>(front)),
-        std::move(std::get<3>(front)));
+        std::get<3>(front),  // create time
+        core::get_system_clock(),  // send time
+        std::move(std::get<4>(front)),  // success
+        std::move(std::get<5>(front)));  // failure
     _waiting.pop_front();
   }
 }
 
 bool Rest::request(
-    const core::http::Method& method,
-    const std::string_view& path) {
+    core::http::Method method,
+    const std::string_view& path,
+    const std::string_view& body) {
   LOG(INFO)(
       FMT_STRING("Sending method={} path=\"{}\""),
       method,
@@ -489,14 +566,14 @@ bool Rest::request(
       core::get_realtime_clock());
   auto headers = _random.create_headers(
       now,
-      core::http::Method::GET,
+      method,
       path);
   fmt::memory_buffer buffer;
   fmt::format_to(
       buffer,
       "{} {} HTTP/1.1\r\n"
       "Host: {}\r\n"
-      "User-Agent: roq-bitmex-pro/{}\r\n"
+      "User-Agent: roq-bitmex/{}\r\n"
       "Accept: */*\r\n"
       "{}"
       "\r\n",
@@ -531,13 +608,17 @@ bool Rest::throttle() {
 }
 
 void Rest::make_pending(
+    core::http::Method method,
     const std::string_view& uri,
+    const std::string_view& body,
     std::chrono::nanoseconds create_time,
     success_t&& success,
     failure_t&& failure) {
   _waiting.push_back(
       std::make_tuple(
-          std::string(uri),
+        method,
+          std::string(uri),  // copy
+          std::string(body),  // copy
           create_time,
           std::move(success),
           std::move(failure)));
