@@ -1,0 +1,7 @@
+{
+"name": "Quote",
+"type": "json::array",
+"values": [
+	{ "name": "data", "type": "roq::span<QuoteItem>" }
+]
+}

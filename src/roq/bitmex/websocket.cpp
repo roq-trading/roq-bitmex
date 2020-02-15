@@ -556,24 +556,6 @@ void WebSocket::operator()(const json::Error& error) {
       });
 }
 
-void WebSocket::operator()(const json::Execution& execution) {
-  _profile.execution(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("execution={}"),
-            execution);
-      });
-}
-
-void WebSocket::operator()(const json::Funding& funding) {
-  _profile.funding(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("funding={}"),
-            funding);
-      });
-}
-
 void WebSocket::operator()(const json::Handshake& handshake) {
   _profile.handshake(
       [&]() {
@@ -582,84 +564,6 @@ void WebSocket::operator()(const json::Handshake& handshake) {
             handshake);
         (*this)(State::READY);
         _gateway(*this);
-      });
-}
-
-void WebSocket::operator()(const json::Instrument& instrument) {
-  _profile.instrument(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("instrument={}"),
-            instrument);
-        _gateway(instrument);
-      });
-}
-
-void WebSocket::operator()(const json::Liquidation& liquidation) {
-  _profile.liquidation(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("liquidation={}"),
-            liquidation);
-      });
-}
-
-void WebSocket::operator()(const json::Margin& margin) {
-  _profile.margin(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("margin={}"),
-            margin);
-      });
-}
-
-void WebSocket::operator()(const json::Order& order) {
-  _profile.order(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("order={}"),
-            order);
-        _gateway(order);
-      });
-}
-
-void WebSocket::operator()(const json::OrderBookL2& order_book_l2) {
-  _profile.order_book_l2(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("order_book_l2={}"),
-            order_book_l2);
-        _gateway(order_book_l2);
-      });
-}
-
-void WebSocket::operator()(const json::Position& position) {
-  _profile.position(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("position={}"),
-            position);
-        _gateway(position);
-      });
-}
-
-void WebSocket::operator()(const json::Quote& quote) {
-  _profile.quote(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("quote={}"),
-            quote);
-        _gateway(quote);
-      });
-}
-
-void WebSocket::operator()(const json::Settlement& settlement) {
-  _profile.settlement(
-      [&]() {
-        VLOG(1)(
-            FMT_STRING("settlement={}"),
-            settlement);
-        _gateway(settlement);
       });
 }
 
@@ -686,13 +590,131 @@ void WebSocket::operator()(const json::Subscribe& subscribe) {
       });
 }
 
-void WebSocket::operator()(const json::Trade& trade) {
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Execution& execution) {
+  _profile.execution(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, execution={}"),
+            action, execution);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Funding& funding) {
+  _profile.funding(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, funding={}"),
+            action, funding);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Instrument& instrument) {
+  _profile.instrument(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, instrument={}"),
+            action, instrument);
+        _gateway(action, instrument);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Liquidation& liquidation) {
+  _profile.liquidation(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, liquidation={}"),
+            action, liquidation);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Margin& margin) {
+  _profile.margin(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, margin={}"),
+            action, margin);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Order& order) {
+  _profile.order(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, order={}"),
+            action, order);
+        _gateway(action, order);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::OrderBookL2& order_book_l2) {
+  _profile.order_book_l2(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, order_book_l2={}"),
+            action, order_book_l2);
+        _gateway(action, order_book_l2);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Position& position) {
+  _profile.position(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, position={}"),
+            action, position);
+        _gateway(action, position);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Quote& quote) {
+  _profile.quote(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, quote={}"),
+            action, quote);
+        _gateway(action, quote);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Settlement& settlement) {
+  _profile.settlement(
+      [&]() {
+        VLOG(1)(
+            FMT_STRING("action={}, settlement={}"),
+            action, settlement);
+        _gateway(action, settlement);
+      });
+}
+
+void WebSocket::operator()(
+    const json::Action action,
+    const json::Trade& trade) {
   _profile.trade(
       [&]() {
         VLOG(1)(
-            FMT_STRING("trade={}"),
-            trade);
-        _gateway(trade);
+            FMT_STRING("action={}, trade={}"),
+            action, trade);
+        _gateway(action, trade);
       });
 }
 

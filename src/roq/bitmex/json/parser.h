@@ -7,6 +7,7 @@
 
 #include "roq/core/json/buffer.h"
 
+#include "roq/bitmex/json/action.h"
 #include "roq/bitmex/json/cancel_all_after.h"
 #include "roq/bitmex/json/error.h"
 #include "roq/bitmex/json/execution.h"
@@ -33,19 +34,20 @@ struct Parser final {
   struct Handler {
     virtual void operator()(const CancelAllAfter&) = 0;
     virtual void operator()(const Error&) = 0;
-    virtual void operator()(const Execution&) = 0;
-    virtual void operator()(const Funding&) = 0;
     virtual void operator()(const Handshake&) = 0;
-    virtual void operator()(const Instrument&) = 0;
-    virtual void operator()(const Liquidation&) = 0;
-    virtual void operator()(const Margin&) = 0;
-    virtual void operator()(const Order&) = 0;
-    virtual void operator()(const OrderBookL2&) = 0;
-    virtual void operator()(const Position&) = 0;
-    virtual void operator()(const Quote&) = 0;
-    virtual void operator()(const Settlement&) = 0;
     virtual void operator()(const Subscribe&) = 0;
-    virtual void operator()(const Trade&) = 0;
+    // table
+    virtual void operator()(const Action, const Execution&) = 0;
+    virtual void operator()(const Action, const Funding&) = 0;
+    virtual void operator()(const Action, const Instrument&) = 0;
+    virtual void operator()(const Action, const Liquidation&) = 0;
+    virtual void operator()(const Action, const Margin&) = 0;
+    virtual void operator()(const Action, const Order&) = 0;
+    virtual void operator()(const Action, const OrderBookL2&) = 0;
+    virtual void operator()(const Action, const Position&) = 0;
+    virtual void operator()(const Action, const Quote&) = 0;
+    virtual void operator()(const Action, const Settlement&) = 0;
+    virtual void operator()(const Action, const Trade&) = 0;
   };
 
   std::string_view action;

@@ -195,8 +195,10 @@ void Gateway::operator()(const WebSocket& websocket) {
   }
 }
 
-void Gateway::operator()(const json::Instrument& instrument) {
-  switch (instrument.action) {
+void Gateway::operator()(
+    const json::Action action,
+    const json::Instrument& instrument) {
+  switch (action) {
     case json::Action::UNDEFINED:
     case json::Action::UNKNOWN:
       LOG(FATAL)("Unexpected");
@@ -247,12 +249,16 @@ void Gateway::operator()(const json::Instrument& instrument) {
   }
 }
 
-void Gateway::operator()(const json::Order&) {
+void Gateway::operator()(
+    const json::Action,
+    const json::Order&) {
 }
 
-void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
-  assert(order_book_l2.action != json::Action::UNKNOWN);
-  auto snapshot = order_book_l2.action == json::Action::PARTIAL;
+void Gateway::operator()(
+    const json::Action action,
+    const json::OrderBookL2& order_book_l2) {
+  assert(action != json::Action::UNKNOWN);
+  auto snapshot = action == json::Action::PARTIAL;
   // note!
   //   first partial update will include *all* instruments
   //   drop everything received before partial (see: API documentation)
@@ -278,7 +284,7 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
       bid_length = ask_length = 0;
     }
     auto price_size = find_price(
-        order_book_l2.action,
+        action,
         item.id,
         item.price,
         item.size);
@@ -321,10 +327,14 @@ void Gateway::operator()(const json::OrderBookL2& order_book_l2) {
     check_download();
 }
 
-void Gateway::operator()(const json::Position&) {
+void Gateway::operator()(
+    const json::Action,
+    const json::Position&) {
 }
 
-void Gateway::operator()(const json::Quote& quote) {
+void Gateway::operator()(
+    const json::Action,
+    const json::Quote& quote) {
   for (auto& item : quote.data) {
     TopOfBook top_of_book {
       .exchange = FLAGS_exchange,
@@ -345,11 +355,15 @@ void Gateway::operator()(const json::Quote& quote) {
   }
 }
 
-void Gateway::operator()(const json::Settlement&) {
+void Gateway::operator()(
+    const json::Action,
+    const json::Settlement&) {
 }
 
-void Gateway::operator()(const json::Trade& trade) {
-  if (trade.action != json::Action::INSERT)
+void Gateway::operator()(
+    const json::Action action,
+    const json::Trade& trade) {
+  if (action != json::Action::INSERT)
     return;
   std::string_view previous;
   bool success = true;

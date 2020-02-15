@@ -79,102 +79,69 @@ void Parser::dispatch(
               case Table::UNKNOWN:
                 break;
               case Table::EXECUTION: {
-                Execution execution(
-                    value,
-                    buffer,
-                    action);
+                Execution execution(value, buffer);
                 dispatched = true;
-                handler(execution);
+                handler(action, execution);
                 break;
               }
               case Table::FUNDING: {
-                Funding funding(
-                    value,
-                    buffer,
-                    action);
+                Funding funding(value, buffer);
                 dispatched = true;
-                handler(funding);
+                handler(action, funding);
                 break;
               }
               case Table::INSTRUMENT: {
-                Instrument instrument(
-                    value,
-                    buffer,
-                    action);
+                Instrument instrument(value, buffer);
                 dispatched = true;
-                handler(instrument);
+                handler(action, instrument);
                 break;
               }
               case Table::LIQUIDATION: {
-                Liquidation liquidation(
-                    value,
-                    buffer,
-                    action);
+                Liquidation liquidation(value, buffer);
                 dispatched = true;
-                handler(liquidation);
+                handler(action, liquidation);
                 break;
               }
               case Table::MARGIN: {
-                Margin margin(
-                    value,
-                    buffer,
-                    action);
+                Margin margin(value, buffer);
                 dispatched = true;
-                handler(margin);
+                handler(action, margin);
                 break;
               }
               case Table::ORDER: {
-                Order order(
-                    value,
-                    buffer,
-                    action);
+                Order order(value, buffer);
                 dispatched = true;
-                handler(order);
+                handler(action, order);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
-                OrderBookL2 order_book_l2(
-                    value,
-                    buffer,
-                    action);
+                OrderBookL2 order_book_l2(value, buffer);
                 dispatched = true;
-                handler(order_book_l2);
+                handler(action, order_book_l2);
                 break;
               }
               case Table::POSITION: {
-                Position position(
-                    value,
-                    buffer,
-                    action);
+                Position position(value, buffer);
                 dispatched = true;
-                handler(position);
+                handler(action, position);
                 break;
               }
               case Table::QUOTE: {
-                Quote quote(
-                    value,
-                    buffer,
-                    action);
+                Quote quote(value, buffer);
                 dispatched = true;
-                handler(quote);
+                handler(action, quote);
                 break;
               }
               case Table::SETTLEMENT: {
-                Settlement settlement(
-                    value,
-                    buffer,
-                    action);
+                Settlement settlement(value, buffer);
                 dispatched = true;
-                handler(settlement);
+                handler(action, settlement);
                 break;
               }
               case Table::TRADE: {
-                Trade trade(
-                    value,
-                    buffer,
-                    action);
+                Trade trade(value, buffer);
                 dispatched = true;
-                handler(trade);
+                handler(action, trade);
                 break;
               }
             }

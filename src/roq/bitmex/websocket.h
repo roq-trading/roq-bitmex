@@ -110,19 +110,20 @@ class WebSocket final
   // json:
   void operator()(const json::CancelAllAfter&) override;
   void operator()(const json::Error&) override;
-  void operator()(const json::Execution&) override;
-  void operator()(const json::Funding&) override;
   void operator()(const json::Handshake&) override;
-  void operator()(const json::Instrument&) override;
-  void operator()(const json::Liquidation&) override;
-  void operator()(const json::Margin&) override;
-  void operator()(const json::Order&) override;
-  void operator()(const json::OrderBookL2&) override;
-  void operator()(const json::Position&) override;
-  void operator()(const json::Quote&) override;
-  void operator()(const json::Settlement&) override;
   void operator()(const json::Subscribe&) override;
-  void operator()(const json::Trade&) override;
+  // table
+  void operator()(const json::Action, const json::Execution&) override;
+  void operator()(const json::Action, const json::Funding&) override;
+  void operator()(const json::Action, const json::Instrument&) override;
+  void operator()(const json::Action, const json::Liquidation&) override;
+  void operator()(const json::Action, const json::Margin&) override;
+  void operator()(const json::Action, const json::Order&) override;
+  void operator()(const json::Action, const json::OrderBookL2&) override;
+  void operator()(const json::Action, const json::Position&) override;
+  void operator()(const json::Action, const json::Quote&) override;
+  void operator()(const json::Action, const json::Settlement&) override;
+  void operator()(const json::Action, const json::Trade&) override;
 
  private:
   Gateway& _gateway;

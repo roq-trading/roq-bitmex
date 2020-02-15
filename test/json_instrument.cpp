@@ -337,8 +337,7 @@ TEST(json_instrument, empty) {
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(
       message,
-      decode_buffer,
-      json::Action::PARTIAL);
+      decode_buffer);
   EXPECT_EQ(obj.data.size(), size_t{0});
 }
 
@@ -559,8 +558,7 @@ TEST(json_instrument, simple) {
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(
       message,
-      decode_buffer,
-      json::Action::PARTIAL);
+      decode_buffer);
   EXPECT_EQ(obj.data.size(), size_t{2});
   // item #0
   EXPECT_EQ(obj.data[0].symbol, ".EVOL7D");

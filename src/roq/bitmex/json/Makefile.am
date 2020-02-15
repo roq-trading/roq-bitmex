@@ -14,28 +14,48 @@ BUILT_SOURCES = \
 	cancel_all_after.h \
 	error.cpp \
 	error.h \
+	execution.cpp \
+	execution.h \
 	execution_item.cpp \
 	execution_item.h \
 	field.cpp \
 	field.h \
+	funding.cpp \
+	funding.h \
 	funding_item.cpp \
 	funding_item.h \
 	handshake.cpp \
 	handshake.h \
+	instrument.cpp \
+	instrument.h \
 	instrument_item.cpp \
 	instrument_item.h \
+	liquidation.cpp \
+	liquidation.h \
 	liquidation_item.cpp \
 	liquidation_item.h \
+	margin.cpp \
+	margin.h \
 	margin_item.cpp \
 	margin_item.h \
+	order_book_l2.cpp \
+	order_book_l2.h \
 	order_book_l2_item.cpp \
 	order_book_l2_item.h \
+	order.cpp \
+	order.h \
 	order_item.cpp \
 	order_item.h \
+	position.cpp \
+	position.h \
 	position_item.cpp \
 	position_item.h \
+	quote.cpp \
+	quote.h \
 	quote_item.cpp \
 	quote_item.h \
+	settlement.cpp \
+	settlement.h \
 	settlement_item.cpp \
 	settlement_item.h \
 	settlement_type.cpp \
@@ -48,6 +68,8 @@ BUILT_SOURCES = \
 	subscribe.h \
 	table.cpp \
 	table.h \
+	trade.cpp \
+	trade.h \
 	trade_item.cpp \
 	trade_item.h \
 	typ.cpp \

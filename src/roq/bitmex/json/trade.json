@@ -1,0 +1,7 @@
+{
+"name": "Trade",
+"type": "json::array",
+"values": [
+	{ "name": "data", "type": "roq::span<TradeItem>" }
+]
+}
