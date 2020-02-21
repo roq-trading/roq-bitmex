@@ -37,7 +37,6 @@ roq_bitmex_SOURCES = \
 	config.cpp \
 	gateway.cpp \
 	options.cpp \
-	order_mapping.cpp \
 	product.cpp \
 	random.cpp \
 	rest.cpp \

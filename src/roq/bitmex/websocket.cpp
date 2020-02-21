@@ -120,7 +120,7 @@ void WebSocket::operator()(const TimerEvent& event) {
           std::chrono::seconds { FLAGS_ping_freq_secs };
         send_ping();
       }
-      if (_next_cancel_all_after <= now) {
+      if (FLAGS_cancel_all_after_secs && _next_cancel_all_after <= now) {
         _next_cancel_all_after = now +
           std::chrono::seconds { FLAGS_cancel_all_after_secs / 4 };
         send_cancel_all_after();
@@ -211,7 +211,8 @@ void WebSocket::send_upgrade_request() {
   auto headers = _random.create_headers(
       expires,
       core::http::Method::GET,
-      "/realtime");
+      "/realtime",
+      std::string_view());
   core::ws::Writer writer(_encode_buffer);
   core::ws::Upgrade::create(
       writer,
@@ -529,7 +530,7 @@ void WebSocket::send_cancel_all_after() {
         "\"op\":\"cancelAllAfter\","
         "\"args\":{}"
         "}}"),
-      FLAGS_cancel_all_after_secs);
+      FLAGS_cancel_all_after_secs * 1000);  // milliseconds
   core::ws::Writer writer(_encode_buffer);
   core::ws::Encoder::text(
       writer,
@@ -564,6 +565,8 @@ void WebSocket::operator()(const json::Handshake& handshake) {
             handshake);
         (*this)(State::READY);
         _gateway(*this);
+        if (FLAGS_cancel_all_after_secs == 0)
+          send_cancel_all_after();
       });
 }
 

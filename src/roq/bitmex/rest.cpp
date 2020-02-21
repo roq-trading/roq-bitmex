@@ -272,7 +272,9 @@ void Rest::operator()(Metrics& metrics) {
     .write(_latency.ping);
 }
 
-void Rest::create_order(const CreateOrder& create_order) {
+void Rest::create_order(
+    const CreateOrder& create_order,
+    const std::string_view& cl_ord_id) {
   // XXX use encode buffer
   auto message = fmt::format(
       FMT_STRING(
@@ -285,36 +287,36 @@ void Rest::create_order(const CreateOrder& create_order) {
         R"("ordType":"{}",)"
         R"("timeInForce":"{}")"
         R"(}})"),
-      std::string_view(),  // cl_ord_id,
+      cl_ord_id,
       create_order.symbol,
       json::c_str(create_order.side),
       create_order.price,
       create_order.quantity,
       json::c_str(create_order.order_type),
       json::c_str(create_order.time_in_force));
+  LOG(INFO)(
+      FMT_STRING("DEBUG: body=\"{}\""),
+      message);
   post(
       "/order",
       message,
       [this](const std::string_view& body) {
         _profile.create_order(
             [&]() {
-              LOG(FATAL)(
-                  FMT_STRING("body=\"{}\""),
+              LOG(INFO)(
+                  FMT_STRING("DEBUG: body=\"{}\""),
                   body);
-              /*
-              core::json::Buffer buffer(_decode_buffer);
-              auto products = json::Products::parse(
-                  body,
-                  buffer);
-              VLOG(1)("products={}", products);
-              _gateway(products);
-              */
+              auto order_item = core::json::Parser::create<json::OrderItem>(
+                  body);
+              LOG(INFO)(FMT_STRING("DEBUG: order_item={}"), order_item);
+              // _gateway(json::Action::INSERT, order);
             });
       },
-      [](auto& status) {
+      [](auto& status, auto& body) {
         LOG(WARNING)(
-            FMT_STRING("HTTP status={}"),
-            status);
+            FMT_STRING("HTTP status={} body=\"{}\""),
+            status,
+            body);
         LOG(WARNING)("Unable to create order");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
@@ -336,10 +338,11 @@ void Rest::get_products() {
               */
             });
       },
-      [](auto& status) {
+      [](auto& status, auto& body) {
         LOG(WARNING)(
-            FMT_STRING("HTTP status={}"),
-            status);
+            FMT_STRING("HTTP status={} body=\"{}\""),
+            status,
+            body);
         LOG(WARNING)("Unable to get products");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
@@ -362,10 +365,11 @@ void Rest::get_accounts() {
               */
             });
       },
-      [this](auto& status) {
+      [this](auto& status, auto& body) {
         LOG(WARNING)(
-            FMT_STRING("HTTP status={}"),
-            status);
+            FMT_STRING("HTTP status={} body=\"{}\""),
+            status,
+            body);
         LOG(WARNING)("Unable to get accounts");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
@@ -383,10 +387,11 @@ void Rest::get_time() {
               */
             });
       },
-      [](auto& status) {
+      [](auto& status, auto& body) {
         LOG(WARNING)(
-            FMT_STRING("HTTP status={}"),
-            status);
+            FMT_STRING("HTTP status={} body=\"{}\""),
+            status,
+            body);
         LOG(WARNING)("Unable to get products");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
@@ -499,6 +504,7 @@ void Rest::on_timer() {
         check_timeout();
       else
         process_pending();
+      send_ping();
       break;
     case State::DISCONNECTING:
       assert(_connection);
@@ -547,6 +553,33 @@ void Rest::process_pending() {
   }
 }
 
+void Rest::send_ping() {
+  std::chrono::nanoseconds now = core::get_system_clock();
+  if (now < _next_ping)
+    return;
+  _next_ping = now + std::chrono::seconds{
+      FLAGS_cancel_all_after_secs / 4
+  };
+  LOG(INFO)("PING");
+  auto message = fmt::format(
+      FMT_STRING(
+        R"({{)"
+        R"("timeout":"{}")"
+        R"(}})"),
+      FLAGS_cancel_all_after_secs * 1000);
+  post(
+      "/order/cancelAllAfter",
+      message,
+      [this](const std::string_view& body) {
+        LOG(INFO)(FMT_STRING("{}"), body);
+      },
+      [](auto& status, auto& body) {
+        LOG(INFO)(FMT_STRING("{} {}"), status, body);
+        LOG(WARNING)("Unable to create order");
+        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
+      });
+}
+
 bool Rest::request(
     core::http::Method method,
     const std::string_view& path,
@@ -564,29 +597,57 @@ bool Rest::request(
   // *must* be seconds (see bitmex-pro api documentation)
   auto now = std::chrono::duration_cast<std::chrono::seconds>(
       core::get_realtime_clock());
+  auto expires = now + std::chrono::seconds{
+    FLAGS_request_expires_secs
+  };
+  auto full_path = fmt::format("{}{}", _uri.path, path);
   auto headers = _random.create_headers(
-      now,
+      expires,
       method,
-      path);
+      full_path,
+      body);
   fmt::memory_buffer buffer;
-  fmt::format_to(
-      buffer,
-      "{} {} HTTP/1.1\r\n"
-      "Host: {}\r\n"
-      "User-Agent: roq-bitmex/{}\r\n"
-      "Accept: */*\r\n"
-      "{}"
-      "\r\n",
-      method,
-      path,
-      _uri.host,
-      ROQ_VERSION,
-      headers);
+  if (body.empty()) {
+    fmt::format_to(
+        buffer,
+        "{} {} HTTP/1.1\r\n"
+        "Host: {}\r\n"
+        "User-Agent: roq-bitmex/{}\r\n"
+        "Accept: application/json\r\n"
+        "Connection: keep-alive\r\n"
+        "{}"
+        "\r\n",
+        method,
+        full_path,
+        _uri.host,
+        ROQ_VERSION,
+        headers);
+  } else {
+    fmt::format_to(
+        buffer,
+        "{} {} HTTP/1.1\r\n"
+        "Host: {}\r\n"
+        "User-Agent: roq-bitmex/{}\r\n"
+        "Accept: */*\r\n"
+        "Connection: keep-alive\r\n"
+        "Content-Type: application/json\r\n"
+        "Content-Length: {}\r\n"
+        "{}"
+        "\r\n"
+        "{}",
+        method,
+        full_path,
+        _uri.host,
+        ROQ_VERSION,
+        body.length(),
+        headers,
+        body);
+  }
   std::string_view request(
       buffer.data(),
       buffer.size());
-  VLOG(1)(
-      FMT_STRING("{}"),
+  LOG(INFO)(
+      FMT_STRING("DEBUG: {}"),
       request);
   _connection->write(
       request.data(),
@@ -663,7 +724,7 @@ bool Rest::remove_one(
     } else {
       _profile.failure(
           [&]() {
-            std::get<3>(front)(status);  // failure handler
+            std::get<3>(front)(status, body);  // failure handler
           });
     }
   } catch (std::exception& e) {

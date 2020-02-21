@@ -18,10 +18,11 @@
 #include "roq/core/event/base.h"
 #include "roq/core/event/dns_base.h"
 
+#include "roq/core/oms/order_cache.h"
+
 #include "roq/bitmex/config.h"
 #include "roq/bitmex/random.h"
 
-#include "roq/bitmex/order_mapping.h"
 #include "roq/bitmex/product.h"
 #include "roq/bitmex/rest.h"
 #include "roq/bitmex/websocket.h"
@@ -101,18 +102,6 @@ class Gateway final : public server::Handler {
       const T& event,
       bool is_last);
 
-  bool validate(const CreateOrderEvent& event);
-
-  bool validate(
-      const ModifyOrderEvent& event,
-      uint32_t gateway_order_id,
-      const std::string_view& external_order_id);
-
-  bool validate(
-      const CancelOrderEvent& event,
-      uint32_t gateway_order_id,
-      const std::string_view& external_order_id);
-
  private:
   server::Dispatcher& _dispatcher;
   // config
@@ -149,14 +138,7 @@ class Gateway final : public server::Handler {
   std::unordered_map<uint64_t, double> _price_lookup;
   // order manager
   GatewayStatus _order_manager_status = GatewayStatus::DISCONNECTED;
-  std::unordered_map<uint64_t, OrderMapping> _order_mapping;
-  core::hash::map<std::string, uint64_t> _order_lookup;
-
-  decltype(_order_mapping)::iterator find_order_mapping(  // XXX move
-      const std::string_view& order_id);
-  decltype(_order_mapping)::iterator find_order_mapping(  // XXX move
-      const std::string_view& order_id,
-      const std::string_view& cl_ord_id);
+  core::oms::OrderCache _order_cache;
 };
 
 }  // namespace bitmex

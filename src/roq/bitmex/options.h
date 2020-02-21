@@ -18,6 +18,7 @@ DECLARE_uint32(decode_buffer_size);
 DECLARE_uint64(reconnect_secs);
 
 DECLARE_uint32(cancel_all_after_secs);
+DECLARE_uint32(request_expires_secs);
 
 // external
 

@@ -13,6 +13,8 @@
 #include "roq/core/utils.h"
 #include "roq/core/view.h"
 
+#include "roq/core/oms/exception.h"
+
 #include "roq/bitmex/options.h"
 
 #include "roq/bitmex/json/utils.h"
@@ -109,30 +111,52 @@ void Gateway::operator()(const ConnectionStatusEvent&) {
 }
 
 void Gateway::operator()(const CreateOrderEvent& event) {
-  if (unlikely(validate(event) == false))
-    return;
+  DLOG(INFO)(FMT_STRING("event={}"), event);
+  // userful
   auto& message_info = event.message_info;
   auto& create_order = event.create_order;
+  // validate
+  if (unlikely(_order_manager_status != GatewayStatus::READY))
+    throw core::oms::Exception(Error::GATEWAY_NOT_READY);
+  if (unlikely(create_order.account.compare(_account) != 0))
+    throw core::oms::Exception(Error::INVALID_ACCOUNT);
+  if (unlikely(create_order.exchange.compare(FLAGS_exchange) != 0))
+    throw core::oms::Exception(Error::INVALID_EXCHANGE);
+  if (unlikely(create_order.position_effect != PositionEffect::UNDEFINED))
+    throw core::oms::Exception(Error::INVALID_POSITION_EFFECT);
+  if (unlikely(
+        create_order.order_template.empty() == false &&
+        create_order.order_template.compare("default") != 0))
+    throw core::oms::Exception(Error::INVALID_ORDER_TEMPLATE);
   // TODO(thraneh): check against max_order_id before continuing
+  // let's try
   auto gateway_order_id = _dispatcher.next_order_id();
-  OrderMapping order_mapping(
-      message_info,
+  core::stack::Buffer<char, 36> buffer;
+  fmt::format_to(
+      std::back_inserter(buffer),
+      "roq-{}-{}-{}",
+      gateway_order_id,
+      message_info.source,
+      create_order.order_id);
+  std::string_view cl_ord_id(
+      buffer.data(),
+      buffer.size());
+  _rest.create_order(
       create_order,
-      gateway_order_id);
-  auto key = order_mapping.key();
-  if (unlikely(_order_mapping.find(key) != _order_mapping.end())) {
-    _dispatcher.send_order_ack(
-        event,
-        Error::INVALID_ORDER_ID);
-    return;
-  } else {
-    auto iter = _order_mapping.emplace(
-        key,
-        std::move(order_mapping)).first;
-    // XXX fix this... replacing previous variable
-    auto& order_mapping = (*iter).second;
-    _rest.create_order(create_order);
-  }
+      cl_ord_id);
+  auto& order = _order_cache.create(
+      event,
+      gateway_order_id,
+      cl_ord_id);
+  DLOG(INFO)(FMT_STRING("order={}"), order);
+  _dispatcher.send_order_ack(
+      event,
+      gateway_order_id,
+      std::string_view());
+  order.update_request(
+      RequestType::CREATE_ORDER,
+      cl_ord_id);
+  DLOG(INFO)(FMT_STRING("order={}"), order);
 }
 
 void Gateway::operator()(const ModifyOrderEvent& event) {
@@ -142,33 +166,39 @@ void Gateway::operator()(const ModifyOrderEvent& event) {
 }
 
 void Gateway::operator()(const CancelOrderEvent& event) {
-  auto& message_info = event.message_info;
+  DLOG(INFO)(FMT_STRING("event={}"), event);
+  auto& order = _order_cache.find(event);
+  DLOG(INFO)(FMT_STRING("order={}"), order);
+  // useful
   auto& cancel_order = event.cancel_order;
-  auto key = OrderMapping::key(
-      message_info.source,
-      cancel_order.order_id);
-  auto iter = _order_mapping.find(key);
-  if (unlikely(iter == _order_mapping.end())) {
-    _dispatcher.send_order_ack(
-        event,
-        Error::UNKNOWN_ORDER_ID);
-    return;
-  }
-  auto& order_mapping = (*iter).second;
-  auto gateway_order_id = order_mapping.gateway_order_id();
-  auto external_order_id = order_mapping.exchange_order_id();
-  if (unlikely(validate(event, gateway_order_id, external_order_id) == false)) {
-    return;
-  }
-  if (unlikely(order_mapping.ready() == false)) {
-    _dispatcher.send_order_ack(
-        event,
+  // auto gateway_order_id = order.gateway_order_id();
+  auto exchange_order_id = order.exchange_order_id();
+  // validate
+  if (unlikely(_order_manager_status != GatewayStatus::READY))
+    throw core::oms::Exception(
+        Error::GATEWAY_NOT_READY,
+        order);
+  if (unlikely(cancel_order.account.compare(_account) != 0))
+    throw core::oms::Exception(
+        Error::INVALID_ACCOUNT,
+        order);
+  if (unlikely(exchange_order_id.empty()))
+    throw core::oms::Exception(
         Error::UNKNOWN_EXCHANGE_ORDER_ID,
-        gateway_order_id,
-        external_order_id);
-    return;
-  }
+        order);
+  // let's try
   LOG(FATAL)("NOT IMPLEMENTED");
+  /*
+  _dispatcher.send_order_ack(
+      event,
+      gateway_order_id,
+      exchange_order_id,
+      request_id);
+  order.update_request(
+      RequestType::CANCEL_ORDER,
+      request_id);
+  DLOG(INFO)(FMT_STRING("order={}"), order);
+  */
 }
 
 void Gateway::operator()(Metrics& metrics) {
@@ -250,8 +280,9 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(
-    const json::Action,
-    const json::Order&) {
+    const json::Action action,
+    const json::Order& order) {
+  DLOG(INFO)(FMT_STRING("action={} order={}"), action, order);
 }
 
 void Gateway::operator()(
@@ -679,111 +710,6 @@ void Gateway::enqueue(
       now,
       now,
       is_last);
-}
-
-bool Gateway::validate(const CreateOrderEvent& event) {
-  auto& create_order = event.create_order;
-  auto error = Error::NONE;
-  if (unlikely(_order_manager_status != GatewayStatus::READY)) {
-    error = Error::GATEWAY_NOT_READY;
-  } else if (unlikely(
-        create_order.account.compare(_account) != 0)) {
-    error = Error::INVALID_ACCOUNT;
-  } else if (unlikely(
-        create_order.exchange.compare(FLAGS_exchange) != 0)) {
-    error = Error::INVALID_EXCHANGE;
-  } else if (unlikely(
-        create_order.position_effect != PositionEffect::UNDEFINED)) {
-    error = Error::INVALID_POSITION_EFFECT;
-  } else if (unlikely(
-        create_order.order_template.empty() == false &&
-        create_order.order_template.compare("default") != 0)) {
-    error = Error::INVALID_ORDER_TEMPLATE;
-  } else {
-    return true;
-  }
-  assert(error != Error::NONE);
-  _dispatcher.send_order_ack(
-      event,
-      error);
-  return false;
-}
-
-bool Gateway::validate(
-    const ModifyOrderEvent& event,
-    uint32_t gateway_order_id,
-    const std::string_view& external_order_id) {
-  auto& modify_order = event.modify_order;
-  auto error = Error::NONE;
-  if (unlikely(_order_manager_status != GatewayStatus::READY)) {
-    error = Error::GATEWAY_NOT_READY;
-  } else if (unlikely(
-        modify_order.account.compare(_account) != 0)) {
-    error = Error::INVALID_ACCOUNT;
-  } else {
-    return true;
-  }
-  assert(error != Error::NONE);
-  _dispatcher.send_order_ack(
-      event,
-      error,
-      gateway_order_id,
-      external_order_id);
-  return false;
-}
-
-bool Gateway::validate(
-    const CancelOrderEvent& event,
-    uint32_t gateway_order_id,
-    const std::string_view& external_order_id) {
-  auto& cancel_order = event.cancel_order;
-  auto error = Error::NONE;
-  if (unlikely(_order_manager_status != GatewayStatus::READY)) {
-    error = Error::GATEWAY_NOT_READY;
-  } else if (unlikely(
-        cancel_order.account.compare(_account) != 0)) {
-    error = Error::INVALID_ACCOUNT;
-  } else {
-    return true;
-  }
-  assert(error != Error::NONE);
-  _dispatcher.send_order_ack(
-      event,
-      error,
-      gateway_order_id,
-      external_order_id);
-  return false;
-}
-
-
-decltype(Gateway::_order_mapping)::iterator
-Gateway::find_order_mapping(const std::string_view& order_id) {
-  auto iter = _order_lookup.find(order_id);
-  if (unlikely(iter == _order_lookup.end())) {
-    return _order_mapping.end();
-  }
-  return _order_mapping.find((*iter).second);
-}
-
-decltype(Gateway::_order_mapping)::iterator
-Gateway::find_order_mapping(
-    const std::string_view& order_id,
-    const std::string_view& cl_ord_id) {
-  auto iter = _order_lookup.find(order_id);
-  if (unlikely(iter == _order_lookup.end())) {
-    iter = _order_lookup.find(cl_ord_id);
-    if (unlikely(iter == _order_lookup.end())) {
-      return _order_mapping.end();
-    } else {
-      // replace cl_ord_id with order_id
-      auto key = (*iter).second;
-      _order_lookup.erase(iter);
-      iter = _order_lookup.emplace(
-          std::string(order_id),
-          key).first;
-    }
-  }
-  return _order_mapping.find((*iter).second);
 }
 
 }  // namespace bitmex

@@ -50,3 +50,7 @@ DEFINE_uint64(reconnect_secs,
 DEFINE_uint32(cancel_all_after_secs,
     uint32_t{60},
     "cancel all after (seconds)");
+
+DEFINE_uint32(request_expires_secs,
+    uint32_t{60},
+    "request expires after (seconds)");

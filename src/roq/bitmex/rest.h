@@ -38,7 +38,7 @@ namespace roq {
 namespace bitmex {
 
 using success_t = std::function<void(const std::string_view&)>;
-using failure_t = std::function<void(const core::http::Status&)>;
+using failure_t = std::function<void(const core::http::Status&, const std::string_view&)>;
 
 class HTTPConnection final : public core::http::Response::Handler {
  public:
@@ -143,7 +143,9 @@ class Rest final : public HTTPConnection::Handler {
 
   void operator()(Metrics& metrics);
 
-  void create_order(const CreateOrder& create_order);
+  void create_order(
+      const CreateOrder& create_order,
+      const std::string_view& cl_ord_id);
 
   void get_products();
   void get_accounts();
@@ -156,6 +158,8 @@ class Rest final : public HTTPConnection::Handler {
   void connect();
 
   void process_pending();
+
+  void send_ping();
 
   void get_time();
 
@@ -257,6 +261,8 @@ class Rest final : public HTTPConnection::Handler {
   int _request_count = 0;
   // XXX weird to have here ...
   core::http::Status _status = core::http::Status::UNKNOWN;
+  //
+  std::chrono::nanoseconds _next_ping = {};
 };
 
 }  // namespace bitmex
