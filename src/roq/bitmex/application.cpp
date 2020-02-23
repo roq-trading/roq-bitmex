@@ -17,6 +17,7 @@ int Application::main(int, char **) {
   roq::server::Trading<Gateway>(
       config,
       FLAGS_listen,
+      server::RequestIdType::SEQUENTIAL,
       config).dispatch();
   return EXIT_SUCCESS;
 }

@@ -110,27 +110,12 @@ void Gateway::operator()(const TimerEvent& event) {
 void Gateway::operator()(const ConnectionStatusEvent&) {
 }
 
-void Gateway::operator()(const CreateOrderEvent& event) {
-  DLOG(INFO)(FMT_STRING("event={}"), event);
-  // userful
+void Gateway::operator()(
+    const CreateOrderEvent& event,
+    const std::string_view& request_id,
+    uint32_t gateway_order_id) {
   auto& message_info = event.message_info;
   auto& create_order = event.create_order;
-  // validate
-  if (unlikely(_order_manager_status != GatewayStatus::READY))
-    throw core::oms::Exception(Error::GATEWAY_NOT_READY);
-  if (unlikely(create_order.account.compare(_account) != 0))
-    throw core::oms::Exception(Error::INVALID_ACCOUNT);
-  if (unlikely(create_order.exchange.compare(FLAGS_exchange) != 0))
-    throw core::oms::Exception(Error::INVALID_EXCHANGE);
-  if (unlikely(create_order.position_effect != PositionEffect::UNDEFINED))
-    throw core::oms::Exception(Error::INVALID_POSITION_EFFECT);
-  if (unlikely(
-        create_order.order_template.empty() == false &&
-        create_order.order_template.compare("default") != 0))
-    throw core::oms::Exception(Error::INVALID_ORDER_TEMPLATE);
-  // TODO(thraneh): check against max_order_id before continuing
-  // let's try
-  auto gateway_order_id = _dispatcher.next_order_id();
   core::stack::Buffer<char, 36> buffer;
   fmt::format_to(
       std::back_inserter(buffer),
@@ -144,61 +129,24 @@ void Gateway::operator()(const CreateOrderEvent& event) {
   _rest.create_order(
       create_order,
       cl_ord_id);
-  auto& order = _order_cache.create(
-      event,
-      gateway_order_id,
-      cl_ord_id);
-  DLOG(INFO)(FMT_STRING("order={}"), order);
-  _dispatcher.send_order_ack(
-      event,
-      gateway_order_id,
-      std::string_view());
-  order.update_request(
-      RequestType::CREATE_ORDER,
-      cl_ord_id);
-  DLOG(INFO)(FMT_STRING("order={}"), order);
 }
 
-void Gateway::operator()(const ModifyOrderEvent& event) {
-  _dispatcher.send_order_ack(
-      event,
-      Error::MODIFY_ORDER_NOT_SUPPORTED);
+void Gateway::operator()(
+    const ModifyOrderEvent&,
+    const std::string_view&,
+    const core::oms::Order& order) {
+  throw core::oms::Exception(
+      Error::MODIFY_ORDER_NOT_SUPPORTED,
+      order);
 }
 
-void Gateway::operator()(const CancelOrderEvent& event) {
-  DLOG(INFO)(FMT_STRING("event={}"), event);
-  auto& order = _order_cache.find(event);
-  DLOG(INFO)(FMT_STRING("order={}"), order);
-  // useful
-  auto& cancel_order = event.cancel_order;
-  // auto gateway_order_id = order.gateway_order_id();
-  auto exchange_order_id = order.exchange_order_id();
-  // validate
-  if (unlikely(_order_manager_status != GatewayStatus::READY))
-    throw core::oms::Exception(
-        Error::GATEWAY_NOT_READY,
-        order);
-  if (unlikely(cancel_order.account.compare(_account) != 0))
-    throw core::oms::Exception(
-        Error::INVALID_ACCOUNT,
-        order);
-  if (unlikely(exchange_order_id.empty()))
-    throw core::oms::Exception(
-        Error::UNKNOWN_EXCHANGE_ORDER_ID,
-        order);
-  // let's try
-  LOG(FATAL)("NOT IMPLEMENTED");
-  /*
-  _dispatcher.send_order_ack(
-      event,
-      gateway_order_id,
-      exchange_order_id,
-      request_id);
-  order.update_request(
-      RequestType::CANCEL_ORDER,
-      request_id);
-  DLOG(INFO)(FMT_STRING("order={}"), order);
-  */
+void Gateway::operator()(
+    const CancelOrderEvent& event,
+    const std::string_view& request_id,
+    const core::oms::Order& order) {
+  throw core::oms::Exception(
+      Error::MODIFY_ORDER_NOT_SUPPORTED,  // XXX fix
+      order);
 }
 
 void Gateway::operator()(Metrics& metrics) {

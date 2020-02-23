@@ -18,8 +18,6 @@
 #include "roq/core/event/base.h"
 #include "roq/core/event/dns_base.h"
 
-#include "roq/core/oms/order_cache.h"
-
 #include "roq/bitmex/config.h"
 #include "roq/bitmex/random.h"
 
@@ -44,9 +42,19 @@ class Gateway final : public server::Handler {
   void operator()(const StopEvent&) override;
   void operator()(const TimerEvent&) override;
   void operator()(const ConnectionStatusEvent&) override;
-  void operator()(const CreateOrderEvent&) override;
-  void operator()(const ModifyOrderEvent&) override;
-  void operator()(const CancelOrderEvent&) override;
+
+  void operator()(
+      const CreateOrderEvent& event,
+      const std::string_view& request_id,
+      uint32_t gateway_order_id) override;
+  void operator()(
+      const ModifyOrderEvent& event,
+      const std::string_view& request_id,
+      const core::oms::Order& order) override;
+  void operator()(
+      const CancelOrderEvent& event,
+      const std::string_view& request_id,
+      const core::oms::Order& order) override;
 
   void operator()(Metrics& metrics) override;
 
@@ -138,7 +146,6 @@ class Gateway final : public server::Handler {
   std::unordered_map<uint64_t, double> _price_lookup;
   // order manager
   GatewayStatus _order_manager_status = GatewayStatus::DISCONNECTED;
-  core::oms::OrderCache _order_cache;
 };
 
 }  // namespace bitmex
