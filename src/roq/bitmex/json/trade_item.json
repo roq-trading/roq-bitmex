@@ -1,6 +1,6 @@
 {
 "name": "TradeItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "foreignNotional", "type": "double" },
 	{ "name": "grossValue", "type": "double" },

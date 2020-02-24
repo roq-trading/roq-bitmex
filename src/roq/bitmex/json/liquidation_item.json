@@ -1,6 +1,6 @@
 {
 "name": "LiquidationItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "leavesQty", "type": "double" },
 	{ "name": "orderID", "type": "std::string_view" },

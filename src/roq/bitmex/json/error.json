@@ -1,6 +1,6 @@
 {
 "name": "Error",
-"type": "json::struct",
+"type": "struct",
 "values": [
 	{ "name": "error", "type": "std::string_view" },
 	{ "name": "meta" },

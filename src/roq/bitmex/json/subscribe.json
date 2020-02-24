@@ -1,6 +1,6 @@
 {
 "name": "Subscribe",
-"type": "json::struct",
+"type": "struct",
 "values": [
 	{ "name": "failure", "type": "bool" },
 	{ "name": "request" },

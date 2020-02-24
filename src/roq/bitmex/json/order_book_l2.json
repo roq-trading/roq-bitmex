@@ -1,6 +1,6 @@
 {
 "name": "OrderBookL2",
-"type": "json::array",
+"type": "array",
 "values": [
 	{ "name": "data", "type": "roq::span<OrderBookL2Item>" }
 ]

@@ -1,6 +1,6 @@
 {
 "name": "Handshake",
-"type": "json::struct",
+"type": "struct",
 "values": [
 	{ "name": "docs", "type": "std::string_view" },
 	{ "name": "info", "type": "std::string_view" },

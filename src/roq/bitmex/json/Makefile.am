@@ -113,7 +113,15 @@ libroq_bitmex_json_la_SOURCES = \
 	utils.cpp
 
 .json.h:
-	@abs_top_builddir@/autogen/autogen.py --namespace=bitmex/json --type h --spec $< > $@
+	@abs_top_builddir@/autogen/autogen.py \
+		--namespace=bitmex/json \
+		--output-type json \
+		--file-type h \
+		$< > $@
 
 .json.cpp:
-	@abs_top_builddir@/autogen/autogen.py --namespace=bitmex/json --type cpp --spec $< > $@
+	@abs_top_builddir@/autogen/autogen.py \
+		--namespace=bitmex/json \
+		--output-type json \
+		--file-type cpp \
+		$< > $@

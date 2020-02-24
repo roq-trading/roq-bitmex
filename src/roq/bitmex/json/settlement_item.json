@@ -1,6 +1,6 @@
 {
 "name": "SettlementItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "bankrupt", "type": "double" },
 	{ "name": "optionStrikePrice", "type": "double" },

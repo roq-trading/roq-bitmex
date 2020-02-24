@@ -1,6 +1,6 @@
 {
 "name": "Execution",
-"type": "json::array",
+"type": "array",
 "values": [
 	{ "name": "data", "type": "roq::span<ExecutionItem>" }
 ]

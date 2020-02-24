@@ -1,6 +1,6 @@
 {
 "name": "InstrumentItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "askPrice", "type": "double" },
 	{ "name": "bankruptLimitDownPrice", "type": "double" },

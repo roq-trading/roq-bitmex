@@ -1,6 +1,6 @@
 {
 "name": "FundingItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "fundingInterval", "type": "std::chrono::nanoseconds" },
 	{ "name": "fundingRateDaily", "type": "double" },

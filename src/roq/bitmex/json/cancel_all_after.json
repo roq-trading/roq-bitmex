@@ -1,6 +1,6 @@
 {
 "name": "CancelAllAfter",
-"type": "json::struct",
+"type": "struct",
 "values": [
 	{ "name": "cancelTime", "type": "std::chrono::nanoseconds" },
 	{ "name": "now", "type": "std::chrono::nanoseconds" }

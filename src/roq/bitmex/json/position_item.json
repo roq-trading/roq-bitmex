@@ -1,6 +1,6 @@
 {
 "name": "PositionItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "account", "type": "uint64_t" },
 	{ "name": "avgCostPrice", "type": "double" },

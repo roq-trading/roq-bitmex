@@ -1,6 +1,6 @@
 {
 "name": "QuoteItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "askPrice", "type": "double" },
 	{ "name": "askSize", "type": "double" },

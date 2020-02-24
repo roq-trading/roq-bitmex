@@ -1,6 +1,6 @@
 {
 "name": "OrderBookL2Item",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "id", "type": "uint64_t" },
 	{ "name": "price", "type": "double" },

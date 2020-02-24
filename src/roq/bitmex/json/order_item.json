@@ -1,6 +1,6 @@
 {
 "name": "OrderItem",
-"type": "json::item",
+"type": "item",
 "values": [
 	{ "name": "account", "type": "uint64_t" },
 	{ "name": "avgPx", "type": "double" },
