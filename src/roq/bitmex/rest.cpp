@@ -240,6 +240,8 @@ Rest::Rest(
         .products = create_profile("products"),
         .accounts = create_profile("accounts"),
         .create_order = create_profile("create_order"),
+        .modify_order = create_profile("modify_order"),
+        .cancel_order = create_profile("cancel_order"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -289,11 +291,11 @@ void Rest::create_order(
         R"(}})"),
       cl_ord_id,
       create_order.symbol,
-      json::c_str(create_order.side),
+      json::map(create_order.side).as_raw_text(),
       create_order.price,
       create_order.quantity,
-      json::c_str(create_order.order_type),
-      json::c_str(create_order.time_in_force));
+      json::map(create_order.order_type).as_raw_text(),
+      json::map(create_order.time_in_force).as_raw_text());
   LOG(INFO)(
       FMT_STRING("DEBUG: body=\"{}\""),
       message);
@@ -318,6 +320,46 @@ void Rest::create_order(
             status,
             body);
         LOG(WARNING)("Unable to create order");
+        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
+      });
+}
+
+void Rest::cancel_order(
+    const CancelOrder& cancel_order,
+    const std::string_view& request_id,
+    const server::OMS_Order& order) {
+  auto message = fmt::format(
+      FMT_STRING(
+        R"({{)"
+        R"("OrderID":"{}")"
+        R"(}})"),
+      order.external_order_id);
+  LOG(INFO)(
+      FMT_STRING("DEBUG: body=\"{}\""),
+      message);
+  delete_(
+      "/order",
+      message,
+      [this](const std::string_view& body) {
+        _profile.cancel_order(
+            [&]() {
+              LOG(INFO)(
+                  FMT_STRING("DEBUG: body=\"{}\""),
+                  body);
+              core::json::Buffer buffer(_decode_buffer);
+              auto order = core::json::Parser::create<json::Order>(
+                  body,
+                  buffer);
+              LOG(INFO)(FMT_STRING("DEBUG: order={}"), order);
+              _gateway(json::Action::DELETE, order);
+            });
+      },
+      [](auto& status, auto& body) {
+        LOG(WARNING)(
+            FMT_STRING("HTTP status={} body=\"{}\""),
+            status,
+            body);
+        LOG(WARNING)("Unable to cancel order");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
 }
@@ -482,6 +524,55 @@ void Rest::post(
       } else {
         make_pending(
             core::http::Method::POST,
+            uri,
+            body,
+            create_time,
+            std::move(success),
+            std::move(failure));
+      }
+      break;
+    default:
+      LOG(FATAL)("Unexpected");
+  }
+}
+
+void Rest::delete_(
+    const std::string_view& uri,
+    const std::string_view& body,
+    success_t&& success,
+    failure_t&& failure) {
+  LOG(INFO)(
+      FMT_STRING("DELETE {}"),
+      uri);
+  auto create_time = core::get_system_clock();
+  switch (_state) {
+    case State::DISCONNECTED:
+      connect();
+      [[ fallthrough ]];
+    case State::DISCONNECTING:  // will fail in order
+    case State::CONNECTING:
+      make_pending(
+          core::http::Method::DELETE,
+          uri,
+          body,
+          create_time,
+          std::move(success),
+          std::move(failure));
+      break;
+    case State::CONNECTED:
+      if (_waiting.empty() &&
+          request(
+            core::http::Method::DELETE,
+            uri,
+            body)) {
+        make_sent(
+            create_time,
+            create_time,
+            std::move(success),
+            std::move(failure));
+      } else {
+        make_pending(
+            core::http::Method::DELETE,
             uri,
             body,
             create_time,

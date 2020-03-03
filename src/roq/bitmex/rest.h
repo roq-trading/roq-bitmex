@@ -147,6 +147,11 @@ class Rest final : public HTTPConnection::Handler {
       const CreateOrder& create_order,
       const std::string_view& cl_ord_id);
 
+  void cancel_order(
+      const CancelOrder& cancel_order,
+      const std::string_view& cl_ord_id,
+      const server::OMS_Order& order);
+
   void get_products();
   void get_accounts();
 
@@ -169,6 +174,12 @@ class Rest final : public HTTPConnection::Handler {
       failure_t&& failure);
 
   void post(
+      const std::string_view& uri,
+      const std::string_view& body,
+      success_t&& success,
+      failure_t&& failure);
+
+  void delete_(
       const std::string_view& uri,
       const std::string_view& body,
       success_t&& success,
@@ -233,7 +244,9 @@ class Rest final : public HTTPConnection::Handler {
       failure,
       products,
       accounts,
-      create_order;
+      create_order,
+      modify_order,
+      cancel_order;
   } _profile;
   struct {
     core::metrics::Latency

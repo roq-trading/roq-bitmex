@@ -50,11 +50,11 @@ class Gateway final : public server::Handler {
   void operator()(
       const ModifyOrderEvent& event,
       const std::string_view& request_id,
-      const core::oms::Order& order) override;
+      const server::OMS_Order& order) override;
   void operator()(
       const CancelOrderEvent& event,
       const std::string_view& request_id,
-      const core::oms::Order& order) override;
+      const server::OMS_Order& order) override;
 
   void operator()(Metrics& metrics) override;
 

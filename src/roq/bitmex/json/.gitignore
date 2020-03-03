@@ -4,6 +4,8 @@ cancel_all_after.cpp
 cancel_all_after.h
 error.cpp
 error.h
+exec_inst.cpp
+exec_inst.h
 execution.cpp
 execution.h
 execution_item.cpp
@@ -28,6 +30,12 @@ margin.cpp
 margin.h
 margin_item.cpp
 margin_item.h
+multi_leg_reporting_type.cpp
+multi_leg_reporting_type.h
+ord_status.cpp
+ord_status.h
+ord_type.cpp
+ord_type.h
 order_book_l2.cpp
 order_book_l2.h
 order_book_l2_item.cpp
@@ -58,6 +66,8 @@ subscribe.cpp
 subscribe.h
 table.cpp
 table.h
+time_in_force.cpp
+time_in_force.h
 trade.cpp
 trade.h
 trade_item.cpp

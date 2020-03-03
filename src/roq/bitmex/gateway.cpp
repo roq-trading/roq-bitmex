@@ -13,8 +13,6 @@
 #include "roq/core/utils.h"
 #include "roq/core/view.h"
 
-#include "roq/core/oms/exception.h"
-
 #include "roq/bitmex/options.h"
 
 #include "roq/bitmex/json/utils.h"
@@ -47,7 +45,7 @@ static bool trade_update(
     const T& item) {
   auto& obj = data[offset];
   new (&obj) Trade {
-    .side = json::convert(item.side),  // XXX check
+    .side = json::map(item.side),  // XXX check
     .price = item.price,
     .quantity = item.size,
     .trade_id = {},
@@ -116,6 +114,7 @@ void Gateway::operator()(
     uint32_t gateway_order_id) {
   auto& message_info = event.message_info;
   auto& create_order = event.create_order;
+  /*
   core::stack::Buffer<char, 36> buffer;
   fmt::format_to(
       std::back_inserter(buffer),
@@ -126,16 +125,17 @@ void Gateway::operator()(
   std::string_view cl_ord_id(
       buffer.data(),
       buffer.size());
+  */
   _rest.create_order(
       create_order,
-      cl_ord_id);
+      request_id);
 }
 
 void Gateway::operator()(
     const ModifyOrderEvent&,
     const std::string_view&,
-    const core::oms::Order& order) {
-  throw core::oms::Exception(
+    const server::OMS_Order& order) {
+  throw server::OMS_Exception(
       Error::MODIFY_ORDER_NOT_SUPPORTED,
       order);
 }
@@ -143,9 +143,12 @@ void Gateway::operator()(
 void Gateway::operator()(
     const CancelOrderEvent& event,
     const std::string_view& request_id,
-    const core::oms::Order& order) {
-  throw core::oms::Exception(
-      Error::MODIFY_ORDER_NOT_SUPPORTED,  // XXX fix
+    const server::OMS_Order& order) {
+  auto& message_info = event.message_info;
+  auto& cancel_order = event.cancel_order;
+  _rest.cancel_order(
+      cancel_order,
+      request_id,
       order);
 }
 
@@ -227,10 +230,79 @@ void Gateway::operator()(
   }
 }
 
+auto compute_request_status(
+    auto request_type,
+    auto ord_status) {
+  switch (ord_status) {
+    case json::OrdStatus::UNDEFINED:
+    case json::OrdStatus::UNKNOWN:
+      break;
+    case json::OrdStatus::NEW: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***");
+          break;
+        case RequestType::CREATE_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::MODIFY_ORDER:
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+        break;
+      }
+      break;
+    }
+  }
+  return RequestStatus::UNDEFINED;
+}
+
 void Gateway::operator()(
     const json::Action action,
     const json::Order& order) {
   DLOG(INFO)(FMT_STRING("action={} order={}"), action, order);
+  for (auto& iter : order.data) {
+
+    auto order_status = iter.working_indicator
+      ? OrderStatus::WORKING
+      : OrderStatus::COMPLETED;
+    DLOG(INFO)(FMT_STRING("order_status={}"), order_status);
+
+    server::OMS_Lookup order_lookup {
+      .symbol = iter.symbol,
+      .side = json::map(iter.side),
+      .status = order_status,
+      .price = iter.price,
+      .remaining_quantity = iter.leaves_qty,
+      .traded_quantity = iter.cum_qty,
+      .commissions = std::numeric_limits<double>::quiet_NaN(),
+      .timestamp = iter.timestamp,
+      .external_order_id = iter.order_id,
+    };
+
+    auto found = _dispatcher.find_order(
+        iter.cl_ord_id,
+        std::string_view(),  // XXX ?????
+        order_lookup,
+        [&](const auto& order, auto& result) {
+
+      constexpr auto origin = Origin::EXCHANGE;
+      auto status = RequestStatus::UNDEFINED;
+
+      // XXX ord_rej_reason
+      result.request_status = compute_request_status(
+          order.request_type,
+          iter.ord_status);
+
+      if (result.request_status != RequestStatus::UNDEFINED) {
+        result.origin = Origin::EXCHANGE;
+        result.error = Error::UNKNOWN;
+        result.text = iter.text;
+      }
+    });
+
+    if (found == false) {
+      LOG(WARNING)("*** EXTERNAL ORDER ***");
+    }
+  }
 }
 
 void Gateway::operator()(

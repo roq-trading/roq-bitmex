@@ -10,9 +10,14 @@
 
 #include "roq/core/charconv/datetime.h"
 
+#include "roq/bitmex/json/exec_inst.h"
+#include "roq/bitmex/json/multi_leg_reporting_type.h"
+#include "roq/bitmex/json/ord_status.h"
+#include "roq/bitmex/json/ord_type.h"
 #include "roq/bitmex/json/settlement_type.h"
 #include "roq/bitmex/json/side.h"
 #include "roq/bitmex/json/state.h"
+#include "roq/bitmex/json/time_in_force.h"
 #include "roq/bitmex/json/typ.h"
 
 namespace roq {
@@ -65,98 +70,140 @@ inline void update(
 
 template <>
 inline void update(
+    ExecInst& result,
+    const core::json::value_t& value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
+    MultiLegReportingType& result,
+    const core::json::value_t& value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
+    OrdStatus& result,
+    const core::json::value_t& value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
+    OrdType& result,
+    const core::json::value_t& value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
     SettlementType& result,
     const core::json::value_t& value) {
-  result = parse_settlement_type(core::json::get<std::string_view>(value));
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
 inline void update(
     Side& result,
     const core::json::value_t& value) {
-  result = parse_side(core::json::get<std::string_view>(value));
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
 inline void update(
     State& result,
     const core::json::value_t& value) {
-  result = parse_state(core::json::get<std::string_view>(value));
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
+    TimeInForce& result,
+    const core::json::value_t& value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
 inline void update(
     Typ& result,
     const core::json::value_t& value) {
-  result = parse_typ(core::json::get<std::string_view>(value));
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
 }
 
 // utils
 
-inline roq::Side convert(json::Side side) {
-  switch (side) {
-    case json::Side::BUY:
-      return roq::Side::BUY;
-    case json::Side::SELL:
-      return roq::Side::SELL;
-    default:
-      return roq::Side::UNDEFINED;
-  }
-}
+// bitmex => roq
 
-inline roq::TradingStatus convert(State state) {
+inline roq::TradingStatus map(json::State state) {
   switch (state) {
-    case State::UNDEFINED:
-      break;
-    case State::UNKNOWN:
-      break;
-    case State::CLOSED:
-      return roq::TradingStatus::CLOSED;
-    case State::OPEN:
-      return roq::TradingStatus::OPEN;
-    case State::SETTLED:
-      break;
-    case State::UNLISTED:
-      break;
+    case json::State::UNDEFINED: break;
+    case json::State::UNKNOWN:   break;
+    case json::State::CLOSED:    return roq::TradingStatus::CLOSED;
+    case json::State::OPEN:      return roq::TradingStatus::OPEN;
+    case json::State::SETTLED:   break;
+    case json::State::UNLISTED:  break;
   }
   return roq::TradingStatus::UNDEFINED;
 }
 
-inline std::string_view c_str(roq::Side side) {
+inline roq::Side map(json::Side side) {
   switch (side) {
-    case roq::Side::BUY:
-      return "Buy";
-    case roq::Side::SELL:
-      return "Sell";
-    default:
-      return std::string_view {};
+    case json::Side::UNDEFINED: break;
+    case json::Side::UNKNOWN:   break;
+    case json::Side::BUY:       return roq::Side::BUY;
+    case json::Side::SELL:      return roq::Side::SELL;
   }
+  return roq::Side::UNDEFINED;
 }
 
-inline std::string_view c_str(roq::OrderType order_type) {
+inline roq::OrderStatus map(json::OrdStatus state) {
+  switch (state) {
+    case OrdStatus::UNDEFINED: break;
+    case OrdStatus::UNKNOWN:   break;
+    case OrdStatus::NEW:       return roq::OrderStatus::WORKING;
+  }
+  return roq::OrderStatus::UNDEFINED;
+}
+
+// roq => bitmex
+
+inline json::Side map(roq::Side side) {
+  switch (side) {
+    case roq::Side::UNDEFINED: break;
+    case roq::Side::BUY:       return json::Side::BUY;
+    case roq::Side::SELL:      return json::Side::SELL;
+  }
+  return json::Side::UNDEFINED;
+}
+
+inline json::OrdType map(roq::OrderType order_type) {
   switch (order_type) {
-    case roq::OrderType::MARKET:
-      return "Market";
-    case roq::OrderType::LIMIT:
-      return "Limit";
-    default:
-      return std::string_view {};
+    case roq::OrderType::UNDEFINED: break;
+    case roq::OrderType::MARKET:    return json::OrdType::MARKET;
+    case roq::OrderType::LIMIT:     return json::OrdType::LIMIT;
   }
+  return json::OrdType::UNDEFINED;
 }
 
-inline std::string_view c_str(roq::TimeInForce time_in_force) {
+inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   switch (time_in_force) {
-    case roq::TimeInForce::FOK:
-      return "FillOrKill";
-    case roq::TimeInForce::IOC:
-      return "ImmediateOrCancel";
-    case roq::TimeInForce::GFD:
-      return "Day";
-    case roq::TimeInForce::GTC:
-      return "GoodTillCancel";
-    default:
-      return std::string_view {};
+    case roq::TimeInForce::UNDEFINED: break;
+    case roq::TimeInForce::FOK:       break;
+    case roq::TimeInForce::IOC:       break;
+    case roq::TimeInForce::GFD:       break;
+    case roq::TimeInForce::GTC:       return json::TimeInForce::GOOD_TILL_CANCEL;
   }
+  return json::TimeInForce::UNDEFINED;
 }
 
 }  // namespace json

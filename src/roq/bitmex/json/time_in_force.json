@@ -1,0 +1,7 @@
+{
+"name": "TimeInForce",
+"type": "enum",
+"values": [
+	{ "name": "GoodTillCancel" }
+]
+}

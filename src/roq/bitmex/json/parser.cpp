@@ -47,7 +47,7 @@ void Parser::dispatch(
     core::json::Parser parser(message);
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::object_t>(root)) {
-      auto field = parse_field(key);
+      auto field = Field(key);
       switch (field) {
         case Field::UNDEFINED:
           LOG(FATAL)("Unexpected");
@@ -60,7 +60,7 @@ void Parser::dispatch(
         case Field::ACTION:
           update(result.action, value);
           update(type, Type::TABLE);
-          action = parse_action(result.action);
+          action = Action(result.action);
           break;
         case Field::ATTRIBUTES:
           // not used
@@ -207,7 +207,7 @@ void Parser::dispatch(
           update(result.table, value);
           update(type, Type::TABLE);
           assert(table == Table::UNKNOWN);
-          table = parse_table(result.table);
+          table = Table(result.table);
           break;
         case Field::TIMESTAMP:
           update(result.timestamp, value);

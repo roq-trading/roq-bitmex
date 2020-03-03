@@ -14,6 +14,8 @@ BUILT_SOURCES = \
 	cancel_all_after.h \
 	error.cpp \
 	error.h \
+	exec_inst.cpp \
+	exec_inst.h \
 	execution.cpp \
 	execution.h \
 	execution_item.cpp \
@@ -38,6 +40,12 @@ BUILT_SOURCES = \
 	margin.h \
 	margin_item.cpp \
 	margin_item.h \
+	multi_leg_reporting_type.cpp \
+	multi_leg_reporting_type.h \
+	ord_status.cpp \
+	ord_status.h \
+	ord_type.cpp \
+	ord_type.h \
 	order_book_l2.cpp \
 	order_book_l2.h \
 	order_book_l2_item.cpp \
@@ -68,6 +76,8 @@ BUILT_SOURCES = \
 	subscribe.h \
 	table.cpp \
 	table.h \
+	time_in_force.cpp \
+	time_in_force.h \
 	trade.cpp \
 	trade.h \
 	trade_item.cpp \
@@ -79,6 +89,7 @@ libroq_bitmex_json_la_SOURCES = \
 	action.cpp \
 	cancel_all_after.cpp \
 	error.cpp \
+	exec_inst.cpp \
 	execution.cpp \
 	execution_item.cpp \
 	field.cpp \
@@ -91,6 +102,9 @@ libroq_bitmex_json_la_SOURCES = \
 	liquidation_item.cpp \
 	margin.cpp \
 	margin_item.cpp \
+	multi_leg_reporting_type.cpp \
+	ord_status.cpp \
+	ord_type.cpp \
 	order_book_l2.cpp \
 	order_book_l2_item.cpp \
 	order.cpp \
@@ -107,6 +121,7 @@ libroq_bitmex_json_la_SOURCES = \
 	state.cpp \
 	subscribe.cpp \
 	table.cpp \
+	time_in_force.cpp \
 	trade.cpp \
 	trade_item.cpp \
 	typ.cpp \

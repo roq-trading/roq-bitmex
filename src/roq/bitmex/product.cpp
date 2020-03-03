@@ -57,7 +57,7 @@ MarketStatus Product::create_market_status(
   return MarketStatus {
     .exchange = FLAGS_exchange,
     .symbol = item.symbol,
-    .trading_status = json::convert(_state),
+    .trading_status = json::map(_state),
   };
 }
 
