@@ -32,10 +32,6 @@ margin_item.cpp
 margin_item.h
 multi_leg_reporting_type.cpp
 multi_leg_reporting_type.h
-ord_status.cpp
-ord_status.h
-ord_type.cpp
-ord_type.h
 order_book_l2.cpp
 order_book_l2.h
 order_book_l2_item.cpp
@@ -44,6 +40,10 @@ order.cpp
 order.h
 order_item.cpp
 order_item.h
+ord_status.cpp
+ord_status.h
+ord_type.cpp
+ord_type.h
 position.cpp
 position.h
 position_item.cpp
