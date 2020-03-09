@@ -26,13 +26,13 @@ class Random final {
       std::chrono::seconds expires,
       const core::http::Method& method,
       const std::string_view& path,
-      const std::string_view& obdy);
+      const std::string_view& body);
 
   std::string create_headers(
       std::chrono::seconds expires,
       const core::http::Method& method,
       const std::string_view& path,
-      const std::string_view& obdy);
+      const std::string_view& body);
 
  private:
   const std::string _key;

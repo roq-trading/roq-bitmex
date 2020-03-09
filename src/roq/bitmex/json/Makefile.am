@@ -85,8 +85,8 @@ AUTOGEN_H = \
 	trade.h \
 	trade_item.h \
 	typ.h
-BUILT_SOURCES = $(AUTOGEN_CPP) $(AUTOGEN_H) .gitignore
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(AUTOGEN_CPP) $(AUTOGEN_H)
+BUILT_SOURCES = $(CLEANFILES) .gitignore
 libroq_bitmex_json_la_SOURCES = \
 	$(AUTOGEN_CPP) \
 	parser.cpp \
