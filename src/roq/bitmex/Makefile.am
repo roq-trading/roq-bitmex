@@ -40,5 +40,5 @@ roq_bitmex_SOURCES = \
 	product.cpp \
 	random.cpp \
 	rest.cpp \
-	websocket.cpp \
+	web_socket.cpp \
 	main.cpp

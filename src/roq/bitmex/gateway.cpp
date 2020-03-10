@@ -66,7 +66,7 @@ Gateway::Gateway(
           config.get_api_key(),
           config.get_secret()),
       _dns_base(_base, true),
-      _websocket(
+      _web_socket(
           *this,
           config,
           _random,
@@ -89,18 +89,18 @@ Gateway::Gateway(
 
 void Gateway::operator()(const StartEvent& event) {
   LOG(INFO)("Starting the gateway...");
-  _websocket(event);
+  _web_socket(event);
   _rest(event);
 }
 
 void Gateway::operator()(const StopEvent& event) {
   LOG(INFO)("Stopping the gateway...");
-  _websocket(event);
+  _web_socket(event);
   _rest(event);
 }
 
 void Gateway::operator()(const TimerEvent& event) {
-  _websocket(event);
+  _web_socket(event);
   _rest(event);
   _base.loop(EVLOOP_NONBLOCK);
 }
@@ -153,15 +153,15 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(Metrics& metrics) {
-  _websocket(metrics);
+  _web_socket(metrics);
   _rest(metrics);
 }
 
 // ws
 
-void Gateway::operator()(const WebSocket& websocket) {
+void Gateway::operator()(const WebSocket& web_socket) {
   VLOG(1)("WebSocket");
-  if (websocket.ready()) {
+  if (web_socket.ready()) {
     if (_download == Download::NONE) {
       // pretend the (automatic) upgrade request is the login
       update_order_manager(GatewayStatus::LOGIN_SENT);
@@ -573,27 +573,27 @@ void Gateway::subscribe_instrument() {
   assert(_download != Download::READY);
   LOG(INFO)("Download products...");
   // XXX _rest.get_products();
-  _websocket.subscribe("instrument");
+  _web_socket.subscribe("instrument");
   _download = Download::PRODUCTS;
 }
 
 void Gateway::subscribe_order_book_l2() {
   assert(_download != Download::READY);
   LOG(INFO)("Download order books");
-  _websocket.subscribe("orderBookL2", _symbols);
+  _web_socket.subscribe("orderBookL2", _symbols);
   _download = Download::ORDER_BOOKS;
 
   // XXX not here
-  _websocket.subscribe("funding", _symbols);
-  _websocket.subscribe("liquidation", _symbols);
-  _websocket.subscribe("quote", _symbols);
-  _websocket.subscribe("settlement", _symbols);
-  _websocket.subscribe("trade", _symbols);
+  _web_socket.subscribe("funding", _symbols);
+  _web_socket.subscribe("liquidation", _symbols);
+  _web_socket.subscribe("quote", _symbols);
+  _web_socket.subscribe("settlement", _symbols);
+  _web_socket.subscribe("trade", _symbols);
   // XXX private
-  _websocket.subscribe("execution", _symbols);
-  _websocket.subscribe("order", _symbols);
-  _websocket.subscribe("margin", _symbols);
-  _websocket.subscribe("position", _symbols);
+  _web_socket.subscribe("execution", _symbols);
+  _web_socket.subscribe("order", _symbols);
+  _web_socket.subscribe("margin", _symbols);
+  _web_socket.subscribe("position", _symbols);
   // XXX other
   // cancelAllAfter
   // authKeyExpires

@@ -23,7 +23,7 @@
 
 #include "roq/bitmex/product.h"
 #include "roq/bitmex/rest.h"
-#include "roq/bitmex/websocket.h"
+#include "roq/bitmex/web_socket.h"
 
 // json (inbound)
 
@@ -122,7 +122,7 @@ class Gateway final : public server::Handler {
   // crypto
   core::ssl::Context _ssl_context;
   // connections
-  WebSocket _websocket;
+  WebSocket _web_socket;
   Rest _rest;
   // download
   enum class Download {
