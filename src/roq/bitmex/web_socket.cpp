@@ -12,22 +12,14 @@
 
 #include "roq/core/charconv.h"
 
-#include "roq/core/http/response.h"
-
-#include "roq/core/ws/decoder.h"
-#include "roq/core/ws/encoder.h"
-#include "roq/core/ws/random.h"
-#include "roq/core/ws/upgrade.h"
-
 #include "roq/bitmex/gateway.h"
-
 #include "roq/bitmex/options.h"
-#include "roq/bitmex/random.h"
 
 namespace roq {
 namespace bitmex {
 
-constexpr std::string_view CONNECTION("ws");
+namespace {
+constexpr std::string_view CONNECTION = "ws";
 
 static auto create_counter(
     const std::string_view& function) {
@@ -52,6 +44,7 @@ static auto create_latency(
       CONNECTION,
       function);
 }
+}  // namespace
 
 WebSocket::WebSocket(
     Gateway& gateway,
@@ -62,12 +55,13 @@ WebSocket::WebSocket(
     core::ssl::Context& ssl_context)
     : _gateway(gateway),
       _random(random),
-      _web_socket(
+      _connection(
           *this,
           base,
           dns_base,
           ssl_context,
           core::URI(FLAGS_ws_uri),
+          std::chrono::seconds { FLAGS_ping_freq_secs },
           FLAGS_decode_buffer_size,  // XXX need read buffer size
           FLAGS_encode_buffer_size,
           [this]() {
@@ -102,37 +96,23 @@ WebSocket::WebSocket(
 }
 
 bool WebSocket::ready() const {
-  return _web_socket.ready();
+  return _connection.ready();
 }
 
 void WebSocket::operator()(const StartEvent&) {
-  _web_socket.start();
+  _connection.start();
 }
 
 void WebSocket::operator()(const StopEvent&) {
-  _web_socket.stop();
+  _connection.stop();
 }
 
 void WebSocket::operator()(const TimerEvent& event) {
-  auto now = event.now;
-  _web_socket.refresh(now);
-  if (_web_socket.ready()) {
-    if (_next_heartbeat <= now) {
-      _next_heartbeat = now +
-        std::chrono::seconds { FLAGS_ping_freq_secs };
-      std::chrono::nanoseconds now = core::get_system_clock();
-      _stack_buffer.clear();
-      core::charconv::to_string(
-          std::back_inserter(_stack_buffer),
-          now.count());
-      std::string_view message(
-          _stack_buffer.data(),
-          _stack_buffer.size());
-      _web_socket.ping(message);
-    }
+  _connection.refresh(event.now);
+  if (_connection.ready()) {
     if (FLAGS_cancel_all_after_secs &&
-        _next_cancel_all_after <= now) {
-      _next_cancel_all_after = now +
+        _next_cancel_all_after <= event.now) {
+      _next_cancel_all_after = event.now +
         std::chrono::seconds { FLAGS_cancel_all_after_secs / 4 };
       send_cancel_all_after();
     }
@@ -140,7 +120,7 @@ void WebSocket::operator()(const TimerEvent& event) {
 }
 
 void WebSocket::subscribe(const std::string_view& topic) {
-  auto text = fmt::format(
+  auto message = fmt::format(
       FMT_STRING(
         "{{"
         "\"op\":\"subscribe\","
@@ -148,7 +128,7 @@ void WebSocket::subscribe(const std::string_view& topic) {
         "\"{}\""
         "}}"),
       topic);
-  _web_socket.send(text);
+  _connection.send_text(message);
 }
 
 void WebSocket::subscribe(
@@ -157,7 +137,7 @@ void WebSocket::subscribe(
   if (filter.empty()) {
     subscribe(topic);
   } else {
-    auto text = fmt::format(
+    auto message = fmt::format(
         FMT_STRING(
           "{{"
           "\"op\":\"subscribe\","
@@ -166,7 +146,7 @@ void WebSocket::subscribe(
           "}}"),
         topic,
         fmt::join(filter, ","));
-    _web_socket.send(text);
+    _connection.send_text(message);
   }
 }
 
@@ -196,37 +176,30 @@ void WebSocket::operator()(Metrics& metrics) {
     .write(_latency.heartbeat);
 }
 
-void WebSocket::operator()(const core::net::WebSocket::Connected&) {
+void WebSocket::operator()(const core::web::Socket::Connected&) {
   _gateway(*this);
 }
 
-void WebSocket::operator()(const core::net::WebSocket::Disconnected&) {
-  _received_handshake = true;
+void WebSocket::operator()(const core::web::Socket::Disconnected&) {
+  _next_cancel_all_after = {};
+  _received_handshake = false;
   _gateway(*this);
 }
 
-void WebSocket::operator()(const core::net::WebSocket::Ready&) {
+void WebSocket::operator()(const core::web::Socket::Ready&) {
   _gateway(*this);
 }
 
-void WebSocket::operator()(const core::net::WebSocket::Close&) {
+void WebSocket::operator()(const core::web::Socket::Close&) {
 }
 
-void WebSocket::operator()(const core::net::WebSocket::Pong& pong) {
-  auto now = core::get_system_clock();
-  VLOG(3)(
-      FMT_STRING("pong(length={})"),
-      pong.payload.size());
-  if (pong.payload.empty() == false) {
-    auto send_time = core::from_chars<uint64_t>(pong.payload);
-    auto latency =
+void WebSocket::operator()(const core::web::Socket::Latency& latency) {
+  _latency.ping.update(
       std::chrono::duration_cast<std::chrono::nanoseconds>(
-          now - decltype(now){send_time}) / 2;  // 1-way
-    _latency.ping.update(latency.count());
-  }
+          latency.sample).count());
 }
 
-void WebSocket::operator()(const core::net::WebSocket::Text& text) {
+void WebSocket::operator()(const core::web::Socket::Text& text) {
   parse(text.payload);
 }
 
@@ -265,14 +238,14 @@ void WebSocket::parse_helper(const std::string_view& message) {
 }
 
 void WebSocket::send_cancel_all_after() {
-  auto text = fmt::format(
+  auto message = fmt::format(
       FMT_STRING(
         "{{"
         "\"op\":\"cancelAllAfter\","
         "\"args\":{}"
         "}}"),
       FLAGS_cancel_all_after_secs * 1000);  // milliseconds
-  _web_socket.send(text);
+  _connection.send_text(message);
 }
 
 void WebSocket::operator()(

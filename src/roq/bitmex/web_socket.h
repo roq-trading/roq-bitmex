@@ -8,8 +8,6 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/core/stack/buffer.h"
-
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
 #include "roq/core/metrics/profile.h"
@@ -17,7 +15,7 @@
 #include "roq/core/event/base.h"
 #include "roq/core/event/dns_base.h"
 
-#include "roq/core/net/web_socket.h"
+#include "roq/core/web/socket.h"
 
 #include "roq/bitmex/config.h"
 #include "roq/bitmex/random.h"
@@ -30,7 +28,7 @@ namespace bitmex {
 class Gateway;
 
 class WebSocket final
-    : public core::net::WebSocket::Handler,
+    : public core::web::Socket::Handler,
       public json::Parser::Handler {
  public:
   WebSocket(
@@ -61,12 +59,12 @@ class WebSocket final
  protected:
   std::string create_upgrade_headers();
 
-  void operator()(const core::net::WebSocket::Connected&) override;
-  void operator()(const core::net::WebSocket::Disconnected&) override;
-  void operator()(const core::net::WebSocket::Ready&) override;
-  void operator()(const core::net::WebSocket::Close&) override;
-  void operator()(const core::net::WebSocket::Pong&) override;
-  void operator()(const core::net::WebSocket::Text&) override;
+  void operator()(const core::web::Socket::Connected&) override;
+  void operator()(const core::web::Socket::Disconnected&) override;
+  void operator()(const core::web::Socket::Ready&) override;
+  void operator()(const core::web::Socket::Close&) override;
+  void operator()(const core::web::Socket::Latency&) override;
+  void operator()(const core::web::Socket::Text&) override;
 
   void parse(const std::string_view& message);
   void parse_helper(const std::string_view& message);
@@ -93,18 +91,15 @@ class WebSocket final
 
  private:
   Gateway& _gateway;
-  // config
   // authentication
   Random& _random;
-  // web socket
-  core::net::WebSocket _web_socket;
+  // connection
+  core::web::Socket _connection;
   // buffers
   core::utils::Buffer _decode_buffer;
   // session
-  std::chrono::nanoseconds _next_heartbeat = {};
   std::chrono::nanoseconds _next_cancel_all_after = {};
-  // other
-  core::stack::Buffer<char, 32> _stack_buffer;
+  bool _received_handshake = false;
   // metrics
   struct {
     core::metrics::Counter
@@ -134,8 +129,6 @@ class WebSocket final
       ping,
       heartbeat;
   } _latency;
-  // state
-  bool _received_handshake = false;
 };
 
 }  // namespace bitmex
