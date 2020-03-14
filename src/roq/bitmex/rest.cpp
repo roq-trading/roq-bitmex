@@ -77,6 +77,7 @@ Rest::Rest(
       _latency {
         .ping = create_latency("ping"),
       } {
+  (void) config;  // avoid warning
 }
 
 void Rest::operator()(const StartEvent&) {
@@ -135,6 +136,7 @@ void Rest::create_order(
       std::string_view(),  // headers
       message,
       [this](const auto status, const auto& body) {
+        (void) status;  // avoid warning
         _profile.create_order(
             [&]() {
               LOG(INFO)(
@@ -159,6 +161,8 @@ void Rest::cancel_order(
     const CancelOrder& cancel_order,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
+  (void) cancel_order;  // avoid warning
+  (void) request_id;  // avoid warning
   auto message = fmt::format(
       FMT_STRING(
         R"({{)"
@@ -174,6 +178,7 @@ void Rest::cancel_order(
       std::string_view(),  // headers
       message,
       [this](const auto status, const auto& body) {
+        (void) status;  // avoid warning
         _profile.cancel_order(
             [&]() {
               LOG(INFO)(
@@ -203,6 +208,8 @@ void Rest::get_products() {
       std::string_view(),  // headers
       std::string_view(),  // body
       [this](const auto status, const auto& body) {
+        (void) status;  // avoid warning
+        (void) body;  // avoid warning
         _profile.products(
             [&]() {
               /*
@@ -231,6 +238,8 @@ void Rest::get_accounts() {
       std::string_view(),  // headers
       std::string_view(),  // body
       [this](const auto status, const auto& body) {
+        (void) status;  // avoid warning
+        (void) body;  // avoid warning
         _profile.accounts(
             [&]() {
               /*

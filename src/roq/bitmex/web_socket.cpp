@@ -93,6 +93,7 @@ WebSocket::WebSocket(
         .ping = create_latency("ping"),
         .heartbeat = create_latency("heartbeat"),
       } {
+  (void) config;  // avoid warning
 }
 
 bool WebSocket::ready() const {
