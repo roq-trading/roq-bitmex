@@ -56,6 +56,8 @@ class WebSocket final
 
   void operator()(Metrics& metrics);
 
+  void close();
+
  protected:
   std::string create_upgrade_headers();
 

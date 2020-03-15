@@ -177,6 +177,10 @@ void WebSocket::operator()(Metrics& metrics) {
     .write(_latency.heartbeat);
 }
 
+void WebSocket::close() {
+  _connection.close();
+}
+
 void WebSocket::operator()(const core::web::Socket::Connected&) {
   _gateway(*this);
 }
@@ -262,10 +266,11 @@ void WebSocket::operator()(
 void WebSocket::operator()(const json::Error& error) {
   _profile.error(
       [&]() {
-        LOG(FATAL)(
+        LOG(WARNING)(
             FMT_STRING("error={}"),
             error);
       });
+  _connection.close();
 }
 
 void WebSocket::operator()(const json::Handshake& handshake) {

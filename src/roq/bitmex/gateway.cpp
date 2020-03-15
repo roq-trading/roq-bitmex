@@ -336,21 +336,34 @@ void Gateway::operator()(
         item.id,
         item.price,
         item.size);
-    switch (item.side) {
-      case json::Side::BUY:
-        success = mbp_update(
-            _bid,
-            bid_length,
-            price_size);
-        break;
-      case json::Side::SELL:
-        success = mbp_update(
-            _ask,
-            ask_length,
-            price_size);
-        break;
-      default:
-        LOG(FATAL)("Unexpected");
+    if (std::isfinite(price_size.first)) {
+      switch (item.side) {
+        case json::Side::BUY:
+          success = mbp_update(
+              _bid,
+              bid_length,
+              price_size);
+          break;
+        case json::Side::SELL:
+          success = mbp_update(
+              _ask,
+              ask_length,
+              price_size);
+          break;
+        default:
+          LOG(FATAL)("Unexpected");
+      }
+    } else {
+      LOG(WARNING)(
+          FMT_STRING(
+            "Closing web-socket: "
+            "unexpected action={} id={} price={} size={}"),
+          action,
+          item.id,
+          item.price,
+          item.size);
+      _web_socket.close();
+      return;
     }
   }
   if (unlikely(success == false)) {
@@ -616,50 +629,56 @@ std::pair<double, double> Gateway::find_price(
       LOG(FATAL)("Unexpected");
       break;
     case json::Action::PARTIAL:
-      LOG_IF(FATAL, std::isfinite(price) == false)(
-          FMT_STRING("id={} price={}: expected finite"), id, price);
-      if (iter == _price_lookup.end()) {
-        iter = _price_lookup.emplace(id, price).first;
-      } else {
-        auto diff = std::fabs(price - (*iter).second);
-        LOG_IF(FATAL, diff > TOLERANCE)(
-            FMT_STRING("id={} price={}: id already exists as price={}"),
-            id, price, (*iter).second);
-      }
-      result = (*iter).second;
-      break;
     case json::Action::INSERT:
-      LOG_IF(FATAL, std::isfinite(price) == false)(
-          FMT_STRING("id={} price={}"), id, price);
-      if (iter == _price_lookup.end()) {
-        iter = _price_lookup.emplace(id, price).first;
+      if (std::isnan(price) == false &&
+          std::isnan(size) == false) {
+        if (iter == _price_lookup.end()) {
+          iter = _price_lookup.emplace(id, price).first;
+          result = (*iter).second;
+        } else {
+          auto previous = (*iter).second;
+          if (std::fabs(price - previous) < TOLERANCE) {
+            result = (*iter).second;
+          } else {
+            // exists as a different price ==> fail
+          }
+        }
       } else {
-        auto diff = std::fabs(price - (*iter).second);
-        LOG_IF(FATAL, diff > TOLERANCE)(
-            FMT_STRING("id={} price={}: id already exists as price={}"),
-            id, price, (*iter).second);
+        // unexpected price or size ==> fail
+        DLOG(FATAL)(
+            FMT_STRING("action={} id={} price={} size={}"),
+            action,
+            id,
+            price,
+            size);
       }
-      result = (*iter).second;
       break;
     case json::Action::UPDATE:
-      LOG_IF(FATAL, iter == _price_lookup.end())(
-            FMT_STRING("id={} price={}: doesn't exist"), id, price);
-      LOG_IF(FATAL, std::isnan(price) == false)(
-          FMT_STRING("id={} price={}: expected nan"), id, price);
-      LOG_IF(FATAL, std::isnan(size) || std::fabs(size) < TOLERANCE)(
-          FMT_STRING("id={} price={} : expected size"), id, price);
-      result = (*iter).second;
+      if (std::isnan(price) &&
+          std::isnan(size) == false &&
+          std::fabs(size) > TOLERANCE) {
+        if (iter != _price_lookup.end()) {
+          result = (*iter).second;
+        } else {
+          // unable to find the cached price ==> fail
+        }
+      } else {
+        // unexpected price or size ==> fail
+      }
       break;
     case json::Action::DELETE:
-      LOG_IF(FATAL, iter == _price_lookup.end())(
-            FMT_STRING("id={} price={}: id doesn't exist"), id, price);
-      LOG_IF(FATAL, std::isnan(size) == false && std::fabs(size) > TOLERANCE)(
-          FMT_STRING("id={} price={} : expected size"), id, price);
-      result = (*iter).second;
-      _price_lookup.erase(iter);
-      break;
+      if (std::isnan(price) &&
+          (std::isnan(size) || std::fabs(size) < TOLERANCE)) {
+        if (iter != _price_lookup.end()) {
+          result = (*iter).second;
+          _price_lookup.erase(iter);
+        } else {
+          // unable to find the cached price ==> fail
+        }
+      } else {
+        // unexpected price or size ==> fail
+      }
   }
-  assert(std::isnan(result) == false);
   return std::make_pair(
       result,
       std::isnan(size) ? 0.0 : size);
