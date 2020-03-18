@@ -58,6 +58,8 @@ Rest::Rest(
           dns_base,
           ssl_context,
           core::URI(FLAGS_rest_uri),
+          std::chrono::seconds { FLAGS_rate_limit_interval_secs },
+          FLAGS_rate_limit_max_requests,
           std::chrono::seconds { FLAGS_ping_freq_secs },
           FLAGS_decode_buffer_size,
           FLAGS_encode_buffer_size),

@@ -19,8 +19,16 @@ DEFINE_string(ws_uri,
     "wss://testnet.bitmex.com/realtime",
     "WebSocket end-point (URI)");
 
-DEFINE_uint64(ping_freq_secs,
-    uint64_t{5},
+DEFINE_uint32(rate_limit_interval_secs,
+    uint32_t{60},
+    "rate limit: monitor interval (seconds)");
+
+DEFINE_uint32(rate_limit_max_requests,
+    uint32_t{60},
+    "rate limit: max requests (per interval)");
+
+DEFINE_uint32(ping_freq_secs,
+    uint32_t{5},
     "ping frequency (seconds)");
 
 DEFINE_string(exchange,
@@ -43,8 +51,8 @@ DEFINE_uint32(decode_buffer_size,
     uint32_t{10485760},
     "decode buffer size");
 
-DEFINE_uint64(reconnect_secs,
-    uint64_t{3},
+DEFINE_uint32(reconnect_secs,
+    uint32_t{3},
     "time before reconnect (seconds)");
 
 DEFINE_uint32(cancel_all_after_secs,
