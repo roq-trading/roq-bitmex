@@ -113,7 +113,6 @@ void Gateway::operator()(
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
   (void) gateway_order_id;  // avoid warning
-  auto& create_order = event.create_order;
   /*
   core::stack::Buffer<char, 36> buffer;
   fmt::format_to(
@@ -127,16 +126,17 @@ void Gateway::operator()(
       buffer.size());
   */
   _rest.create_order(
-      create_order,
+      event.create_order,
       request_id);
 }
 
 void Gateway::operator()(
-    const ModifyOrderEvent&,
-    const std::string_view&,
+    const ModifyOrderEvent& event,
+    const std::string_view& request_id,
     const server::OMS_Order& order) {
-  throw server::OMS_Exception(
-      Error::MODIFY_ORDER_NOT_SUPPORTED,
+  _rest.modify_order(
+      event.modify_order,
+      request_id,
       order);
 }
 
@@ -144,9 +144,8 @@ void Gateway::operator()(
     const CancelOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  auto& cancel_order = event.cancel_order;
   _rest.cancel_order(
-      cancel_order,
+      event.cancel_order,
       request_id,
       order);
 }

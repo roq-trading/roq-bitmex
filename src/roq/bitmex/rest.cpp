@@ -159,6 +159,18 @@ void Rest::create_order(
       });
 }
 
+void Rest::modify_order(
+    const ModifyOrder& modify_order,
+    const std::string_view& cl_ord_id,
+    const server::OMS_Order& order) {
+  (void)modify_order;
+  (void)cl_ord_id;
+  (void)order;
+  throw server::OMS_Exception(
+      Error::MODIFY_ORDER_NOT_SUPPORTED,
+      order);
+}
+
 void Rest::cancel_order(
     const CancelOrder& cancel_order,
     const std::string_view& request_id,
