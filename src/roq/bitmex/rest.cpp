@@ -62,7 +62,8 @@ Rest::Rest(
           FLAGS_rate_limit_max_requests,
           std::chrono::seconds { FLAGS_ping_freq_secs },
           FLAGS_decode_buffer_size,
-          FLAGS_encode_buffer_size),
+          FLAGS_encode_buffer_size,
+          "/"),
       _decode_buffer(FLAGS_decode_buffer_size),
       _counter {
         .disconnect = create_counter("disconnect"),
@@ -80,6 +81,10 @@ Rest::Rest(
         .ping = create_latency("ping"),
       } {
   (void) config;  // avoid warning
+}
+
+void Rest::close() {
+  _connection.close();
 }
 
 void Rest::operator()(const StartEvent&) {

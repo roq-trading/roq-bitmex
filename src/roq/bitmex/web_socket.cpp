@@ -100,6 +100,10 @@ bool WebSocket::ready() const {
   return _connection.ready();
 }
 
+void WebSocket::close() {
+  _connection.close();
+}
+
 void WebSocket::operator()(const StartEvent&) {
   _connection.start();
 }
@@ -175,10 +179,6 @@ void WebSocket::operator()(Metrics& metrics) {
     // latency
     .write(_latency.ping)
     .write(_latency.heartbeat);
-}
-
-void WebSocket::close() {
-  _connection.close();
 }
 
 void WebSocket::operator()(const core::web::Socket::Connected&) {

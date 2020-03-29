@@ -132,6 +132,7 @@ class Gateway final : public server::Handler {
     ORDER_BOOKS,
     READY,
   } _download = Download::NONE;
+  std::chrono::nanoseconds _download_timestamp = {};
   // reference data
   core::hash::map<std::string, Product> _product_cache;
   std::vector<std::string> _symbols;

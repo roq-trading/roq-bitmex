@@ -269,7 +269,8 @@ void Parser::dispatch(
         break;
     }
   }
-  throw std::runtime_error("Can't parse message");
+  LOG(WARNING)(FMT_STRING("message=\"{}\""), message);
+  LOG(FATAL)("Unexpected");
 }
 
 }  // namespace json

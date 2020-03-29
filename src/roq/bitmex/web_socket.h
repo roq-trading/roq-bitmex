@@ -44,6 +44,8 @@ class WebSocket final
 
   bool ready() const;
 
+  void close();
+
   void operator()(const StartEvent&);
   void operator()(const StopEvent&);
   void operator()(const TimerEvent&);
@@ -55,8 +57,6 @@ class WebSocket final
       const std::vector<std::string>& filter);
 
   void operator()(Metrics& metrics);
-
-  void close();
 
  protected:
   std::string create_upgrade_headers();

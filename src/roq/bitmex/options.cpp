@@ -31,6 +31,10 @@ DEFINE_uint32(ping_freq_secs,
     uint32_t{5},
     "ping frequency (seconds)");
 
+DEFINE_uint32(download_timeout_secs,
+    uint32_t{5},
+    "download time-out (seconds)");
+
 DEFINE_string(exchange,
     "bitmex",
     "exchange identifier (string)");

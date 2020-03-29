@@ -38,6 +38,8 @@ class Rest final : public core::web::Client::Handler {
   Rest(Rest&&) = delete;
   Rest(const Rest&) = delete;
 
+  void close();
+
   void operator()(const StartEvent&);
   void operator()(const StopEvent&);
   void operator()(const TimerEvent&);

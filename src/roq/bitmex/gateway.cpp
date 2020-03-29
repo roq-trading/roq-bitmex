@@ -100,8 +100,18 @@ void Gateway::operator()(const StopEvent& event) {
 }
 
 void Gateway::operator()(const TimerEvent& event) {
-  _web_socket(event);
-  _rest(event);
+  if (_download != Download::NONE &&
+      _download_timestamp.count() > 0 &&
+      (event.now - _download_timestamp) >
+          std::chrono::seconds { FLAGS_download_timeout_secs }) {
+    LOG(WARNING)("Download time-out");
+    _download_timestamp = {};
+    _rest.close();
+    _web_socket.close();
+  } else {
+    _web_socket(event);
+    _rest(event);
+  }
   _base.loop(EVLOOP_NONBLOCK);
 }
 
@@ -555,6 +565,7 @@ void Gateway::check_download() {
       LOG(INFO)("Download order books COMPLETED");
       update_market_data(GatewayStatus::READY);
       LOG(INFO)("Download COMPLETED");
+      _download_timestamp = {};
       _download = Download::READY;
       server::PRINT_REDUCED_LOGGING();
       break;
@@ -570,6 +581,7 @@ void Gateway::download_accounts() {
   LOG(INFO)("Download accounts...");
   // _rest.get_accounts();
   _download = Download::ACCOUNTS;
+  _download_timestamp = core::get_system_clock();
 }
 
 void Gateway::subscribe_instrument() {
@@ -578,6 +590,7 @@ void Gateway::subscribe_instrument() {
   // XXX _rest.get_products();
   _web_socket.subscribe("instrument");
   _download = Download::PRODUCTS;
+  _download_timestamp = core::get_system_clock();
 }
 
 void Gateway::subscribe_order_book_l2() {

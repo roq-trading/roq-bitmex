@@ -12,6 +12,7 @@ DECLARE_string(ws_uri);
 DECLARE_uint32(rate_limit_interval_secs);
 DECLARE_uint32(rate_limit_max_requests);
 DECLARE_uint32(ping_freq_secs);
+DECLARE_uint32(download_timeout_secs);
 DECLARE_string(exchange);
 DECLARE_bool(cancel_on_disconnect);
 DECLARE_uint32(max_trades);
