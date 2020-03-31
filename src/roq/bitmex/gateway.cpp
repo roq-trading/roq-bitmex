@@ -95,11 +95,14 @@ void Gateway::operator()(const StartEvent& event) {
 
 void Gateway::operator()(const StopEvent& event) {
   LOG(INFO)("Stopping the gateway...");
-  _web_socket(event);
   _rest(event);
+  _web_socket(event);
 }
 
 void Gateway::operator()(const TimerEvent& event) {
+  // web socket
+  _web_socket(event);
+  // rest
   if (_download != Download::NONE &&
       _download_timestamp.count() > 0 &&
       (event.now - _download_timestamp) >
@@ -107,9 +110,7 @@ void Gateway::operator()(const TimerEvent& event) {
     LOG(WARNING)("Download time-out");
     _download_timestamp = {};
     _rest.close();
-    _web_socket.close();
   } else {
-    _web_socket(event);
     _rest(event);
   }
   _base.loop(EVLOOP_NONBLOCK);

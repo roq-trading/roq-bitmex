@@ -71,7 +71,7 @@ class WebSocket final
   void parse(const std::string_view& message);
   void parse_helper(const std::string_view& message);
 
-  void send_cancel_all_after();
+  void send_cancel_all_after(std::chrono::seconds seconds);
 
   // json:
   void operator()(const json::CancelAllAfter&) override;

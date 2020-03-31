@@ -32,7 +32,7 @@ DEFINE_uint32(ping_freq_secs,
     "ping frequency (seconds)");
 
 DEFINE_uint32(download_timeout_secs,
-    uint32_t{5},
+    uint32_t{15},
     "download time-out (seconds)");
 
 DEFINE_string(exchange,
@@ -61,7 +61,7 @@ DEFINE_uint32(reconnect_secs,
 
 DEFINE_uint32(cancel_all_after_secs,
     uint32_t{60},
-    "cancel all after (seconds)");
+    "cancel all after (seconds), requires cancel-on-disconnect");
 
 DEFINE_uint32(request_expires_secs,
     uint32_t{60},

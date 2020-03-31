@@ -115,11 +115,13 @@ void WebSocket::operator()(const StopEvent&) {
 void WebSocket::operator()(const TimerEvent& event) {
   _connection.refresh(event.now);
   if (_connection.ready()) {
-    if (FLAGS_cancel_all_after_secs &&
+    if (FLAGS_cancel_on_disconnect &&
+        FLAGS_cancel_all_after_secs &&
         _next_cancel_all_after <= event.now) {
       _next_cancel_all_after = event.now +
         std::chrono::seconds { FLAGS_cancel_all_after_secs / 4 };
-      send_cancel_all_after();
+      send_cancel_all_after(
+          std::chrono::seconds {FLAGS_cancel_all_after_secs });
     }
   }
 }
@@ -242,14 +244,14 @@ void WebSocket::parse_helper(const std::string_view& message) {
       buffer);
 }
 
-void WebSocket::send_cancel_all_after() {
+void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
   auto message = fmt::format(
       FMT_STRING(
         "{{"
         "\"op\":\"cancelAllAfter\","
         "\"args\":{}"
         "}}"),
-      FLAGS_cancel_all_after_secs * 1000);  // milliseconds
+      seconds.count() * 1000);  // milliseconds
   _connection.send_text(message);
 }
 
@@ -281,8 +283,9 @@ void WebSocket::operator()(const json::Handshake& handshake) {
             handshake);
         _received_handshake = true;
         _gateway(*this);
-        if (FLAGS_cancel_all_after_secs == 0)
-          send_cancel_all_after();
+        if (FLAGS_cancel_on_disconnect == false ||
+            FLAGS_cancel_all_after_secs == 0)
+          send_cancel_all_after(std::chrono::seconds {});
       });
 }
 
