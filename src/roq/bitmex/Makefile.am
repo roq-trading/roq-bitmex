@@ -32,7 +32,14 @@ roq_bitmex_CPPFLAGS = \
 	$(ROQ_API_CFLAGS) \
 	$(ROQ_CORE_CFLAGS) \
 	$(ROQ_SERVER_CFLAGS)
+AUTOGEN_CPP = \
+	web_socket_state.cpp
+AUTOGEN_H = \
+	web_socket_state.h
+CLEANFILES = $(AUTOGEN_CPP) $(AUTOGEN_H)
+BUILT_SOURCES = $(CLEANFILES) .gitignore
 roq_bitmex_SOURCES = \
+	$(AUTOGEN_CPP) \
 	application.cpp \
 	config.cpp \
 	gateway.cpp \
@@ -42,3 +49,20 @@ roq_bitmex_SOURCES = \
 	rest.cpp \
 	web_socket.cpp \
 	main.cpp
+
+.gitignore: Makefile.am
+	echo $(AUTOGEN_CPP) $(AUTOGEN_H) | tr " " "\n" | sort > $@
+
+.json.h:
+	@abs_top_builddir@/autogen/autogen.py \
+		--namespace=roq/bitmex \
+		--output-type state \
+		--file-type h \
+		$< > $@
+
+.json.cpp:
+	@abs_top_builddir@/autogen/autogen.py \
+		--namespace=roq/bitmex \
+		--output-type state \
+		--file-type cpp \
+		$< > $@

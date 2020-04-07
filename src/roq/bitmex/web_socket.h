@@ -73,11 +73,11 @@ class WebSocket final
 
   void send_cancel_all_after(std::chrono::seconds seconds);
 
-  // json:
   void operator()(const json::CancelAllAfter&) override;
   void operator()(const json::Error&) override;
   void operator()(const json::Handshake&) override;
   void operator()(const json::Subscribe&) override;
+
   // table
   void operator()(const json::Action, const json::Execution&) override;
   void operator()(const json::Action, const json::Funding&) override;
@@ -99,9 +99,6 @@ class WebSocket final
   core::web::Socket _connection;
   // buffers
   core::utils::Buffer _decode_buffer;
-  // session
-  std::chrono::nanoseconds _next_cancel_all_after = {};
-  bool _received_handshake = false;
   // metrics
   struct {
     core::metrics::Counter
@@ -131,6 +128,9 @@ class WebSocket final
       ping,
       heartbeat;
   } _latency;
+  // session
+  bool _ready = false;
+  std::chrono::nanoseconds _next_cancel_all_after = {};
 };
 
 }  // namespace bitmex

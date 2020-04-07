@@ -10,6 +10,7 @@
 #include "roq/metrics.h"
 
 #include "roq/server.h"
+#include "roq/download.h"
 
 #include "roq/core/hash/map.h"
 
@@ -24,6 +25,8 @@
 #include "roq/bitmex/product.h"
 #include "roq/bitmex/rest.h"
 #include "roq/bitmex/web_socket.h"
+
+#include "roq/bitmex/web_socket_state.h"
 
 // json (inbound)
 
@@ -75,9 +78,6 @@ class Gateway final : public server::Handler {
   void update_market_data(GatewayStatus gateway_status);
   void update_order_manager(GatewayStatus gateway_status);
 
-  void begin_download();
-  void check_download();
-
   void download_accounts();
 
   void subscribe_instrument();
@@ -111,6 +111,11 @@ class Gateway final : public server::Handler {
       bool is_last);
 
  private:
+  using WebSocketDownload = server::Download<WebSocketState>;
+
+  uint32_t download(WebSocketDownload::State state);
+
+ private:
   server::Dispatcher& _dispatcher;
   // config
   const std::string _account;
@@ -122,17 +127,13 @@ class Gateway final : public server::Handler {
   // crypto
   core::ssl::Context _ssl_context;
   // connections
-  WebSocket _web_socket;
-  Rest _rest;
-  // download
-  enum class Download {
-    NONE,
-    PRODUCTS,
-    ACCOUNTS,
-    ORDER_BOOKS,
-    READY,
-  } _download = Download::NONE;
-  std::chrono::nanoseconds _download_timestamp = {};
+  struct {
+    WebSocket connection;
+    WebSocketDownload download;
+  } _web_socket;
+  struct {
+    Rest connection;
+  } _rest;
   // reference data
   core::hash::map<std::string, Product> _product_cache;
   std::vector<std::string> _symbols;

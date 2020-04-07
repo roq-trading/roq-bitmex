@@ -3,7 +3,6 @@
 #include "roq/bitmex/web_socket.h"
 
 #include <fmt/format.h>
-// #include <fmt/chrono.h>
 
 #include "roq/builtins.h"
 #include "roq/patterns.h"
@@ -113,27 +112,26 @@ void WebSocket::operator()(const StopEvent&) {
 }
 
 void WebSocket::operator()(const TimerEvent& event) {
-  _connection.refresh(event.now);
-  if (_connection.ready()) {
-    if (FLAGS_cancel_on_disconnect &&
-        FLAGS_cancel_all_after_secs &&
-        _next_cancel_all_after <= event.now) {
-      _next_cancel_all_after = event.now +
-        std::chrono::seconds { FLAGS_cancel_all_after_secs / 4 };
-      send_cancel_all_after(
-          std::chrono::seconds {FLAGS_cancel_all_after_secs });
-    }
+  if (_connection.refresh(event.now) == false)
+    return;
+  if (FLAGS_cancel_on_disconnect &&
+      FLAGS_cancel_all_after_secs &&
+      _ready &&
+      _next_cancel_all_after <= event.now) {
+    _next_cancel_all_after = event.now +
+      std::chrono::seconds { FLAGS_cancel_all_after_secs / 4 };
+    send_cancel_all_after(
+        std::chrono::seconds {FLAGS_cancel_all_after_secs });
   }
 }
 
 void WebSocket::subscribe(const std::string_view& topic) {
   auto message = fmt::format(
       FMT_STRING(
-        "{{"
-        "\"op\":\"subscribe\","
-        "\"args\":"
-        "\"{}\""
-        "}}"),
+        R"({{)"
+        R"("op":"subscribe",)"
+        R"("args":"{}")"
+        R"(}})"),
       topic);
   _connection.send_text(message);
 }
@@ -146,11 +144,10 @@ void WebSocket::subscribe(
   } else {
     auto message = fmt::format(
         FMT_STRING(
-          "{{"
-          "\"op\":\"subscribe\","
-          "\"args\":"
-          "\"{}:{}\""
-          "}}"),
+          R"({{)"
+          R"("op":"subscribe",)"
+          R"("args":"{}:{}")"
+          R"(}})"),
         topic,
         fmt::join(filter, ","));
     _connection.send_text(message);
@@ -184,17 +181,17 @@ void WebSocket::operator()(Metrics& metrics) {
 }
 
 void WebSocket::operator()(const core::web::Socket::Connected&) {
-  _gateway(*this);
+  // note! don't notify gateway: wait for ready
 }
 
 void WebSocket::operator()(const core::web::Socket::Disconnected&) {
+  _ready = false;
   _next_cancel_all_after = {};
-  _received_handshake = false;
   _gateway(*this);
 }
 
 void WebSocket::operator()(const core::web::Socket::Ready&) {
-  _gateway(*this);
+  // note! don't notify gateway: wait for handshake
 }
 
 void WebSocket::operator()(const core::web::Socket::Close&) {
@@ -222,15 +219,18 @@ std::string WebSocket::create_upgrade_headers() {
 
 void WebSocket::parse(const std::string_view& message) {
   VLOG(4)(
-      FMT_STRING("message={}"),
+      FMT_STRING(R"(message={})"),
       message);
   _profile.parse(
       [&]() {
         try {
           parse_helper(message);
         } catch (std::exception& e) {
+          LOG(WARNING)(
+              FMT_STRING(R"(message="{}")"),
+              message);
           LOG(FATAL)(
-              FMT_STRING("ERROR what=\"{}\""),
+              FMT_STRING(R"(ERROR what="{}")"),
               e.what());
         }
       });
@@ -247,10 +247,10 @@ void WebSocket::parse_helper(const std::string_view& message) {
 void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
   auto message = fmt::format(
       FMT_STRING(
-        "{{"
-        "\"op\":\"cancelAllAfter\","
-        "\"args\":{}"
-        "}}"),
+        R"({{)"
+        R"("op":"cancelAllAfter",)"
+        R"("args":{})"
+        R"(}})"),
       seconds.count() * 1000);  // milliseconds
   _connection.send_text(message);
 }
@@ -260,7 +260,7 @@ void WebSocket::operator()(
   _profile.cancel_all_after(
       [&]() {
         VLOG(1)(
-            FMT_STRING("cancel_all_after={}"),
+            FMT_STRING(R"(cancel_all_after={})"),
             cancel_all_after);
       });
 }
@@ -269,7 +269,7 @@ void WebSocket::operator()(const json::Error& error) {
   _profile.error(
       [&]() {
         LOG(WARNING)(
-            FMT_STRING("error={}"),
+            FMT_STRING(R"(error={})"),
             error);
       });
   _connection.close();
@@ -279,9 +279,11 @@ void WebSocket::operator()(const json::Handshake& handshake) {
   _profile.handshake(
       [&]() {
         VLOG(1)(
-            FMT_STRING("handshake={}"),
+            FMT_STRING(R"(handshake={})"),
             handshake);
-        _received_handshake = true;
+        LOG(INFO)("Ready");
+        assert(_ready == false);
+        _ready = true;
         _gateway(*this);
         if (FLAGS_cancel_on_disconnect == false ||
             FLAGS_cancel_all_after_secs == 0)
@@ -293,17 +295,17 @@ void WebSocket::operator()(const json::Subscribe& subscribe) {
   _profile.subscribe(
       [&]() {
         VLOG(1)(
-            FMT_STRING("subscribe={}"),
+            FMT_STRING(R"(subscribe={})"),
             subscribe);
         if (subscribe.success) {
           assert(subscribe.failure == false);
           LOG(INFO)(
-              FMT_STRING("Successfully subscribed to topic=\"{}\""),
+              FMT_STRING(R"(Successfully subscribed to topic="{}")"),
               subscribe.subscribe);
         } else if (subscribe.failure) {
           assert(subscribe.success == false);
           LOG(WARNING)(
-              FMT_STRING("Failed to subscribe topic=\"{}\""),
+              FMT_STRING(R"(Failed to subscribe topic="{}")"),
               subscribe.subscribe);
         } else {
           LOG(FATAL)("Expected success or failure");
@@ -318,8 +320,9 @@ void WebSocket::operator()(
   _profile.execution(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, execution={}"),
-            action, execution);
+            FMT_STRING(R"(action={}, execution={})"),
+            action,
+            execution);
       });
 }
 
@@ -329,8 +332,9 @@ void WebSocket::operator()(
   _profile.funding(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, funding={}"),
-            action, funding);
+            FMT_STRING(R"(action={}, funding={})"),
+            action,
+            funding);
       });
 }
 
@@ -340,8 +344,9 @@ void WebSocket::operator()(
   _profile.instrument(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, instrument={}"),
-            action, instrument);
+            FMT_STRING(R"(action={}, instrument={})"),
+            action,
+            instrument);
         _gateway(action, instrument);
       });
 }
@@ -352,8 +357,9 @@ void WebSocket::operator()(
   _profile.liquidation(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, liquidation={}"),
-            action, liquidation);
+            FMT_STRING(R"(action={}, liquidation={})"),
+            action,
+            liquidation);
       });
 }
 
@@ -363,8 +369,9 @@ void WebSocket::operator()(
   _profile.margin(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, margin={}"),
-            action, margin);
+            FMT_STRING(R"(action={}, margin={})"),
+            action,
+            margin);
       });
 }
 
@@ -374,8 +381,9 @@ void WebSocket::operator()(
   _profile.order(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, order={}"),
-            action, order);
+            FMT_STRING(R"(action={}, order={})"),
+            action,
+            order);
         _gateway(action, order);
       });
 }
@@ -386,8 +394,9 @@ void WebSocket::operator()(
   _profile.order_book_l2(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, order_book_l2={}"),
-            action, order_book_l2);
+            FMT_STRING(R"(action={}, order_book_l2={})"),
+            action,
+            order_book_l2);
         _gateway(action, order_book_l2);
       });
 }
@@ -398,8 +407,9 @@ void WebSocket::operator()(
   _profile.position(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, position={}"),
-            action, position);
+            FMT_STRING(R"(action={}, position={})"),
+            action,
+            position);
         _gateway(action, position);
       });
 }
@@ -410,8 +420,9 @@ void WebSocket::operator()(
   _profile.quote(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, quote={}"),
-            action, quote);
+            FMT_STRING(R"(action={}, quote={})"),
+            action,
+            quote);
         _gateway(action, quote);
       });
 }
@@ -422,8 +433,9 @@ void WebSocket::operator()(
   _profile.settlement(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, settlement={}"),
-            action, settlement);
+            FMT_STRING(R"(action={}, settlement={})"),
+            action,
+            settlement);
         _gateway(action, settlement);
       });
 }
@@ -434,8 +446,9 @@ void WebSocket::operator()(
   _profile.trade(
       [&]() {
         VLOG(1)(
-            FMT_STRING("action={}, trade={}"),
-            action, trade);
+            FMT_STRING(R"(action={}, trade={})"),
+            action,
+            trade);
         _gateway(action, trade);
       });
 }

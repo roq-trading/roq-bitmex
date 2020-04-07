@@ -60,7 +60,6 @@ class Rest final : public core::web::Client::Handler {
       const std::string_view& cl_ord_id,
       const server::OMS_Order& order);
 
-  void get_products();
   void get_accounts();
 
  protected:

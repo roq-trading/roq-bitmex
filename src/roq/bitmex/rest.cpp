@@ -134,8 +134,8 @@ void Rest::create_order(
       create_order.quantity,
       json::map(create_order.order_type).as_raw_text(),
       json::map(create_order.time_in_force).as_raw_text());
-  LOG(INFO)(
-      FMT_STRING("DEBUG: body=\"{}\""),
+  DLOG(INFO)(
+      FMT_STRING(R"(body="{}")"),
       message);
   _connection.request(
       core::http::Method::POST,
@@ -146,18 +146,20 @@ void Rest::create_order(
         (void) status;  // avoid warning
         _profile.create_order(
             [&]() {
-              LOG(INFO)(
-                  FMT_STRING("DEBUG: body=\"{}\""),
+              DLOG(INFO)(
+                  FMT_STRING(R"(body="{}")"),
                   body);
               auto order_item = core::json::Parser::create<json::OrderItem>(
                   body);
-              LOG(INFO)(FMT_STRING("DEBUG: order_item={}"), order_item);
+              DLOG(INFO)(
+                  FMT_STRING(R"(order_item={})"),
+                  order_item);
               // _gateway(json::Action::INSERT, order);
             });
       },
       [](const auto& e) {
         LOG(WARNING)(
-            FMT_STRING("Exception what=\"{}\""),
+            FMT_STRING(R"(Exception what="{}")"),
             e.what());
         LOG(WARNING)("Unable to create order");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
@@ -188,8 +190,8 @@ void Rest::cancel_order(
         R"("OrderID":"{}")"
         R"(}})"),
       order.external_order_id);
-  LOG(INFO)(
-      FMT_STRING("DEBUG: body=\"{}\""),
+  DLOG(INFO)(
+      FMT_STRING(R"(body="{}")"),
       message);
   _connection.request(
       core::http::Method::DELETE,
@@ -200,52 +202,24 @@ void Rest::cancel_order(
         (void) status;  // avoid warning
         _profile.cancel_order(
             [&]() {
-              LOG(INFO)(
-                  FMT_STRING("DEBUG: body=\"{}\""),
+              DLOG(INFO)(
+                  FMT_STRING(R"(body="{}")"),
                   body);
               core::json::Buffer buffer(_decode_buffer);
               auto order = core::json::Parser::create<json::Order>(
                   body,
                   buffer);
-              LOG(INFO)(FMT_STRING("DEBUG: order={}"), order);
+              DLOG(INFO)(
+                  FMT_STRING(R"(order={})"),
+                  order);
               _gateway(json::Action::DELETE, order);
             });
       },
       [](const auto& e) {
         LOG(WARNING)(
-            FMT_STRING("Exception what=\"{}\""),
+            FMT_STRING(R"(Exception what="{}")"),
             e.what());
         LOG(WARNING)("Unable to cancel order");
-        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
-      });
-}
-
-void Rest::get_products() {
-  _connection.request(
-      core::http::Method::GET,
-      "/products",
-      std::string_view(),  // headers
-      std::string_view(),  // body
-      [this](const auto status, const auto& body) {
-        (void) status;  // avoid warning
-        (void) body;  // avoid warning
-        _profile.products(
-            [&]() {
-              /*
-              core::json::Buffer buffer(_decode_buffer);
-              auto products = json::Products::parse(
-                  body,
-                  buffer);
-              VLOG(1)("products={}", products);
-              _gateway(products);
-              */
-            });
-      },
-      [](const auto& e) {
-        LOG(WARNING)(
-            FMT_STRING("Exception what=\"{}\""),
-            e.what());
-        LOG(WARNING)("Unable to get products");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
       });
 }
@@ -273,7 +247,7 @@ void Rest::get_accounts() {
       },
       [this](const auto& e) {
         LOG(WARNING)(
-            FMT_STRING("Exception what=\"{}\""),
+            FMT_STRING(R"(Exception what="{}")"),
             e.what());
         LOG(WARNING)("Unable to get accounts");
         LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...

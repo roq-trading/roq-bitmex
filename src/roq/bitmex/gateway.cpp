@@ -66,20 +66,28 @@ Gateway::Gateway(
           config.get_api_key(),
           config.get_secret()),
       _dns_base(_base, true),
-      _web_socket(
+      _web_socket {
+        .connection = {
           *this,
           config,
           _random,
           _base,
           _dns_base,
-          _ssl_context),
-      _rest(
+          _ssl_context,
+        },
+        .download = WebSocketDownload(
+            std::chrono::seconds { FLAGS_download_timeout_secs }),
+      },
+      _rest {
+        .connection = {
           *this,
           config,
           _random,
           _base,
           _dns_base,
-          _ssl_context),
+          _ssl_context,
+        },
+      },
       _bid(FLAGS_max_depth),
       _ask(FLAGS_max_depth),
       _trade(FLAGS_max_trades) {
@@ -89,29 +97,25 @@ Gateway::Gateway(
 
 void Gateway::operator()(const StartEvent& event) {
   LOG(INFO)("Starting the gateway...");
-  _web_socket(event);
-  _rest(event);
+  _web_socket.connection(event);
+  _rest.connection(event);
 }
 
 void Gateway::operator()(const StopEvent& event) {
   LOG(INFO)("Stopping the gateway...");
-  _rest(event);
-  _web_socket(event);
+  _rest.connection(event);
+  _web_socket.connection(event);
 }
 
 void Gateway::operator()(const TimerEvent& event) {
   // web socket
-  _web_socket(event);
+  _web_socket.connection(event);
   // rest
-  if (_download != Download::NONE &&
-      _download_timestamp.count() > 0 &&
-      (event.now - _download_timestamp) >
-          std::chrono::seconds { FLAGS_download_timeout_secs }) {
-    LOG(WARNING)("Download time-out");
-    _download_timestamp = {};
-    _rest.close();
+  if (_web_socket.download.has_expired()) {
+    LOG(WARNING)("Rest download has timed out");
+    _rest.connection.close();
   } else {
-    _rest(event);
+    _rest.connection(event);
   }
   _base.loop(EVLOOP_NONBLOCK);
 }
@@ -136,7 +140,7 @@ void Gateway::operator()(
       buffer.data(),
       buffer.size());
   */
-  _rest.create_order(
+  _rest.connection.create_order(
       event.create_order,
       request_id);
 }
@@ -145,7 +149,7 @@ void Gateway::operator()(
     const ModifyOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  _rest.modify_order(
+  _rest.connection.modify_order(
       event.modify_order,
       request_id,
       order);
@@ -155,31 +159,28 @@ void Gateway::operator()(
     const CancelOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  _rest.cancel_order(
+  _rest.connection.cancel_order(
       event.cancel_order,
       request_id,
       order);
 }
 
 void Gateway::operator()(Metrics& metrics) {
-  _web_socket(metrics);
-  _rest(metrics);
+  _web_socket.connection(metrics);
+  _rest.connection(metrics);
 }
 
 // ws
 
-void Gateway::operator()(const WebSocket& web_socket) {
-  VLOG(1)("WebSocket");
-  if (web_socket.ready()) {
-    if (_download == Download::NONE) {
-      // pretend the (automatic) upgrade request is the login
-      update_order_manager(GatewayStatus::LOGIN_SENT);
-      update_market_data(GatewayStatus::LOGIN_SENT);
-      begin_download();
-    }
+void Gateway::operator()(const WebSocket&) {
+  if (_web_socket.connection.ready()) {
+    _web_socket.download.check(
+        WebSocketDownload::State::UNDEFINED,
+        [this](auto state) -> uint32_t {
+          return download(state);
+        });
   } else {
-    update_market_data(GatewayStatus::DISCONNECTED);
-    _download = Download::NONE;
+    _web_socket.download.reset();  // XXX here?
     _symbols.clear();
     _snapshot = {};
   }
@@ -196,12 +197,12 @@ void Gateway::operator()(
     case json::Action::PARTIAL:
       if (_snapshot.instrument == false) {
         _snapshot.instrument = true;
-        assert(_download != Download::READY);
+        // assert(_download != Download::READY);
         size_t security_count = 0;
         for (auto& item : instrument.data) {
           if (_dispatcher.discard_symbol(item.symbol)) {
             VLOG(1)(
-                FMT_STRING("Drop symbol=\"{}\""),
+                FMT_STRING(R"(Drop symbol="{}")"),
                 item.symbol);
             continue;
           }
@@ -213,10 +214,14 @@ void Gateway::operator()(
           enqueue(market_status, true);
         }
         VLOG(1)(
-            FMT_STRING("- securities: {} (/{})"),
+            FMT_STRING(R"(- securities: {} (/{}))"),
             security_count,
             instrument.data.size());
-        check_download();
+        _web_socket.download.check_relaxed(
+            WebSocketDownload::State::INSTRUMENT,
+            [this](auto state) -> uint32_t {
+              return download(state);
+            });
       }
       break;
     case json::Action::INSERT:
@@ -267,12 +272,17 @@ auto compute_request_status(
 void Gateway::operator()(
     const json::Action action,
     const json::Order& order) {
-  DLOG(INFO)(FMT_STRING("action={} order={}"), action, order);
+  DLOG(INFO)(
+      FMT_STRING(R"(action={} order={})"),
+      action,
+      order);
   for (auto& iter : order.data) {
     auto order_status = iter.working_indicator
       ? OrderStatus::WORKING
       : OrderStatus::COMPLETED;
-    DLOG(INFO)(FMT_STRING("order_status={}"), order_status);
+    DLOG(INFO)(
+        FMT_STRING(R"(order_status={})"),
+        order_status);
 
     server::OMS_Lookup order_lookup {
       .symbol = iter.symbol,
@@ -321,7 +331,7 @@ void Gateway::operator()(
   //   first partial update will include *all* instruments
   //   drop everything received before partial (see: API documentation)
   if (snapshot == false &&
-      _download != Download::READY)
+      _snapshot.order_book_l2 == false)
     return;
   std::string_view previous;
   bool success = true;
@@ -366,21 +376,21 @@ void Gateway::operator()(
     } else {
       LOG(WARNING)(
           FMT_STRING(
-            "Closing web-socket: "
-            "unexpected action={} id={} price={} size={}"),
+            R"(Closing web-socket: )"
+            R"(unexpected action={} id={} price={} size={})"),
           action,
           item.id,
           item.price,
           item.size);
-      _web_socket.close();
+      _web_socket.connection.close();
       return;
     }
   }
   if (unlikely(success == false)) {
     LOG(FATAL)(
         FMT_STRING(
-          "Insufficient bid/ask array size(s): "
-          "len(bid)={}/{}, len(ask)={}/{}"),
+          R"(Insufficient bid/ask array size(s): )"
+          R"(len(bid)={}/{}, len(ask)={}/{})"),
         bid_length,
         _bid.size(),
         ask_length,
@@ -394,8 +404,14 @@ void Gateway::operator()(
       snapshot,
       true);
   // download complete?
-  if (snapshot && _download != Download::READY)
-    check_download();
+  if (snapshot) {
+      _snapshot.order_book_l2 = true;
+      _web_socket.download.check_relaxed(
+          WebSocketDownload::State::ORDER_BOOK_L2,
+          [this](auto state) -> uint32_t {
+            return download(state);
+          });
+  }
 }
 
 void Gateway::operator()(
@@ -419,7 +435,9 @@ void Gateway::operator()(
       .snapshot = false,  // XXX ???
       .exchange_time_utc = item.timestamp,
     };
-    VLOG(1)(FMT_STRING("top_of_book={}"), top_of_book);
+    VLOG(1)(
+        FMT_STRING(R"(top_of_book={})"),
+        top_of_book);
     enqueue(
         top_of_book,
         true);  // XXX not always correct
@@ -459,7 +477,9 @@ void Gateway::operator()(
           },
           .exchange_time_utc = timestamp,
           };
-        VLOG(1)(FMT_STRING("trade_summary={}"), trade_summary);
+        VLOG(1)(
+            FMT_STRING(R"(trade_summary={})"),
+            trade_summary);
         enqueue(
             trade_summary,
             false);
@@ -475,8 +495,8 @@ void Gateway::operator()(
   if (unlikely(success == false)) {
     LOG(FATAL)(
         FMT_STRING(
-          "Insufficient trade array size: "
-          "len(trade)={}/{}"),
+          R"(Insufficient trade array size: )"
+          R"(len(trade)={}/{})"),
         trade_length,
         _trade.size());
   }
@@ -490,7 +510,9 @@ void Gateway::operator()(
       },
       .exchange_time_utc = timestamp,
       };
-    VLOG(1)(FMT_STRING("trade_summary={}"), trade_summary);
+    VLOG(1)(
+        FMT_STRING(R"(trade_summary={})"),
+        trade_summary);
     enqueue(
         trade_summary,
         true);
@@ -498,6 +520,32 @@ void Gateway::operator()(
 }
 
 // rest
+
+uint32_t Gateway::download(WebSocketDownload::State state) {
+  switch (state) {
+    case WebSocketDownload::State::UNDEFINED:
+      break;
+    case WebSocketDownload::State::ACCOUNTS: {
+      // download_accounts();
+      // return 1;
+      return 0;
+    }
+    case WebSocketDownload::State::INSTRUMENT: {
+      subscribe_instrument();
+      return 1;
+    }
+    case WebSocketDownload::State::ORDER_BOOK_L2: {
+      subscribe_order_book_l2();
+      return 1;
+    }
+    case WebSocketDownload::State::DONE:
+      update_order_manager(GatewayStatus::READY);
+      update_market_data(GatewayStatus::READY);
+      return 0;
+  }
+  assert(false);
+  return 0;
+}
 
 void Gateway::operator()(const Rest&) {
 }
@@ -515,7 +563,9 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
   enqueue(
       market_data_status,
       true);
-  LOG(INFO)(FMT_STRING("market_data_status={}"), _market_data_status);
+  LOG(INFO)(
+      FMT_STRING(R"(market_data_status={})"),
+      _market_data_status);
 }
 
 void Gateway::update_order_manager(GatewayStatus gateway_status) {
@@ -529,88 +579,33 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
   enqueue(
       order_manager_status,
       true);
-  LOG(INFO)(FMT_STRING("order_manager_status={}"), _order_manager_status);
-}
-
-void Gateway::begin_download() {
-  assert(_download == Download::NONE);
-  assert(_order_manager_status == GatewayStatus::LOGIN_SENT);
-  assert(_market_data_status == GatewayStatus::LOGIN_SENT);
-  update_order_manager(GatewayStatus::DOWNLOADING);
-  update_market_data(GatewayStatus::DOWNLOADING);
-  LOG(INFO)("Download:");
-  subscribe_instrument();
-}
-
-void Gateway::check_download() {
-  assert(_download != Download::NONE);
-  assert(_download != Download::READY);
-  switch (_download) {
-    case Download::NONE:
-      assert(false);
-      break;
-    case Download::ACCOUNTS: {
-      LOG(INFO)("Download accounts COMPLETED");
-      update_order_manager(GatewayStatus::READY);
-      subscribe_order_book_l2();
-      break;
-    }
-    case Download::PRODUCTS: {
-      LOG(INFO)("Download products COMPLETED");
-      // download_accounts();
-      update_order_manager(GatewayStatus::READY);
-      subscribe_order_book_l2();
-      break;
-    }
-    case Download::ORDER_BOOKS: {
-      LOG(INFO)("Download order books COMPLETED");
-      update_market_data(GatewayStatus::READY);
-      LOG(INFO)("Download COMPLETED");
-      _download_timestamp = {};
-      _download = Download::READY;
-      server::PRINT_REDUCED_LOGGING();
-      break;
-    }
-    case Download::READY:
-      assert(false);
-      break;
-  }
+  LOG(INFO)(
+      FMT_STRING(R"(order_manager_status={})"),
+      _order_manager_status);
 }
 
 void Gateway::download_accounts() {
-  assert(_download != Download::READY);
-  LOG(INFO)("Download accounts...");
-  // _rest.get_accounts();
-  _download = Download::ACCOUNTS;
-  _download_timestamp = core::get_system_clock();
+  _rest.connection.get_accounts();
 }
 
 void Gateway::subscribe_instrument() {
-  assert(_download != Download::READY);
-  LOG(INFO)("Download products...");
-  // XXX _rest.get_products();
-  _web_socket.subscribe("instrument");
-  _download = Download::PRODUCTS;
-  _download_timestamp = core::get_system_clock();
+  _web_socket.connection.subscribe("instrument");
 }
 
 void Gateway::subscribe_order_book_l2() {
-  assert(_download != Download::READY);
-  LOG(INFO)("Download order books");
-  _web_socket.subscribe("orderBookL2", _symbols);
-  _download = Download::ORDER_BOOKS;
+  _web_socket.connection.subscribe("orderBookL2", _symbols);
 
   // XXX not here
-  _web_socket.subscribe("funding", _symbols);
-  _web_socket.subscribe("liquidation", _symbols);
-  _web_socket.subscribe("quote", _symbols);
-  _web_socket.subscribe("settlement", _symbols);
-  _web_socket.subscribe("trade", _symbols);
+  _web_socket.connection.subscribe("funding", _symbols);
+  _web_socket.connection.subscribe("liquidation", _symbols);
+  _web_socket.connection.subscribe("quote", _symbols);
+  _web_socket.connection.subscribe("settlement", _symbols);
+  _web_socket.connection.subscribe("trade", _symbols);
   // XXX private
-  _web_socket.subscribe("execution", _symbols);
-  _web_socket.subscribe("order", _symbols);
-  _web_socket.subscribe("margin", _symbols);
-  _web_socket.subscribe("position", _symbols);
+  _web_socket.connection.subscribe("execution", _symbols);
+  _web_socket.connection.subscribe("order", _symbols);
+  _web_socket.connection.subscribe("margin", _symbols);
+  _web_socket.connection.subscribe("position", _symbols);
   // XXX other
   // cancelAllAfter
   // authKeyExpires
@@ -659,7 +654,7 @@ std::pair<double, double> Gateway::find_price(
       } else {
         // unexpected price or size ==> fail
         DLOG(FATAL)(
-            FMT_STRING("action={} id={} price={} size={}"),
+            FMT_STRING(R"(action={} id={} price={} size={})"),
             action,
             id,
             price,
@@ -707,7 +702,7 @@ void Gateway::publish_market_by_price(
   if ((bid_length + ask_length) == 0)
     return;
   LOG_IF(INFO, snapshot)(
-      FMT_STRING("Received market data snapshot for symbol=\"{}\""),
+      FMT_STRING(R"(Received market data snapshot for symbol="{}")"),
       symbol);
   MarketByPrice market_by_price {
     .exchange = FLAGS_exchange,
@@ -723,7 +718,9 @@ void Gateway::publish_market_by_price(
     .snapshot = snapshot,
     .exchange_time_utc = {},
     };
-  VLOG(1)(FMT_STRING("market_by_price={}"), market_by_price);
+  VLOG(1)(
+      FMT_STRING(R"(market_by_price={})"),
+      market_by_price);
   enqueue(
       market_by_price,
       is_last);

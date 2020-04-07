@@ -1,0 +1,10 @@
+{
+"name": "WebSocketState",
+"type": "enum",
+"values": [
+	{ "name": "accounts" },
+	{ "name": "instrument" },
+	{ "name": "order_book_l2" },
+	{ "name": "done" }
+]
+}
