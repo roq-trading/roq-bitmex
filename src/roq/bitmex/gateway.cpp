@@ -291,7 +291,6 @@ void Gateway::operator()(
       .price = iter.price,
       .remaining_quantity = iter.leaves_qty,
       .traded_quantity = iter.cum_qty,
-      .commissions = std::numeric_limits<double>::quiet_NaN(),
       .timestamp = iter.timestamp,
       .external_order_id = iter.order_id,
     };
