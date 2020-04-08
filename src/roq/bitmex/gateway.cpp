@@ -113,6 +113,7 @@ void Gateway::operator()(const TimerEvent& event) {
   // rest
   if (_web_socket.download.has_expired()) {
     LOG(WARNING)("Rest download has timed out");
+    _web_socket.download.reset();
     _rest.connection.close();
   } else {
     _rest.connection(event);
