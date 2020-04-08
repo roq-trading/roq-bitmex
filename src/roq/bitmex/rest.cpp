@@ -63,7 +63,7 @@ Rest::Rest(
           std::chrono::seconds { FLAGS_ping_freq_secs },
           FLAGS_decode_buffer_size,
           FLAGS_encode_buffer_size,
-          "/"),
+          FLAGS_rest_ping_path),
       _decode_buffer(FLAGS_decode_buffer_size),
       _counter {
         .disconnect = create_counter("disconnect"),

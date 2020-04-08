@@ -66,3 +66,7 @@ DEFINE_uint32(cancel_all_after_secs,
 DEFINE_uint32(request_expires_secs,
     uint32_t{60},
     "request expires after (seconds)");
+
+DEFINE_string(rest_ping_path,
+    "/",
+    "URI path used for REST connection keep-alive messages");

@@ -23,6 +23,8 @@ DECLARE_uint32(reconnect_secs);
 DECLARE_uint32(cancel_all_after_secs);
 DECLARE_uint32(request_expires_secs);
 
+DECLARE_string(rest_ping_path);
+
 // external
 
 DECLARE_string(name);
