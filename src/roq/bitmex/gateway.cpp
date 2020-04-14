@@ -245,31 +245,6 @@ void Gateway::operator()(
   }
 }
 
-auto compute_request_status(
-    auto request_type,
-    auto ord_status) {
-  switch (ord_status) {
-    case json::OrdStatus::UNDEFINED:
-    case json::OrdStatus::UNKNOWN:
-      break;
-    case json::OrdStatus::NEW: {
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          LOG(WARNING)("*** EXTERNAL ACTION ***");
-          break;
-        case RequestType::CREATE_ORDER:
-          return RequestStatus::ACCEPTED;
-        case RequestType::MODIFY_ORDER:
-        case RequestType::CANCEL_ORDER:
-          DLOG(FATAL)("UNEXPECTED");
-        break;
-      }
-      break;
-    }
-  }
-  return RequestStatus::UNDEFINED;
-}
-
 void Gateway::operator()(
     const json::Action action,
     const json::Order& order) {
@@ -277,49 +252,8 @@ void Gateway::operator()(
       FMT_STRING(R"(action={} order={})"),
       action,
       order);
-  for (auto& iter : order.data) {
-    auto order_status = iter.working_indicator
-      ? OrderStatus::WORKING
-      : OrderStatus::COMPLETED;
-    DLOG(INFO)(
-        FMT_STRING(R"(order_status={})"),
-        order_status);
-
-    server::OMS_Lookup order_lookup {
-      .symbol = iter.symbol,
-      .side = json::map(iter.side),
-      .status = order_status,
-      .price = iter.price,
-      .remaining_quantity = iter.leaves_qty,
-      .traded_quantity = iter.cum_qty,
-      .timestamp = iter.timestamp,
-      .external_order_id = iter.order_id,
-    };
-
-    auto found = _dispatcher.find_order(
-        iter.cl_ord_id,
-        std::string_view(),  // XXX ?????
-        order_lookup,
-        [&](const auto& order, auto& result) {
-      // constexpr auto origin = Origin::EXCHANGE;
-      // auto status = RequestStatus::UNDEFINED;
-
-      // XXX ord_rej_reason
-      result.request_status = compute_request_status(
-          order.request_type,
-          iter.ord_status);
-
-      if (result.request_status != RequestStatus::UNDEFINED) {
-        result.origin = Origin::EXCHANGE;
-        result.error = Error::UNKNOWN;
-        result.text = iter.text;
-      }
-    });
-
-    if (found == false) {
-      LOG(WARNING)("*** EXTERNAL ORDER ***");
-    }
-  }
+  for (auto& iter : order.data)
+    (*this)(iter);
 }
 
 void Gateway::operator()(
@@ -550,6 +484,113 @@ uint32_t Gateway::download(WebSocketDownload::State state) {
 void Gateway::operator()(const Rest&) {
 }
 
+auto compute_order_status(
+    auto ord_status,
+    auto working_status) {
+  switch (ord_status) {
+    case json::OrdStatus::UNDEFINED:
+    case json::OrdStatus::UNKNOWN:
+      if (working_status)
+        return OrderStatus::WORKING;
+      break;
+    case json::OrdStatus::NEW:
+      return working_status
+        ? OrderStatus::WORKING
+        : OrderStatus::ACCEPTED;
+    case json::OrdStatus::CANCELED:
+      return OrderStatus::CANCELED;
+  }
+  return OrderStatus::UNDEFINED;
+}
+
+auto compute_request_status(
+    auto request_type,
+    auto ord_status) {
+  switch (ord_status) {
+    case json::OrdStatus::UNDEFINED:
+    case json::OrdStatus::UNKNOWN:
+      break;
+    case json::OrdStatus::NEW: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***");
+          break;
+        case RequestType::CREATE_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::MODIFY_ORDER:
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+        break;
+      }
+      break;
+    }
+    case json::OrdStatus::CANCELED: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***");
+          break;
+        case RequestType::CANCEL_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::CREATE_ORDER:
+        case RequestType::MODIFY_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+        break;
+      }
+      break;
+    }
+  }
+  return RequestStatus::UNDEFINED;
+}
+
+void Gateway::operator()(const json::OrderItem& order_item) {
+    auto order_status = compute_order_status(
+        order_item.ord_status,
+        order_item.working_indicator);
+    DLOG(INFO)(
+        FMT_STRING(R"(order_status={})"),
+        order_status);
+
+  server::OMS_Lookup order_lookup {
+    .symbol = order_item.symbol,
+    .side = json::map(order_item.side),
+    .status = order_status,
+    .price = order_item.price,
+    .remaining_quantity = order_item.leaves_qty,
+    .traded_quantity = order_item.cum_qty,
+    .timestamp = order_item.timestamp,  // XXX transact_time?
+    .external_order_id = order_item.order_id,
+  };
+  auto found = _dispatcher.find_order(
+      order_item.order_id,
+      order_item.cl_ord_id,
+      order_lookup,
+      [&](const auto& order, auto& result) {
+    result.request_status = compute_request_status(
+        order.request_type,
+        order_item.ord_status);
+
+    if (result.request_status != RequestStatus::UNDEFINED) {
+      result.origin = Origin::EXCHANGE;
+      result.error =
+        order_item.ord_rej_reason.empty()
+        ? Error::UNDEFINED
+        : Error::UNKNOWN,
+      result.text = order_item.ord_rej_reason;  // XXX text ???
+    }
+  });
+
+  if (found == false) {
+    LOG(WARNING)("*** EXTERNAL ORDER ***");
+  }
+}
+
+void Gateway::operator()(const json::Order& order) {
+  DLOG(INFO)(
+      FMT_STRING(R"(order={})"),
+      order);
+  for (auto& iter : order.data)
+    (*this)(iter);
+}
 
 // UTILS:
 

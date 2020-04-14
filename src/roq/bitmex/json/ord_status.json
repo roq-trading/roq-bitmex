@@ -2,6 +2,7 @@
 "name": "OrdStatus",
 "type": "enum",
 "values": [
-	{ "name": "New" }
+	{ "name": "New" },
+	{ "name": "Canceled" }
 ]
 }

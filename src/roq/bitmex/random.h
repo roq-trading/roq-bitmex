@@ -23,18 +23,19 @@ class Random final {
   Random(const Random&) = delete;
 
   std::string create_signature(
-      std::chrono::seconds expires,
+      std::chrono::nanoseconds expires,
       const core::http::Method& method,
       const std::string_view& path,
       const std::string_view& body);
 
   std::string create_headers(
-      std::chrono::seconds expires,
+      std::chrono::nanoseconds expires,
       const core::http::Method& method,
       const std::string_view& path,
       const std::string_view& body);
 
  private:
+  const std::string _base_path;
   const std::string _key;
   core::crypto::HMAC_SHA256 _hmac;
 };

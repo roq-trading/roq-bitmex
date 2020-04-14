@@ -17,6 +17,7 @@ namespace bitmex {
 
 namespace {
 constexpr std::string_view CONNECTION = "rest";
+constexpr std::chrono::seconds TIMEOUT {1};
 
 static auto create_counter(
     const std::string_view& function) {
@@ -115,6 +116,8 @@ void Rest::operator()(Metrics& metrics) {
 void Rest::create_order(
     const CreateOrder& create_order,
     const std::string_view& cl_ord_id) {
+  auto expires = core::get_realtime_clock() + TIMEOUT;
+  auto method = core::http::Method::POST;
   // XXX use encode buffer
   auto message = fmt::format(
       FMT_STRING(
@@ -125,7 +128,8 @@ void Rest::create_order(
         R"("price":{},)"
         R"("orderQty":{},)"
         R"("ordType":"{}",)"
-        R"("timeInForce":"{}")"
+        R"("timeInForce":"{}",)"
+        R"("execInst":"{}")"
         R"(}})"),
       cl_ord_id,
       create_order.symbol,
@@ -133,28 +137,56 @@ void Rest::create_order(
       create_order.price,
       create_order.quantity,
       json::map(create_order.order_type).as_raw_text(),
-      json::map(create_order.time_in_force).as_raw_text());
+      json::map(create_order.time_in_force).as_raw_text(),
+      create_order.execution_instruction == ExecutionInstruction::UNDEFINED
+        ? std::string_view()
+        : json::map(create_order.execution_instruction).as_raw_text());
   DLOG(INFO)(
       FMT_STRING(R"(body="{}")"),
       message);
+  auto headers = _random.create_headers(
+      expires,
+      method,
+      "/api/v1/order",  // XXX align with _connection.uri
+      message);
   _connection.request(
-      core::http::Method::POST,
+      method,
       "/order",
-      std::string_view(),  // headers
+      headers,
       message,
       [this](const auto status, const auto& body) {
-        (void) status;  // avoid warning
         _profile.create_order(
             [&]() {
               DLOG(INFO)(
-                  FMT_STRING(R"(body="{}")"),
+                  FMT_STRING(R"(status={} body="{}")"),
+                  status,
                   body);
-              auto order_item = core::json::Parser::create<json::OrderItem>(
-                  body);
-              DLOG(INFO)(
-                  FMT_STRING(R"(order_item={})"),
-                  order_item);
-              // _gateway(json::Action::INSERT, order);
+              switch (status) {
+                case core::http::Status::OK: {  // 200
+                  auto order_item =
+                    core::json::Parser::create<json::OrderItem>(body);
+                  DLOG(INFO)(
+                      FMT_STRING(R"(order_item={})"),
+                      order_item);
+                  _gateway(order_item);
+                  break;
+                }
+                case core::http::Status::BAD_REQUEST:   // 400
+                case core::http::Status::UNAUTHORIZED:  // 401
+                case core::http::Status::FORBIDDEN:     // 403
+                case core::http::Status::NOT_FOUND: {   // 404
+                  LOG(FATAL)(
+                      FMT_STRING(R"(Unexpected status={} body="{}")"),
+                      status,
+                      body);
+                  break;
+                }
+                default:
+                  LOG(FATAL)(
+                      FMT_STRING(R"(Unexpected status={} body="{}")"),
+                      status,
+                      body);
+              }
             });
       },
       [](const auto& e) {
@@ -182,37 +214,65 @@ void Rest::cancel_order(
     const CancelOrder& cancel_order,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  (void) cancel_order;  // avoid warning
-  (void) request_id;  // avoid warning
+  (void)cancel_order;  // avoid warning
+  (void)request_id;  // avoid warning
+  auto expires = core::get_realtime_clock() + TIMEOUT;
+  auto method = core::http::Method::DELETE;
+  // XXX use encode buffer
   auto message = fmt::format(
       FMT_STRING(
         R"({{)"
-        R"("OrderID":"{}")"
+        R"("orderID":"{}")"
         R"(}})"),
       order.external_order_id);
   DLOG(INFO)(
       FMT_STRING(R"(body="{}")"),
       message);
+  auto headers = _random.create_headers(
+      expires,
+      method,
+      "/api/v1/order",  // XXX align with _connection.uri
+      message);
   _connection.request(
-      core::http::Method::DELETE,
+      method,
       "/order",
-      std::string_view(),  // headers
+      headers,
       message,
       [this](const auto status, const auto& body) {
-        (void) status;  // avoid warning
         _profile.cancel_order(
             [&]() {
-              DLOG(INFO)(
-                  FMT_STRING(R"(body="{}")"),
-                  body);
-              core::json::Buffer buffer(_decode_buffer);
-              auto order = core::json::Parser::create<json::Order>(
-                  body,
-                  buffer);
-              DLOG(INFO)(
-                  FMT_STRING(R"(order={})"),
-                  order);
-              _gateway(json::Action::DELETE, order);
+              switch (status) {
+                case core::http::Status::OK: {  // 200
+                  DLOG(INFO)(
+                      FMT_STRING(R"(status={} body="{}")"),
+                      status,
+                      body);
+                  core::json::Buffer buffer(_decode_buffer);
+                  auto order = core::json::Parser::create<json::Order>(
+                      body,
+                      buffer);
+                  DLOG(INFO)(
+                      FMT_STRING(R"(order={})"),
+                      order);
+                  _gateway(order);
+                  break;
+                }
+                case core::http::Status::BAD_REQUEST:   // 400
+                case core::http::Status::UNAUTHORIZED:  // 401
+                case core::http::Status::FORBIDDEN:     // 403
+                case core::http::Status::NOT_FOUND: {   // 404
+                  LOG(FATAL)(
+                      FMT_STRING(R"(Unexpected status={} body="{}")"),
+                      status,
+                      body);
+                  break;
+                }
+                default:
+                  LOG(FATAL)(
+                      FMT_STRING(R"(Unexpected status={} body="{}")"),
+                      status,
+                      body);
+              }
             });
       },
       [](const auto& e) {

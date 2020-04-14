@@ -6,31 +6,39 @@
 
 #include <cassert>
 
+#include "roq/core/uri.h"
 #include "roq/core/binascii/hex.h"
-
 #include "roq/core/crypto/hmac.h"
+
+#include "roq/bitmex/options.h"
 
 namespace roq {
 namespace bitmex {
 
+static auto create_base_path() {
+  core::URI uri(FLAGS_rest_uri);
+  return uri.path;
+}
+
 static auto create_timestamp_secs(
-    std::chrono::seconds value) {
+    std::chrono::nanoseconds value) {
   return fmt::format(
       FMT_STRING("{}"),
-      value.count());
+      std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 
 Random::Random(
     const std::string_view& key,
     const std::string_view& secret)
-    : _key(key),
+    : _base_path(create_base_path()),
+      _key(key),
       _hmac(
           secret.data(),
           secret.length()) {
 }
 
 std::string Random::create_signature(
-    std::chrono::seconds expires,
+    std::chrono::nanoseconds expires,
     const core::http::Method& method,
     const std::string_view& path,
     const std::string_view& body) {
@@ -53,7 +61,7 @@ std::string Random::create_signature(
 }
 
 std::string Random::create_headers(
-    std::chrono::seconds expires,
+    std::chrono::nanoseconds expires,
     const core::http::Method& method,
     const std::string_view& path,
     const std::string_view& body) {
@@ -68,7 +76,7 @@ std::string Random::create_headers(
         "api-expires: {}\r\n"
         "api-key: {}\r\n"),
       signature,
-      expires.count(),
+      std::chrono::duration_cast<std::chrono::seconds>(expires).count(),
       _key);
 }
 

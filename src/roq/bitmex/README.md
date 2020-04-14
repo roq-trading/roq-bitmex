@@ -1,3 +1,23 @@
+
+fields we always receive
+* account
+* cl\_ord\_id
+* order\_id
+* symbol
+
+create
+      action  ord\_status  working  time
+rest          NEW          true
+ws    INSERT  NEW          false    +525us
+ws    UPDATE               true     +624us
+
+
+
+
+
+
+
+
 TODO
 
 json::Instrument

@@ -73,6 +73,8 @@ class Gateway final : public server::Handler {
 
   // rest
   void operator()(const Rest&);
+  void operator()(const json::OrderItem&);
+  void operator()(const json::Order&);
 
  private:
   void update_market_data(GatewayStatus gateway_status);

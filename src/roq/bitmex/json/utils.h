@@ -166,14 +166,17 @@ inline roq::Side map(json::Side side) {
   return roq::Side::UNDEFINED;
 }
 
+/* XXX need working_indicator as well
 inline roq::OrderStatus map(json::OrdStatus state) {
   switch (state) {
     case OrdStatus::UNDEFINED: break;
     case OrdStatus::UNKNOWN:   break;
     case OrdStatus::NEW:       return roq::OrderStatus::WORKING;
+    case OrdStatus::CANCELED:  return roq::OrderStatus::CANCELED;
   }
   return roq::OrderStatus::UNDEFINED;
 }
+*/
 
 // roq => bitmex
 
@@ -204,6 +207,17 @@ inline json::TimeInForce map(roq::TimeInForce time_in_force) {
     case roq::TimeInForce::GTC:       return json::TimeInForce::GOOD_TILL_CANCEL;
   }
   return json::TimeInForce::UNDEFINED;
+}
+
+inline json::ExecInst map(roq::ExecutionInstruction execution_instruction) {
+  switch (execution_instruction) {
+    case roq::ExecutionInstruction::UNDEFINED:                   break;
+    case roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE: return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
+    case roq::ExecutionInstruction::CANCEL_IF_NOT_BEST:          break;
+    case roq::ExecutionInstruction::DO_NOT_INCREASE:             return json::ExecInst::REDUCE_ONLY;
+    case roq::ExecutionInstruction::DO_NOT_REDUCE:               break;
+  }
+  return json::ExecInst::UNDEFINED;
 }
 
 }  // namespace json
