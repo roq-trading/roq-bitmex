@@ -323,6 +323,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, execution={})"),
             action,
             execution);
+        _gateway(action, execution);
       });
 }
 

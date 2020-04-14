@@ -70,3 +70,7 @@ DEFINE_uint32(request_expires_secs,
 DEFINE_string(rest_ping_path,
     "/",
     "URI path used for REST connection keep-alive messages");
+
+DEFINE_uint32(expires_timeout_secs,
+    uint32_t{1},
+    "expires time-out (seconds)");

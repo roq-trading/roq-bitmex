@@ -3,6 +3,7 @@
 "type": "enum",
 "values": [
 	{ "name": "New" },
+	{ "name": "Filled" },
 	{ "name": "Canceled" }
 ]
 }

@@ -63,6 +63,7 @@ class Gateway final : public server::Handler {
 
   // ws
   void operator()(const WebSocket&);
+  void operator()(const json::Action, const json::Execution&);
   void operator()(const json::Action, const json::Instrument&);
   void operator()(const json::Action, const json::Order&);
   void operator()(const json::Action, const json::OrderBookL2&);

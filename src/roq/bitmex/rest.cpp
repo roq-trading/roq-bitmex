@@ -17,7 +17,6 @@ namespace bitmex {
 
 namespace {
 constexpr std::string_view CONNECTION = "rest";
-constexpr std::chrono::seconds TIMEOUT {1};
 
 static auto create_counter(
     const std::string_view& function) {
@@ -41,6 +40,12 @@ static auto create_latency(
       FLAGS_name,
       CONNECTION,
       function);
+}
+
+static auto compute_expires() {
+  auto result = core::get_realtime_clock()
+    + std::chrono::seconds{ FLAGS_expires_timeout_secs };
+  return std::chrono::ceil<std::chrono::seconds>(result);
 }
 }  // namespace
 
@@ -116,7 +121,7 @@ void Rest::operator()(Metrics& metrics) {
 void Rest::create_order(
     const CreateOrder& create_order,
     const std::string_view& cl_ord_id) {
-  auto expires = core::get_realtime_clock() + TIMEOUT;
+  auto expires = compute_expires();
   auto method = core::http::Method::POST;
   // XXX use encode buffer
   auto message = fmt::format(
@@ -200,14 +205,77 @@ void Rest::create_order(
 
 void Rest::modify_order(
     const ModifyOrder& modify_order,
-    const std::string_view& cl_ord_id,
+    const std::string_view& request_id,
     const server::OMS_Order& order) {
-  (void)modify_order;
-  (void)cl_ord_id;
-  (void)order;
-  throw server::OMS_Exception(
-      Error::MODIFY_ORDER_NOT_SUPPORTED,
-      order);
+  (void)request_id;  // avoid warning
+  auto expires = compute_expires();
+  auto method = core::http::Method::PUT;
+  // XXX use encode buffer
+  auto message = fmt::format(
+      FMT_STRING(
+        R"({{)"
+        R"("orderID":"{}",)"
+        R"("orderQty":{},)"
+        R"("price":{})"
+        R"(}})"),
+      order.external_order_id,
+      modify_order.quantity,
+      modify_order.price);
+  DLOG(INFO)(
+      FMT_STRING(R"(body="{}")"),
+      message);
+  auto headers = _random.create_headers(
+      expires,
+      method,
+      "/api/v1/order",  // XXX align with _connection.uri
+      message);
+  _connection.request(
+      method,
+      "/order",
+      headers,
+      message,
+      [this](const auto status, const auto& body) {
+        _profile.modify_order(
+            [&]() {
+              switch (status) {
+                case core::http::Status::OK: {  // 200
+                  DLOG(INFO)(
+                      FMT_STRING(R"(status={} body="{}")"),
+                      status,
+                      body);
+                  auto order_item =
+                    core::json::Parser::create<json::OrderItem>(body);
+                  DLOG(INFO)(
+                      FMT_STRING(R"(order_item={})"),
+                      order_item);
+                  _gateway(order_item);
+                  break;
+                }
+                case core::http::Status::BAD_REQUEST:   // 400
+                case core::http::Status::UNAUTHORIZED:  // 401
+                case core::http::Status::FORBIDDEN:     // 403
+                case core::http::Status::NOT_FOUND: {   // 404
+                  LOG(FATAL)(
+                      FMT_STRING(R"(Unexpected status={} body="{}")"),
+                      status,
+                      body);
+                  break;
+                }
+                default:
+                  LOG(FATAL)(
+                      FMT_STRING(R"(Unexpected status={} body="{}")"),
+                      status,
+                      body);
+              }
+            });
+      },
+      [](const auto& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception what="{}")"),
+            e.what());
+        LOG(WARNING)("Unable to modify order");
+        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
+      });
 }
 
 void Rest::cancel_order(
@@ -216,7 +284,7 @@ void Rest::cancel_order(
     const server::OMS_Order& order) {
   (void)cancel_order;  // avoid warning
   (void)request_id;  // avoid warning
-  auto expires = core::get_realtime_clock() + TIMEOUT;
+  auto expires = compute_expires();
   auto method = core::http::Method::DELETE;
   // XXX use encode buffer
   auto message = fmt::format(

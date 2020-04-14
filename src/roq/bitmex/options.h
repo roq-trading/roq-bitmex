@@ -25,6 +25,8 @@ DECLARE_uint32(request_expires_secs);
 
 DECLARE_string(rest_ping_path);
 
+DECLARE_uint32(expires_timeout_secs);
+
 // external
 
 DECLARE_string(name);

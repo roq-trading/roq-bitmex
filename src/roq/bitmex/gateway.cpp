@@ -128,19 +128,7 @@ void Gateway::operator()(
     const CreateOrderEvent& event,
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
-  (void) gateway_order_id;  // avoid warning
-  /*
-  core::stack::Buffer<char, 36> buffer;
-  fmt::format_to(
-      std::back_inserter(buffer),
-      "roq-{}-{}-{}",
-      gateway_order_id,
-      message_info.source,
-      create_order.order_id);
-  std::string_view cl_ord_id(
-      buffer.data(),
-      buffer.size());
-  */
+  (void)gateway_order_id;  // avoid warning
   _rest.connection.create_order(
       event.create_order,
       request_id);
@@ -188,7 +176,15 @@ void Gateway::operator()(const WebSocket&) {
 }
 
 void Gateway::operator()(
-    const json::Action action,
+    json::Action action,
+    const json::Execution& execution) {
+  DLOG(INFO)(
+      FMT_STRING("execution={}"),
+      execution);
+}
+
+void Gateway::operator()(
+    json::Action action,
     const json::Instrument& instrument) {
   switch (action) {
     case json::Action::UNDEFINED:
@@ -497,6 +493,8 @@ auto compute_order_status(
       return working_status
         ? OrderStatus::WORKING
         : OrderStatus::ACCEPTED;
+    case json::OrdStatus::FILLED:
+      return OrderStatus::COMPLETED;
     case json::OrdStatus::CANCELED:
       return OrderStatus::CANCELED;
   }
@@ -516,12 +514,15 @@ auto compute_request_status(
           LOG(WARNING)("*** EXTERNAL ACTION ***");
           break;
         case RequestType::CREATE_ORDER:
-          return RequestStatus::ACCEPTED;
         case RequestType::MODIFY_ORDER:
+          return RequestStatus::ACCEPTED;
         case RequestType::CANCEL_ORDER:
           DLOG(FATAL)("UNEXPECTED");
         break;
       }
+      break;
+    }
+    case json::OrdStatus::FILLED: {
       break;
     }
     case json::OrdStatus::CANCELED: {

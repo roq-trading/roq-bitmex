@@ -52,12 +52,12 @@ class Rest final : public core::web::Client::Handler {
 
   void modify_order(
       const ModifyOrder& modify_order,
-      const std::string_view& cl_ord_id,
+      const std::string_view& request_id,
       const server::OMS_Order& order);
 
   void cancel_order(
       const CancelOrder& cancel_order,
-      const std::string_view& cl_ord_id,
+      const std::string_view& request_id,
       const server::OMS_Order& order);
 
   void get_accounts();
