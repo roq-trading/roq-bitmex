@@ -2,6 +2,7 @@
 
 #include "roq/bitmex/gateway.h"
 
+#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -760,8 +761,137 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(
-    const json::Action,
-    const json::Position&) {
+    const json::Action action,
+    const json::Position& position) {
+  DLOG(INFO)(
+      FMT_STRING("action={}, position={}"),
+      action,
+      position);
+  for (auto& item : position.data) {
+    PositionUpdate buy {
+      .account = _account,
+      .exchange = FLAGS_exchange,
+      .symbol = item.symbol,
+      .side = Side::BUY,
+      .position = std::max<double>(0.0, item.current_qty),
+      .last_trade_id = 0,
+      .position_cost = 0.0,
+      .position_yesterday = 0.0,
+      .position_cost_yesterday = 0.0,
+    };
+    PositionUpdate sell {
+      .account = _account,
+      .exchange = FLAGS_exchange,
+      .symbol = item.symbol,
+      .side = Side::SELL,
+      .position = std::max<double>(0.0, -item.current_qty),
+      .last_trade_id = 0,
+      .position_cost = 0.0,
+      .position_yesterday = 0.0,
+      .position_cost_yesterday = 0.0,
+    };
+    enqueue(
+        buy,
+        false);
+    enqueue(
+        sell,
+        true);
+  }
+/*
+{
+account=273093
+avg_cost_price=6885.0
+avg_entry_price=6885.0
+bankrupt_price=100000000.0
+break_even_price=6926.0
+commission=0.0007500000000000002
+cross_margin=true
+currency="XBt"
+current_comm=186.0
+current_cost=29421.0
+current_qty=-1.0   ///////////////////////////
+current_timestamp=1586929105385000000ns
+deleverage_percentile=1.0
+exec_buy_cost=29091.0
+exec_buy_qty=2.0
+exec_comm=20.0
+exec_cost=-29091.0
+exec_qty=2.0
+exec_sell_cost=0.0
+exec_sell_qty=0.0
+foreign_notional=1.0
+gross_exec_cost=0.0
+gross_open_cost=0.0
+gross_open_premium=0.0
+home_notional=-0.00014558000000000008
+indicative_tax=0.0
+indicative_tax_rate=0.0
+init_margin=0.0
+init_margin_req=0.010000000000000002
+is_open=true
+last_price=6869.2
+last_value=14558.0
+leverage=100.0
+liquidation_price=100000000.0
+long_bankrupt=0.0
+maint_margin=192.0
+maint_margin_req=0.004500000000000002
+margin_call_price=100000000.0
+mark_price=6869.2
+mark_value=14558.0
+opening_comm=166.0
+opening_cost=58512.0
+opening_qty=-3.0   ///////////////////////////
+opening_timestamp=1586926800000000000ns
+open_order_buy_cost=0.0
+open_order_buy_premium=0.0
+open_order_buy_qty=0.0
+open_order_sell_cost=0.0
+open_order_sell_premium=0.0
+open_order_sell_qty=0.0
+pos_allowance=0.0
+pos_comm=12.0
+pos_cost=14524.0
+pos_cost2=14539.0
+pos_cross=15.0
+pos_init=146.0
+pos_loss=15.0
+pos_maint=138.0
+pos_margin=158.0
+pos_state=nan
+prev_close_price=6877.35
+prev_realised_pnl=-21322.0
+prev_unrealised_pnl=0.0
+quote_currency="USD"
+realised_cost=14897.0
+realised_gross_pnl=-14897.0
+realised_pnl=-15083.0
+realised_tax=0.0
+rebalanced_pnl=15169.0
+risk_limit=20000000000.0
+risk_value=14558.0
+session_margin=0.0
+short_bankrupt=0.0
+simple_cost=0.0
+simple_pnl=0.0
+simple_pnl_pcnt=0.0
+simple_qty=0.0
+simple_value=0.0
+symbol="XBTUSD"   ///////////////////////////
+target_excess_margin=0.0
+taxable_margin=0.0
+tax_base=0.0
+timestamp=1586929105385000000ns
+underlying="XBT"
+unrealised_cost=14524.0
+unrealised_gross_pnl=34.0
+unrealised_pnl=34.0
+unrealised_pnl_pcnt=0.0023000000000000004
+unrealised_roe_pcnt=0.2341
+unrealised_tax=0.0
+var_margin=0.0
+}
+*/
 }
 
 void Gateway::operator()(
