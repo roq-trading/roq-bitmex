@@ -6,6 +6,8 @@ error.cpp
 error.h
 exec_inst.cpp
 exec_inst.h
+exec_type.cpp
+exec_type.h
 execution.cpp
 execution.h
 execution_item.cpp
@@ -26,6 +28,8 @@ liquidation.cpp
 liquidation.h
 liquidation_item.cpp
 liquidation_item.h
+liquidity_ind.cpp
+liquidity_ind.h
 margin.cpp
 margin.h
 margin_item.cpp

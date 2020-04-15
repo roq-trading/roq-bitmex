@@ -1,0 +1,8 @@
+{
+"name": "LiquidityInd",
+"type": "enum",
+"values": [
+	{ "name": "AddedLiquidity" },
+	{ "name": "RemovedLiquidity" }
+]
+}

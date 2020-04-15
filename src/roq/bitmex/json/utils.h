@@ -11,6 +11,8 @@
 #include "roq/core/charconv/datetime.h"
 
 #include "roq/bitmex/json/exec_inst.h"
+#include "roq/bitmex/json/exec_type.h"
+#include "roq/bitmex/json/liquidity_ind.h"
 #include "roq/bitmex/json/multi_leg_reporting_type.h"
 #include "roq/bitmex/json/ord_status.h"
 #include "roq/bitmex/json/ord_type.h"
@@ -71,6 +73,22 @@ inline void update(
 template <>
 inline void update(
     ExecInst& result,
+    const core::json::value_t& value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
+    ExecType& result,
+    const core::json::value_t& value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(
+    LiquidityInd& result,
     const core::json::value_t& value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
@@ -166,17 +184,16 @@ inline roq::Side map(json::Side side) {
   return roq::Side::UNDEFINED;
 }
 
-/* XXX need working_indicator as well
 inline roq::OrderStatus map(json::OrdStatus state) {
   switch (state) {
     case OrdStatus::UNDEFINED: break;
     case OrdStatus::UNKNOWN:   break;
     case OrdStatus::NEW:       return roq::OrderStatus::WORKING;
+    case OrdStatus::FILLED:    return roq::OrderStatus::COMPLETED;
     case OrdStatus::CANCELED:  return roq::OrderStatus::CANCELED;
   }
   return roq::OrderStatus::UNDEFINED;
 }
-*/
 
 // roq => bitmex
 

@@ -47,6 +47,10 @@ DEFINE_uint32(max_trades,
   uint32_t{16384},
   "maximum trades for trade summary");
 
+DEFINE_uint32(max_fills,
+  uint32_t{256},
+  "maximum fills for trade update");
+
 DEFINE_uint32(encode_buffer_size,
     uint32_t{1048576},
     "encode buffer size");
@@ -74,3 +78,7 @@ DEFINE_string(rest_ping_path,
 DEFINE_uint32(expires_timeout_secs,
     uint32_t{1},
     "expires time-out (seconds)");
+
+DEFINE_bool(allow_inconsistent_order_updates,
+    false,
+    "allow inconsistent order updates? (bool)");

@@ -1,0 +1,10 @@
+{
+"name": "ExecType",
+"type": "enum",
+"values": [
+	{ "name": "New" },
+	{ "name": "Replaced" },
+	{ "name": "Canceled" },
+	{ "name": "Trade" }
+]
+}

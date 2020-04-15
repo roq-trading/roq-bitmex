@@ -16,6 +16,7 @@ DECLARE_uint32(download_timeout_secs);
 DECLARE_string(exchange);
 DECLARE_bool(cancel_on_disconnect);
 DECLARE_uint32(max_trades);
+DECLARE_uint32(max_fills);
 DECLARE_uint32(encode_buffer_size);
 DECLARE_uint32(decode_buffer_size);
 DECLARE_uint32(reconnect_secs);
@@ -26,6 +27,8 @@ DECLARE_uint32(request_expires_secs);
 DECLARE_string(rest_ping_path);
 
 DECLARE_uint32(expires_timeout_secs);
+
+DECLARE_bool(allow_inconsistent_order_updates);
 
 // external
 

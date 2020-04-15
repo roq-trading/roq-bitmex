@@ -148,6 +148,7 @@ class Gateway final : public server::Handler {
   GatewayStatus _market_data_status = GatewayStatus::DISCONNECTED;
   core::page_aligned_vector<MBPUpdate> _bid, _ask;
   core::page_aligned_vector<Trade> _trade;
+  core::page_aligned_vector<Fill> _fill;
   std::unordered_map<uint64_t, double> _price_lookup;
   // order manager
   GatewayStatus _order_manager_status = GatewayStatus::DISCONNECTED;

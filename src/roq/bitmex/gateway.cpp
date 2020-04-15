@@ -57,6 +57,28 @@ static bool trade_update(
   return offset < data.size();
 }
 
+template <typename T>
+static bool fill_update(
+    auto& dispatcher,
+    auto& data,
+    size_t& offset,
+    const T& item) {
+  auto trade_id = dispatcher.next_trade_id();
+  auto& obj = data[offset];
+  new (&obj) Fill {
+    .quantity = item.last_qty,
+    .price = item.last_px,
+    .trade_id = trade_id,
+    .gateway_trade_id = trade_id,
+    .external_trade_id = {},
+  };
+  core::copy_to(
+      item.trd_match_id,
+      obj.external_trade_id);
+  ++offset;
+  return offset < data.size();
+}
+
 Gateway::Gateway(
     server::Dispatcher& dispatcher,
     const Config& config)
@@ -90,7 +112,8 @@ Gateway::Gateway(
       },
       _bid(FLAGS_max_depth),
       _ask(FLAGS_max_depth),
-      _trade(FLAGS_max_trades) {
+      _trade(FLAGS_max_trades),
+      _fill(FLAGS_max_fills) {
   LOG_IF(WARNING, FLAGS_cancel_on_disconnect == false)(
       "Orders will *NOT* be cancelled on disconnect");
 }
@@ -175,12 +198,404 @@ void Gateway::operator()(const WebSocket&) {
   }
 }
 
+auto compute_request_status_2(
+    auto request_type,
+    auto exec_type) {
+  switch (exec_type) {
+    case json::ExecType::UNDEFINED:
+    case json::ExecType::UNKNOWN:
+      break;
+    case json::ExecType::NEW: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***");
+          break;
+        case RequestType::CREATE_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::MODIFY_ORDER:
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+        break;
+      }
+      break;
+    }
+    case json::ExecType::REPLACED: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***");
+          break;
+        case RequestType::MODIFY_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::CREATE_ORDER:
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+        break;
+      }
+      break;
+    }
+    case json::ExecType::CANCELED: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***");
+          break;
+        case RequestType::CANCEL_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::CREATE_ORDER:
+        case RequestType::MODIFY_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+        break;
+      }
+      break;
+    }
+    case json::ExecType::TRADE:
+      break;
+  }
+  return RequestStatus::UNDEFINED;
+}
+
 void Gateway::operator()(
     json::Action action,
     const json::Execution& execution) {
+  (void)action;  // avoid warning
   DLOG(INFO)(
       FMT_STRING("execution={}"),
       execution);
+  size_t fill_length = 0, index = 0;
+  bool success = true;
+  for (auto& item : execution.data) {
+    auto last = execution.data.size() == ++index;
+    server::OMS_Lookup order_lookup {
+      .symbol = item.symbol,
+      .side = json::map(item.side),
+      .status = json::map(item.ord_status),
+      .price = item.price,
+      .remaining_quantity = item.leaves_qty,
+      .traded_quantity = item.cum_qty,
+      .timestamp = item.timestamp,  // XXX transact_time?
+      .external_order_id = item.order_id,
+    };
+    auto found = _dispatcher.find_order(
+        item.order_id,
+        item.cl_ord_id,
+        order_lookup,
+        [&](const auto& order, auto& result) {
+      result.request_status = compute_request_status_2(
+          order.request_type,
+          item.exec_type);
+
+      if (result.request_status != RequestStatus::UNDEFINED) {
+        result.origin = Origin::EXCHANGE;
+        result.error =
+          item.ord_rej_reason.empty()
+          ? Error::UNDEFINED
+          : Error::UNKNOWN,
+        result.text = item.ord_rej_reason;
+      }
+
+      if (item.exec_type == json::ExecType::TRADE) {
+        success = fill_update(
+            _dispatcher,
+            _fill,
+            fill_length,
+            item);
+        if (unlikely(success == false)) {
+          LOG(FATAL)(
+              FMT_STRING(
+                R"(Insufficient fill array size: )"
+                R"(len(trade)={}/{})"),
+              fill_length,
+              _fill.size());
+        }
+      }
+
+      if (last && fill_length) {
+        if (likely(success)) {
+          TradeUpdate trade_update {
+            .account = order.account,
+            .order_id = order.user_order_id,
+            .exchange = order.exchange,
+            .symbol = order.symbol,
+            .side = order.side,
+            .position_effect = PositionEffect::UNDEFINED,
+            .order_template = std::string_view(),
+            .create_time_utc = item.timestamp,  // XXX transact_time?
+            .update_time_utc = item.timestamp,  // XXX transact_time?
+            .gateway_order_id = order.gateway_order_id,
+            .external_order_id = order.external_order_id,
+            .fills = roq::span<Fill const>(
+                _fill.data(),
+                fill_length),
+          };
+          enqueue(
+              order.user_id,
+              trade_update,
+              true);
+        } else {
+          LOG(FATAL)(
+              FMT_STRING(
+                R"(Insufficient fill array size: )"
+                R"(len(fill)={}/{})"),
+              fill_length,
+              _fill.size());
+        }
+      }
+    });
+    if (found == false) {
+      LOG(WARNING)("*** EXTERNAL ORDER ***");
+    }
+  }
+/*
+{
+account=273093
+avg_px=0.0
+cl_ord_id="roq-1586872864-4"
+cl_ord_link_id=""
+commission=0.0
+contingency_type=""
+cum_qty=0.0
+currency="USD"
+display_qty=0.0
+ex_destination="XBME"
+exec_comm=0.0
+exec_cost=0.0
+exec_id="0cf1e0f7-89a7-2b16-0413-77d3443750b8"
+exec_inst=""
+exec_type="New"
+foreign_notional=0.0
+home_notional=0.0
+last_liquidity_ind=""
+last_mkt=""
+last_px=0.0
+last_qty=0.0
+leaves_qty=1.0
+multi_leg_reporting_type="SingleSecurity"
+order_id="3a174d58-1d40-19d4-71fd-1040eb2a35be"
+order_qty=1.0
+ord_rej_reason=""
+ord_status="New"
+ord_type="Limit"
+peg_offset_value=0.0
+peg_price_type=""
+price=6883.0
+settl_currency="XBt"
+side="Buy"
+simple_cum_qty=0.0
+simple_leaves_qty=0.0
+simple_order_qty=0.0
+stop_px=0.0
+symbol="XBTUSD"
+text="Submitted via API."
+time_in_force="GoodTillCancel"
+timestamp=1586873125585000000ns
+trade_publish_indicator=""
+transact_time=1586873125585000000ns
+trd_match_id="00000000-0000-0000-0000-000000000000"
+triggered=""
+underlying_last_px=0.0
+working_indicator=true
+}
+
+{
+account=273093
+avg_px=0.0
+cl_ord_id="roq-1586872864-4"
+cl_ord_link_id=""
+commission=0.0
+contingency_type=""
+cum_qty=0.0
+currency="USD"
+display_qty=0.0
+ex_destination="XBME"
+exec_comm=0.0
+exec_cost=0.0
+exec_id="e66711c6-2f86-4df0-39e5-4f4faa5cf57e"
+exec_inst=""
+exec_type="Replaced"
+foreign_notional=0.0
+home_notional=0.0
+last_liquidity_ind=""
+last_mkt=""
+last_px=0.0
+last_qty=0.0
+leaves_qty=1.0
+multi_leg_reporting_type="SingleSecurity"
+order_id="3a174d58-1d40-19d4-71fd-1040eb2a35be"
+order_qty=1.0
+ord_rej_reason=""
+ord_status="New"
+ord_type="Limit"
+peg_offset_value=0.0
+peg_price_type=""
+price=6883.5
+settl_currency="XBt"
+side="Buy"
+simple_cum_qty=0.0
+simple_leaves_qty=0.0
+simple_order_qty=0.0
+stop_px=0.0
+symbol="XBTUSD"
+text="Amended orderQty price: Amended via API.\nSubmitted via API."
+time_in_force="GoodTillCancel"
+timestamp=1586873245657000000ns
+trade_publish_indicator=""
+transact_time=1586873245657000000ns
+trd_match_id="00000000-0000-0000-0000-000000000000"
+triggered=""
+underlying_last_px=0.0
+working_indicator=true
+}
+
+
+{
+account=273093
+avg_px=6883.75
+cl_ord_id="roq-1586872864-4"
+cl_ord_link_id=""
+commission=0.0007500000000000002
+contingency_type=""
+cum_qty=1.0
+currency="USD"
+display_qty=0.0
+ex_destination="XBME"
+exec_comm=10.0
+exec_cost=-14527.0
+exec_id="66f13afe-5e57-4d37-ad43-fe8d0f8c603c"
+exec_inst=""
+exec_type="Trade"
+foreign_notional=-1.0
+home_notional=0.00014527000000000005
+last_liquidity_ind="RemovedLiquidity"
+last_mkt="XBME"
+last_px=6883.5
+last_qty=1.0
+leaves_qty=0.0
+multi_leg_reporting_type="SingleSecurity"
+order_id="3a174d58-1d40-19d4-71fd-1040eb2a35be"
+order_qty=1.0
+ord_rej_reason=""
+ord_status="Filled"
+ord_type="Limit"
+peg_offset_value=0.0
+peg_price_type=""
+price=6883.5
+settl_currency="XBt"
+side="Buy"
+simple_cum_qty=0.0
+simple_leaves_qty=0.0
+simple_order_qty=0.0
+stop_px=0.0
+symbol="XBTUSD"
+text="Amended orderQty price: Amended via API.\nSubmitted via API."
+time_in_force="GoodTillCancel"
+timestamp=1586873245657000000ns
+trade_publish_indicator="PublishTrade"
+transact_time=1586873245657000000ns
+trd_match_id="15b03a0f-03de-6826-4c63-3f49ba0c8190"
+triggered=""
+underlying_last_px=0.0
+working_indicator=false
+}
+
+{
+account=273093
+avg_px=6885.0
+cl_ord_id=""
+cl_ord_link_id=""
+commission=-0.0002500000000000001
+contingency_type=""
+cum_qty=3.0
+currency="USD"
+display_qty=0.0
+ex_destination="XBME"
+exec_comm=-10.0
+exec_cost=43572.0
+exec_id="8c2a2682-04aa-ff1e-ef44-027062134e22"
+exec_inst=""
+exec_type="Trade"
+foreign_notional=3.0
+home_notional=-0.00043572000000000017
+last_liquidity_ind="AddedLiquidity"
+last_mkt="XBME"
+last_px=6885.0
+last_qty=3.0
+leaves_qty=0.0
+multi_leg_reporting_type="SingleSecurity"
+order_id="018c5318-0442-eafd-b4df-b2d261323d1a"
+order_qty=3.0
+ord_rej_reason=""
+ord_status="Filled"
+ord_type="Limit"
+peg_offset_value=0.0
+peg_price_type=""
+price=6885.0
+settl_currency="XBt"
+side="Sell"
+simple_cum_qty=0.0
+simple_leaves_qty=0.0
+simple_order_qty=0.0
+stop_px=0.0
+symbol="XBTUSD"
+text="Submission from testnet.bitmex.com"
+time_in_force="GoodTillCancel"
+timestamp=1586873368899000000ns
+trade_publish_indicator="PublishTrade"
+transact_time=1586873368899000000ns
+trd_match_id="77db132c-3b26-0bc9-b750-5fbeb04d5ff6"
+triggered=""
+underlying_last_px=0.0
+working_indicator=false
+}
+
+{
+account=273093
+avg_px=0.0
+cl_ord_id="roq-1586872864-3"
+cl_ord_link_id=""
+commission=0.0
+contingency_type=""
+cum_qty=0.0
+currency="USD"
+display_qty=0.0
+ex_destination="XBME"
+exec_comm=0.0
+exec_cost=0.0
+exec_id="a2455064-a337-d36f-1008-21c648f49d12"
+exec_inst=""
+exec_type="Canceled"
+foreign_notional=0.0
+home_notional=0.0
+last_liquidity_ind=""
+last_mkt=""
+last_px=0.0
+last_qty=0.0
+leaves_qty=0.0
+multi_leg_reporting_type="SingleSecurity"
+order_id="73c01791-d59f-a4a6-6b65-1ceb561f7c8c"
+order_qty=1.0
+ord_rej_reason=""
+ord_status="Canceled"
+ord_type="Limit"
+peg_offset_value=0.0
+peg_price_type=""
+price=6883.0
+settl_currency="XBt"
+side="Buy"
+simple_cum_qty=0.0
+simple_leaves_qty=0.0
+simple_order_qty=0.0
+stop_px=0.0
+symbol="XBTUSD"
+text="Canceled: Cancel from testnet.bitmex.com\nSubmitted via API."
+time_in_force="GoodTillCancel"
+timestamp=1586873099436000000ns
+trade_publish_indicator=""
+transact_time=1586873099436000000ns
+trd_match_id="00000000-0000-0000-0000-000000000000"
+triggered=""
+underlying_last_px=0.0
+working_indicator=false
+}
+*/
 }
 
 void Gateway::operator()(
@@ -544,12 +959,15 @@ auto compute_request_status(
 }
 
 void Gateway::operator()(const json::OrderItem& order_item) {
-    auto order_status = compute_order_status(
-        order_item.ord_status,
-        order_item.working_indicator);
-    DLOG(INFO)(
-        FMT_STRING(R"(order_status={})"),
-        order_status);
+  if (FLAGS_allow_inconsistent_order_updates == false)
+    return;
+
+  auto order_status = compute_order_status(
+      order_item.ord_status,
+      order_item.working_indicator);
+  DLOG(INFO)(
+      FMT_STRING(R"(order_status={})"),
+      order_status);
 
   server::OMS_Lookup order_lookup {
     .symbol = order_item.symbol,

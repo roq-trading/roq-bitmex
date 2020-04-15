@@ -12,6 +12,7 @@ AUTOGEN_CPP = \
 	cancel_all_after.cpp \
 	error.cpp \
 	exec_inst.cpp \
+	exec_type.cpp \
 	execution.cpp \
 	execution_item.cpp \
 	field.cpp \
@@ -22,15 +23,16 @@ AUTOGEN_CPP = \
 	instrument_item.cpp \
 	liquidation.cpp \
 	liquidation_item.cpp \
+	liquidity_ind.cpp \
 	margin.cpp \
 	margin_item.cpp \
 	multi_leg_reporting_type.cpp \
-	ord_status.cpp \
-	ord_type.cpp \
 	order_book_l2.cpp \
 	order_book_l2_item.cpp \
 	order.cpp \
 	order_item.cpp \
+	ord_status.cpp \
+	ord_type.cpp \
 	position.cpp \
 	position_item.cpp \
 	quote.cpp \
@@ -51,6 +53,7 @@ AUTOGEN_H = \
 	cancel_all_after.h \
 	error.h \
 	exec_inst.h \
+	exec_type.h \
 	execution.h \
 	execution_item.h \
 	field.h \
@@ -61,15 +64,16 @@ AUTOGEN_H = \
 	instrument_item.h \
 	liquidation.h \
 	liquidation_item.h \
+	liquidity_ind.h \
 	margin.h \
 	margin_item.h \
 	multi_leg_reporting_type.h \
-	ord_status.h \
-	ord_type.h \
 	order_book_l2.h \
 	order_book_l2_item.h \
 	order.h \
 	order_item.h \
+	ord_status.h \
+	ord_type.h \
 	position.h \
 	position_item.h \
 	quote.h \
