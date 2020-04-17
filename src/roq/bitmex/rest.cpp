@@ -6,6 +6,7 @@
 #include <fmt/chrono.h>
 
 #include <chrono>
+#include <utility>
 
 #include "roq/bitmex/gateway.h"
 #include "roq/bitmex/options.h"
@@ -120,7 +121,8 @@ void Rest::operator()(Metrics& metrics) {
 
 void Rest::create_order(
     const CreateOrder& create_order,
-    const std::string_view& cl_ord_id) {
+    const std::string_view& cl_ord_id,
+    core::web::Client::failure_t&& failure) {
   auto expires = compute_expires();
   auto method = core::http::Method::POST;
   // XXX use encode buffer
@@ -194,19 +196,14 @@ void Rest::create_order(
               }
             });
       },
-      [](const auto& e) {
-        LOG(WARNING)(
-            FMT_STRING(R"(Exception what="{}")"),
-            e.what());
-        LOG(WARNING)("Unable to create order");
-        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
-      });
+      std::move(failure));
 }
 
 void Rest::modify_order(
     const ModifyOrder& modify_order,
     const std::string_view& request_id,
-    const server::OMS_Order& order) {
+    const server::OMS_Order& order,
+    core::web::Client::failure_t&& failure) {
   (void)request_id;  // avoid warning
   auto expires = compute_expires();
   auto method = core::http::Method::PUT;
@@ -269,19 +266,14 @@ void Rest::modify_order(
               }
             });
       },
-      [](const auto& e) {
-        LOG(WARNING)(
-            FMT_STRING(R"(Exception what="{}")"),
-            e.what());
-        LOG(WARNING)("Unable to modify order");
-        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
-      });
+      std::move(failure));
 }
 
 void Rest::cancel_order(
     const CancelOrder& cancel_order,
     const std::string_view& request_id,
-    const server::OMS_Order& order) {
+    const server::OMS_Order& order,
+    core::web::Client::failure_t&& failure) {
   (void)cancel_order;  // avoid warning
   (void)request_id;  // avoid warning
   auto expires = compute_expires();
@@ -343,16 +335,10 @@ void Rest::cancel_order(
               }
             });
       },
-      [](const auto& e) {
-        LOG(WARNING)(
-            FMT_STRING(R"(Exception what="{}")"),
-            e.what());
-        LOG(WARNING)("Unable to cancel order");
-        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
-      });
+      std::move(failure));
 }
 
-void Rest::get_accounts() {
+void Rest::get_accounts(core::web::Client::failure_t&& failure) {
   _connection.request(
       core::http::Method::GET,
       "/accounts",
@@ -373,13 +359,7 @@ void Rest::get_accounts() {
               */
             });
       },
-      [this](const auto& e) {
-        LOG(WARNING)(
-            FMT_STRING(R"(Exception what="{}")"),
-            e.what());
-        LOG(WARNING)("Unable to get accounts");
-        LOG(FATAL)("Unexpected -- now what?");  // FIXME(thraneh): ...
-      });
+      std::move(failure));
 }
 
 void Rest::operator()(const core::web::Client::Connected&) {

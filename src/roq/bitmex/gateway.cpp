@@ -153,29 +153,50 @@ void Gateway::operator()(
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
   (void)gateway_order_id;  // avoid warning
-  _rest.connection.create_order(
-      event.create_order,
-      request_id);
+  try {
+    _rest.connection.create_order(
+        event.create_order,
+        request_id,
+        [this](const auto& e) {
+          throw e;
+        });
+  } catch (NotConnected&) {
+    LOG(FATAL)("Unexpected");  // XXX implement
+  }
 }
 
 void Gateway::operator()(
     const ModifyOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  _rest.connection.modify_order(
-      event.modify_order,
-      request_id,
-      order);
+  try {
+    _rest.connection.modify_order(
+        event.modify_order,
+        request_id,
+        order,
+        [this](const auto& e) {
+          throw e;
+        });
+  } catch (NotConnected&) {
+    LOG(FATAL)("Unexpected");  // XXX implement
+  }
 }
 
 void Gateway::operator()(
     const CancelOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  _rest.connection.cancel_order(
-      event.cancel_order,
-      request_id,
-      order);
+  try {
+    _rest.connection.cancel_order(
+        event.cancel_order,
+        request_id,
+        order,
+        [this](const auto& e) {
+          throw e;
+        });
+  } catch (NotConnected&) {
+    LOG(FATAL)("Unexpected");  // XXX implement
+  }
 }
 
 void Gateway::operator()(Metrics& metrics) {
@@ -1175,7 +1196,18 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
 }
 
 void Gateway::download_accounts() {
-  _rest.connection.get_accounts();
+  try {
+    _rest.connection.get_accounts(
+        [this](const auto& e) {
+          throw e;
+        });
+  } catch (NotConnected&) {
+    _web_socket.download.retry(
+        WebSocketDownload::State::ACCOUNTS,
+        [this](auto state) -> uint32_t {
+          return download(state);
+        });
+  }
 }
 
 void Gateway::subscribe_instrument() {

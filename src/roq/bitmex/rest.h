@@ -48,19 +48,22 @@ class Rest final : public core::web::Client::Handler {
 
   void create_order(
       const CreateOrder& create_order,
-      const std::string_view& cl_ord_id);
+      const std::string_view& cl_ord_id,
+      core::web::Client::failure_t&& failure);
 
   void modify_order(
       const ModifyOrder& modify_order,
       const std::string_view& request_id,
-      const server::OMS_Order& order);
+      const server::OMS_Order& order,
+      core::web::Client::failure_t&& failure);
 
   void cancel_order(
       const CancelOrder& cancel_order,
       const std::string_view& request_id,
-      const server::OMS_Order& order);
+      const server::OMS_Order& order,
+      core::web::Client::failure_t&& failure);
 
-  void get_accounts();
+  void get_accounts(core::web::Client::failure_t&&);
 
  protected:
   void operator()(const core::web::Client::Connected&) override;
