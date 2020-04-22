@@ -15,6 +15,7 @@ int Application::main(int, char **) {
   VLOG(1)(FMT_STRING("config={}"), config);
   LOG(INFO)("Starting the gateway");
   roq::server::Trading<Gateway>(
+      PACKAGE_NAME,
       config,
       FLAGS_listen,
       server::RequestIdType::SEQUENTIAL,

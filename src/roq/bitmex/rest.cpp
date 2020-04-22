@@ -65,6 +65,8 @@ Rest::Rest(
           dns_base,
           ssl_context,
           core::URI(FLAGS_rest_uri),
+          PACKAGE_NAME,
+          true,  // keep alive
           std::chrono::seconds { FLAGS_rate_limit_interval_secs },
           FLAGS_rate_limit_max_requests,
           std::chrono::seconds { FLAGS_ping_freq_secs },
