@@ -152,51 +152,120 @@ void Gateway::operator()(
     const CreateOrderEvent& event,
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
-  (void)gateway_order_id;  // avoid warning
-  try {
-    _rest.connection.create_order(
-        event.create_order,
-        request_id,
-        [this](const auto& e) {
-          throw e;
-        });
-  } catch (NotConnected&) {
-    LOG(FATAL)("Unexpected");  // XXX implement
-  }
+  (void) gateway_order_id;  // avoid warning
+  _rest.connection.create_order(
+      event.create_order,
+      request_id,
+      [this](auto& response) {
+        try {
+          auto [status, body] = response.get();
+          switch (status) {
+            case core::http::Status::OK:  // 200
+              break;
+            case core::http::Status::BAD_REQUEST:   // 400
+            case core::http::Status::UNAUTHORIZED:  // 401
+            case core::http::Status::FORBIDDEN:     // 403
+            case core::http::Status::NOT_FOUND: {   // 404
+              // XXX send ack failure
+              LOG(FATAL)(
+                  FMT_STRING(R"(Unexpected status={} body="{}")"),
+                  status,
+                  body);
+              break;
+            }
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(R"(Unexpected status={} body="{}")"),
+                  status,
+                  body);
+          }
+        } catch (NotConnected& e) {
+          // XXX send ack failure
+          LOG(FATAL)(
+              FMT_STRING(R"(Unexpected what="{}")"),
+              e.what());
+        }
+      });
 }
 
 void Gateway::operator()(
     const ModifyOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  try {
-    _rest.connection.modify_order(
-        event.modify_order,
-        request_id,
-        order,
-        [this](const auto& e) {
-          throw e;
-        });
-  } catch (NotConnected&) {
-    LOG(FATAL)("Unexpected");  // XXX implement
-  }
+  _rest.connection.modify_order(
+      event.modify_order,
+      request_id,
+      order,
+      [this](auto& response) {
+        try {
+          auto [status, body] = response.get();
+          switch (status) {
+            case core::http::Status::OK:  // 200
+              break;
+            case core::http::Status::BAD_REQUEST:   // 400
+            case core::http::Status::UNAUTHORIZED:  // 401
+            case core::http::Status::FORBIDDEN:     // 403
+            case core::http::Status::NOT_FOUND: {   // 404
+              // XXX send ack failure
+              LOG(FATAL)(
+                  FMT_STRING(R"(Unexpected status={} body="{}")"),
+                  status,
+                  body);
+              break;
+            }
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(R"(Unexpected status={} body="{}")"),
+                  status,
+                  body);
+          }
+        } catch (NotConnected& e) {
+          // XXX send ack failure
+          LOG(FATAL)(
+              FMT_STRING(R"(Unexpected what="{}")"),
+              e.what());
+        }
+      });
 }
 
 void Gateway::operator()(
     const CancelOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  try {
-    _rest.connection.cancel_order(
-        event.cancel_order,
-        request_id,
-        order,
-        [this](const auto& e) {
-          throw e;
-        });
-  } catch (NotConnected&) {
-    LOG(FATAL)("Unexpected");  // XXX implement
-  }
+  _rest.connection.cancel_order(
+      event.cancel_order,
+      request_id,
+      order,
+      [this](auto& response) {
+        try {
+          auto [status, body] = response.get();
+          switch (status) {
+            case core::http::Status::OK:  // 200
+              break;
+            case core::http::Status::BAD_REQUEST:   // 400
+            case core::http::Status::UNAUTHORIZED:  // 401
+            case core::http::Status::FORBIDDEN:     // 403
+            case core::http::Status::NOT_FOUND: {   // 404
+              // XXX send ack failure
+              LOG(FATAL)(
+                  FMT_STRING(R"(Unexpected status={} body="{}")"),
+                  status,
+                  body);
+              break;
+            }
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(R"(Unexpected status={} body="{}")"),
+                  status,
+                  body);
+          }
+        } catch (NotConnected& e) {
+          // XXX send ack failure
+          LOG(FATAL)(
+              FMT_STRING(R"(Unexpected what="{}")"),
+              e.what());
+        }
+      });
 }
 
 void Gateway::operator()(Metrics& metrics) {
@@ -1044,6 +1113,14 @@ uint32_t Gateway::download(WebSocketDownload::State state) {
 }
 
 void Gateway::operator()(const Rest&) {
+  if (_rest.connection.ready()) {
+    _web_socket.download.resume(
+        [this](auto state) {
+          return download(state);
+        });
+  } else {
+    _web_socket.download.retry();
+  }
 }
 
 auto compute_order_status(
@@ -1196,18 +1273,25 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
 }
 
 void Gateway::download_accounts() {
-  try {
-    _rest.connection.get_accounts(
-        [this](const auto& e) {
-          throw e;
-        });
-  } catch (NotConnected&) {
-    _web_socket.download.retry(
-        WebSocketDownload::State::ACCOUNTS,
-        [this](auto state) -> uint32_t {
-          return download(state);
-        });
-  }
+  _rest.connection.get_accounts(
+      [this](auto& response) {
+        if (response.success()) {
+          auto status = response.status();
+          switch (status) {
+            case core::http::Status::OK:
+              _web_socket.download.check(
+                  WebSocketDownload::State::ACCOUNTS,
+                  [this](auto state) {
+                    return download(state);
+                  });
+              break;
+            default:
+              LOG(FATAL)(
+              FMT_STRING(R"(Unable to get accounts, status={})"),
+              status);
+          }
+        }
+      });
 }
 
 void Gateway::subscribe_instrument() {

@@ -92,6 +92,10 @@ Rest::Rest(
   (void) config;  // avoid warning
 }
 
+bool Rest::ready() const {
+  return _connection.ready();
+}
+
 void Rest::close() {
   _connection.close();
 }
@@ -124,7 +128,7 @@ void Rest::operator()(Metrics& metrics) {
 void Rest::create_order(
     const CreateOrder& create_order,
     const std::string_view& cl_ord_id,
-    core::web::Client::failure_t&& failure) {
+    std::function<void(const core::web::Response&)>&& callback) {
   auto expires = compute_expires();
   auto method = core::http::Method::POST;
   // XXX use encode buffer
@@ -163,50 +167,35 @@ void Rest::create_order(
       "/order",
       headers,
       message,
-      [this](const auto status, const auto& body) {
-        _profile.create_order(
-            [&]() {
-              DLOG(INFO)(
-                  FMT_STRING(R"(status={} body="{}")"),
-                  status,
-                  body);
-              switch (status) {
-                case core::http::Status::OK: {  // 200
+      [this, callback](auto& response) {
+        if (response.success()) {
+          _profile.create_order(
+              [&]() {
+                auto [status, body] = response.get();
+                DLOG(INFO)(
+                    FMT_STRING(R"(status={} body="{}")"),
+                    status,
+                    body);
+                if (status == core::http::Status::OK) {  // 200
                   auto order_item =
                     core::json::Parser::create<json::OrderItem>(body);
                   DLOG(INFO)(
                       FMT_STRING(R"(order_item={})"),
                       order_item);
                   _gateway(order_item);
-                  break;
                 }
-                case core::http::Status::BAD_REQUEST:   // 400
-                case core::http::Status::UNAUTHORIZED:  // 401
-                case core::http::Status::FORBIDDEN:     // 403
-                case core::http::Status::NOT_FOUND: {   // 404
-                  LOG(FATAL)(
-                      FMT_STRING(R"(Unexpected status={} body="{}")"),
-                      status,
-                      body);
-                  break;
-                }
-                default:
-                  LOG(FATAL)(
-                      FMT_STRING(R"(Unexpected status={} body="{}")"),
-                      status,
-                      body);
-              }
-            });
-      },
-      std::move(failure));
+              });
+        }
+        callback(response);
+      });
 }
 
 void Rest::modify_order(
     const ModifyOrder& modify_order,
     const std::string_view& request_id,
     const server::OMS_Order& order,
-    core::web::Client::failure_t&& failure) {
-  (void)request_id;  // avoid warning
+    std::function<void(const core::web::Response&)>&& callback) {
+  (void) request_id;  // avoid warning
   auto expires = compute_expires();
   auto method = core::http::Method::PUT;
   // XXX use encode buffer
@@ -233,11 +222,12 @@ void Rest::modify_order(
       "/order",
       headers,
       message,
-      [this](const auto status, const auto& body) {
-        _profile.modify_order(
-            [&]() {
-              switch (status) {
-                case core::http::Status::OK: {  // 200
+      [this, callback](auto& response) {
+        if (response.success()) {
+          _profile.modify_order(
+              [&]() {
+                auto [status, body] = response.get();
+                if (status == core::http::Status::OK) {  // 200
                   DLOG(INFO)(
                       FMT_STRING(R"(status={} body="{}")"),
                       status,
@@ -248,36 +238,20 @@ void Rest::modify_order(
                       FMT_STRING(R"(order_item={})"),
                       order_item);
                   _gateway(order_item);
-                  break;
                 }
-                case core::http::Status::BAD_REQUEST:   // 400
-                case core::http::Status::UNAUTHORIZED:  // 401
-                case core::http::Status::FORBIDDEN:     // 403
-                case core::http::Status::NOT_FOUND: {   // 404
-                  LOG(FATAL)(
-                      FMT_STRING(R"(Unexpected status={} body="{}")"),
-                      status,
-                      body);
-                  break;
-                }
-                default:
-                  LOG(FATAL)(
-                      FMT_STRING(R"(Unexpected status={} body="{}")"),
-                      status,
-                      body);
-              }
-            });
-      },
-      std::move(failure));
+              });
+        }
+        callback(response);
+      });
 }
 
 void Rest::cancel_order(
     const CancelOrder& cancel_order,
     const std::string_view& request_id,
     const server::OMS_Order& order,
-    core::web::Client::failure_t&& failure) {
-  (void)cancel_order;  // avoid warning
-  (void)request_id;  // avoid warning
+    std::function<void(const core::web::Response&)>&& callback) {
+  (void) cancel_order;  // avoid warning
+  (void) request_id;  // avoid warning
   auto expires = compute_expires();
   auto method = core::http::Method::DELETE;
   // XXX use encode buffer
@@ -300,11 +274,12 @@ void Rest::cancel_order(
       "/order",
       headers,
       message,
-      [this](const auto status, const auto& body) {
-        _profile.cancel_order(
-            [&]() {
-              switch (status) {
-                case core::http::Status::OK: {  // 200
+      [this, callback](auto& response) {
+        if (response.success()) {
+          _profile.cancel_order(
+              [&]() {
+                auto [status, body] = response.get();
+                if (status == core::http::Status::OK) {  // 200
                   DLOG(INFO)(
                       FMT_STRING(R"(status={} body="{}")"),
                       status,
@@ -317,51 +292,39 @@ void Rest::cancel_order(
                       FMT_STRING(R"(order={})"),
                       order);
                   _gateway(order);
-                  break;
                 }
-                case core::http::Status::BAD_REQUEST:   // 400
-                case core::http::Status::UNAUTHORIZED:  // 401
-                case core::http::Status::FORBIDDEN:     // 403
-                case core::http::Status::NOT_FOUND: {   // 404
-                  LOG(FATAL)(
-                      FMT_STRING(R"(Unexpected status={} body="{}")"),
-                      status,
-                      body);
-                  break;
-                }
-                default:
-                  LOG(FATAL)(
-                      FMT_STRING(R"(Unexpected status={} body="{}")"),
-                      status,
-                      body);
-              }
-            });
-      },
-      std::move(failure));
+              });
+        }
+        callback(response);
+      });
 }
 
-void Rest::get_accounts(core::web::Client::failure_t&& failure) {
+void Rest::get_accounts(
+    std::function<void(const core::web::Response&)>&& callback) {
   _connection.request(
       core::http::Method::GET,
       "/accounts",
       std::string_view(),  // headers
       std::string_view(),  // body
-      [this](const auto status, const auto& body) {
-        (void) status;  // avoid warning
-        (void) body;  // avoid warning
-        _profile.accounts(
-            [&]() {
-              /*
-              core::json::Buffer buffer(_decode_buffer);
-              auto accounts = json::Accounts::parse(
-                  body,
-                  buffer);
-              VLOG(1)("accounts={}", accounts);
-              _gateway(accounts);
-              */
-            });
-      },
-      std::move(failure));
+      [this, callback](auto& response) {
+        if (response.success()) {
+          auto [status, body] = response.get();
+          (void) status;  // avoid warning
+          (void) body;  // avoid warning
+          _profile.accounts(
+              [&]() {
+                /* XXX parser has not yet been implemented...
+                core::json::Buffer buffer(_decode_buffer);
+                auto accounts = json::Accounts::parse(
+                    body,
+                    buffer);
+                VLOG(1)("accounts={}", accounts);
+                _gateway(accounts);
+                */
+              });
+        }
+        callback(response);
+      });
 }
 
 void Rest::operator()(const core::web::Client::Connected&) {

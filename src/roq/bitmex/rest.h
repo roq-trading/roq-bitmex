@@ -38,6 +38,8 @@ class Rest final : public core::web::Client::Handler {
   Rest(Rest&&) = delete;
   Rest(const Rest&) = delete;
 
+  bool ready() const;
+
   void close();
 
   void operator()(const StartEvent&);
@@ -49,21 +51,22 @@ class Rest final : public core::web::Client::Handler {
   void create_order(
       const CreateOrder& create_order,
       const std::string_view& cl_ord_id,
-      core::web::Client::failure_t&& failure);
+      std::function<void(const core::web::Response&)>&& callback);
 
   void modify_order(
       const ModifyOrder& modify_order,
       const std::string_view& request_id,
       const server::OMS_Order& order,
-      core::web::Client::failure_t&& failure);
+      std::function<void(const core::web::Response&)>&& callback);
 
   void cancel_order(
       const CancelOrder& cancel_order,
       const std::string_view& request_id,
       const server::OMS_Order& order,
-      core::web::Client::failure_t&& failure);
+      std::function<void(const core::web::Response&)>&& callback);
 
-  void get_accounts(core::web::Client::failure_t&&);
+  void get_accounts(
+      std::function<void(const core::web::Response&)>&& callback);
 
  protected:
   void operator()(const core::web::Client::Connected&) override;
