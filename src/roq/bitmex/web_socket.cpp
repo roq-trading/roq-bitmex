@@ -335,7 +335,7 @@ void WebSocket::operator()(
     const json::Funding& funding) {
   _profile.funding(
       [&]() {
-        VLOG(1)(
+        VLOG(2)(
             FMT_STRING(R"(action={}, funding={})"),
             action,
             funding);
@@ -347,7 +347,7 @@ void WebSocket::operator()(
     const json::Instrument& instrument) {
   _profile.instrument(
       [&]() {
-        VLOG(1)(
+        VLOG(2)(
             FMT_STRING(R"(action={}, instrument={})"),
             action,
             instrument);
@@ -360,7 +360,7 @@ void WebSocket::operator()(
     const json::Liquidation& liquidation) {
   _profile.liquidation(
       [&]() {
-        VLOG(1)(
+        VLOG(2)(
             FMT_STRING(R"(action={}, liquidation={})"),
             action,
             liquidation);
@@ -372,7 +372,7 @@ void WebSocket::operator()(
     const json::Margin& margin) {
   _profile.margin(
       [&]() {
-        VLOG(1)(
+        VLOG(2)(
             FMT_STRING(R"(action={}, margin={})"),
             action,
             margin);
@@ -397,7 +397,7 @@ void WebSocket::operator()(
     const json::OrderBookL2& order_book_l2) {
   _profile.order_book_l2(
       [&]() {
-        VLOG(1)(
+        VLOG(3)(
             FMT_STRING(R"(action={}, order_book_l2={})"),
             action,
             order_book_l2);
@@ -410,7 +410,7 @@ void WebSocket::operator()(
     const json::Position& position) {
   _profile.position(
       [&]() {
-        VLOG(1)(
+        VLOG(2)(
             FMT_STRING(R"(action={}, position={})"),
             action,
             position);
@@ -423,7 +423,7 @@ void WebSocket::operator()(
     const json::Quote& quote) {
   _profile.quote(
       [&]() {
-        VLOG(1)(
+        VLOG(3)(
             FMT_STRING(R"(action={}, quote={})"),
             action,
             quote);
@@ -436,7 +436,7 @@ void WebSocket::operator()(
     const json::Settlement& settlement) {
   _profile.settlement(
       [&]() {
-        VLOG(1)(
+        VLOG(3)(
             FMT_STRING(R"(action={}, settlement={})"),
             action,
             settlement);
@@ -449,7 +449,7 @@ void WebSocket::operator()(
     const json::Trade& trade) {
   _profile.trade(
       [&]() {
-        VLOG(1)(
+        VLOG(2)(
             FMT_STRING(R"(action={}, trade={})"),
             action,
             trade);

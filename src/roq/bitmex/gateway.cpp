@@ -99,7 +99,10 @@ Gateway::Gateway(
           _ssl_context,
         },
         .download = WebSocketDownload(
-            std::chrono::seconds { FLAGS_download_timeout_secs }),
+            std::chrono::seconds { FLAGS_download_timeout_secs },
+            [this](auto state) {
+              return download(state);
+            }),
       },
       _rest {
         .connection = {
@@ -135,6 +138,7 @@ void Gateway::operator()(const TimerEvent& event) {
   // web socket
   _web_socket.connection(event);
   // rest
+  /*
   if (_web_socket.download.has_expired()) {
     LOG(WARNING)("Rest download has timed out");
     _web_socket.download.reset();
@@ -142,6 +146,8 @@ void Gateway::operator()(const TimerEvent& event) {
   } else {
     _rest.connection(event);
   }
+  */
+  _rest.connection(event);
   _base.loop(EVLOOP_NONBLOCK);
 }
 
@@ -277,13 +283,9 @@ void Gateway::operator()(Metrics& metrics) {
 
 void Gateway::operator()(const WebSocket&) {
   if (_web_socket.connection.ready()) {
-    _web_socket.download.check(
-        WebSocketDownload::State::UNDEFINED,
-        [this](auto state) -> uint32_t {
-          return download(state);
-        });
+    _web_socket.download.begin();
   } else {
-    _web_socket.download.reset();  // XXX here?
+    _web_socket.download.reset();
     _symbols.clear();
     _snapshot = {};
   }
@@ -716,15 +718,12 @@ void Gateway::operator()(
           auto market_status = product.create_market_status(item);
           enqueue(market_status, true);
         }
-        VLOG(1)(
+        VLOG(2)(
             FMT_STRING(R"(- securities: {} (/{}))"),
             security_count,
             instrument.data.size());
         _web_socket.download.check_relaxed(
-            WebSocketDownload::State::INSTRUMENT,
-            [this](auto state) -> uint32_t {
-              return download(state);
-            });
+            WebSocketDownload::State::INSTRUMENT);
       }
       break;
     case json::Action::INSERT:
@@ -843,10 +842,7 @@ void Gateway::operator()(
   if (snapshot) {
       _snapshot.order_book_l2 = true;
       _web_socket.download.check_relaxed(
-          WebSocketDownload::State::ORDER_BOOK_L2,
-          [this](auto state) -> uint32_t {
-            return download(state);
-          });
+          WebSocketDownload::State::ORDER_BOOK_L2);
   }
 }
 
@@ -1000,7 +996,7 @@ void Gateway::operator()(
       .snapshot = false,  // XXX ???
       .exchange_time_utc = item.timestamp,
     };
-    VLOG(1)(
+    VLOG(3)(
         FMT_STRING(R"(top_of_book={})"),
         top_of_book);
     enqueue(
@@ -1042,7 +1038,7 @@ void Gateway::operator()(
           },
           .exchange_time_utc = timestamp,
           };
-        VLOG(1)(
+        VLOG(3)(
             FMT_STRING(R"(trade_summary={})"),
             trade_summary);
         enqueue(
@@ -1075,7 +1071,7 @@ void Gateway::operator()(
       },
       .exchange_time_utc = timestamp,
       };
-    VLOG(1)(
+    VLOG(3)(
         FMT_STRING(R"(trade_summary={})"),
         trade_summary);
     enqueue(
@@ -1086,7 +1082,9 @@ void Gateway::operator()(
 
 // rest
 
-uint32_t Gateway::download(WebSocketDownload::State state) {
+int32_t Gateway::download(WebSocketDownload::State state) {
+  if (_rest.connection.ready() == false)
+    return -1;
   switch (state) {
     case WebSocketDownload::State::UNDEFINED:
       break;
@@ -1113,14 +1111,8 @@ uint32_t Gateway::download(WebSocketDownload::State state) {
 }
 
 void Gateway::operator()(const Rest&) {
-  if (_rest.connection.ready()) {
-    _web_socket.download.resume(
-        [this](auto state) {
-          return download(state);
-        });
-  } else {
-    _web_socket.download.retry();
-  }
+  if (_rest.connection.ready())
+    _web_socket.download.bump();
 }
 
 auto compute_order_status(
@@ -1273,23 +1265,26 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
 }
 
 void Gateway::download_accounts() {
+  constexpr auto state = WebSocketDownload::State::ACCOUNTS;
   _rest.connection.get_accounts(
       [this](auto& response) {
-        if (response.success()) {
+        try {
           auto status = response.status();
           switch (status) {
             case core::http::Status::OK:
-              _web_socket.download.check(
-                  WebSocketDownload::State::ACCOUNTS,
-                  [this](auto state) {
-                    return download(state);
-                  });
+              _web_socket.download.check(state);
               break;
             default:
               LOG(FATAL)(
-              FMT_STRING(R"(Unable to get accounts, status={})"),
-              status);
+                  FMT_STRING(
+                      R"(Unable to get accounts, )"
+                      R"(status={})"),
+                  status);
           }
+        } catch (NotConnected&) {
+          _web_socket.download.retry(state);
+        } catch (TimedOut&) {
+          _web_socket.download.retry(state);
         }
       });
 }
@@ -1424,7 +1419,7 @@ void Gateway::publish_market_by_price(
     .snapshot = snapshot,
     .exchange_time_utc = {},
     };
-  VLOG(1)(
+  VLOG(3)(
       FMT_STRING(R"(market_by_price={})"),
       market_by_price);
   enqueue(
