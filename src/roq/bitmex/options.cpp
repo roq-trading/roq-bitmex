@@ -12,7 +12,7 @@ DEFINE_string(config_file,
     "config file (path)");
 
 DEFINE_string(rest_uri,
-    "https://testnet.bitmex.com/api/v1",
+    "https://testnet.bitmex.com",
     "REST end-point (URI)");
 
 DEFINE_string(ws_uri,

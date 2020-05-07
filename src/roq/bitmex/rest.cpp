@@ -129,8 +129,9 @@ void Rest::create_order(
     const CreateOrder& create_order,
     const std::string_view& cl_ord_id,
     std::function<void(const core::web::Response&)>&& callback) {
+  constexpr auto method = core::http::Method::POST;
+  constexpr std::string_view path = "/api/v1/order";
   auto expires = compute_expires();
-  auto method = core::http::Method::POST;
   // XXX use encode buffer
   auto message = fmt::format(
       FMT_STRING(
@@ -160,11 +161,11 @@ void Rest::create_order(
   auto headers = _random.create_headers(
       expires,
       method,
-      "/api/v1/order",  // XXX align with _connection.uri
+      path,
       message);
   _connection.request(
       method,
-      "/order",
+      path,
       headers,
       message,
       [this, callback](auto& response) {
@@ -196,8 +197,9 @@ void Rest::modify_order(
     const server::OMS_Order& order,
     std::function<void(const core::web::Response&)>&& callback) {
   (void) request_id;  // avoid warning
+  constexpr auto method = core::http::Method::PUT;
+  constexpr std::string_view path = "/api/v1/order";
   auto expires = compute_expires();
-  auto method = core::http::Method::PUT;
   // XXX use encode buffer
   auto message = fmt::format(
       FMT_STRING(
@@ -215,11 +217,11 @@ void Rest::modify_order(
   auto headers = _random.create_headers(
       expires,
       method,
-      "/api/v1/order",  // XXX align with _connection.uri
+      path,
       message);
   _connection.request(
       method,
-      "/order",
+      path,
       headers,
       message,
       [this, callback](auto& response) {
@@ -252,8 +254,9 @@ void Rest::cancel_order(
     std::function<void(const core::web::Response&)>&& callback) {
   (void) cancel_order;  // avoid warning
   (void) request_id;  // avoid warning
+  constexpr auto method = core::http::Method::DELETE;
+  constexpr std::string_view path = "/api/v1/order";
   auto expires = compute_expires();
-  auto method = core::http::Method::DELETE;
   // XXX use encode buffer
   auto message = fmt::format(
       FMT_STRING(
@@ -267,11 +270,11 @@ void Rest::cancel_order(
   auto headers = _random.create_headers(
       expires,
       method,
-      "/api/v1/order",  // XXX align with _connection.uri
+      path,
       message);
   _connection.request(
       method,
-      "/order",
+      path,
       headers,
       message,
       [this, callback](auto& response) {
@@ -301,9 +304,11 @@ void Rest::cancel_order(
 
 void Rest::get_accounts(
     std::function<void(const core::web::Response&)>&& callback) {
+  constexpr auto method = core::http::Method::GET;
+  constexpr std::string_view path = "/api/v1/accounts";
   _connection.request(
-      core::http::Method::GET,
-      "/accounts",
+      method,
+      path,
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {

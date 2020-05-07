@@ -14,7 +14,7 @@ CONFIG_FILE="$CWD/config/$NAME.toml"
 
 URI="www.bitmex.com"
 
-REST_URI="https://$URI/api/v1"
+REST_URI="https://$URI"
 WS_URI="wss://$URI/realtime"
 
 $PREFIX ./roq-bitmex \
