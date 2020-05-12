@@ -164,36 +164,22 @@ void Gateway::operator()(
   _rest.connection.create_order(
       event.create_order,
       request_id,
-      [this](auto& response) {
-        try {
-          auto [status, body] = response.get();
-          switch (status) {
-            case core::http::Status::OK:  // 200
-              break;
-            case core::http::Status::BAD_REQUEST:   // 400
-            case core::http::Status::UNAUTHORIZED:  // 401
-            case core::http::Status::FORBIDDEN:     // 403
-            case core::http::Status::NOT_FOUND: {   // 404
-              // XXX send ack failure
-              LOG(FATAL)(
-                  FMT_STRING(R"(Unexpected status={} body="{}")"),
-                  status,
-                  body);
-              break;
-            }
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(R"(Unexpected status={} body="{}")"),
-                  status,
-                  body);
-          }
-        } catch (NotConnected& e) {
-          // XXX send ack failure
-          LOG(FATAL)(
-              FMT_STRING(R"(Unexpected what="{}")"),
-              e.what());
-        }
-      });
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+      */
+    } catch (NetworkError& e) {
+      // XXX send ack failure
+      LOG(FATAL)(
+          FMT_STRING(R"(Unexpected what="{}")"),
+          e.what());
+    }
+  });
 }
 
 void Gateway::operator()(
@@ -204,36 +190,22 @@ void Gateway::operator()(
       event.modify_order,
       request_id,
       order,
-      [this](auto& response) {
-        try {
-          auto [status, body] = response.get();
-          switch (status) {
-            case core::http::Status::OK:  // 200
-              break;
-            case core::http::Status::BAD_REQUEST:   // 400
-            case core::http::Status::UNAUTHORIZED:  // 401
-            case core::http::Status::FORBIDDEN:     // 403
-            case core::http::Status::NOT_FOUND: {   // 404
-              // XXX send ack failure
-              LOG(FATAL)(
-                  FMT_STRING(R"(Unexpected status={} body="{}")"),
-                  status,
-                  body);
-              break;
-            }
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(R"(Unexpected status={} body="{}")"),
-                  status,
-                  body);
-          }
-        } catch (NotConnected& e) {
-          // XXX send ack failure
-          LOG(FATAL)(
-              FMT_STRING(R"(Unexpected what="{}")"),
-              e.what());
-        }
-      });
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+      */
+    } catch (NetworkError& e) {
+      // XXX send ack failure
+      LOG(FATAL)(
+          FMT_STRING(R"(Unexpected what="{}")"),
+          e.what());
+    }
+  });
 }
 
 void Gateway::operator()(
@@ -244,36 +216,22 @@ void Gateway::operator()(
       event.cancel_order,
       request_id,
       order,
-      [this](auto& response) {
-        try {
-          auto [status, body] = response.get();
-          switch (status) {
-            case core::http::Status::OK:  // 200
-              break;
-            case core::http::Status::BAD_REQUEST:   // 400
-            case core::http::Status::UNAUTHORIZED:  // 401
-            case core::http::Status::FORBIDDEN:     // 403
-            case core::http::Status::NOT_FOUND: {   // 404
-              // XXX send ack failure
-              LOG(FATAL)(
-                  FMT_STRING(R"(Unexpected status={} body="{}")"),
-                  status,
-                  body);
-              break;
-            }
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(R"(Unexpected status={} body="{}")"),
-                  status,
-                  body);
-          }
-        } catch (NotConnected& e) {
-          // XXX send ack failure
-          LOG(FATAL)(
-              FMT_STRING(R"(Unexpected what="{}")"),
-              e.what());
-        }
-      });
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+      */
+    } catch (NetworkError& e) {
+      // XXX send ack failure
+      LOG(FATAL)(
+          FMT_STRING(R"(Unexpected what="{}")"),
+          e.what());
+    }
+  });
 }
 
 void Gateway::operator()(Metrics& metrics) {

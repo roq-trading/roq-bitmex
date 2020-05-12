@@ -8,7 +8,6 @@
 #include <chrono>
 #include <utility>
 
-#include "roq/bitmex/gateway.h"
 #include "roq/bitmex/options.h"
 
 #include "roq/bitmex/json/utils.h"
@@ -51,13 +50,13 @@ static auto compute_expires() {
 }  // namespace
 
 Rest::Rest(
-    Gateway& gateway,
+    Handler& handler,
     const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
     core::ssl::Context& ssl_context)
-    : _gateway(gateway),
+    : _handler(handler),
       _random(random),
       _connection(
           *this,
@@ -78,8 +77,6 @@ Rest::Rest(
         .disconnect = create_counter("disconnect"),
       },
       _profile {
-        .success = create_profile("success"),
-        .failure = create_profile("failure"),
         .products = create_profile("products"),
         .accounts = create_profile("accounts"),
         .create_order = create_profile("create_order"),
@@ -117,8 +114,6 @@ void Rest::operator()(Metrics& metrics) {
     // counter
     .write(_counter.disconnect)
     // profile
-    .write(_profile.success)
-    .write(_profile.failure)
     .write(_profile.products)
     .write(_profile.accounts)
     // latency
@@ -128,7 +123,7 @@ void Rest::operator()(Metrics& metrics) {
 void Rest::create_order(
     const CreateOrder& create_order,
     const std::string_view& cl_ord_id,
-    std::function<void(const core::web::Response&)>&& callback) {
+    std::function<void(const core::Promise<json::OrderItem>&)>&& callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/api/v1/order";
   auto expires = compute_expires();
@@ -169,33 +164,35 @@ void Rest::create_order(
       headers,
       message,
       [this, callback](auto& response) {
-        if (response.success()) {
-          _profile.create_order(
-              [&]() {
-                auto [status, body] = response.get();
-                DLOG(INFO)(
-                    FMT_STRING(R"(status={} body="{}")"),
-                    status,
-                    body);
-                if (status == core::http::Status::OK) {  // 200
-                  auto order_item =
-                    core::json::Parser::create<json::OrderItem>(body);
-                  DLOG(INFO)(
-                      FMT_STRING(R"(order_item={})"),
-                      order_item);
-                  _gateway(order_item);
-                }
-              });
-        }
-        callback(response);
-      });
+    _profile.create_order(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        auto order_item =
+          core::json::Parser::create<json::OrderItem>(response.body());
+        VLOG(1)(
+            FMT_STRING(R"(order_item={})"),
+            order_item);
+        core::Promise<json::OrderItem> promise(order_item);
+        callback(promise);
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::OrderItem> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 void Rest::modify_order(
     const ModifyOrder& modify_order,
     const std::string_view& request_id,
     const server::OMS_Order& order,
-    std::function<void(const core::web::Response&)>&& callback) {
+    std::function<void(const core::Promise<json::OrderItem>&)>&& callback) {
   (void) request_id;  // avoid warning
   constexpr auto method = core::http::Method::PUT;
   constexpr std::string_view path = "/api/v1/order";
@@ -225,33 +222,35 @@ void Rest::modify_order(
       headers,
       message,
       [this, callback](auto& response) {
-        if (response.success()) {
-          _profile.modify_order(
-              [&]() {
-                auto [status, body] = response.get();
-                if (status == core::http::Status::OK) {  // 200
-                  DLOG(INFO)(
-                      FMT_STRING(R"(status={} body="{}")"),
-                      status,
-                      body);
-                  auto order_item =
-                    core::json::Parser::create<json::OrderItem>(body);
-                  DLOG(INFO)(
-                      FMT_STRING(R"(order_item={})"),
-                      order_item);
-                  _gateway(order_item);
-                }
-              });
-        }
-        callback(response);
-      });
+    _profile.modify_order(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        auto order_item =
+          core::json::Parser::create<json::OrderItem>(response.body());
+        VLOG(1)(
+            FMT_STRING(R"(order_item={})"),
+            order_item);
+        core::Promise<json::OrderItem> promise(order_item);
+        callback(promise);
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::OrderItem> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 void Rest::cancel_order(
     const CancelOrder& cancel_order,
     const std::string_view& request_id,
     const server::OMS_Order& order,
-    std::function<void(const core::web::Response&)>&& callback) {
+    std::function<void(const core::Promise<json::Order>&)>&& callback) {
   (void) cancel_order;  // avoid warning
   (void) request_id;  // avoid warning
   constexpr auto method = core::http::Method::DELETE;
@@ -278,28 +277,30 @@ void Rest::cancel_order(
       headers,
       message,
       [this, callback](auto& response) {
-        if (response.success()) {
-          _profile.cancel_order(
-              [&]() {
-                auto [status, body] = response.get();
-                if (status == core::http::Status::OK) {  // 200
-                  DLOG(INFO)(
-                      FMT_STRING(R"(status={} body="{}")"),
-                      status,
-                      body);
-                  core::json::Buffer buffer(_decode_buffer);
-                  auto order = core::json::Parser::create<json::Order>(
-                      body,
-                      buffer);
-                  DLOG(INFO)(
-                      FMT_STRING(R"(order={})"),
-                      order);
-                  _gateway(order);
-                }
-              });
-        }
-        callback(response);
-      });
+    _profile.cancel_order(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(_decode_buffer);
+        auto order = core::json::Parser::create<json::Order>(
+            response.body(),
+            buffer);
+        VLOG(1)(
+            FMT_STRING(R"(order={})"),
+            order);
+        core::Promise<json::Order> promise(order);
+        callback(promise);
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::Order> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 /* 20200512 -- doesn't look like anything real
@@ -340,11 +341,11 @@ void Rest::get(
 */
 
 void Rest::operator()(const core::web::Client::Connected&) {
-  _gateway(*this);
+  _handler(*this);
 }
 
 void Rest::operator()(const core::web::Client::Disconnected&) {
-  _gateway(*this);
+  _handler(*this);
   ++_counter.disconnect;
 }
 

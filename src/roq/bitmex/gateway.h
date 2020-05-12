@@ -35,11 +35,17 @@ namespace bitmex {
 
 class WebSocket;
 
-class Gateway final : public server::Handler {
+class Gateway final
+    : public server::Handler,
+      public Rest::Handler,
+      public WebSocket::Handler {
  public:
   Gateway(
       server::Dispatcher& dispatcher,
       const Config& config);
+
+ protected:
+  // server::Handler
 
   void operator()(const StartEvent&) override;
   void operator()(const StopEvent&) override;
@@ -61,21 +67,21 @@ class Gateway final : public server::Handler {
 
   void operator()(Metrics& metrics) override;
 
-  // ws
-  void operator()(const WebSocket&);
-  void operator()(const json::Action, const json::Execution&);
-  void operator()(const json::Action, const json::Instrument&);
-  void operator()(const json::Action, const json::Order&);
-  void operator()(const json::Action, const json::OrderBookL2&);
-  void operator()(const json::Action, const json::Position&);
-  void operator()(const json::Action, const json::Quote&);
-  void operator()(const json::Action, const json::Settlement&);
-  void operator()(const json::Action, const json::Trade&);
+  // WebSocket::Handler
 
-  // rest
-  void operator()(const Rest&);
-  void operator()(const json::OrderItem&);
-  void operator()(const json::Order&);
+  void operator()(const WebSocket&) override;
+  void operator()(const json::Action, const json::Execution&) override;
+  void operator()(const json::Action, const json::Instrument&) override;
+  void operator()(const json::Action, const json::Order&) override;
+  void operator()(const json::Action, const json::OrderBookL2&) override;
+  void operator()(const json::Action, const json::Position&) override;
+  void operator()(const json::Action, const json::Quote&) override;
+  void operator()(const json::Action, const json::Settlement&) override;
+  void operator()(const json::Action, const json::Trade&) override;
+
+  // Rest::Handler
+
+  void operator()(const Rest&) override;
 
  private:
   void update_market_data(GatewayStatus gateway_status);
@@ -101,7 +107,9 @@ class Gateway final : public server::Handler {
       bool snapshot,
       bool is_last);
 
- private:
+  void operator()(const json::OrderItem&);
+  void operator()(const json::Order&);
+
   template <typename T>
   void enqueue(
       const T& event,
@@ -113,7 +121,6 @@ class Gateway final : public server::Handler {
       const T& event,
       bool is_last);
 
- private:
   using WebSocketDownload = server::Download<WebSocketState>;
 
   int32_t download(WebSocketDownload::State state);

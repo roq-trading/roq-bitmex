@@ -11,7 +11,6 @@
 
 #include "roq/core/charconv.h"
 
-#include "roq/bitmex/gateway.h"
 #include "roq/bitmex/options.h"
 
 namespace roq {
@@ -46,13 +45,13 @@ static auto create_latency(
 }  // namespace
 
 WebSocket::WebSocket(
-    Gateway& gateway,
+    Handler& handler,
     const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
     core::ssl::Context& ssl_context)
-    : _gateway(gateway),
+    : _handler(handler),
       _random(random),
       _connection(
           *this,
@@ -187,7 +186,7 @@ void WebSocket::operator()(const core::web::Socket::Connected&) {
 void WebSocket::operator()(const core::web::Socket::Disconnected&) {
   _ready = false;
   _next_cancel_all_after = {};
-  _gateway(*this);
+  _handler(*this);
 }
 
 void WebSocket::operator()(const core::web::Socket::Ready&) {
@@ -287,7 +286,7 @@ void WebSocket::operator()(const json::Handshake& handshake) {
         LOG(INFO)("Ready");
         assert(_ready == false);
         _ready = true;
-        _gateway(*this);
+        _handler(*this);
         if (FLAGS_cancel_on_disconnect == false ||
             FLAGS_cancel_all_after_secs == 0)
           send_cancel_all_after(std::chrono::seconds {});
@@ -326,7 +325,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, execution={})"),
             action,
             execution);
-        _gateway(action, execution);
+        _handler(action, execution);
       });
 }
 
@@ -351,7 +350,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, instrument={})"),
             action,
             instrument);
-        _gateway(action, instrument);
+        _handler(action, instrument);
       });
 }
 
@@ -388,7 +387,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, order={})"),
             action,
             order);
-        _gateway(action, order);
+        _handler(action, order);
       });
 }
 
@@ -401,7 +400,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, order_book_l2={})"),
             action,
             order_book_l2);
-        _gateway(action, order_book_l2);
+        _handler(action, order_book_l2);
       });
 }
 
@@ -414,7 +413,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, position={})"),
             action,
             position);
-        _gateway(action, position);
+        _handler(action, position);
       });
 }
 
@@ -427,7 +426,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, quote={})"),
             action,
             quote);
-        _gateway(action, quote);
+        _handler(action, quote);
       });
 }
 
@@ -440,7 +439,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, settlement={})"),
             action,
             settlement);
-        _gateway(action, settlement);
+        _handler(action, settlement);
       });
 }
 
@@ -453,7 +452,7 @@ void WebSocket::operator()(
             FMT_STRING(R"(action={}, trade={})"),
             action,
             trade);
-        _gateway(action, trade);
+        _handler(action, trade);
       });
 }
 

@@ -25,14 +25,24 @@
 namespace roq {
 namespace bitmex {
 
-class Gateway;
-
 class WebSocket final
     : public core::web::Socket::Handler,
       public json::Parser::Handler {
  public:
+  struct Handler {
+    virtual void operator()(const WebSocket&) = 0;
+    virtual void operator()(const json::Action, const json::Execution&) = 0;
+    virtual void operator()(const json::Action, const json::Instrument&) = 0;
+    virtual void operator()(const json::Action, const json::Order&) = 0;
+    virtual void operator()(const json::Action, const json::OrderBookL2&) = 0;
+    virtual void operator()(const json::Action, const json::Position&) = 0;
+    virtual void operator()(const json::Action, const json::Quote&) = 0;
+    virtual void operator()(const json::Action, const json::Settlement&) = 0;
+    virtual void operator()(const json::Action, const json::Trade&) = 0;
+  };
+
   WebSocket(
-      Gateway& gateway,
+      Handler& handler,
       const Config& config,
       Random& random,
       core::event::Base& base,
@@ -59,7 +69,7 @@ class WebSocket final
   void operator()(Metrics& metrics);
 
  protected:
-  std::string create_upgrade_headers();
+  // core::web::Socket::Handler
 
   void operator()(const core::web::Socket::Connected&) override;
   void operator()(const core::web::Socket::Disconnected&) override;
@@ -68,17 +78,13 @@ class WebSocket final
   void operator()(const core::web::Socket::Latency&) override;
   void operator()(const core::web::Socket::Text&) override;
 
-  void parse(const std::string_view& message);
-  void parse_helper(const std::string_view& message);
-
-  void send_cancel_all_after(std::chrono::seconds seconds);
+  // json::Parser::Handler
 
   void operator()(const json::CancelAllAfter&) override;
   void operator()(const json::Error&) override;
   void operator()(const json::Handshake&) override;
   void operator()(const json::Subscribe&) override;
 
-  // table
   void operator()(const json::Action, const json::Execution&) override;
   void operator()(const json::Action, const json::Funding&) override;
   void operator()(const json::Action, const json::Instrument&) override;
@@ -92,7 +98,15 @@ class WebSocket final
   void operator()(const json::Action, const json::Trade&) override;
 
  private:
-  Gateway& _gateway;
+  std::string create_upgrade_headers();
+
+  void parse(const std::string_view& message);
+  void parse_helper(const std::string_view& message);
+
+  void send_cancel_all_after(std::chrono::seconds seconds);
+
+ private:
+  Handler& _handler;
   // authentication
   Random& _random;
   // connection

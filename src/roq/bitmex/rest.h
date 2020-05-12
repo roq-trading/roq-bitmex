@@ -22,15 +22,20 @@
 #include "roq/bitmex/config.h"
 #include "roq/bitmex/random.h"
 
+#include "roq/bitmex/json/order.h"
+#include "roq/bitmex/json/order_item.h"
+
 namespace roq {
 namespace bitmex {
 
-class Gateway;
-
 class Rest final : public core::web::Client::Handler {
  public:
+  struct Handler {
+    virtual void operator()(const Rest&) = 0;
+  };
+
   Rest(
-      Gateway& gateway,
+      Handler& handler,
       const Config& config,
       Random& random,
       core::event::Base& base,
@@ -53,30 +58,32 @@ class Rest final : public core::web::Client::Handler {
   void create_order(
       const CreateOrder& create_order,
       const std::string_view& cl_ord_id,
-      std::function<void(const core::web::Response&)>&& callback);
+      std::function<void(const core::Promise<json::OrderItem>&)>&& callback);
 
   void modify_order(
       const ModifyOrder& modify_order,
       const std::string_view& request_id,
       const server::OMS_Order& order,
-      std::function<void(const core::web::Response&)>&& callback);
+      std::function<void(const core::Promise<json::OrderItem>&)>&& callback);
 
   void cancel_order(
       const CancelOrder& cancel_order,
       const std::string_view& request_id,
       const server::OMS_Order& order,
-      std::function<void(const core::web::Response&)>&& callback);
+      std::function<void(const core::Promise<json::Order>&)>&& callback);
 
   template <typename T>
   void get(std::function<void(const core::Promise<T>&)>&&);
 
  protected:
+  // core::web::Client::Handler
+
   void operator()(const core::web::Client::Connected&) override;
   void operator()(const core::web::Client::Disconnected&) override;
   void operator()(const core::web::Client::Latency&) override;
 
  private:
-  Gateway& _gateway;
+  Handler& _handler;
   // authentication
   Random& _random;
   // connection
@@ -90,8 +97,6 @@ class Rest final : public core::web::Client::Handler {
   } _counter;
   struct {
     core::metrics::Profile
-      success,
-      failure,
       products,
       accounts,
       create_order,
