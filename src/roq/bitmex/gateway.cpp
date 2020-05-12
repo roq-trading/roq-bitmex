@@ -14,6 +14,8 @@
 #include "roq/core/utils.h"
 #include "roq/core/view.h"
 
+#include "roq/core/http/exceptions.h"
+
 #include "roq/bitmex/options.h"
 
 #include "roq/bitmex/json/utils.h"
@@ -1266,27 +1268,18 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
 
 void Gateway::download_accounts() {
   constexpr auto state = WebSocketDownload::State::ACCOUNTS;
-  _rest.connection.get_accounts(
-      [this](auto& response) {
-        try {
-          auto status = response.status();
-          switch (status) {
-            case core::http::Status::OK:
-              _web_socket.download.check(state);
-              break;
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(
-                      R"(Unable to get accounts, )"
-                      R"(status={})"),
-                  status);
-          }
-        } catch (NotConnected&) {
-          _web_socket.download.retry(state);
-        } catch (TimedOut&) {
-          _web_socket.download.retry(state);
-        }
-      });
+  /*
+  _rest.connection.get<json::Accounts>(
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      _web_socket.download.check(state);
+    } catch (NetworkError&) {
+      _web_socket.download.retry(state);
+    }
+  });
+  */
+  _web_socket.download.check(state);
 }
 
 void Gateway::subscribe_instrument() {

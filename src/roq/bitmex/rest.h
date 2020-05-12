@@ -4,6 +4,8 @@
 
 #include <string_view>
 
+#include "roq/core/promise.h"
+
 #include "roq/core/utils/buffer.h"
 
 #include "roq/core/metrics/counter.h"
@@ -65,8 +67,8 @@ class Rest final : public core::web::Client::Handler {
       const server::OMS_Order& order,
       std::function<void(const core::web::Response&)>&& callback);
 
-  void get_accounts(
-      std::function<void(const core::web::Response&)>&& callback);
+  template <typename T>
+  void get(std::function<void(const core::Promise<T>&)>&&);
 
  protected:
   void operator()(const core::web::Client::Connected&) override;

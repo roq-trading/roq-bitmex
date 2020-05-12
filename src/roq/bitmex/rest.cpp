@@ -302,8 +302,10 @@ void Rest::cancel_order(
       });
 }
 
-void Rest::get_accounts(
-    std::function<void(const core::web::Response&)>&& callback) {
+/* 20200512 -- doesn't look like anything real
+template <>
+void Rest::get(
+    std::function<void(const core::Promise<json::Accounts>&)>&& callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/api/v1/accounts";
   _connection.request(
@@ -312,25 +314,30 @@ void Rest::get_accounts(
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {
-        if (response.success()) {
-          auto [status, body] = response.get();
-          (void) status;  // avoid warning
-          (void) body;  // avoid warning
-          _profile.accounts(
-              [&]() {
-                /* XXX parser has not yet been implemented...
-                core::json::Buffer buffer(_decode_buffer);
-                auto accounts = json::Accounts::parse(
-                    body,
-                    buffer);
-                VLOG(1)("accounts={}", accounts);
-                _gateway(accounts);
-                */
-              });
-        }
-        callback(response);
-      });
+    _profile.accounts(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(_decode_buffer);
+        auto accounts = json::Accounts::parse(
+            response.body(),
+            buffer);
+        VLOG(1)("accounts={}", accounts);
+        core::Promise<json::Accounts> promise(accounts);
+        callback(promise);
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::Accounts> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
+*/
 
 void Rest::operator()(const core::web::Client::Connected&) {
   _gateway(*this);
