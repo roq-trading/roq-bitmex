@@ -19,9 +19,9 @@ WS_URI="wss://$URI/realtime"
 
 $PREFIX ./roq-bitmex \
 	--name "bitmex" \
+	--client-listen-address $CWD/$NAME.sock \
+	--metrics-listen-address 1234 \
 	--config-file "$CONFIG_FILE" \
 	--ws-uri "$WS_URI" \
 	--rest-uri "$REST_URI" \
-	--listen $CWD/$NAME.sock \
-	--metrics 1234 \
 	$@

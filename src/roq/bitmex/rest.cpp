@@ -44,7 +44,7 @@ static auto create_latency(
 
 static auto compute_expires() {
   auto result = core::get_realtime_clock()
-    + std::chrono::seconds{ FLAGS_expires_timeout_secs };
+    + std::chrono::seconds{ FLAGS_rest_expires_timeout_secs };
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
 }  // namespace

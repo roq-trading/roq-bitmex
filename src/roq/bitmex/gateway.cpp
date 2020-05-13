@@ -118,9 +118,9 @@ Gateway::Gateway(
       },
       _bid(FLAGS_cache_mbp_max_depth),
       _ask(FLAGS_cache_mbp_max_depth),
-      _trade(FLAGS_max_trades),
-      _fill(FLAGS_max_fills) {
-  LOG_IF(WARNING, FLAGS_cancel_on_disconnect == false)(
+      _trade(FLAGS_cache_trades_max_depth),
+      _fill(FLAGS_cache_fills_max_depth) {
+  LOG_IF(WARNING, FLAGS_ws_cancel_on_disconnect == false)(
       "Orders will *NOT* be cancelled on disconnect");
 }
 
