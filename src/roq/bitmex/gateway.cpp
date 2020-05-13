@@ -116,8 +116,8 @@ Gateway::Gateway(
           _ssl_context,
         },
       },
-      _bid(FLAGS_max_depth),
-      _ask(FLAGS_max_depth),
+      _bid(FLAGS_cache_mbp_max_depth),
+      _ask(FLAGS_cache_mbp_max_depth),
       _trade(FLAGS_max_trades),
       _fill(FLAGS_max_fills) {
   LOG_IF(WARNING, FLAGS_cancel_on_disconnect == false)(

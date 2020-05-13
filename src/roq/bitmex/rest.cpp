@@ -66,9 +66,9 @@ Rest::Rest(
           core::URI(FLAGS_rest_uri),
           PACKAGE_NAME,
           true,  // keep alive
-          std::chrono::seconds { FLAGS_rate_limit_interval_secs },
-          FLAGS_rate_limit_max_requests,
-          std::chrono::seconds { FLAGS_ping_freq_secs },
+          std::chrono::seconds { FLAGS_rest_rate_limit_interval_secs },
+          FLAGS_rest_rate_limit_max_requests,
+          std::chrono::seconds { FLAGS_rest_ping_freq_secs },
           FLAGS_decode_buffer_size,
           FLAGS_encode_buffer_size,
           FLAGS_rest_ping_path),

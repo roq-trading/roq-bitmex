@@ -15,20 +15,28 @@ DEFINE_string(rest_uri,
     "https://testnet.bitmex.com",
     "REST end-point (URI)");
 
+DEFINE_uint32(rest_ping_freq_secs,
+    5,
+    "ping frequency (seconds)");
+
+DEFINE_string(rest_ping_path,
+    "/",
+    "URI path used for REST connection keep-alive messages");
+
+DEFINE_uint32(rest_rate_limit_interval_secs,
+    60,
+    "rate limit: monitor interval (seconds)");
+
+DEFINE_uint32(rest_rate_limit_max_requests,
+    60,
+    "rate limit: max requests (per interval)");
+
 DEFINE_string(ws_uri,
     "wss://testnet.bitmex.com/realtime",
     "WebSocket end-point (URI)");
 
-DEFINE_uint32(rate_limit_interval_secs,
-    uint32_t{60},
-    "rate limit: monitor interval (seconds)");
-
-DEFINE_uint32(rate_limit_max_requests,
-    uint32_t{60},
-    "rate limit: max requests (per interval)");
-
-DEFINE_uint32(ping_freq_secs,
-    uint32_t{5},
+DEFINE_uint32(ws_ping_freq_secs,
+    5,
     "ping frequency (seconds)");
 
 DEFINE_uint32(download_timeout_secs,
@@ -59,10 +67,6 @@ DEFINE_uint32(decode_buffer_size,
     uint32_t{10485760},
     "decode buffer size");
 
-DEFINE_uint32(reconnect_secs,
-    uint32_t{3},
-    "time before reconnect (seconds)");
-
 DEFINE_uint32(cancel_all_after_secs,
     uint32_t{15},
     "cancel all after (seconds), requires cancel-on-disconnect");
@@ -70,10 +74,6 @@ DEFINE_uint32(cancel_all_after_secs,
 DEFINE_uint32(request_expires_secs,
     uint32_t{60},
     "request expires after (seconds)");
-
-DEFINE_string(rest_ping_path,
-    "/",
-    "URI path used for REST connection keep-alive messages");
 
 DEFINE_uint32(expires_timeout_secs,
     uint32_t{1},
