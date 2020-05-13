@@ -93,10 +93,6 @@ bool Rest::ready() const {
   return _connection.ready();
 }
 
-void Rest::close() {
-  _connection.close();
-}
-
 void Rest::operator()(const StartEvent&) {
   _connection.start();
 }
@@ -180,7 +176,6 @@ void Rest::create_order(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::OrderItem> promise(std::current_exception());
         callback(promise);
       }
@@ -238,7 +233,6 @@ void Rest::modify_order(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::OrderItem> promise(std::current_exception());
         callback(promise);
       }
@@ -295,7 +289,6 @@ void Rest::cancel_order(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::Order> promise(std::current_exception());
         callback(promise);
       }
@@ -331,7 +324,6 @@ void Rest::get(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::Accounts> promise(std::current_exception());
         callback(promise);
       }

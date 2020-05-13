@@ -47,8 +47,6 @@ class Rest final : public core::web::Client::Handler {
 
   bool ready() const;
 
-  void close();
-
   void operator()(const StartEvent&);
   void operator()(const StopEvent&);
   void operator()(const TimerEvent&);
