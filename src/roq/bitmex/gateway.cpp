@@ -1225,11 +1225,15 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
 }
 
 void Gateway::download_accounts() {
-  constexpr auto state = WebSocketDownload::State::ACCOUNTS;
+  assert(false);
   /*
+  constexpr auto state = WebSocketDownload::State::ACCOUNTS;
+  auto sequence = _web_socket.download.sequence();
   _rest.connection.get<json::Accounts>(
-      [this](auto& promise) {
+      [this, sequence](auto& promise) {
     try {
+      if (_web_socket.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       _web_socket.download.check(state);
     } catch (NetworkError&) {
@@ -1237,7 +1241,6 @@ void Gateway::download_accounts() {
     }
   });
   */
-  _web_socket.download.check(state);
 }
 
 void Gateway::subscribe_instrument() {
