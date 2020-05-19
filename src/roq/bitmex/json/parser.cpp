@@ -54,7 +54,7 @@ void Parser::dispatch(
           break;
         case Field::UNKNOWN:
           DLOG(FATAL)(
-              FMT_STRING("Unknown key=\"{}\""),
+              FMT_STRING(R"(Unknown key="{}")"),
               key);
           break;
         case Field::ACTION:
@@ -269,7 +269,9 @@ void Parser::dispatch(
         break;
     }
   }
-  LOG(WARNING)(FMT_STRING("message=\"{}\""), message);
+  LOG(WARNING)(
+      FMT_STRING(R"(message="{}")"),
+      message);
   LOG(FATAL)("Unexpected");
 }
 
