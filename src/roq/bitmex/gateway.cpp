@@ -395,6 +395,10 @@ void Gateway::operator()(
     });
     if (found == false) {
       LOG(WARNING)("*** EXTERNAL ORDER ***");
+      LOG(WARNING)(
+          FMT_STRING("action={}, execution={}"),
+          action,
+          execution);
     }
   }
 /*
@@ -1180,6 +1184,9 @@ void Gateway::operator()(const json::OrderItem& order_item) {
 
   if (found == false) {
     LOG(WARNING)("*** EXTERNAL ORDER ***");
+    LOG(WARNING)(
+        FMT_STRING("order_item={}"),
+        order_item);
   }
 }
 
