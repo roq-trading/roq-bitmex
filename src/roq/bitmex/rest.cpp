@@ -157,6 +157,7 @@ void Rest::create_order(
   _connection.request(
       method,
       path,
+      std::string_view(),  // query
       headers,
       message,
       [this, callback](auto& response) {
@@ -214,6 +215,7 @@ void Rest::modify_order(
   _connection.request(
       method,
       path,
+      std::string_view(),  // query
       headers,
       message,
       [this, callback](auto& response) {
@@ -268,6 +270,7 @@ void Rest::cancel_order(
   _connection.request(
       method,
       path,
+      std::string_view(),  // query
       headers,
       message,
       [this, callback](auto& response) {
@@ -305,6 +308,7 @@ void Rest::get(
   _connection.request(
       method,
       path,
+      std::string_view(),  // query
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {
