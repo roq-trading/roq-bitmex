@@ -103,15 +103,15 @@ void WebSocket::close() {
   _connection.close();
 }
 
-void WebSocket::operator()(const StartEvent&) {
+void WebSocket::operator()(const server::StartEvent&) {
   _connection.start();
 }
 
-void WebSocket::operator()(const StopEvent&) {
+void WebSocket::operator()(const server::StopEvent&) {
   _connection.stop();
 }
 
-void WebSocket::operator()(const TimerEvent& event) {
+void WebSocket::operator()(const server::TimerEvent& event) {
   if (_connection.refresh(event.now) == false)
     return;
   if (FLAGS_ws_cancel_on_disconnect &&

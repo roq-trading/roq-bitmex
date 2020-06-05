@@ -17,6 +17,8 @@
 
 #include "roq/core/web/socket.h"
 
+#include "roq/server.h"
+
 #include "roq/bitmex/config.h"
 #include "roq/bitmex/random.h"
 
@@ -56,9 +58,9 @@ class WebSocket final
 
   void close();
 
-  void operator()(const StartEvent&);
-  void operator()(const StopEvent&);
-  void operator()(const TimerEvent&);
+  void operator()(const server::StartEvent&);
+  void operator()(const server::StopEvent&);
+  void operator()(const server::TimerEvent&);
 
   void subscribe(const std::string_view& topic);
 

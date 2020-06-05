@@ -19,6 +19,8 @@
 
 #include "roq/core/web/client.h"
 
+#include "roq/server.h"
+
 #include "roq/bitmex/config.h"
 #include "roq/bitmex/random.h"
 
@@ -47,9 +49,9 @@ class Rest final : public core::web::Client::Handler {
 
   bool ready() const;
 
-  void operator()(const StartEvent&);
-  void operator()(const StopEvent&);
-  void operator()(const TimerEvent&);
+  void operator()(const server::StartEvent&);
+  void operator()(const server::StopEvent&);
+  void operator()(const server::TimerEvent&);
 
   void operator()(Metrics& metrics);
 

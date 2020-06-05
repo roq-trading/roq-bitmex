@@ -93,15 +93,15 @@ bool Rest::ready() const {
   return _connection.ready();
 }
 
-void Rest::operator()(const StartEvent&) {
+void Rest::operator()(const server::StartEvent&) {
   _connection.start();
 }
 
-void Rest::operator()(const StopEvent&) {
+void Rest::operator()(const server::StopEvent&) {
   _connection.stop();
 }
 
-void Rest::operator()(const TimerEvent& event) {
+void Rest::operator()(const server::TimerEvent& event) {
   _connection.refresh(event.now);
 }
 
