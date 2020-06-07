@@ -16,11 +16,13 @@ roq_bitmex_test_LDADD = \
 	$(DATE_LIBS) \
 	$(ROQ_CORE_LIBS) \
 	$(ROQ_API_LIBS) \
+	$(ROQ_LOGGING_LIBS) \
 	$(FMT_LIBS) \
 	$(DATE_LIBS)
 roq_bitmex_test_CPPFLAGS = \
 	-I$(top_builddir)/src \
 	-I$(top_srcdir)/third_party/googletest/googletest/include \
+	$(ROQ_LOGGING_CFLAGS) \
 	$(ROQ_API_CFLAGS) \
 	$(ROQ_CORE_CFLAGS) \
 	$(FMT_CFLAGS) \
