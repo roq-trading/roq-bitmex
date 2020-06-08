@@ -228,9 +228,9 @@ void Gateway::operator()(
   });
 }
 
-void Gateway::operator()(Metrics& metrics) {
-  _web_socket.connection(metrics);
-  _rest.connection(metrics);
+void Gateway::operator()(metrics::Writer& writer) {
+  _web_socket.connection(writer);
+  _rest.connection(writer);
 }
 
 // ws

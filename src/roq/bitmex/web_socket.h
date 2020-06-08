@@ -68,7 +68,7 @@ class WebSocket final
       const std::string_view& topic,
       const std::vector<std::string>& filter);
 
-  void operator()(Metrics& metrics);
+  void operator()(metrics::Writer& writer);
 
  protected:
   // core::web::Socket::Handler

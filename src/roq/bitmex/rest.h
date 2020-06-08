@@ -53,7 +53,7 @@ class Rest final : public core::web::Client::Handler {
   void operator()(const server::StopEvent&);
   void operator()(const server::TimerEvent&);
 
-  void operator()(Metrics& metrics);
+  void operator()(metrics::Writer& writer);
 
   void create_order(
       const CreateOrder& create_order,

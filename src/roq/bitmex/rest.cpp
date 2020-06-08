@@ -105,15 +105,15 @@ void Rest::operator()(const server::TimerEvent& event) {
   _connection.refresh(event.now);
 }
 
-void Rest::operator()(Metrics& metrics) {
-  metrics
+void Rest::operator()(metrics::Writer& writer) {
+  writer
     // counter
-    .write(_counter.disconnect)
+    .write(_counter.disconnect, metrics::COUNTER)
     // profile
-    .write(_profile.products)
-    .write(_profile.accounts)
+    .write(_profile.products, metrics::PROFILE)
+    .write(_profile.accounts, metrics::PROFILE)
     // latency
-    .write(_latency.ping);
+    .write(_latency.ping, metrics::LATENCY);
 }
 
 void Rest::create_order(

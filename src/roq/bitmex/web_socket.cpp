@@ -154,30 +154,30 @@ void WebSocket::subscribe(
   }
 }
 
-void WebSocket::operator()(Metrics& metrics) {
-  metrics
+void WebSocket::operator()(metrics::Writer& writer) {
+  writer
     // counter
-    .write(_counter.disconnect)
+    .write(_counter.disconnect, metrics::COUNTER)
     // profile
-    .write(_profile.parse)
-    .write(_profile.cancel_all_after)
-    .write(_profile.error)
-    .write(_profile.execution)
-    .write(_profile.funding)
-    .write(_profile.handshake)
-    .write(_profile.instrument)
-    .write(_profile.liquidation)
-    .write(_profile.margin)
-    .write(_profile.order)
-    .write(_profile.order_book_l2)
-    .write(_profile.position)
-    .write(_profile.quote)
-    .write(_profile.settlement)
-    .write(_profile.subscribe)
-    .write(_profile.trade)
+    .write(_profile.parse, metrics::PROFILE)
+    .write(_profile.cancel_all_after, metrics::PROFILE)
+    .write(_profile.error, metrics::PROFILE)
+    .write(_profile.execution, metrics::PROFILE)
+    .write(_profile.funding, metrics::PROFILE)
+    .write(_profile.handshake, metrics::PROFILE)
+    .write(_profile.instrument, metrics::PROFILE)
+    .write(_profile.liquidation, metrics::PROFILE)
+    .write(_profile.margin, metrics::PROFILE)
+    .write(_profile.order, metrics::PROFILE)
+    .write(_profile.order_book_l2, metrics::PROFILE)
+    .write(_profile.position, metrics::PROFILE)
+    .write(_profile.quote, metrics::PROFILE)
+    .write(_profile.settlement, metrics::PROFILE)
+    .write(_profile.subscribe, metrics::PROFILE)
+    .write(_profile.trade, metrics::PROFILE)
     // latency
-    .write(_latency.ping)
-    .write(_latency.heartbeat);
+    .write(_latency.ping, metrics::LATENCY)
+    .write(_latency.heartbeat, metrics::LATENCY);
 }
 
 void WebSocket::operator()(const core::web::Socket::Connected&) {
