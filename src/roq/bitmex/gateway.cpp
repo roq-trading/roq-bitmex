@@ -345,7 +345,7 @@ void Gateway::operator()(
             _fill,
             fill_length,
             item);
-        if (unlikely(success == false)) {
+        if (ROQ_PREDICT_FALSE(success == false)) {
           LOG(FATAL)(
               FMT_STRING(
                 R"(Insufficient fill array size: )"
@@ -356,7 +356,7 @@ void Gateway::operator()(
       }
 
       if (last && fill_length) {
-        if (likely(success)) {
+        if (ROQ_PREDICT_TRUE(success)) {
           TradeUpdate trade_update {
             .account = order.account,
             .order_id = order.user_order_id,
@@ -780,7 +780,7 @@ void Gateway::operator()(
       return;
     }
   }
-  if (unlikely(success == false)) {
+  if (ROQ_PREDICT_FALSE(success == false)) {
     LOG(FATAL)(
         FMT_STRING(
           R"(Insufficient bid/ask array size(s): )"
@@ -1012,7 +1012,7 @@ void Gateway::operator()(
         trade_length,
         item);
   }
-  if (unlikely(success == false)) {
+  if (ROQ_PREDICT_FALSE(success == false)) {
     LOG(FATAL)(
         FMT_STRING(
           R"(Insufficient trade array size: )"
