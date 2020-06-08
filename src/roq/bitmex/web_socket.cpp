@@ -4,7 +4,7 @@
 
 #include <fmt/format.h>
 
-#include "roq/patterns.h"
+#include "roq/core/patterns.h"
 
 #include "roq/core/clock.h"
 
