@@ -27,7 +27,7 @@ requirements:
     - roq-core =={{ version }}
     - roq-server =={{ version }}
     - roq-oss-crossguid
-    - roq-oss-date
+    - roq-oss-date ==2.4.1
     - roq-oss-http-parser
     - roq-oss-benchmark
 
