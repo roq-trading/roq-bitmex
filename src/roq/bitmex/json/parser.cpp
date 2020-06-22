@@ -37,7 +37,8 @@ void update(Type& result, const Type type) {
 void Parser::dispatch(
     Parser::Handler& handler,
     const std::string_view& message,
-    core::json::Buffer& buffer) {
+    core::json::Buffer& buffer,
+    const server::Trace& trace) {
   Parser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN;
@@ -81,67 +82,100 @@ void Parser::dispatch(
               case Table::EXECUTION: {
                 Execution execution(value, buffer);
                 dispatched = true;
-                handler(action, execution);
+                handler(
+                    action,
+                    execution,
+                    trace);
                 break;
               }
               case Table::FUNDING: {
                 Funding funding(value, buffer);
                 dispatched = true;
-                handler(action, funding);
+                handler(
+                    action,
+                    funding,
+                    trace);
                 break;
               }
               case Table::INSTRUMENT: {
                 Instrument instrument(value, buffer);
                 dispatched = true;
-                handler(action, instrument);
+                handler(
+                    action,
+                    instrument,
+                    trace);
                 break;
               }
               case Table::LIQUIDATION: {
                 Liquidation liquidation(value, buffer);
                 dispatched = true;
-                handler(action, liquidation);
+                handler(
+                    action,
+                    liquidation,
+                    trace);
                 break;
               }
               case Table::MARGIN: {
                 Margin margin(value, buffer);
                 dispatched = true;
-                handler(action, margin);
+                handler(
+                    action,
+                    margin,
+                    trace);
                 break;
               }
               case Table::ORDER: {
                 Order order(value, buffer);
                 dispatched = true;
-                handler(action, order);
+                handler(
+                    action,
+                    order,
+                    trace);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
                 OrderBookL2 order_book_l2(value, buffer);
                 dispatched = true;
-                handler(action, order_book_l2);
+                handler(
+                    action,
+                    order_book_l2,
+                    trace);
                 break;
               }
               case Table::POSITION: {
                 Position position(value, buffer);
                 dispatched = true;
-                handler(action, position);
+                handler(
+                    action,
+                    position,
+                    trace);
                 break;
               }
               case Table::QUOTE: {
                 Quote quote(value, buffer);
                 dispatched = true;
-                handler(action, quote);
+                handler(
+                    action,
+                    quote,
+                    trace);
                 break;
               }
               case Table::SETTLEMENT: {
                 Settlement settlement(value, buffer);
                 dispatched = true;
-                handler(action, settlement);
+                handler(
+                    action,
+                    settlement,
+                    trace);
                 break;
               }
               case Table::TRADE: {
                 Trade trade(value, buffer);
                 dispatched = true;
-                handler(action, trade);
+                handler(
+                    action,
+                    trade,
+                    trace);
                 break;
               }
             }

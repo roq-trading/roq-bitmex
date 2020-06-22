@@ -33,14 +33,38 @@ class WebSocket final
  public:
   struct Handler {
     virtual void operator()(const WebSocket&) = 0;
-    virtual void operator()(const json::Action, const json::Execution&) = 0;
-    virtual void operator()(const json::Action, const json::Instrument&) = 0;
-    virtual void operator()(const json::Action, const json::Order&) = 0;
-    virtual void operator()(const json::Action, const json::OrderBookL2&) = 0;
-    virtual void operator()(const json::Action, const json::Position&) = 0;
-    virtual void operator()(const json::Action, const json::Quote&) = 0;
-    virtual void operator()(const json::Action, const json::Settlement&) = 0;
-    virtual void operator()(const json::Action, const json::Trade&) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::Execution&,
+        const server::Trace& trace) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::Instrument&,
+        const server::Trace& trace) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::Order&,
+        const server::Trace& trace) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::OrderBookL2&,
+        const server::Trace& trace) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::Position&,
+        const server::Trace& trace) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::Quote&,
+        const server::Trace& trace) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::Settlement&,
+        const server::Trace& trace) = 0;
+    virtual void operator()(
+        const json::Action,
+        const json::Trade&,
+        const server::Trace& trace) = 0;
   };
 
   WebSocket(
@@ -87,17 +111,50 @@ class WebSocket final
   void operator()(const json::Handshake&) override;
   void operator()(const json::Subscribe&) override;
 
-  void operator()(const json::Action, const json::Execution&) override;
-  void operator()(const json::Action, const json::Funding&) override;
-  void operator()(const json::Action, const json::Instrument&) override;
-  void operator()(const json::Action, const json::Liquidation&) override;
-  void operator()(const json::Action, const json::Margin&) override;
-  void operator()(const json::Action, const json::Order&) override;
-  void operator()(const json::Action, const json::OrderBookL2&) override;
-  void operator()(const json::Action, const json::Position&) override;
-  void operator()(const json::Action, const json::Quote&) override;
-  void operator()(const json::Action, const json::Settlement&) override;
-  void operator()(const json::Action, const json::Trade&) override;
+  void operator()(
+      const json::Action,
+      const json::Execution&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Funding&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Instrument&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Liquidation&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Margin&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Order&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::OrderBookL2&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Position&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Quote&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Settlement&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Trade&,
+      const server::Trace&) override;
 
  private:
   std::string create_upgrade_headers();

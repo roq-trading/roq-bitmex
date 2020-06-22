@@ -7,6 +7,8 @@
 
 #include "roq/core/json/buffer.h"
 
+#include "roq/server.h"
+
 #include "roq/bitmex/json/action.h"
 #include "roq/bitmex/json/cancel_all_after.h"
 #include "roq/bitmex/json/error.h"
@@ -37,17 +39,50 @@ struct Parser final {
     virtual void operator()(const Handshake&) = 0;
     virtual void operator()(const Subscribe&) = 0;
     // table
-    virtual void operator()(const Action, const Execution&) = 0;
-    virtual void operator()(const Action, const Funding&) = 0;
-    virtual void operator()(const Action, const Instrument&) = 0;
-    virtual void operator()(const Action, const Liquidation&) = 0;
-    virtual void operator()(const Action, const Margin&) = 0;
-    virtual void operator()(const Action, const Order&) = 0;
-    virtual void operator()(const Action, const OrderBookL2&) = 0;
-    virtual void operator()(const Action, const Position&) = 0;
-    virtual void operator()(const Action, const Quote&) = 0;
-    virtual void operator()(const Action, const Settlement&) = 0;
-    virtual void operator()(const Action, const Trade&) = 0;
+    virtual void operator()(
+        const Action,
+        const Execution&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Funding&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Instrument&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Liquidation&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Margin&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Order&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const OrderBookL2&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Position&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Quote&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Settlement&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const Action,
+        const Trade&,
+        const server::Trace&) = 0;
   };
 
   std::string_view action;
@@ -65,7 +100,8 @@ struct Parser final {
   static void dispatch(
       Handler& handler,
       const std::string_view& message,
-      core::json::Buffer& buffer);
+      core::json::Buffer& buffer,
+      const server::Trace& trace);
 };
 
 }  // namespace json

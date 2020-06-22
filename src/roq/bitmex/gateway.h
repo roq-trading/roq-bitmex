@@ -70,14 +70,38 @@ class Gateway final
   // WebSocket::Handler
 
   void operator()(const WebSocket&) override;
-  void operator()(const json::Action, const json::Execution&) override;
-  void operator()(const json::Action, const json::Instrument&) override;
-  void operator()(const json::Action, const json::Order&) override;
-  void operator()(const json::Action, const json::OrderBookL2&) override;
-  void operator()(const json::Action, const json::Position&) override;
-  void operator()(const json::Action, const json::Quote&) override;
-  void operator()(const json::Action, const json::Settlement&) override;
-  void operator()(const json::Action, const json::Trade&) override;
+  void operator()(
+      const json::Action,
+      const json::Execution&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Instrument&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Order&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::OrderBookL2&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Position&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Quote&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Settlement&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Action,
+      const json::Trade&,
+      const server::Trace&) override;
 
   // Rest::Handler
 
@@ -105,6 +129,7 @@ class Gateway final
       size_t bid_length,
       size_t ask_length,
       bool snapshot,
+      const server::Trace& trace,
       bool is_last);
 
   void operator()(const json::OrderItem&);
@@ -113,12 +138,14 @@ class Gateway final
   template <typename T>
   void enqueue(
       const T& event,
+      const server::Trace& trace,
       bool is_last);
 
   template <typename T>
   void enqueue(
       uint8_t user_id,
       const T& event,
+      const server::Trace& trace,
       bool is_last);
 
   using WebSocketDownload = server::Download<WebSocketState>;

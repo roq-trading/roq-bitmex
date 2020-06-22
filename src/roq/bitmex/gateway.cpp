@@ -302,7 +302,8 @@ auto compute_request_status_2(
 
 void Gateway::operator()(
     json::Action action,
-    const json::Execution& execution) {
+    const json::Execution& execution,
+    const server::Trace& trace) {
   (void)action;  // avoid warning
   DLOG(INFO)(
       FMT_STRING("execution={}"),
@@ -325,6 +326,7 @@ void Gateway::operator()(
         item.order_id,
         item.cl_ord_id,
         order_lookup,
+        trace,
         [&](const auto& order, auto& result) {
       result.request_status = compute_request_status_2(
           order.request_type,
@@ -377,6 +379,7 @@ void Gateway::operator()(
           enqueue(
               order.user_id,
               trade_update,
+              trace,
               true);
         } else {
           LOG(FATAL)(
@@ -652,7 +655,8 @@ working_indicator=false
 
 void Gateway::operator()(
     json::Action action,
-    const json::Instrument& instrument) {
+    const json::Instrument& instrument,
+    const server::Trace& trace) {
   switch (action) {
     case json::Action::UNDEFINED:
     case json::Action::UNKNOWN:
@@ -673,9 +677,15 @@ void Gateway::operator()(
           ++security_count;
           auto& product = find_product(item);
           auto reference_data = product.create_reference_data(item);
-          enqueue(reference_data, false);
+          enqueue(
+              reference_data,
+              trace,
+              false);
           auto market_status = product.create_market_status(item);
-          enqueue(market_status, true);
+          enqueue(
+              market_status,
+              trace,
+              true);
         }
         VLOG(2)(
             FMT_STRING(R"(- securities: {} (/{}))"),
@@ -695,7 +705,10 @@ void Gateway::operator()(
         auto& product = find_product(item);
         // XXX check if dirty
         auto market_status = product.create_market_status(item);
-        enqueue(market_status, true);
+        enqueue(
+            market_status,
+            trace,
+            true);
       }
       break;
     }
@@ -707,7 +720,8 @@ void Gateway::operator()(
 
 void Gateway::operator()(
     const json::Action action,
-    const json::Order& order) {
+    const json::Order& order,
+    const server::Trace& trace) {
   DLOG(INFO)(
       FMT_STRING(R"(action={} order={})"),
       action,
@@ -718,7 +732,8 @@ void Gateway::operator()(
 
 void Gateway::operator()(
     const json::Action action,
-    const json::OrderBookL2& order_book_l2) {
+    const json::OrderBookL2& order_book_l2,
+    const server::Trace& trace) {
   assert(action != json::Action::UNKNOWN);
   auto snapshot = action == json::Action::PARTIAL;
   // note!
@@ -741,6 +756,7 @@ void Gateway::operator()(
           bid_length,
           ask_length,
           snapshot,
+          trace,
           false);
       previous = item.symbol;
       bid_length = ask_length = 0;
@@ -796,6 +812,7 @@ void Gateway::operator()(
       bid_length,
       ask_length,
       snapshot,
+      trace,
       true);
   // download complete?
   if (snapshot) {
@@ -807,7 +824,8 @@ void Gateway::operator()(
 
 void Gateway::operator()(
     const json::Action action,
-    const json::Position& position) {
+    const json::Position& position,
+    const server::Trace& trace) {
   DLOG(INFO)(
       FMT_STRING("action={}, position={}"),
       action,
@@ -837,9 +855,11 @@ void Gateway::operator()(
     };
     enqueue(
         buy,
+        trace,
         false);
     enqueue(
         sell,
+        trace,
         true);
   }
 /*
@@ -941,7 +961,8 @@ var_margin=0.0
 
 void Gateway::operator()(
     const json::Action,
-    const json::Quote& quote) {
+    const json::Quote& quote,
+    const server::Trace& trace) {
   for (auto& item : quote.data) {
     TopOfBook top_of_book {
       .exchange = FLAGS_exchange,
@@ -960,18 +981,21 @@ void Gateway::operator()(
         top_of_book);
     enqueue(
         top_of_book,
+        trace,
         true);  // XXX not always correct
   }
 }
 
 void Gateway::operator()(
     const json::Action,
-    const json::Settlement&) {
+    const json::Settlement&,
+    const server::Trace&) {
 }
 
 void Gateway::operator()(
     const json::Action action,
-    const json::Trade& trade) {
+    const json::Trade& trade,
+    const server::Trace& trace) {
   if (action != json::Action::INSERT)
     return;
   std::string_view previous;
@@ -1002,6 +1026,7 @@ void Gateway::operator()(
             trade_summary);
         enqueue(
             trade_summary,
+            trace,
             false);
       }
       previous = item.symbol;
@@ -1035,6 +1060,7 @@ void Gateway::operator()(
         trade_summary);
     enqueue(
         trade_summary,
+        trace,
         true);
   }
 }
@@ -1141,6 +1167,8 @@ void Gateway::operator()(const json::OrderItem& order_item) {
   if (FLAGS_allow_inconsistent_order_updates == false)
     return;
 
+  server::Trace trace;  // XXX not correct (*after* parsing)
+
   auto order_status = compute_order_status(
       order_item.ord_status,
       order_item.working_indicator);
@@ -1162,6 +1190,7 @@ void Gateway::operator()(const json::OrderItem& order_item) {
       order_item.order_id,
       order_item.cl_ord_id,
       order_lookup,
+      trace,
       [&](const auto& order, auto& result) {
     result.request_status = compute_request_status(
         order.request_type,
@@ -1199,11 +1228,13 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
   if (gateway_status == _market_data_status)
     return;
   _market_data_status = gateway_status;
+  server::Trace trace;
   MarketDataStatus market_data_status {
     .status = _market_data_status,
   };
   enqueue(
       market_data_status,
+      trace,
       true);
   LOG(INFO)(
       FMT_STRING(R"(market_data_status={})"),
@@ -1214,12 +1245,14 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
   if (gateway_status == _order_manager_status)
     return;
   _order_manager_status = gateway_status;
+  server::Trace trace;
   OrderManagerStatus order_manager_status {
     .account = _account,
     .status = _order_manager_status,
   };
   enqueue(
       order_manager_status,
+      trace,
       true);
   LOG(INFO)(
       FMT_STRING(R"(order_manager_status={})"),
@@ -1354,6 +1387,7 @@ void Gateway::publish_market_by_price(
     size_t bid_length,
     size_t ask_length,
     bool snapshot,
+    const server::Trace& trace,
     bool is_last) {
   assert(symbol.empty() == false);
   if ((bid_length + ask_length) == 0)
@@ -1380,18 +1414,18 @@ void Gateway::publish_market_by_price(
       market_by_price);
   enqueue(
       market_by_price,
+      trace,
       is_last);
 }
 
 template <typename T>
 void Gateway::enqueue(
     const T& event,
+    const server::Trace& trace,
     bool is_last) {
-  auto now = core::get_system_clock();
   _dispatcher(
       event,
-      now,
-      now,
+      trace,
       is_last);
 }
 
@@ -1399,13 +1433,12 @@ template <typename T>
 void Gateway::enqueue(
     uint8_t user_id,
     const T& event,
+    const server::Trace& trace,
     bool is_last) {
-  auto now = core::get_system_clock();
   _dispatcher(
       user_id,
       event,
-      now,
-      now,
+      trace,
       is_last);
 }
 

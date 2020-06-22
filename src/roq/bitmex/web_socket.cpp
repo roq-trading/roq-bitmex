@@ -236,11 +236,13 @@ void WebSocket::parse(const std::string_view& message) {
 }
 
 void WebSocket::parse_helper(const std::string_view& message) {
+  server::Trace trace;
   core::json::Buffer buffer(_decode_buffer);
   json::Parser::dispatch(
       *this,
       message,
-      buffer);
+      buffer,
+      trace);
 }
 
 void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
@@ -318,141 +320,179 @@ void WebSocket::operator()(const json::Subscribe& subscribe) {
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Execution& execution) {
+    const json::Execution& execution,
+    const server::Trace& trace) {
   _profile.execution(
       [&]() {
         VLOG(1)(
             FMT_STRING(R"(action={}, execution={})"),
             action,
             execution);
-        _handler(action, execution);
+        _handler(
+            action,
+            execution,
+            trace);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Funding& funding) {
+    const json::Funding& funding,
+    const server::Trace&) {
   _profile.funding(
       [&]() {
         VLOG(2)(
             FMT_STRING(R"(action={}, funding={})"),
             action,
             funding);
+        // XXX not used
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Instrument& instrument) {
+    const json::Instrument& instrument,
+    const server::Trace& trace) {
   _profile.instrument(
       [&]() {
         VLOG(2)(
             FMT_STRING(R"(action={}, instrument={})"),
             action,
             instrument);
-        _handler(action, instrument);
+        _handler(
+            action,
+            instrument,
+            trace);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Liquidation& liquidation) {
+    const json::Liquidation& liquidation,
+    const server::Trace&) {
   _profile.liquidation(
       [&]() {
         VLOG(2)(
             FMT_STRING(R"(action={}, liquidation={})"),
             action,
             liquidation);
+        /// XXX not used
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Margin& margin) {
+    const json::Margin& margin,
+    const server::Trace&) {
   _profile.margin(
       [&]() {
         VLOG(2)(
             FMT_STRING(R"(action={}, margin={})"),
             action,
             margin);
+        /// XXX not used
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Order& order) {
+    const json::Order& order,
+    const server::Trace& trace) {
   _profile.order(
       [&]() {
         VLOG(1)(
             FMT_STRING(R"(action={}, order={})"),
             action,
             order);
-        _handler(action, order);
+        _handler(
+            action,
+            order,
+            trace);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::OrderBookL2& order_book_l2) {
+    const json::OrderBookL2& order_book_l2,
+    const server::Trace& trace) {
   _profile.order_book_l2(
       [&]() {
         VLOG(3)(
             FMT_STRING(R"(action={}, order_book_l2={})"),
             action,
             order_book_l2);
-        _handler(action, order_book_l2);
+        _handler(
+            action,
+            order_book_l2,
+            trace);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Position& position) {
+    const json::Position& position,
+    const server::Trace& trace) {
   _profile.position(
       [&]() {
         VLOG(2)(
             FMT_STRING(R"(action={}, position={})"),
             action,
             position);
-        _handler(action, position);
+        _handler(
+            action,
+            position,
+            trace);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Quote& quote) {
+    const json::Quote& quote,
+    const server::Trace& trace) {
   _profile.quote(
       [&]() {
         VLOG(3)(
             FMT_STRING(R"(action={}, quote={})"),
             action,
             quote);
-        _handler(action, quote);
+        _handler(
+            action,
+            quote,
+            trace);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Settlement& settlement) {
+    const json::Settlement& settlement,
+    const server::Trace& trace) {
   _profile.settlement(
       [&]() {
         VLOG(3)(
             FMT_STRING(R"(action={}, settlement={})"),
             action,
             settlement);
-        _handler(action, settlement);
+        _handler(
+            action,
+            settlement,
+            trace);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
-    const json::Trade& trade) {
+    const json::Trade& trade,
+    const server::Trace& trace) {
   _profile.trade(
       [&]() {
         VLOG(2)(
             FMT_STRING(R"(action={}, trade={})"),
             action,
             trade);
-        _handler(action, trade);
+        _handler(
+            action,
+            trade,
+            trace);
       });
 }
 
