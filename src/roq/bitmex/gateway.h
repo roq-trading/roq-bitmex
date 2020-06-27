@@ -50,18 +50,18 @@ class Gateway final
   void operator()(const server::StartEvent&) override;
   void operator()(const server::StopEvent&) override;
   void operator()(const server::TimerEvent&) override;
-  void operator()(const server::ConnectionStatusEvent&) override;
+  void operator()(const Event<ConnectionStatus>&) override;
 
   void operator()(
-      const CreateOrderEvent& event,
+      const Event<CreateOrder>& event,
       const std::string_view& request_id,
       uint32_t gateway_order_id) override;
   void operator()(
-      const ModifyOrderEvent& event,
+      const Event<ModifyOrder>& event,
       const std::string_view& request_id,
       const server::OMS_Order& order) override;
   void operator()(
-      const CancelOrderEvent& event,
+      const Event<CancelOrder>& event,
       const std::string_view& request_id,
       const server::OMS_Order& order) override;
 
