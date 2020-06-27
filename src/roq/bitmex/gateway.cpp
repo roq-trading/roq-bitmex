@@ -721,7 +721,7 @@ void Gateway::operator()(
 void Gateway::operator()(
     const json::Action action,
     const json::Order& order,
-    const server::Trace& trace) {
+    const server::Trace&) {
   DLOG(INFO)(
       FMT_STRING(R"(action={} order={})"),
       action,
@@ -1395,7 +1395,7 @@ void Gateway::publish_market_by_price(
   LOG_IF(INFO, snapshot)(
       FMT_STRING(R"(Received market data snapshot for symbol="{}")"),
       symbol);
-  MarketByPrice market_by_price {
+  MarketByPriceUpdate market_by_price_update {
     .exchange = FLAGS_exchange,
     .symbol = symbol,
     .bids = {
@@ -1410,10 +1410,10 @@ void Gateway::publish_market_by_price(
     .exchange_time_utc = {},
     };
   VLOG(3)(
-      FMT_STRING(R"(market_by_price={})"),
-      market_by_price);
+      FMT_STRING(R"(market_by_price_update={})"),
+      market_by_price_update);
   enqueue(
-      market_by_price,
+      market_by_price_update,
       trace,
       is_last);
 }
