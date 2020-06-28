@@ -93,16 +93,16 @@ bool Rest::ready() const {
   return _connection.ready();
 }
 
-void Rest::operator()(const server::StartEvent&) {
+void Rest::operator()(const Event<Start>&) {
   _connection.start();
 }
 
-void Rest::operator()(const server::StopEvent&) {
+void Rest::operator()(const Event<Stop>&) {
   _connection.stop();
 }
 
-void Rest::operator()(const server::TimerEvent& event) {
-  _connection.refresh(event.now);
+void Rest::operator()(const Event<Timer>& event) {
+  _connection.refresh(event.value.now);
 }
 
 void Rest::operator()(metrics::Writer& writer) {

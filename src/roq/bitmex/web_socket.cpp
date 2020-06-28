@@ -102,22 +102,22 @@ void WebSocket::close() {
   _connection.close();
 }
 
-void WebSocket::operator()(const server::StartEvent&) {
+void WebSocket::operator()(const Event<Start>&) {
   _connection.start();
 }
 
-void WebSocket::operator()(const server::StopEvent&) {
+void WebSocket::operator()(const Event<Stop>&) {
   _connection.stop();
 }
 
-void WebSocket::operator()(const server::TimerEvent& event) {
-  if (_connection.refresh(event.now) == false)
+void WebSocket::operator()(const Event<Timer>& event) {
+  if (_connection.refresh(event.value.now) == false)
     return;
   if (FLAGS_ws_cancel_on_disconnect &&
       FLAGS_ws_cancel_all_after_secs &&
       _ready &&
-      _next_cancel_all_after <= event.now) {
-    _next_cancel_all_after = event.now +
+      _next_cancel_all_after <= event.value.now) {
+    _next_cancel_all_after = event.value.now +
       std::chrono::seconds { FLAGS_ws_cancel_all_after_secs / 4 };
     send_cancel_all_after(
         std::chrono::seconds {FLAGS_ws_cancel_all_after_secs });
