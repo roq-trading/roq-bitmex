@@ -36,35 +36,35 @@ class WebSocket final
     virtual void operator()(
         const json::Action,
         const json::Execution&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::Action,
         const json::Instrument&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::Action,
         const json::Order&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::Action,
         const json::OrderBookL2&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::Action,
         const json::Position&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::Action,
         const json::Quote&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::Action,
         const json::Settlement&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::Action,
         const json::Trade&,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo&) = 0;
   };
 
   WebSocket(
@@ -114,47 +114,47 @@ class WebSocket final
   void operator()(
       const json::Action,
       const json::Execution&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Funding&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Instrument&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Liquidation&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Margin&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Order&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::OrderBookL2&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Position&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Quote&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Settlement&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Action,
       const json::Trade&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
 
  private:
   std::string create_upgrade_headers();

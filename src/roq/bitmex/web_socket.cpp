@@ -236,13 +236,13 @@ void WebSocket::parse(const std::string_view& message) {
 }
 
 void WebSocket::parse_helper(const std::string_view& message) {
-  server::Trace trace;
+  server::TraceInfo trace_info;
   core::json::Buffer buffer(_decode_buffer);
   json::Parser::dispatch(
       *this,
       message,
       buffer,
-      trace);
+      trace_info);
 }
 
 void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
@@ -321,7 +321,7 @@ void WebSocket::operator()(const json::Subscribe& subscribe) {
 void WebSocket::operator()(
     const json::Action action,
     const json::Execution& execution,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.execution(
       [&]() {
         VLOG(1)(
@@ -331,14 +331,14 @@ void WebSocket::operator()(
         _handler(
             action,
             execution,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
     const json::Funding& funding,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   _profile.funding(
       [&]() {
         VLOG(2)(
@@ -352,7 +352,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action,
     const json::Instrument& instrument,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.instrument(
       [&]() {
         VLOG(2)(
@@ -362,14 +362,14 @@ void WebSocket::operator()(
         _handler(
             action,
             instrument,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
     const json::Liquidation& liquidation,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   _profile.liquidation(
       [&]() {
         VLOG(2)(
@@ -383,7 +383,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action,
     const json::Margin& margin,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   _profile.margin(
       [&]() {
         VLOG(2)(
@@ -397,7 +397,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action,
     const json::Order& order,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.order(
       [&]() {
         VLOG(1)(
@@ -407,14 +407,14 @@ void WebSocket::operator()(
         _handler(
             action,
             order,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
     const json::OrderBookL2& order_book_l2,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.order_book_l2(
       [&]() {
         VLOG(3)(
@@ -424,14 +424,14 @@ void WebSocket::operator()(
         _handler(
             action,
             order_book_l2,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
     const json::Position& position,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.position(
       [&]() {
         VLOG(2)(
@@ -441,14 +441,14 @@ void WebSocket::operator()(
         _handler(
             action,
             position,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
     const json::Quote& quote,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.quote(
       [&]() {
         VLOG(3)(
@@ -458,14 +458,14 @@ void WebSocket::operator()(
         _handler(
             action,
             quote,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
     const json::Settlement& settlement,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.settlement(
       [&]() {
         VLOG(3)(
@@ -475,14 +475,14 @@ void WebSocket::operator()(
         _handler(
             action,
             settlement,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocket::operator()(
     const json::Action action,
     const json::Trade& trade,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _profile.trade(
       [&]() {
         VLOG(2)(
@@ -492,7 +492,7 @@ void WebSocket::operator()(
         _handler(
             action,
             trade,
-            trace);
+            trace_info);
       });
 }
 

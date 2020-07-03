@@ -38,7 +38,7 @@ void Parser::dispatch(
     Parser::Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   Parser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN;
@@ -85,7 +85,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     execution,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::FUNDING: {
@@ -94,7 +94,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     funding,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::INSTRUMENT: {
@@ -103,7 +103,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     instrument,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::LIQUIDATION: {
@@ -112,7 +112,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     liquidation,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::MARGIN: {
@@ -121,7 +121,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     margin,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::ORDER: {
@@ -130,7 +130,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     order,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
@@ -139,7 +139,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     order_book_l2,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::POSITION: {
@@ -148,7 +148,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     position,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::QUOTE: {
@@ -157,7 +157,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     quote,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::SETTLEMENT: {
@@ -166,7 +166,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     settlement,
-                    trace);
+                    trace_info);
                 break;
               }
               case Table::TRADE: {
@@ -175,7 +175,7 @@ void Parser::dispatch(
                 handler(
                     action,
                     trade,
-                    trace);
+                    trace_info);
                 break;
               }
             }

@@ -42,47 +42,47 @@ struct Parser final {
     virtual void operator()(
         const Action,
         const Execution&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Funding&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Instrument&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Liquidation&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Margin&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Order&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const OrderBookL2&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Position&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Quote&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Settlement&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Action,
         const Trade&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
   };
 
   std::string_view action;
@@ -101,7 +101,7 @@ struct Parser final {
       Handler& handler,
       const std::string_view& message,
       core::json::Buffer& buffer,
-      const server::Trace& trace);
+      const server::TraceInfo& trace);
 };
 
 }  // namespace json
