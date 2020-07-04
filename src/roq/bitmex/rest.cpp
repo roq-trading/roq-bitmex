@@ -125,17 +125,16 @@ void Rest::create_order(
   auto expires = compute_expires();
   // XXX use encode buffer
   auto message = fmt::format(
-      FMT_STRING(
-        R"({{)"
-        R"("clOrdID":"{}",)"
-        R"("symbol":"{}",)"
-        R"("side":"{}",)"
-        R"("price":{},)"
-        R"("orderQty":{},)"
-        R"("ordType":"{}",)"
-        R"("timeInForce":"{}",)"
-        R"("execInst":"{}")"
-        R"(}})"),
+      R"({{)"
+      R"("clOrdID":"{}",)"
+      R"("symbol":"{}",)"
+      R"("side":"{}",)"
+      R"("price":{},)"
+      R"("orderQty":{},)"
+      R"("ordType":"{}",)"
+      R"("timeInForce":"{}",)"
+      R"("execInst":"{}")"
+      R"(}})",
       cl_ord_id,
       create_order.symbol,
       json::map(create_order.side).as_raw_text(),
@@ -147,7 +146,7 @@ void Rest::create_order(
         ? std::string_view()
         : json::map(create_order.execution_instruction).as_raw_text());
   DLOG(INFO)(
-      FMT_STRING(R"(body="{}")"),
+      R"(body="{}")",
       message);
   auto headers = _random.create_headers(
       expires,
@@ -168,13 +167,13 @@ void Rest::create_order(
         auto order_item =
           core::json::Parser::create<json::OrderItem>(response.body());
         VLOG(1)(
-            FMT_STRING(R"(order_item={})"),
+            R"(order_item={})",
             order_item);
         core::Promise<json::OrderItem> promise(order_item);
         callback(promise);
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::OrderItem> promise(std::current_exception());
@@ -195,17 +194,16 @@ void Rest::modify_order(
   auto expires = compute_expires();
   // XXX use encode buffer
   auto message = fmt::format(
-      FMT_STRING(
-        R"({{)"
-        R"("orderID":"{}",)"
-        R"("orderQty":{},)"
-        R"("price":{})"
-        R"(}})"),
+      R"({{)"
+      R"("orderID":"{}",)"
+      R"("orderQty":{},)"
+      R"("price":{})"
+      R"(}})",
       order.external_order_id,
       modify_order.quantity,
       modify_order.price);
   DLOG(INFO)(
-      FMT_STRING(R"(body="{}")"),
+      R"(body="{}")",
       message);
   auto headers = _random.create_headers(
       expires,
@@ -226,13 +224,13 @@ void Rest::modify_order(
         auto order_item =
           core::json::Parser::create<json::OrderItem>(response.body());
         VLOG(1)(
-            FMT_STRING(R"(order_item={})"),
+            R"(order_item={})",
             order_item);
         core::Promise<json::OrderItem> promise(order_item);
         callback(promise);
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::OrderItem> promise(std::current_exception());
@@ -254,13 +252,12 @@ void Rest::cancel_order(
   auto expires = compute_expires();
   // XXX use encode buffer
   auto message = fmt::format(
-      FMT_STRING(
-        R"({{)"
-        R"("orderID":"{}")"
-        R"(}})"),
+      R"({{)"
+      R"("orderID":"{}")"
+      R"(}})",
       order.external_order_id);
   DLOG(INFO)(
-      FMT_STRING(R"(body="{}")"),
+      R"(body="{}")",
       message);
   auto headers = _random.create_headers(
       expires,
@@ -283,13 +280,13 @@ void Rest::cancel_order(
             response.body(),
             buffer);
         VLOG(1)(
-            FMT_STRING(R"(order={})"),
+            R"(order={})",
             order);
         core::Promise<json::Order> promise(order);
         callback(promise);
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::Order> promise(std::current_exception());
@@ -325,7 +322,7 @@ void Rest::get(
         callback(promise);
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::Accounts> promise(std::current_exception());

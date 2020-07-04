@@ -23,7 +23,7 @@ static auto create_base_path() {
 static auto create_timestamp_secs(
     std::chrono::nanoseconds value) {
   return fmt::format(
-      FMT_STRING("{}"),
+      "{}",
       std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 
@@ -71,10 +71,9 @@ std::string Random::create_headers(
       path,
       body);
   return fmt::format(
-      FMT_STRING(
-        "api-signature: {}\r\n"
-        "api-expires: {}\r\n"
-        "api-key: {}\r\n"),
+      "api-signature: {}\r\n"
+      "api-expires: {}\r\n"
+      "api-key: {}\r\n",
       signature,
       std::chrono::duration_cast<std::chrono::seconds>(expires).count(),
       _key);

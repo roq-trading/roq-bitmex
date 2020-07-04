@@ -170,7 +170,7 @@ void Gateway::operator()(
     } catch (NetworkError& e) {
       // XXX send ack failure
       LOG(FATAL)(
-          FMT_STRING(R"(Unexpected what="{}")"),
+          R"(Unexpected what="{}")",
           e.what());
     }
   });
@@ -196,7 +196,7 @@ void Gateway::operator()(
     } catch (NetworkError& e) {
       // XXX send ack failure
       LOG(FATAL)(
-          FMT_STRING(R"(Unexpected what="{}")"),
+          R"(Unexpected what="{}")",
           e.what());
     }
   });
@@ -222,7 +222,7 @@ void Gateway::operator()(
     } catch (NetworkError& e) {
       // XXX send ack failure
       LOG(FATAL)(
-          FMT_STRING(R"(Unexpected what="{}")"),
+          R"(Unexpected what="{}")",
           e.what());
     }
   });
@@ -306,7 +306,7 @@ void Gateway::operator()(
     const server::TraceInfo& trace_info) {
   (void)action;  // avoid warning
   DLOG(INFO)(
-      FMT_STRING("execution={}"),
+      "execution={}",
       execution);
   size_t fill_length = 0, index = 0;
   bool success = true;
@@ -349,9 +349,8 @@ void Gateway::operator()(
             item);
         if (ROQ_PREDICT_FALSE(success == false)) {
           LOG(FATAL)(
-              FMT_STRING(
-                R"(Insufficient fill array size: )"
-                R"(len(trade)={}/{})"),
+              R"(Insufficient fill array size: )"
+              R"(len(trade)={}/{})",
               fill_length,
               _fill.size());
         }
@@ -384,9 +383,8 @@ void Gateway::operator()(
               order.user_id);  // HANS
         } else {
           LOG(FATAL)(
-              FMT_STRING(
-                R"(Insufficient fill array size: )"
-                R"(len(fill)={}/{})"),
+              R"(Insufficient fill array size: )"
+              R"(len(fill)={}/{})",
               fill_length,
               _fill.size());
         }
@@ -395,7 +393,7 @@ void Gateway::operator()(
     if (found == false) {
       LOG(WARNING)("*** EXTERNAL ORDER ***");
       LOG(WARNING)(
-          FMT_STRING("action={}, execution={}"),
+          "action={}, execution={}",
           action,
           execution);
     }
@@ -671,7 +669,7 @@ void Gateway::operator()(
         for (auto& item : instrument.data) {
           if (_dispatcher.discard_symbol(item.symbol)) {
             VLOG(1)(
-                FMT_STRING(R"(Drop symbol="{}")"),
+                R"(Drop symbol="{}")",
                 item.symbol);
             continue;
           }
@@ -691,7 +689,7 @@ void Gateway::operator()(
               true);
         }
         VLOG(2)(
-            FMT_STRING(R"(- securities: {} (/{}))"),
+            R"(- securities: {} (/{}))",
             security_count,
             instrument.data.size());
         _web_socket.download.check_relaxed(
@@ -727,7 +725,7 @@ void Gateway::operator()(
     const json::Order& order,
     const server::TraceInfo&) {
   DLOG(INFO)(
-      FMT_STRING(R"(action={} order={})"),
+      R"(action={} order={})",
       action,
       order);
   for (auto& iter : order.data)
@@ -789,9 +787,8 @@ void Gateway::operator()(
       }
     } else {
       LOG(WARNING)(
-          FMT_STRING(
-            R"(Closing web-socket: )"
-            R"(unexpected action={} id={} price={} size={})"),
+          R"(Closing web-socket: )"
+          R"(unexpected action={} id={} price={} size={})",
           action,
           item.id,
           item.price,
@@ -802,9 +799,8 @@ void Gateway::operator()(
   }
   if (ROQ_PREDICT_FALSE(success == false)) {
     LOG(FATAL)(
-        FMT_STRING(
-          R"(Insufficient bid/ask array size(s): )"
-          R"(len(bid)={}/{}, len(ask)={}/{})"),
+        R"(Insufficient bid/ask array size(s): )"
+        R"(len(bid)={}/{}, len(ask)={}/{})",
         bid_length,
         _bid.size(),
         ask_length,
@@ -831,7 +827,7 @@ void Gateway::operator()(
     const json::Position& position,
     const server::TraceInfo& trace_info) {
   DLOG(INFO)(
-      FMT_STRING("action={}, position={}"),
+      "action={}, position={}",
       action,
       position);
   for (auto& item : position.data) {
@@ -983,7 +979,7 @@ void Gateway::operator()(
       .exchange_time_utc = item.timestamp,
     };
     VLOG(3)(
-        FMT_STRING(R"(top_of_book={})"),
+        R"(top_of_book={})",
         top_of_book);
     server::create_trace_and_dispatch(
         trace_info,
@@ -1029,7 +1025,7 @@ void Gateway::operator()(
           .exchange_time_utc = timestamp,
           };
         VLOG(3)(
-            FMT_STRING(R"(trade_summary={})"),
+            R"(trade_summary={})",
             trade_summary);
         server::create_trace_and_dispatch(
             trace_info,
@@ -1047,9 +1043,8 @@ void Gateway::operator()(
   }
   if (ROQ_PREDICT_FALSE(success == false)) {
     LOG(FATAL)(
-        FMT_STRING(
-          R"(Insufficient trade array size: )"
-          R"(len(trade)={}/{})"),
+        R"(Insufficient trade array size: )"
+        R"(len(trade)={}/{})",
         trade_length,
         _trade.size());
   }
@@ -1064,7 +1059,7 @@ void Gateway::operator()(
       .exchange_time_utc = timestamp,
       };
     VLOG(3)(
-        FMT_STRING(R"(trade_summary={})"),
+        R"(trade_summary={})",
         trade_summary);
     server::create_trace_and_dispatch(
         trace_info,
@@ -1182,7 +1177,7 @@ void Gateway::operator()(const json::OrderItem& order_item) {
       order_item.ord_status,
       order_item.working_indicator);
   DLOG(INFO)(
-      FMT_STRING(R"(order_status={})"),
+      R"(order_status={})",
       order_status);
 
   server::OMS_Lookup order_lookup {
@@ -1218,14 +1213,14 @@ void Gateway::operator()(const json::OrderItem& order_item) {
   if (found == false) {
     LOG(WARNING)("*** EXTERNAL ORDER ***");
     LOG(WARNING)(
-        FMT_STRING("order_item={}"),
+        "order_item={}",
         order_item);
   }
 }
 
 void Gateway::operator()(const json::Order& order) {
   DLOG(INFO)(
-      FMT_STRING(R"(order={})"),
+      R"(order={})",
       order);
   for (auto& iter : order.data)
     (*this)(iter);
@@ -1247,7 +1242,7 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
       _dispatcher,
       true);
   LOG(INFO)(
-      FMT_STRING(R"(market_data_status={})"),
+      R"(market_data_status={})",
       _market_data_status);
 }
 
@@ -1266,7 +1261,7 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
       _dispatcher,
       true);
   LOG(INFO)(
-      FMT_STRING(R"(order_manager_status={})"),
+      R"(order_manager_status={})",
       _order_manager_status);
 }
 
@@ -1355,7 +1350,7 @@ std::pair<double, double> Gateway::find_price(
       } else {
         // unexpected price or size ==> fail
         DLOG(FATAL)(
-            FMT_STRING(R"(action={} id={} price={} size={})"),
+            R"(action={} id={} price={} size={})",
             action,
             id,
             price,
@@ -1404,7 +1399,7 @@ void Gateway::publish_market_by_price(
   if ((bid_length + ask_length) == 0)
     return;
   LOG_IF(INFO, snapshot)(
-      FMT_STRING(R"(Received market data snapshot for symbol="{}")"),
+      R"(Received market data snapshot for symbol="{}")",
       symbol);
   MarketByPriceUpdate market_by_price_update {
     .exchange = FLAGS_exchange,
@@ -1421,7 +1416,7 @@ void Gateway::publish_market_by_price(
     .exchange_time_utc = {},
     };
   VLOG(3)(
-      FMT_STRING(R"(market_by_price_update={})"),
+      R"(market_by_price_update={})",
       market_by_price_update);
   server::create_trace_and_dispatch(
       trace_info,

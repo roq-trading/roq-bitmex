@@ -12,7 +12,7 @@ namespace bitmex {
 int Application::main(int, char **) {
   LOG(INFO)("Parse configuration");
   Config config(FLAGS_config_file);
-  VLOG(1)(FMT_STRING("config={}"), config);
+  VLOG(1)("config={}", config);
   LOG(INFO)("Starting the gateway");
   roq::server::Trading<Gateway>(
       PACKAGE_NAME,

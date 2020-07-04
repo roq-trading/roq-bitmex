@@ -47,7 +47,9 @@ void Config::operator()(User&& user) {
 void Config::operator()(
     const std::string_view& key,
     cpptoml::base&) {
-  LOG(WARNING)(FMT_STRING("UNKNOWN KEY=\"{}\""), key);
+  LOG(WARNING)(
+      R"(UNKNOWN KEY="{}")",
+      key);
 }
 
 }  // namespace bitmex
