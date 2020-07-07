@@ -3,9 +3,10 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <absl/container/flat_hash_map.h>
 
 #include "roq/metrics.h"
 
@@ -170,7 +171,7 @@ class Gateway final
   core::page_aligned_vector<MBPUpdate> _bid, _ask;
   core::page_aligned_vector<Trade> _trade;
   core::page_aligned_vector<Fill> _fill;
-  std::unordered_map<uint64_t, double> _price_lookup;
+  absl::flat_hash_map<uint64_t, double> _price_lookup;
   // order manager
   GatewayStatus _order_manager_status = GatewayStatus::DISCONNECTED;
 };
