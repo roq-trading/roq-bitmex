@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "roq/logging.h"
-#include "roq/format.h"
 
 #include "roq/core/charconv.h"
 #include "roq/core/clock.h"

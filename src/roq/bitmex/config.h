@@ -4,14 +4,13 @@
 
 #include <cpptoml.h>
 
+#include <absl/container/flat_hash_map.h>
+
 #include <fmt/format.h>
 
-#include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include <absl/container/flat_hash_map.h>
 
 #include "roq/logging.h"
 #include "roq/server.h"
