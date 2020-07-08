@@ -347,7 +347,7 @@ void Gateway::operator()(
             _fill,
             fill_length,
             item);
-        if (ROQ_PREDICT_FALSE(success == false)) {
+        if (ROQ_UNLIKELY(success == false)) {
           LOG(FATAL)(
               R"(Insufficient fill array size: )"
               R"(len(trade)={}/{})",
@@ -357,7 +357,7 @@ void Gateway::operator()(
       }
 
       if (last && fill_length) {
-        if (ROQ_PREDICT_TRUE(success)) {
+        if (ROQ_LIKELY(success)) {
           TradeUpdate trade_update {
             .account = order.account,
             .order_id = order.user_order_id,
@@ -797,7 +797,7 @@ void Gateway::operator()(
       return;
     }
   }
-  if (ROQ_PREDICT_FALSE(success == false)) {
+  if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)(
         R"(Insufficient bid/ask array size(s): )"
         R"(len(bid)={}/{}, len(ask)={}/{})",
@@ -1041,7 +1041,7 @@ void Gateway::operator()(
         trade_length,
         item);
   }
-  if (ROQ_PREDICT_FALSE(success == false)) {
+  if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)(
         R"(Insufficient trade array size: )"
         R"(len(trade)={}/{})",
