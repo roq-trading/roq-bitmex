@@ -1,0 +1,65 @@
+set(TARGET_NAME "${PROJECT_NAME}")
+
+set(SOURCES
+  application.cpp
+  config.cpp
+  gateway.cpp
+  main.cpp
+  options.cpp
+  product.cpp
+  random.cpp
+  rest.cpp
+  web_socket.cpp
+)
+
+add_subdirectory("json")
+
+include(RoqAutogen)
+
+roq_autogen(
+  OUTPUT AUTOGEN_HEADERS
+  PATTERN "*.json"
+  NAMESPACE "roq/bitmex"
+  OUTPUT_TYPE "state"
+  FILE_TYPE "h")
+
+add_custom_target(autogen-headers ALL
+  DEPENDS ${AUTOGEN_HEADERS})
+
+roq_autogen(
+  OUTPUT AUTOGEN_SOURCES
+  PATTERN "*.json"
+  NAMESPACE "roq/bitmex"
+  OUTPUT_TYPE "state"
+  FILE_TYPE "cpp")
+
+add_executable("${TARGET_NAME}"
+  ${SOURCES}
+  ${AUTOGEN_SOURCES})
+
+add_dependencies("${TARGET_NAME}"
+  autogen-headers
+  autogen-json-headers)
+
+target_link_libraries("${TARGET_NAME}"
+  "${PROJECT_NAME}-json"
+  roq-server
+  roq-core
+  roq-api::roq-api
+  roq-logging
+  absl::flat_hash_map
+  absl::flat_hash_set
+  gflags
+  OpenSSL::SSL
+  ${HTTP_PARSER_LIBRARIES}
+  ${BROTLI_LIBRARIES}
+  ${RT_LIBRARIES}
+)
+
+set_target_properties("${TARGET_NAME}" PROPERTIES LINK_FLAGS_RELEASE -s)
+
+target_compile_definitions("${TARGET_NAME}" PRIVATE
+  PACKAGE_NAME="${TARGET_NAME}"
+  VERSION="${GIT_REPO_VERSION}")
+
+install(TARGETS ${TARGET_NAME})

@@ -42,3 +42,5 @@ roq-bitmex-benchmark
 roq-bitmex-test
 
 *.roq
+
+build/
