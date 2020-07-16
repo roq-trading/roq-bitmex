@@ -1,46 +1,60 @@
-*.swp
+# vim
 
-.dirstamp
+*.swp
+*.swo
+
+
+# autotools
+
 Makefile
 Makefile.in
 aclocal.m4
-ar-lib
-compile
-config.guess
-config.log
 config.status
-config.sub
 configure
-depcomp
-install-sh
+config.log
 libtool
-libtws_api.la
-ltmain.sh
-missing
-test-driver
 
 .deps/
 .libs/
+
 autom4te.cache/
 m4/
+build-aux/
 
 *.Plo
 *.la
 *.lo
 *.o
 
-*.pc
 *.tar.*
+
+
+# cmake
+
+CMakeCache.txt
+DartConfiguration.tcl
+
+CMakeFiles/
+Testing/
+lib/
+
+*.cmake
+
+*.a
+*.o
+*.so
+
+build/
+
+
+# gtest
 
 *.log
 *.trs
 
-*.con
+
+# project specific
 
 roq-bitmex
 roq-bitmex-benchmark
 roq-bitmex-test
-
-*.roq
-
-build/
