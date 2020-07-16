@@ -11,8 +11,8 @@ add_executable("${TARGET_NAME}"
 
 target_link_libraries("${TARGET_NAME}"
   "${PROJECT_NAME}-json"
-  roq-core
-  roq-logging
+  roq-core::roq-core
+  roq-logging::roq-logging
   gtest_main
   ${RT_LIBRARIES}
 )
