@@ -29,3 +29,8 @@ add_library("${TARGET_NAME}" STATIC
   ${AUTOGEN_SOURCES})
 
 add_dependencies("${TARGET_NAME}" autogen-json-headers)
+
+target_link_libraries("${TARGET_NAME}"
+  roq-core::roq-core
+  roq-logging::roq-logging
+  fmt::fmt)
