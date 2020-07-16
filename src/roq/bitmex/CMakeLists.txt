@@ -43,16 +43,15 @@ add_dependencies("${TARGET_NAME}"
 
 target_link_libraries("${TARGET_NAME}"
   "${PROJECT_NAME}-json"
-  roq-server
-  roq-core
+  roq-server::roq-server
+  roq-core::roq-core
   roq-api::roq-api
-  roq-logging
+  roq-logging::roq-logging
   absl::flat_hash_map
   absl::flat_hash_set
   gflags
-  OpenSSL::SSL
-  ${HTTP_PARSER_LIBRARIES}
-  ${BROTLI_LIBRARIES}
+  ${CROSSGUID_LIBRARIES}
+  ${UUID_LIBRARIES}
   ${RT_LIBRARIES}
 )
 

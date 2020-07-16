@@ -41,9 +41,9 @@ include(GNUInstallDirs)
 
 # dependencies
 
-find_package(HttpParser REQUIRED)
+find_package(Crossguid REQUIRED)
+find_package(Libevent REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(Brotli REQUIRED)
 find_package(absl REQUIRED)
 find_package(fmt REQUIRED)
 find_package(gflags REQUIRED)
@@ -52,6 +52,7 @@ find_package(roq-core REQUIRED)
 find_package(roq-logging REQUIRED)
 find_package(roq-server REQUIRED)
 find_package(rt REQUIRED)
+find_package(uuid REQUIRED)
 
 # include
 
