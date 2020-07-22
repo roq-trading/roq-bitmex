@@ -57,6 +57,7 @@ build/
 
 # project specific
 
+roq-bitmex.pc
 roq-bitmex
 roq-bitmex-benchmark
 roq-bitmex-test
