@@ -2,10 +2,6 @@
 	path = third_party/googletest
 	url = https://github.com/google/googletest.git
 	ignore = dirty
-[submodule "roq-m4"]
-	path = m4
-	url = ssh://git@quinclas.ch:1975/roq-trading/roq-m4.git
-	ignore = dirty
 [submodule "roq-autogen"]
 	path = autogen
 	url = ssh://git@quinclas.ch:1975/roq-trading/roq-autogen.git

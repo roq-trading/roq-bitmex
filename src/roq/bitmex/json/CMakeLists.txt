@@ -57,6 +57,15 @@ roq_autogen(
   FILE_TYPE "h"
   SOURCES ${AUTOGEN_SCHEMAS})
 
+set(GITIGNORE "${CMAKE_CURRENT_SOURCE_DIR}/.gitignore")
+
+file(WRITE "${GITIGNORE}" "")
+
+foreach(path ${AUTOGEN_SCHEMAS})
+  get_filename_component(name ${path} NAME_WE)
+  file(APPEND "${GITIGNORE}" "${name}.h\n${name}.cpp\n")
+endforeach()
+
 add_custom_target(autogen-json-headers ALL
   DEPENDS ${AUTOGEN_HEADERS})
 
