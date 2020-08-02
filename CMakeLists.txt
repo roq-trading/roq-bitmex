@@ -79,12 +79,12 @@ endif(BUILD_TESTING)
 
 # benchmark
 
-option(ROQ_BINANCE_BENCHMARK "Enable benchmark" ON)
+option(BUILD_BENCHMARK "Enable benchmark" ON)
 
-if(ROQ_BINANCE_BENCHMARK)
+if(BUILD_BENCHMARK)
   find_package(benchmark REQUIRED)
   add_subdirectory("${CMAKE_SOURCE_DIR}/benchmark")
-endif(ROQ_BINANCE_BENCHMARK)
+endif(BUILD_BENCHMARK)
 
 # install
 
