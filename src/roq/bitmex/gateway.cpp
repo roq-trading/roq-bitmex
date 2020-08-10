@@ -152,8 +152,7 @@ void Gateway::operator()(const Event<Connection>&) {
 void Gateway::operator()(
     const Event<CreateOrder>& event,
     const std::string_view& request_id,
-    uint32_t gateway_order_id) {
-  (void) gateway_order_id;  // avoid warning
+    [[ maybe_unused ]] uint32_t gateway_order_id) {
   _rest.connection.create_order(
       event.value,
       request_id,
@@ -300,10 +299,9 @@ auto compute_request_status_2(
 }
 
 void Gateway::operator()(
-    json::Action action,
+    [[ maybe_unused ]] json::Action action,
     const json::Execution& execution,
     const server::TraceInfo& trace_info) {
-  (void)action;  // avoid warning
   DLOG(INFO)(
       "execution={}",
       execution);

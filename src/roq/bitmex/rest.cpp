@@ -51,7 +51,7 @@ static auto compute_expires() {
 
 Rest::Rest(
     Handler& handler,
-    const Config& config,
+    [[ maybe_unused ]] const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
@@ -86,7 +86,6 @@ Rest::Rest(
       _latency {
         .ping = create_latency("ping"),
       } {
-  (void) config;  // avoid warning
 }
 
 bool Rest::ready() const {
@@ -185,10 +184,9 @@ void Rest::create_order(
 
 void Rest::modify_order(
     const ModifyOrder& modify_order,
-    const std::string_view& request_id,
+    [[ maybe_unused ]] const std::string_view& request_id,
     const server::OMS_Order& order,
     std::function<void(const core::Promise<json::OrderItem>&)>&& callback) {
-  (void) request_id;  // avoid warning
   constexpr auto method = core::http::Method::PUT;
   constexpr std::string_view path = "/api/v1/order";
   auto expires = compute_expires();
@@ -241,12 +239,10 @@ void Rest::modify_order(
 }
 
 void Rest::cancel_order(
-    const CancelOrder& cancel_order,
-    const std::string_view& request_id,
+    [[ maybe_unused ]] const CancelOrder& cancel_order,
+    [[ maybe_unused ]] const std::string_view& request_id,
     const server::OMS_Order& order,
     std::function<void(const core::Promise<json::Order>&)>&& callback) {
-  (void) cancel_order;  // avoid warning
-  (void) request_id;  // avoid warning
   constexpr auto method = core::http::Method::DELETE;
   constexpr std::string_view path = "/api/v1/order";
   auto expires = compute_expires();

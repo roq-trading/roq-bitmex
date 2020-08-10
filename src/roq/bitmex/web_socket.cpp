@@ -45,7 +45,7 @@ static auto create_latency(
 
 WebSocket::WebSocket(
     Handler& handler,
-    const Config& config,
+    [[ maybe_unused ]] const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
@@ -91,7 +91,6 @@ WebSocket::WebSocket(
         .ping = create_latency("ping"),
         .heartbeat = create_latency("heartbeat"),
       } {
-  (void) config;  // avoid warning
 }
 
 bool WebSocket::ready() const {
