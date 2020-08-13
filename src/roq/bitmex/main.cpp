@@ -11,5 +11,7 @@ int main(int argc, char **argv) {
       argc,
       argv,
       DESCRIPTION,
-      VERSION).run();
+      ROQ_BUILD_VERSION,
+      ROQ_BUILD_TYPE,
+      ROQ_GIT_DESCRIBE_HASH).run();
 }

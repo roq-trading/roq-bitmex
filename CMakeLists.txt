@@ -54,6 +54,20 @@ find_package(roq-server REQUIRED)
 find_package(rt REQUIRED)
 find_package(uuid REQUIRED)
 
+# build info
+
+if(DEFINED ENV{ROQ_BUILD_TYPE})
+  set(ROQ_BUILD_TYPE $ENV{ROQ_BUILD_TYPE})
+else()
+  set(ROQ_BUILD_TYPE "unknown")
+endif()
+
+if(DEFINED ENV{GIT_DESCRIBE_HASH})
+  set(ROQ_GIT_DESCRIBE_HASH $ENV{GIT_DESCRIBE_HASH})
+else()
+  set(ROQ_GIT_DESCRIBE_HASH "unknown")
+endif()
+
 # include
 
 include_directories(

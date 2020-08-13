@@ -64,7 +64,7 @@ Rest::Rest(
           dns_base,
           ssl_context,
           core::URI(FLAGS_rest_uri),
-          PACKAGE_NAME,
+          ROQ_PACKAGE_NAME,
           true,  // keep alive
           std::chrono::seconds { FLAGS_rest_rate_limit_interval_secs },
           FLAGS_rest_rate_limit_max_requests,
