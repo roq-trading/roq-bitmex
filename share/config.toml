@@ -1,11 +1,4 @@
-symbols = [
-  "XBT.*",
-]
-
-[order_templates]
-
-  [order_templates.default]
-  self_trade_prevention = 'D'
+symbols = ".*"
 
 [accounts]
 
@@ -13,7 +6,7 @@ symbols = [
   master = true
   login = "YOUR_BITMEX_API_KEY_GOES_HERE"
   secret = "YOUR_BITMEX_SECRET_GOES_HERE"
-  symbols = [ "BTC-.*", "ETH-.*" ]
+  symbols = ".*"
 
 [users]
 

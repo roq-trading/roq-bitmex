@@ -1,17 +1,12 @@
 symbols = ".*"
 
-[order_templates]
-
-  [order_templates.default]
-  self_trade_prevention = 'D'
-
 [accounts]
 
   [accounts.A1]
   master = true
   login = "b2FQsnZvA9zsK-is-Y_Ei6W8"
   secret = "j0HMkpnnmk2GrZ0MbdWsUZ5ndaPV3-LMoDXZusNP8Mq3sSPQ"
-  symbols = [ ".*" ]
+  symbols = ".*"
 
 [users]
 
@@ -20,22 +15,6 @@ symbols = ".*"
   symbols = ".*"
 
   [users.trader]
-  password = "secret"
-  accounts = [ "A1" ]
-  symbols = [ "XBTUSD" ]
-  monitor_period_secs = 60
-  ban_period_secs = 300
-  request_limit = 10
-
-  [users.example-1]
-  password = "1234"
-  symbols = ".*"
-
-  [users.example-2]
-  password = "secret"
-  symbols = ".*"
-
-  [users.example-3]
   password = "secret"
   accounts = [ "A1" ]
   symbols = [ "XBTUSD" ]
