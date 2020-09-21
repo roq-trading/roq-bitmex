@@ -1,4 +1,4 @@
-# BitMEX
+# Roq BitMEX
 
 Copyright (c) 2017-2020, Hans Erik Thrane
 All rights reserved.
