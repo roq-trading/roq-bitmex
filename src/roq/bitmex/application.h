@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "roq/application.h"
+#include "roq/service.h"
 
 namespace roq {
 namespace bitmex {
 
-class Application final : public roq::Application {
+class Application final : public roq::Service {
  public:
-  using roq::Application::Application;
+  using roq::Service::Service;
 
  protected:
   int main(int, char **) override;
