@@ -27,43 +27,32 @@ namespace bitmex {
 namespace json {
 
 template <typename T>
-inline void update(
-    T& result,
-    const core::json::value_t& value) {
+inline void update(T &result, const core::json::value_t &value) {
   result = core::json::get<T>(value);
 }
 
 template <>
 inline void update(
-    std::chrono::nanoseconds& result,
-    const core::json::value_t& value) {
+    std::chrono::nanoseconds &result, const core::json::value_t &value) {
   return std::visit(
       overloaded {
-        [&](const core::json::null_t&) {
-          result = std::chrono::nanoseconds {};
-        },
-        [](bool) {
-          throw std::bad_cast();
-        },
-        [&](int64_t value) {
-          result = std::chrono::nanoseconds {
-            static_cast<uint64_t>(value * int64_t{1000000000})
-          };
-        },
-        [&](double value) {
-          result = std::chrono::nanoseconds {
-            static_cast<uint64_t>(value * 1.0e9)
-          };
-        },
-        [&](const std::string_view& value) {
-          result = core::charconv::to_datetime(value);
-        },
-        [](const core::json::object_t&) {
-          throw std::bad_cast();
-        },
-        [](const core::json::array_t&) {
-          throw std::bad_cast();
-        },
+          [&](const core::json::null_t &) {
+            result = std::chrono::nanoseconds {};
+          },
+          [](bool) { throw std::bad_cast(); },
+          [&](int64_t value) {
+            result = std::chrono::nanoseconds { static_cast<uint64_t>(
+                value * int64_t { 1000000000 }) };
+          },
+          [&](double value) {
+            result = std::chrono::nanoseconds { static_cast<uint64_t>(
+                value * 1.0e9) };
+          },
+          [&](const std::string_view &value) {
+            result = core::charconv::to_datetime(value);
+          },
+          [](const core::json::object_t &) { throw std::bad_cast(); },
+          [](const core::json::array_t &) { throw std::bad_cast(); },
       },
       value);
 }
@@ -71,89 +60,68 @@ inline void update(
 // json
 
 template <>
-inline void update(
-    ExecInst& result,
-    const core::json::value_t& value) {
+inline void update(ExecInst &result, const core::json::value_t &value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(ExecType &result, const core::json::value_t &value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(LiquidityInd &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
 inline void update(
-    ExecType& result,
-    const core::json::value_t& value) {
+    MultiLegReportingType &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
-inline void update(
-    LiquidityInd& result,
-    const core::json::value_t& value) {
+inline void update(OrdStatus &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
-inline void update(
-    MultiLegReportingType& result,
-    const core::json::value_t& value) {
+inline void update(OrdType &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
-inline void update(
-    OrdStatus& result,
-    const core::json::value_t& value) {
+inline void update(SettlementType &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
-inline void update(
-    OrdType& result,
-    const core::json::value_t& value) {
+inline void update(Side &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
-inline void update(
-    SettlementType& result,
-    const core::json::value_t& value) {
+inline void update(State &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
-inline void update(
-    Side& result,
-    const core::json::value_t& value) {
+inline void update(TimeInForce &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
 
 template <>
-inline void update(
-    State& result,
-    const core::json::value_t& value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    TimeInForce& result,
-    const core::json::value_t& value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    Typ& result,
-    const core::json::value_t& value) {
+inline void update(Typ &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
@@ -164,33 +132,48 @@ inline void update(
 
 inline roq::TradingStatus map(json::State state) {
   switch (state) {
-    case json::State::UNDEFINED: break;
-    case json::State::UNKNOWN:   break;
-    case json::State::CLOSED:    return roq::TradingStatus::CLOSED;
-    case json::State::OPEN:      return roq::TradingStatus::OPEN;
-    case json::State::SETTLED:   break;
-    case json::State::UNLISTED:  break;
+    case json::State::UNDEFINED:
+      break;
+    case json::State::UNKNOWN:
+      break;
+    case json::State::CLOSED:
+      return roq::TradingStatus::CLOSED;
+    case json::State::OPEN:
+      return roq::TradingStatus::OPEN;
+    case json::State::SETTLED:
+      break;
+    case json::State::UNLISTED:
+      break;
   }
   return roq::TradingStatus::UNDEFINED;
 }
 
 inline roq::Side map(json::Side side) {
   switch (side) {
-    case json::Side::UNDEFINED: break;
-    case json::Side::UNKNOWN:   break;
-    case json::Side::BUY:       return roq::Side::BUY;
-    case json::Side::SELL:      return roq::Side::SELL;
+    case json::Side::UNDEFINED:
+      break;
+    case json::Side::UNKNOWN:
+      break;
+    case json::Side::BUY:
+      return roq::Side::BUY;
+    case json::Side::SELL:
+      return roq::Side::SELL;
   }
   return roq::Side::UNDEFINED;
 }
 
 inline roq::OrderStatus map(json::OrdStatus state) {
   switch (state) {
-    case OrdStatus::UNDEFINED: break;
-    case OrdStatus::UNKNOWN:   break;
-    case OrdStatus::NEW:       return roq::OrderStatus::WORKING;
-    case OrdStatus::FILLED:    return roq::OrderStatus::COMPLETED;
-    case OrdStatus::CANCELED:  return roq::OrderStatus::CANCELED;
+    case OrdStatus::UNDEFINED:
+      break;
+    case OrdStatus::UNKNOWN:
+      break;
+    case OrdStatus::NEW:
+      return roq::OrderStatus::WORKING;
+    case OrdStatus::FILLED:
+      return roq::OrderStatus::COMPLETED;
+    case OrdStatus::CANCELED:
+      return roq::OrderStatus::CANCELED;
   }
   return roq::OrderStatus::UNDEFINED;
 }
@@ -199,40 +182,56 @@ inline roq::OrderStatus map(json::OrdStatus state) {
 
 inline json::Side map(roq::Side side) {
   switch (side) {
-    case roq::Side::UNDEFINED: break;
-    case roq::Side::BUY:       return json::Side::BUY;
-    case roq::Side::SELL:      return json::Side::SELL;
+    case roq::Side::UNDEFINED:
+      break;
+    case roq::Side::BUY:
+      return json::Side::BUY;
+    case roq::Side::SELL:
+      return json::Side::SELL;
   }
   return json::Side::UNDEFINED;
 }
 
 inline json::OrdType map(roq::OrderType order_type) {
   switch (order_type) {
-    case roq::OrderType::UNDEFINED: break;
-    case roq::OrderType::MARKET:    return json::OrdType::MARKET;
-    case roq::OrderType::LIMIT:     return json::OrdType::LIMIT;
+    case roq::OrderType::UNDEFINED:
+      break;
+    case roq::OrderType::MARKET:
+      return json::OrdType::MARKET;
+    case roq::OrderType::LIMIT:
+      return json::OrdType::LIMIT;
   }
   return json::OrdType::UNDEFINED;
 }
 
 inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   switch (time_in_force) {
-    case roq::TimeInForce::UNDEFINED: break;
-    case roq::TimeInForce::FOK:       break;
-    case roq::TimeInForce::IOC:       break;
-    case roq::TimeInForce::GFD:       break;
-    case roq::TimeInForce::GTC:       return json::TimeInForce::GOOD_TILL_CANCEL;
+    case roq::TimeInForce::UNDEFINED:
+      break;
+    case roq::TimeInForce::FOK:
+      break;
+    case roq::TimeInForce::IOC:
+      break;
+    case roq::TimeInForce::GFD:
+      break;
+    case roq::TimeInForce::GTC:
+      return json::TimeInForce::GOOD_TILL_CANCEL;
   }
   return json::TimeInForce::UNDEFINED;
 }
 
 inline json::ExecInst map(roq::ExecutionInstruction execution_instruction) {
   switch (execution_instruction) {
-    case roq::ExecutionInstruction::UNDEFINED:                   break;
-    case roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE: return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
-    case roq::ExecutionInstruction::CANCEL_IF_NOT_BEST:          break;
-    case roq::ExecutionInstruction::DO_NOT_INCREASE:             return json::ExecInst::REDUCE_ONLY;
-    case roq::ExecutionInstruction::DO_NOT_REDUCE:               break;
+    case roq::ExecutionInstruction::UNDEFINED:
+      break;
+    case roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE:
+      return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
+    case roq::ExecutionInstruction::CANCEL_IF_NOT_BEST:
+      break;
+    case roq::ExecutionInstruction::DO_NOT_INCREASE:
+      return json::ExecInst::REDUCE_ONLY;
+    case roq::ExecutionInstruction::DO_NOT_REDUCE:
+      break;
   }
   return json::ExecInst::UNDEFINED;
 }

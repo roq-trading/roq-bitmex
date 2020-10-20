@@ -33,79 +33,73 @@ namespace bitmex {
 class Rest final : public core::web::Client::Handler {
  public:
   struct Handler {
-    virtual void operator()(const Rest&) = 0;
+    virtual void operator()(const Rest &) = 0;
   };
 
   Rest(
-      Handler& handler,
-      const Config& config,
-      Random& random,
-      core::event::Base& base,
-      core::event::DNSBase& dns_base,
-      core::ssl::Context& ssl_context);
+      Handler &handler,
+      const Config &config,
+      Random &random,
+      core::event::Base &base,
+      core::event::DNSBase &dns_base,
+      core::ssl::Context &ssl_context);
 
-  Rest(Rest&&) = delete;
-  Rest(const Rest&) = delete;
+  Rest(Rest &&) = delete;
+  Rest(const Rest &) = delete;
 
   bool ready() const;
 
-  void operator()(const Event<Start>&);
-  void operator()(const Event<Stop>&);
-  void operator()(const Event<Timer>&);
+  void operator()(const Event<Start> &);
+  void operator()(const Event<Stop> &);
+  void operator()(const Event<Timer> &);
 
-  void operator()(metrics::Writer& writer);
+  void operator()(metrics::Writer &writer);
 
   void create_order(
-      const CreateOrder& create_order,
-      const std::string_view& cl_ord_id,
-      std::function<void(const core::Promise<json::OrderItem>&)>&& callback);
+      const CreateOrder &create_order,
+      const std::string_view &cl_ord_id,
+      std::function<void(const core::Promise<json::OrderItem> &)> &&callback);
 
   void modify_order(
-      const ModifyOrder& modify_order,
-      const std::string_view& request_id,
-      const server::OMS_Order& order,
-      std::function<void(const core::Promise<json::OrderItem>&)>&& callback);
+      const ModifyOrder &modify_order,
+      const std::string_view &request_id,
+      const server::OMS_Order &order,
+      std::function<void(const core::Promise<json::OrderItem> &)> &&callback);
 
   void cancel_order(
-      const CancelOrder& cancel_order,
-      const std::string_view& request_id,
-      const server::OMS_Order& order,
-      std::function<void(const core::Promise<json::Order>&)>&& callback);
+      const CancelOrder &cancel_order,
+      const std::string_view &request_id,
+      const server::OMS_Order &order,
+      std::function<void(const core::Promise<json::Order> &)> &&callback);
 
   template <typename T>
-  void get(std::function<void(const core::Promise<T>&)>&&);
+  void get(std::function<void(const core::Promise<T> &)> &&);
 
  protected:
   // core::web::Client::Handler
 
-  void operator()(const core::web::Client::Connected&) override;
-  void operator()(const core::web::Client::Disconnected&) override;
-  void operator()(const core::web::Client::Latency&) override;
+  void operator()(const core::web::Client::Connected &) override;
+  void operator()(const core::web::Client::Disconnected &) override;
+  void operator()(const core::web::Client::Latency &) override;
 
  private:
-  Handler& _handler;
+  Handler &_handler;
   // authentication
-  Random& _random;
+  Random &_random;
   // connection
   core::web::Client _connection;
   // buffers
   core::utils::Buffer _decode_buffer;
   // metrics
   struct {
-    core::metrics::Counter
-      disconnect;
+    core::metrics::Counter disconnect;
   } _counter;
   struct {
-    core::metrics::Profile
-      products,
-      accounts,
-      create_order,
-      modify_order,
-      cancel_order;
+    core::metrics::Profile products, accounts, create_order, modify_order,
+        cancel_order;
   } _profile;
   struct {
-    core::metrics::Latency
-      ping;
+    core::metrics::Latency ping;
   } _latency;
 };
 

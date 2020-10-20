@@ -24,7 +24,7 @@ enum class Type {
   TABLE,
 };
 
-void update(Type& result, const Type type) {
+void update(Type &result, const Type type) {
   assert(type != Type::UNKNOWN);
   if (result == Type::UNKNOWN) {
     result = type;
@@ -35,10 +35,10 @@ void update(Type& result, const Type type) {
 }  // namespace
 
 void Parser::dispatch(
-    Parser::Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer,
-    const server::TraceInfo& trace_info) {
+    Parser::Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
   Parser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN;
@@ -54,9 +54,7 @@ void Parser::dispatch(
           LOG(FATAL)("Unexpected");
           break;
         case Field::UNKNOWN:
-          DLOG(FATAL)(
-              R"(Unknown key="{}")",
-              key);
+          DLOG(FATAL)(R"(Unknown key="{}")", key);
           break;
         case Field::ACTION:
           update(result.action, value);
@@ -82,100 +80,67 @@ void Parser::dispatch(
               case Table::EXECUTION: {
                 Execution execution(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    execution,
-                    trace_info);
+                handler(action, execution, trace_info);
                 break;
               }
               case Table::FUNDING: {
                 Funding funding(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    funding,
-                    trace_info);
+                handler(action, funding, trace_info);
                 break;
               }
               case Table::INSTRUMENT: {
                 Instrument instrument(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    instrument,
-                    trace_info);
+                handler(action, instrument, trace_info);
                 break;
               }
               case Table::LIQUIDATION: {
                 Liquidation liquidation(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    liquidation,
-                    trace_info);
+                handler(action, liquidation, trace_info);
                 break;
               }
               case Table::MARGIN: {
                 Margin margin(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    margin,
-                    trace_info);
+                handler(action, margin, trace_info);
                 break;
               }
               case Table::ORDER: {
                 Order order(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    order,
-                    trace_info);
+                handler(action, order, trace_info);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
                 OrderBookL2 order_book_l2(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    order_book_l2,
-                    trace_info);
+                handler(action, order_book_l2, trace_info);
                 break;
               }
               case Table::POSITION: {
                 Position position(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    position,
-                    trace_info);
+                handler(action, position, trace_info);
                 break;
               }
               case Table::QUOTE: {
                 Quote quote(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    quote,
-                    trace_info);
+                handler(action, quote, trace_info);
                 break;
               }
               case Table::SETTLEMENT: {
                 Settlement settlement(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    settlement,
-                    trace_info);
+                handler(action, settlement, trace_info);
                 break;
               }
               case Table::TRADE: {
                 Trade trade(value, buffer);
                 dispatched = true;
-                handler(
-                    action,
-                    trade,
-                    trace_info);
+                handler(action, trade, trace_info);
                 break;
               }
             }
@@ -296,16 +261,13 @@ void Parser::dispatch(
         return;
       }
       case Type::TABLE:
-        if (dispatched)
-          return;
+        if (dispatched) return;
         // perhaps we were just unlucky with the ordering of keys
         // XXX increment warning counter
         break;
     }
   }
-  LOG(WARNING)(
-      R"(message="{}")",
-      message);
+  LOG(WARNING)(R"(message="{}")", message);
   LOG(FATAL)("Unexpected");
 }
 

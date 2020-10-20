@@ -10,8 +10,8 @@
 
 #include "roq/metrics.h"
 
-#include "roq/server.h"
 #include "roq/download.h"
+#include "roq/server.h"
 
 #include "roq/core/hash/map.h"
 
@@ -36,77 +36,74 @@ namespace bitmex {
 
 class WebSocket;
 
-class Gateway final
-    : public server::Handler,
-      public Rest::Handler,
-      public WebSocket::Handler {
+class Gateway final : public server::Handler,
+                      public Rest::Handler,
+                      public WebSocket::Handler {
  public:
-  Gateway(
-      server::Dispatcher& dispatcher,
-      const Config& config);
+  Gateway(server::Dispatcher &dispatcher, const Config &config);
 
  protected:
   // server::Handler
 
-  void operator()(const Event<Start>&) override;
-  void operator()(const Event<Stop>&) override;
-  void operator()(const Event<Timer>&) override;
-  void operator()(const Event<Connection>&) override;
+  void operator()(const Event<Start> &) override;
+  void operator()(const Event<Stop> &) override;
+  void operator()(const Event<Timer> &) override;
+  void operator()(const Event<Connection> &) override;
 
   void operator()(
-      const Event<CreateOrder>& event,
-      const std::string_view& request_id,
+      const Event<CreateOrder> &event,
+      const std::string_view &request_id,
       uint32_t gateway_order_id) override;
   void operator()(
-      const Event<ModifyOrder>& event,
-      const std::string_view& request_id,
-      const server::OMS_Order& order) override;
+      const Event<ModifyOrder> &event,
+      const std::string_view &request_id,
+      const server::OMS_Order &order) override;
   void operator()(
-      const Event<CancelOrder>& event,
-      const std::string_view& request_id,
-      const server::OMS_Order& order) override;
+      const Event<CancelOrder> &event,
+      const std::string_view &request_id,
+      const server::OMS_Order &order) override;
 
-  void operator()(metrics::Writer& writer) override;
+  void operator()(metrics::Writer &writer) override;
 
   // WebSocket::Handler
 
-  void operator()(const WebSocket&) override;
+  void operator()(const WebSocket &) override;
   void operator()(
       const json::Action,
-      const json::Execution&,
-      const server::TraceInfo&) override;
+      const json::Execution &,
+      const server::TraceInfo &) override;
   void operator()(
       const json::Action,
-      const json::Instrument&,
-      const server::TraceInfo&) override;
+      const json::Instrument &,
+      const server::TraceInfo &) override;
   void operator()(
       const json::Action,
-      const json::Order&,
-      const server::TraceInfo&) override;
+      const json::Order &,
+      const server::TraceInfo &) override;
   void operator()(
       const json::Action,
-      const json::OrderBookL2&,
-      const server::TraceInfo&) override;
+      const json::OrderBookL2 &,
+      const server::TraceInfo &) override;
   void operator()(
       const json::Action,
-      const json::Position&,
-      const server::TraceInfo&) override;
+      const json::Position &,
+      const server::TraceInfo &) override;
   void operator()(
       const json::Action,
-      const json::Quote&,
-      const server::TraceInfo&) override;
+      const json::Quote &,
+      const server::TraceInfo &) override;
   void operator()(
       const json::Action,
-      const json::Settlement&,
-      const server::TraceInfo&) override;
+      const json::Settlement &,
+      const server::TraceInfo &) override;
   void operator()(
       const json::Action,
-      const json::Trade&,
-      const server::TraceInfo&) override;
+      const json::Trade &,
+      const server::TraceInfo &) override;
 
   // Rest::Handler
 
-  void operator()(const Rest&) override;
+  void operator()(const Rest &) override;
 
  private:
   void update_market_data(GatewayStatus gateway_status);
@@ -117,31 +114,28 @@ class Gateway final
   void subscribe_instrument();
   void subscribe_order_book_l2();
 
-  const Product& find_product(const json::InstrumentItem&);
+  const Product &find_product(const json::InstrumentItem &);
 
   std::pair<double, double> find_price(
-      json::Action action,
-      uint64_t id,
-      double price,
-      double size);
+      json::Action action, uint64_t id, double price, double size);
 
   void publish_market_by_price(
-      const std::string_view& symbol,
+      const std::string_view &symbol,
       size_t bid_length,
       size_t ask_length,
       bool snapshot,
-      const server::TraceInfo& trace_info,
+      const server::TraceInfo &trace_info,
       bool is_last);
 
-  void operator()(const json::OrderItem&);
-  void operator()(const json::Order&);
+  void operator()(const json::OrderItem &);
+  void operator()(const json::Order &);
 
   using WebSocketDownload = server::Download<WebSocketState>;
 
   int32_t download(WebSocketDownload::State state);
 
  private:
-  server::Dispatcher& _dispatcher;
+  server::Dispatcher &_dispatcher;
   // config
   const std::string _account;
   // authentication

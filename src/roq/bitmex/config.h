@@ -18,11 +18,10 @@
 namespace roq {
 namespace bitmex {
 
-class Config final
-    : public server::Config,
-      public server::ConfigReader::Handler {
+class Config final : public server::Config,
+                     public server::ConfigReader::Handler {
  public:
-  explicit Config(const std::string_view& path);
+  explicit Config(const std::string_view &path);
 
   std::string get_account() const;
 
@@ -39,15 +38,13 @@ class Config final
 
  protected:
   // server::Config
-  void dispatch(server::Config::Handler& handler) const override;
+  void dispatch(server::Config::Handler &handler) const override;
 
   // server::ConfigReader::Handler
-  void operator()(server::Symbols&& symbols) override;
-  void operator()(Account&& account) override;
-  void operator()(User&& user) override;
-  void operator()(
-      const std::string_view& key,
-      cpptoml::base& base) override;
+  void operator()(server::Symbols &&symbols) override;
+  void operator()(Account &&account) override;
+  void operator()(User &&user) override;
+  void operator()(const std::string_view &key, cpptoml::base &base) override;
 
  public:
   std::vector<User> users;
@@ -72,11 +69,11 @@ class Config final
 template <>
 struct fmt::formatter<roq::bitmex::Config> {
   template <typename C>
-  constexpr auto parse(C& ctx) {
+  constexpr auto parse(C &ctx) {
     return ctx.begin();
   }
   template <typename C>
-  auto format(const roq::bitmex::Config& value, C& ctx) {
+  auto format(const roq::bitmex::Config &value, C &ctx) {
     // FIXME(thraneh): proper
     return format_to(
         ctx.out(),
@@ -85,6 +82,6 @@ struct fmt::formatter<roq::bitmex::Config> {
         "accounts=..."
         "}}",
         fmt::join(value.users, ", "));
-        // fmt::join(value.accounts, ", "));
+    // fmt::join(value.accounts, ", "));
   }
 };

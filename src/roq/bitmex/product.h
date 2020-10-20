@@ -14,15 +14,15 @@ namespace bitmex {
 
 class Product final {
  public:
-  explicit Product(const json::InstrumentItem&);
+  explicit Product(const json::InstrumentItem &);
 
-  Product(Product&&) = delete;
-  Product(const Product&) = delete;
+  Product(Product &&) = delete;
+  Product(const Product &) = delete;
 
-  bool update(const json::InstrumentItem&);
+  bool update(const json::InstrumentItem &);
 
-  ReferenceData create_reference_data(const json::InstrumentItem&) const;
-  MarketStatus create_market_status(const json::InstrumentItem&) const;
+  ReferenceData create_reference_data(const json::InstrumentItem &) const;
+  MarketStatus create_market_status(const json::InstrumentItem &) const;
 
  private:
   // reference data
