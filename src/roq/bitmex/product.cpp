@@ -30,31 +30,31 @@ bool Product::update(const json::InstrumentItem &item) {
 ReferenceData Product::create_reference_data(
     const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
-  return ReferenceData {
-    .exchange = FLAGS_exchange,
-    .symbol = item.symbol,
-    .security_type = SecurityType::UNDEFINED,  // XXX typ?
-    .currency = _quote_currency,               // XXX or position_currency?
-    .settlement_currency = _settl_currency,
-    .commission_currency = std::string_view(),
-    .tick_size = _tick_size,
-    .limit_up = _limit_up_price,
-    .limit_down = _limit_down_price,
-    .multiplier = _multiplier,
-    .min_trade_vol = _lot_size,            // XXX correct?
-    .option_type = OptionType::UNDEFINED,  // XXX typ?
-    .strike_currency = std::string_view(),
-    .strike_price = _option_strike_price,
+  return ReferenceData{
+      .exchange = FLAGS_exchange,
+      .symbol = item.symbol,
+      .security_type = SecurityType::UNDEFINED,  // XXX typ?
+      .currency = _quote_currency,               // XXX or position_currency?
+      .settlement_currency = _settl_currency,
+      .commission_currency = std::string_view(),
+      .tick_size = _tick_size,
+      .limit_up = _limit_up_price,
+      .limit_down = _limit_down_price,
+      .multiplier = _multiplier,
+      .min_trade_vol = _lot_size,            // XXX correct?
+      .option_type = OptionType::UNDEFINED,  // XXX typ?
+      .strike_currency = std::string_view(),
+      .strike_price = _option_strike_price,
   };
 }
 
 MarketStatus Product::create_market_status(
     const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
-  return MarketStatus {
-    .exchange = FLAGS_exchange,
-    .symbol = item.symbol,
-    .trading_status = json::map(_state),
+  return MarketStatus{
+      .exchange = FLAGS_exchange,
+      .symbol = item.symbol,
+      .trading_status = json::map(_state),
   };
 }
 

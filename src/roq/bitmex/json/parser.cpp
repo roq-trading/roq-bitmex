@@ -227,35 +227,35 @@ void Parser::dispatch(
         throw std::runtime_error("Can't detect message type");
       case Type::CANCEL_ALL_AFTER: {
         CancelAllAfter cancel_all_after = {
-          .cancel_time = result.cancel_time,
-          .now = result.now,
+            .cancel_time = result.cancel_time,
+            .now = result.now,
         };
         handler(cancel_all_after);
         return;
       }
       case Type::ERROR: {
         Error error = {
-          .error = result.error,
-          .status = result.status,
+            .error = result.error,
+            .status = result.status,
         };
         handler(error);
         return;
       }
       case Type::INFO: {
-        Handshake handshake {
-          .docs = nullptr,
-          .info = nullptr,
-          .timestamp = result.timestamp,
-          .version = result.version,
+        Handshake handshake{
+            .docs = nullptr,
+            .info = nullptr,
+            .timestamp = result.timestamp,
+            .version = result.version,
         };
         handler(handshake);
         return;
       }
       case Type::SUBSCRIBE: {
-        Subscribe subscribe {
-          .failure = result.failure,
-          .subscribe = result.subscribe,
-          .success = result.success,
+        Subscribe subscribe{
+            .failure = result.failure,
+            .subscribe = result.subscribe,
+            .success = result.success,
         };
         handler(subscribe);
         return;

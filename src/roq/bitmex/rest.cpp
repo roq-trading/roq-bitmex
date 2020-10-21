@@ -32,7 +32,7 @@ static auto create_latency(const std::string_view &function) {
 
 static auto compute_expires() {
   auto result = core::get_realtime_clock() +
-                std::chrono::seconds { FLAGS_rest_expires_timeout_secs };
+                std::chrono::seconds{FLAGS_rest_expires_timeout_secs};
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
 }  // namespace
@@ -54,26 +54,26 @@ Rest::Rest(
           ROQ_PACKAGE_NAME,
           true,  // keep alive
           FLAGS_rest_request_queue_depth,
-          std::chrono::seconds { FLAGS_rest_request_timeout_secs },
-          std::chrono::seconds { FLAGS_rest_rate_limit_interval_secs },
+          std::chrono::seconds{FLAGS_rest_request_timeout_secs},
+          std::chrono::seconds{FLAGS_rest_rate_limit_interval_secs},
           FLAGS_rest_rate_limit_max_requests,
-          std::chrono::seconds { FLAGS_rest_ping_freq_secs },
+          std::chrono::seconds{FLAGS_rest_ping_freq_secs},
           FLAGS_decode_buffer_size,
           FLAGS_encode_buffer_size,
           FLAGS_rest_ping_path),
       _decode_buffer(FLAGS_decode_buffer_size),
-      _counter {
-        .disconnect = create_counter("disconnect"),
+      _counter{
+          .disconnect = create_counter("disconnect"),
       },
-      _profile {
-        .products = create_profile("products"),
-        .accounts = create_profile("accounts"),
-        .create_order = create_profile("create_order"),
-        .modify_order = create_profile("modify_order"),
-        .cancel_order = create_profile("cancel_order"),
+      _profile{
+          .products = create_profile("products"),
+          .accounts = create_profile("accounts"),
+          .create_order = create_profile("create_order"),
+          .modify_order = create_profile("modify_order"),
+          .cancel_order = create_profile("cancel_order"),
       },
-      _latency {
-        .ping = create_latency("ping"),
+      _latency{
+          .ping = create_latency("ping"),
       } {
 }
 

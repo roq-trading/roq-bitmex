@@ -35,18 +35,18 @@ template <>
 inline void update(
     std::chrono::nanoseconds &result, const core::json::value_t &value) {
   return std::visit(
-      overloaded {
+      overloaded{
           [&](const core::json::null_t &) {
-            result = std::chrono::nanoseconds {};
+            result = std::chrono::nanoseconds{};
           },
           [](bool) { throw std::bad_cast(); },
           [&](int64_t value) {
-            result = std::chrono::nanoseconds { static_cast<uint64_t>(
-                value * int64_t { 1000000000 }) };
+            result = std::chrono::nanoseconds{
+                static_cast<uint64_t>(value * int64_t{1000000000})};
           },
           [&](double value) {
-            result = std::chrono::nanoseconds { static_cast<uint64_t>(
-                value * 1.0e9) };
+            result =
+                std::chrono::nanoseconds{static_cast<uint64_t>(value * 1.0e9)};
           },
           [&](const std::string_view &value) {
             result = core::charconv::to_datetime(value);

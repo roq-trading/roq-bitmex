@@ -46,35 +46,35 @@ WebSocket::WebSocket(
           ssl_context,
           core::URI(FLAGS_ws_uri),
           std::string_view(),  // query
-          std::chrono::seconds { FLAGS_ws_ping_freq_secs },
+          std::chrono::seconds{FLAGS_ws_ping_freq_secs},
           FLAGS_decode_buffer_size,  // XXX need read buffer size
           FLAGS_encode_buffer_size,
           [this]() { return create_upgrade_headers(); }),
       _decode_buffer(FLAGS_decode_buffer_size),
-      _counter {
-        .disconnect = create_counter("disconnect"),
+      _counter{
+          .disconnect = create_counter("disconnect"),
       },
-      _profile {
-        .parse = create_profile("parse"),
-        .cancel_all_after = create_profile("cancel_all_after"),
-        .error = create_profile("error"),
-        .execution = create_profile("execution"),
-        .funding = create_profile("funding"),
-        .handshake = create_profile("handshake"),
-        .instrument = create_profile("instrument"),
-        .liquidation = create_profile("liquidation"),
-        .margin = create_profile("margin"),
-        .order = create_profile("order"),
-        .order_book_l2 = create_profile("order_book_l2"),
-        .position = create_profile("position"),
-        .quote = create_profile("quote"),
-        .settlement = create_profile("settlement"),
-        .subscribe = create_profile("subscribe"),
-        .trade = create_profile("trade"),
+      _profile{
+          .parse = create_profile("parse"),
+          .cancel_all_after = create_profile("cancel_all_after"),
+          .error = create_profile("error"),
+          .execution = create_profile("execution"),
+          .funding = create_profile("funding"),
+          .handshake = create_profile("handshake"),
+          .instrument = create_profile("instrument"),
+          .liquidation = create_profile("liquidation"),
+          .margin = create_profile("margin"),
+          .order = create_profile("order"),
+          .order_book_l2 = create_profile("order_book_l2"),
+          .position = create_profile("position"),
+          .quote = create_profile("quote"),
+          .settlement = create_profile("settlement"),
+          .subscribe = create_profile("subscribe"),
+          .trade = create_profile("trade"),
       },
-      _latency {
-        .ping = create_latency("ping"),
-        .heartbeat = create_latency("heartbeat"),
+      _latency{
+          .ping = create_latency("ping"),
+          .heartbeat = create_latency("heartbeat"),
       } {
 }
 
@@ -100,9 +100,8 @@ void WebSocket::operator()(const Event<Timer> &event) {
       _ready && _next_cancel_all_after <= event.value.now) {
     _next_cancel_all_after =
         event.value.now +
-        std::chrono::seconds { FLAGS_ws_cancel_all_after_secs / 4 };
-    send_cancel_all_after(
-        std::chrono::seconds { FLAGS_ws_cancel_all_after_secs });
+        std::chrono::seconds{FLAGS_ws_cancel_all_after_secs / 4};
+    send_cancel_all_after(std::chrono::seconds{FLAGS_ws_cancel_all_after_secs});
   }
 }
 
@@ -187,7 +186,7 @@ void WebSocket::operator()(const core::web::Socket::Text &text) {
 
 std::string WebSocket::create_upgrade_headers() {
   auto expires = std::chrono::duration_cast<std::chrono::seconds>(
-      core::get_realtime_clock() + std::chrono::seconds { 5 });
+      core::get_realtime_clock() + std::chrono::seconds{5});
   return _random.create_headers(
       expires, core::http::Method::GET, "/realtime", std::string_view());
 }
@@ -241,7 +240,7 @@ void WebSocket::operator()(const json::Handshake &handshake) {
     _handler(*this);
     if (FLAGS_ws_cancel_on_disconnect == false ||
         FLAGS_ws_cancel_all_after_secs == 0)
-      send_cancel_all_after(std::chrono::seconds {});
+      send_cancel_all_after(std::chrono::seconds{});
   });
 }
 
