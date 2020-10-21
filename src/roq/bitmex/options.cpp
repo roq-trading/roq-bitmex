@@ -17,6 +17,10 @@ DEFINE_string(
     "/",
     "URI path used for REST connection keep-alive messages");
 
+DEFINE_uint32(rest_request_queue_depth, 5, "request: max queue depth");
+
+DEFINE_uint32(rest_request_timeout_secs, 30, "request: timeout (seconds)");
+
 DEFINE_uint32(
     rest_rate_limit_interval_secs,
     60,

@@ -13,6 +13,8 @@ DECLARE_uint32(download_timeout_secs);
 DECLARE_string(rest_uri);
 DECLARE_uint32(rest_ping_freq_secs);
 DECLARE_string(rest_ping_path);
+DECLARE_uint32(rest_request_queue_depth);
+DECLARE_uint32(rest_request_timeout_secs);
 DECLARE_uint32(rest_rate_limit_interval_secs);
 DECLARE_uint32(rest_rate_limit_max_requests);
 DECLARE_uint32(rest_expires_timeout_secs);
