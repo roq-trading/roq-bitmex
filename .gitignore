@@ -55,6 +55,11 @@ build/
 *.trs
 
 
+# cppcheck
+
+compile_commands.json
+
+
 # project specific
 
 roq-bitmex.pc
