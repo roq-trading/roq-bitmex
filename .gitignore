@@ -48,16 +48,13 @@ lib/
 
 build/
 
+compile_commands.json*
+
 
 # gtest
 
 *.log
 *.trs
-
-
-# cppcheck
-
-compile_commands.json
 
 
 # project specific
