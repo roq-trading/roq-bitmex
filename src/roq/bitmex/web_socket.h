@@ -157,28 +157,28 @@ class WebSocket final : public core::web::Socket::Handler,
   void send_cancel_all_after(std::chrono::seconds seconds);
 
  private:
-  Handler &_handler;
+  Handler &handler_;
   // authentication
-  Random &_random;
+  Random &random_;
   // connection
-  core::web::Socket _connection;
+  core::web::Socket connection_;
   // buffers
-  core::utils::Buffer _decode_buffer;
+  core::utils::Buffer decode_buffer_;
   // metrics
   struct {
     core::metrics::Counter disconnect;
-  } _counter;
+  } counter_;
   struct {
     core::metrics::Profile parse, cancel_all_after, error, execution, funding,
         handshake, instrument, liquidation, margin, order, order_book_l2,
         position, quote, settlement, subscribe, trade;
-  } _profile;
+  } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
-  } _latency;
+  } latency_;
   // session
-  bool _ready = false;
-  std::chrono::nanoseconds _next_cancel_all_after = {};
+  bool ready_ = false;
+  std::chrono::nanoseconds next_cancel_all_after_ = {};
 };
 
 }  // namespace bitmex

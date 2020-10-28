@@ -26,8 +26,8 @@ static auto create_timestamp_secs(std::chrono::nanoseconds value) {
 }
 
 Random::Random(const std::string_view &key, const std::string_view &secret)
-    : _base_path(create_base_path()), _key(key),
-      _hmac(secret.data(), secret.length()) {
+    : base_path(create_base_path()), key_(key),
+      hmac_(secret.data(), secret.length()) {
 }
 
 std::string Random::create_signature(
@@ -37,13 +37,13 @@ std::string Random::create_signature(
     const std::string_view &body) {
   auto expires_ = create_timestamp_secs(expires);
   auto method_ = std::string_view(core::http::EnumNameMethod(method));
-  _hmac.clear();
-  _hmac.update(method_);
-  _hmac.update(path);
-  _hmac.update(expires_);
-  if (body.empty() == false) _hmac.update(body);
+  hmac_.clear();
+  hmac_.update(method_);
+  hmac_.update(path);
+  hmac_.update(expires_);
+  if (body.empty() == false) hmac_.update(body);
   std::array<char, 32> buffer;
-  auto length = _hmac.digest(buffer.data(), buffer.size());
+  auto length = hmac_.digest(buffer.data(), buffer.size());
   assert(length == buffer.size());
   return core::binascii::Hex::encode(buffer.data(), buffer.size());
 }
@@ -60,7 +60,7 @@ std::string Random::create_headers(
       "api-key: {}\r\n",
       signature,
       std::chrono::duration_cast<std::chrono::seconds>(expires).count(),
-      _key);
+      key_);
 }
 
 }  // namespace bitmex

@@ -38,8 +38,8 @@ WebSocket::WebSocket(
     core::event::Base &base,
     core::event::DNSBase &dns_base,
     core::ssl::Context &ssl_context)
-    : _handler(handler), _random(random),
-      _connection(
+    : handler_(handler), random_(random),
+      connection_(
           *this,
           base,
           dns_base,
@@ -50,11 +50,11 @@ WebSocket::WebSocket(
           FLAGS_decode_buffer_size,  // XXX need read buffer size
           FLAGS_encode_buffer_size,
           [this]() { return create_upgrade_headers(); }),
-      _decode_buffer(FLAGS_decode_buffer_size),
-      _counter{
+      decode_buffer_(FLAGS_decode_buffer_size),
+      counter_{
           .disconnect = create_counter("disconnect"),
       },
-      _profile{
+      profile_{
           .parse = create_profile("parse"),
           .cancel_all_after = create_profile("cancel_all_after"),
           .error = create_profile("error"),
@@ -72,33 +72,33 @@ WebSocket::WebSocket(
           .subscribe = create_profile("subscribe"),
           .trade = create_profile("trade"),
       },
-      _latency{
+      latency_{
           .ping = create_latency("ping"),
           .heartbeat = create_latency("heartbeat"),
       } {
 }
 
 bool WebSocket::ready() const {
-  return _connection.ready();
+  return connection_.ready();
 }
 
 void WebSocket::close() {
-  _connection.close();
+  connection_.close();
 }
 
 void WebSocket::operator()(const Event<Start> &) {
-  _connection.start();
+  connection_.start();
 }
 
 void WebSocket::operator()(const Event<Stop> &) {
-  _connection.stop();
+  connection_.stop();
 }
 
 void WebSocket::operator()(const Event<Timer> &event) {
-  if (_connection.refresh(event.value.now) == false) return;
+  if (connection_.refresh(event.value.now) == false) return;
   if (FLAGS_ws_cancel_on_disconnect && FLAGS_ws_cancel_all_after_secs &&
-      _ready && _next_cancel_all_after <= event.value.now) {
-    _next_cancel_all_after =
+      ready_ && next_cancel_all_after_ <= event.value.now) {
+    next_cancel_all_after_ =
         event.value.now +
         std::chrono::seconds{FLAGS_ws_cancel_all_after_secs / 4};
     send_cancel_all_after(std::chrono::seconds{FLAGS_ws_cancel_all_after_secs});
@@ -112,7 +112,7 @@ void WebSocket::subscribe(const std::string_view &topic) {
       R"("args":"{}")"
       R"(}})",
       topic);
-  _connection.send_text(message);
+  connection_.send_text(message);
 }
 
 void WebSocket::subscribe(
@@ -127,34 +127,34 @@ void WebSocket::subscribe(
         R"(}})",
         topic,
         fmt::join(filter, ","));
-    _connection.send_text(message);
+    connection_.send_text(message);
   }
 }
 
 void WebSocket::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(_counter.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(_profile.parse, metrics::PROFILE)
-      .write(_profile.cancel_all_after, metrics::PROFILE)
-      .write(_profile.error, metrics::PROFILE)
-      .write(_profile.execution, metrics::PROFILE)
-      .write(_profile.funding, metrics::PROFILE)
-      .write(_profile.handshake, metrics::PROFILE)
-      .write(_profile.instrument, metrics::PROFILE)
-      .write(_profile.liquidation, metrics::PROFILE)
-      .write(_profile.margin, metrics::PROFILE)
-      .write(_profile.order, metrics::PROFILE)
-      .write(_profile.order_book_l2, metrics::PROFILE)
-      .write(_profile.position, metrics::PROFILE)
-      .write(_profile.quote, metrics::PROFILE)
-      .write(_profile.settlement, metrics::PROFILE)
-      .write(_profile.subscribe, metrics::PROFILE)
-      .write(_profile.trade, metrics::PROFILE)
+      .write(profile_.parse, metrics::PROFILE)
+      .write(profile_.cancel_all_after, metrics::PROFILE)
+      .write(profile_.error, metrics::PROFILE)
+      .write(profile_.execution, metrics::PROFILE)
+      .write(profile_.funding, metrics::PROFILE)
+      .write(profile_.handshake, metrics::PROFILE)
+      .write(profile_.instrument, metrics::PROFILE)
+      .write(profile_.liquidation, metrics::PROFILE)
+      .write(profile_.margin, metrics::PROFILE)
+      .write(profile_.order, metrics::PROFILE)
+      .write(profile_.order_book_l2, metrics::PROFILE)
+      .write(profile_.position, metrics::PROFILE)
+      .write(profile_.quote, metrics::PROFILE)
+      .write(profile_.settlement, metrics::PROFILE)
+      .write(profile_.subscribe, metrics::PROFILE)
+      .write(profile_.trade, metrics::PROFILE)
       // latency
-      .write(_latency.ping, metrics::LATENCY)
-      .write(_latency.heartbeat, metrics::LATENCY);
+      .write(latency_.ping, metrics::LATENCY)
+      .write(latency_.heartbeat, metrics::LATENCY);
 }
 
 void WebSocket::operator()(const core::web::Socket::Connected &) {
@@ -162,9 +162,9 @@ void WebSocket::operator()(const core::web::Socket::Connected &) {
 }
 
 void WebSocket::operator()(const core::web::Socket::Disconnected &) {
-  _ready = false;
-  _next_cancel_all_after = {};
-  _handler(*this);
+  ready_ = false;
+  next_cancel_all_after_ = {};
+  handler_(*this);
 }
 
 void WebSocket::operator()(const core::web::Socket::Ready &) {
@@ -175,7 +175,7 @@ void WebSocket::operator()(const core::web::Socket::Close &) {
 }
 
 void WebSocket::operator()(const core::web::Socket::Latency &latency) {
-  _latency.ping.update(
+  latency_.ping.update(
       std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
           .count());
 }
@@ -187,13 +187,13 @@ void WebSocket::operator()(const core::web::Socket::Text &text) {
 std::string WebSocket::create_upgrade_headers() {
   auto expires = std::chrono::duration_cast<std::chrono::seconds>(
       core::get_realtime_clock() + std::chrono::seconds{5});
-  return _random.create_headers(
+  return random_.create_headers(
       expires, core::http::Method::GET, "/realtime", std::string_view());
 }
 
 void WebSocket::parse(const std::string_view &message) {
   VLOG(4)(R"(message={})", message);
-  _profile.parse([&]() {
+  profile_.parse([&]() {
     try {
       parse_helper(message);
     } catch (std::exception &e) {
@@ -205,7 +205,7 @@ void WebSocket::parse(const std::string_view &message) {
 
 void WebSocket::parse_helper(const std::string_view &message) {
   server::TraceInfo trace_info;
-  core::json::Buffer buffer(_decode_buffer);
+  core::json::Buffer buffer(decode_buffer_);
   json::Parser::dispatch(*this, message, buffer, trace_info);
 }
 
@@ -217,27 +217,27 @@ void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
       R"(}})",
       seconds.count() * 1000);  // milliseconds
   DLOG(INFO)("message={}", message);
-  _connection.send_text(message);
+  connection_.send_text(message);
 }
 
 void WebSocket::operator()(const json::CancelAllAfter &cancel_all_after) {
-  _profile.cancel_all_after([&]() {
+  profile_.cancel_all_after([&]() {
     VLOG(1)(R"(cancel_all_after={})", cancel_all_after);
   });
 }
 
 void WebSocket::operator()(const json::Error &error) {
-  _profile.error([&]() { LOG(WARNING)(R"(error={})", error); });
-  _connection.close();
+  profile_.error([&]() { LOG(WARNING)(R"(error={})", error); });
+  connection_.close();
 }
 
 void WebSocket::operator()(const json::Handshake &handshake) {
-  _profile.handshake([&]() {
+  profile_.handshake([&]() {
     VLOG(1)(R"(handshake={})", handshake);
     LOG(INFO)("Ready");
-    assert(_ready == false);
-    _ready = true;
-    _handler(*this);
+    assert(ready_ == false);
+    ready_ = true;
+    handler_(*this);
     if (FLAGS_ws_cancel_on_disconnect == false ||
         FLAGS_ws_cancel_all_after_secs == 0)
       send_cancel_all_after(std::chrono::seconds{});
@@ -245,7 +245,7 @@ void WebSocket::operator()(const json::Handshake &handshake) {
 }
 
 void WebSocket::operator()(const json::Subscribe &subscribe) {
-  _profile.subscribe([&]() {
+  profile_.subscribe([&]() {
     VLOG(1)(R"(subscribe={})", subscribe);
     if (subscribe.success) {
       assert(subscribe.failure == false);
@@ -265,9 +265,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Execution &execution,
     const server::TraceInfo &trace_info) {
-  _profile.execution([&]() {
+  profile_.execution([&]() {
     VLOG(1)(R"(action={}, execution={})", action, execution);
-    _handler(action, execution, trace_info);
+    handler_(action, execution, trace_info);
   });
 }
 
@@ -275,7 +275,7 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Funding &funding,
     const server::TraceInfo &) {
-  _profile.funding([&]() {
+  profile_.funding([&]() {
     VLOG(2)(R"(action={}, funding={})", action, funding);
     // XXX not used
   });
@@ -285,9 +285,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Instrument &instrument,
     const server::TraceInfo &trace_info) {
-  _profile.instrument([&]() {
+  profile_.instrument([&]() {
     VLOG(2)(R"(action={}, instrument={})", action, instrument);
-    _handler(action, instrument, trace_info);
+    handler_(action, instrument, trace_info);
   });
 }
 
@@ -295,7 +295,7 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Liquidation &liquidation,
     const server::TraceInfo &) {
-  _profile.liquidation([&]() {
+  profile_.liquidation([&]() {
     VLOG(2)(R"(action={}, liquidation={})", action, liquidation);
     /// XXX not used
   });
@@ -305,7 +305,7 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Margin &margin,
     const server::TraceInfo &) {
-  _profile.margin([&]() {
+  profile_.margin([&]() {
     VLOG(2)(R"(action={}, margin={})", action, margin);
     /// XXX not used
   });
@@ -315,9 +315,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Order &order,
     const server::TraceInfo &trace_info) {
-  _profile.order([&]() {
+  profile_.order([&]() {
     VLOG(1)(R"(action={}, order={})", action, order);
-    _handler(action, order, trace_info);
+    handler_(action, order, trace_info);
   });
 }
 
@@ -325,9 +325,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::OrderBookL2 &order_book_l2,
     const server::TraceInfo &trace_info) {
-  _profile.order_book_l2([&]() {
+  profile_.order_book_l2([&]() {
     VLOG(3)(R"(action={}, order_book_l2={})", action, order_book_l2);
-    _handler(action, order_book_l2, trace_info);
+    handler_(action, order_book_l2, trace_info);
   });
 }
 
@@ -335,9 +335,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Position &position,
     const server::TraceInfo &trace_info) {
-  _profile.position([&]() {
+  profile_.position([&]() {
     VLOG(2)(R"(action={}, position={})", action, position);
-    _handler(action, position, trace_info);
+    handler_(action, position, trace_info);
   });
 }
 
@@ -345,9 +345,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Quote &quote,
     const server::TraceInfo &trace_info) {
-  _profile.quote([&]() {
+  profile_.quote([&]() {
     VLOG(3)(R"(action={}, quote={})", action, quote);
-    _handler(action, quote, trace_info);
+    handler_(action, quote, trace_info);
   });
 }
 
@@ -355,9 +355,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Settlement &settlement,
     const server::TraceInfo &trace_info) {
-  _profile.settlement([&]() {
+  profile_.settlement([&]() {
     VLOG(3)(R"(action={}, settlement={})", action, settlement);
-    _handler(action, settlement, trace_info);
+    handler_(action, settlement, trace_info);
   });
 }
 
@@ -365,9 +365,9 @@ void WebSocket::operator()(
     const json::Action action,
     const json::Trade &trade,
     const server::TraceInfo &trace_info) {
-  _profile.trade([&]() {
+  profile_.trade([&]() {
     VLOG(2)(R"(action={}, trade={})", action, trade);
-    _handler(action, trade, trace_info);
+    handler_(action, trade, trace_info);
   });
 }
 

@@ -44,8 +44,8 @@ Rest::Rest(
     core::event::Base &base,
     core::event::DNSBase &dns_base,
     core::ssl::Context &ssl_context)
-    : _handler(handler), _random(random),
-      _connection(
+    : handler_(handler), random_(random),
+      connection_(
           *this,
           base,
           dns_base,
@@ -61,47 +61,47 @@ Rest::Rest(
           FLAGS_decode_buffer_size,
           FLAGS_encode_buffer_size,
           FLAGS_rest_ping_path),
-      _decode_buffer(FLAGS_decode_buffer_size),
-      _counter{
+      decode_buffer_(FLAGS_decode_buffer_size),
+      counter_{
           .disconnect = create_counter("disconnect"),
       },
-      _profile{
+      profile_{
           .products = create_profile("products"),
           .accounts = create_profile("accounts"),
           .create_order = create_profile("create_order"),
           .modify_order = create_profile("modify_order"),
           .cancel_order = create_profile("cancel_order"),
       },
-      _latency{
+      latency_{
           .ping = create_latency("ping"),
       } {
 }
 
 bool Rest::ready() const {
-  return _connection.ready();
+  return connection_.ready();
 }
 
 void Rest::operator()(const Event<Start> &) {
-  _connection.start();
+  connection_.start();
 }
 
 void Rest::operator()(const Event<Stop> &) {
-  _connection.stop();
+  connection_.stop();
 }
 
 void Rest::operator()(const Event<Timer> &event) {
-  _connection.refresh(event.value.now);
+  connection_.refresh(event.value.now);
 }
 
 void Rest::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(_counter.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(_profile.products, metrics::PROFILE)
-      .write(_profile.accounts, metrics::PROFILE)
+      .write(profile_.products, metrics::PROFILE)
+      .write(profile_.accounts, metrics::PROFILE)
       // latency
-      .write(_latency.ping, metrics::LATENCY);
+      .write(latency_.ping, metrics::LATENCY);
 }
 
 void Rest::create_order(
@@ -134,15 +134,15 @@ void Rest::create_order(
           ? std::string_view()
           : json::map(create_order.execution_instruction).as_raw_text());
   DLOG(INFO)(R"(body="{}")", message);
-  auto headers = _random.create_headers(expires, method, path, message);
-  _connection.request(
+  auto headers = random_.create_headers(expires, method, path, message);
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       headers,
       message,
       [this, callback](auto &response) {
-        _profile.create_order([&]() {
+        profile_.create_order([&]() {
           try {
             response.expect(core::http::Status::OK);
             auto order_item =
@@ -179,15 +179,15 @@ void Rest::modify_order(
       modify_order.quantity,
       modify_order.price);
   DLOG(INFO)(R"(body="{}")", message);
-  auto headers = _random.create_headers(expires, method, path, message);
-  _connection.request(
+  auto headers = random_.create_headers(expires, method, path, message);
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       headers,
       message,
       [this, callback](auto &response) {
-        _profile.modify_order([&]() {
+        profile_.modify_order([&]() {
           try {
             response.expect(core::http::Status::OK);
             auto order_item =
@@ -220,18 +220,18 @@ void Rest::cancel_order(
       R"(}})",
       order.external_order_id);
   DLOG(INFO)(R"(body="{}")", message);
-  auto headers = _random.create_headers(expires, method, path, message);
-  _connection.request(
+  auto headers = random_.create_headers(expires, method, path, message);
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       headers,
       message,
       [this, callback](auto &response) {
-        _profile.cancel_order([&]() {
+        profile_.cancel_order([&]() {
           try {
             response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(_decode_buffer);
+            core::json::Buffer buffer(decode_buffer_);
             auto order = core::json::Parser::create<json::Order>(
                 response.body(), buffer);
             VLOG(1)(R"(order={})", order);
@@ -253,18 +253,18 @@ void Rest::get(
     std::function<void(const core::Promise<json::Accounts>&)>&& callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/api/v1/accounts";
-  _connection.request(
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {
-    _profile.accounts(
+    profile_.accounts(
         [&]() {
       try {
         response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(_decode_buffer);
+        core::json::Buffer buffer(decode_buffer_);
         auto accounts = json::Accounts::parse(
             response.body(),
             buffer);
@@ -285,16 +285,16 @@ void Rest::get(
 */
 
 void Rest::operator()(const core::web::Client::Connected &) {
-  _handler(*this);
+  handler_(*this);
 }
 
 void Rest::operator()(const core::web::Client::Disconnected &) {
-  _handler(*this);
-  ++_counter.disconnect;
+  handler_(*this);
+  ++counter_.disconnect;
 }
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
-  _latency.ping.update(
+  latency_.ping.update(
       std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
           .count());
 }

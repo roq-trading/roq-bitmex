@@ -135,39 +135,39 @@ class Gateway final : public server::Handler,
   int32_t download(WebSocketDownload::State state);
 
  private:
-  server::Dispatcher &_dispatcher;
+  server::Dispatcher &dispatcher_;
   // config
-  const std::string _account;
+  const std::string account_;
   // authentication
-  Random _random;
+  Random random_;
   // async
-  core::event::Base _base;
-  core::event::DNSBase _dns_base;
+  core::event::Base base_;
+  core::event::DNSBase dns_base_;
   // crypto
-  core::ssl::Context _ssl_context;
+  core::ssl::Context ssl_context_;
   // connections
   struct {
     WebSocket connection;
     WebSocketDownload download;
-  } _web_socket;
+  } web_socket_;
   struct {
     Rest connection;
-  } _rest;
+  } rest_;
   // reference data
-  core::hash::map<std::string, Product> _product_cache;
-  std::vector<std::string> _symbols;
+  core::hash::map<std::string, Product> product_cache_;
+  std::vector<std::string> symbols_;
   struct {
     bool instrument = false;
     bool order_book_l2 = false;
-  } _snapshot;
+  } snapshot_;
   // market data
-  GatewayStatus _market_data_status = GatewayStatus::DISCONNECTED;
-  core::page_aligned_vector<MBPUpdate> _bid, _ask;
-  core::page_aligned_vector<Trade> _trade;
-  core::page_aligned_vector<Fill> _fill;
-  absl::flat_hash_map<uint64_t, double> _price_lookup;
+  GatewayStatus market_data_status_ = GatewayStatus::DISCONNECTED;
+  core::page_aligned_vector<MBPUpdate> bid_, ask_;
+  core::page_aligned_vector<Trade> trade_;
+  core::page_aligned_vector<Fill> fill_;
+  absl::flat_hash_map<uint64_t, double> price_lookup_;
   // order manager
-  GatewayStatus _order_manager_status = GatewayStatus::DISCONNECTED;
+  GatewayStatus order_manager_status_ = GatewayStatus::DISCONNECTED;
 };
 
 }  // namespace bitmex

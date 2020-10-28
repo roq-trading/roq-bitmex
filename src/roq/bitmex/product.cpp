@@ -10,18 +10,18 @@ namespace roq {
 namespace bitmex {
 
 Product::Product(const json::InstrumentItem &item)
-    : _quote_currency(item.quote_currency),
-      _settl_currency(item.settl_currency), _tick_size(item.tick_size),
-      _limit_up_price(item.limit_up_price),
-      _limit_down_price(item.limit_down_price), _multiplier(item.multiplier),
-      _lot_size(item.lot_size), _option_strike_price(item.option_strike_price),
-      _state(item.state) {
+    : quote_currency_(item.quote_currency),
+      settl_currency_(item.settl_currency), tick_size_(item.tick_size),
+      limit_up_price_(item.limit_up_price),
+      limit_down_price_(item.limit_down_price), multiplier_(item.multiplier),
+      lot_size_(item.lot_size), option_strike_price_(item.option_strike_price),
+      state_(item.state) {
 }
 
 bool Product::update(const json::InstrumentItem &item) {
   bool updated = false;
-  if (item.state != json::State::UNDEFINED && item.state != _state) {
-    _state = item.state;
+  if (item.state != json::State::UNDEFINED && item.state != state_) {
+    state_ = item.state;
     updated = true;
   }
   return updated;
@@ -34,17 +34,17 @@ ReferenceData Product::create_reference_data(
       .exchange = FLAGS_exchange,
       .symbol = item.symbol,
       .security_type = SecurityType::UNDEFINED,  // XXX typ?
-      .currency = _quote_currency,               // XXX or position_currency?
-      .settlement_currency = _settl_currency,
+      .currency = quote_currency_,               // XXX or position_currency?
+      .settlement_currency = settl_currency_,
       .commission_currency = std::string_view(),
-      .tick_size = _tick_size,
-      .limit_up = _limit_up_price,
-      .limit_down = _limit_down_price,
-      .multiplier = _multiplier,
-      .min_trade_vol = _lot_size,            // XXX correct?
+      .tick_size = tick_size_,
+      .limit_up = limit_up_price_,
+      .limit_down = limit_down_price_,
+      .multiplier = multiplier_,
+      .min_trade_vol = lot_size_,            // XXX correct?
       .option_type = OptionType::UNDEFINED,  // XXX typ?
       .strike_currency = std::string_view(),
-      .strike_price = _option_strike_price,
+      .strike_price = option_strike_price_,
   };
 }
 
@@ -54,7 +54,7 @@ MarketStatus Product::create_market_status(
   return MarketStatus{
       .exchange = FLAGS_exchange,
       .symbol = item.symbol,
-      .trading_status = json::map(_state),
+      .trading_status = json::map(state_),
   };
 }
 

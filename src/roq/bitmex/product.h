@@ -26,16 +26,16 @@ class Product final {
 
  private:
   // reference data
-  std::string _quote_currency;
-  std::string _settl_currency;
-  double _tick_size = std::numeric_limits<double>::quiet_NaN();
-  double _limit_up_price = std::numeric_limits<double>::quiet_NaN();
-  double _limit_down_price = std::numeric_limits<double>::quiet_NaN();
-  double _multiplier = std::numeric_limits<double>::quiet_NaN();
-  double _lot_size = std::numeric_limits<double>::quiet_NaN();
-  double _option_strike_price = std::numeric_limits<double>::quiet_NaN();
+  std::string quote_currency_;
+  std::string settl_currency_;
+  double tick_size_ = std::numeric_limits<double>::quiet_NaN();
+  double limit_up_price_ = std::numeric_limits<double>::quiet_NaN();
+  double limit_down_price_ = std::numeric_limits<double>::quiet_NaN();
+  double multiplier_ = std::numeric_limits<double>::quiet_NaN();
+  double lot_size_ = std::numeric_limits<double>::quiet_NaN();
+  double option_strike_price_ = std::numeric_limits<double>::quiet_NaN();
   // market status
-  json::State _state = json::State::UNDEFINED;
+  json::State state_ = json::State::UNDEFINED;
 };
 
 }  // namespace bitmex

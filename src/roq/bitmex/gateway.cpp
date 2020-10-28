@@ -67,67 +67,67 @@ static bool fill_update(
 }
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
-    : _dispatcher(dispatcher), _account(config.get_account()),
-      _random(config.get_api_key(), config.get_secret()),
-      _dns_base(_base, true),
-      _web_socket{
+    : dispatcher_(dispatcher), account_(config.get_account()),
+      random_(config.get_api_key(), config.get_secret()),
+      dns_base_(base_, true),
+      web_socket_{
           .connection =
               {
                   *this,
                   config,
-                  _random,
-                  _base,
-                  _dns_base,
-                  _ssl_context,
+                  random_,
+                  base_,
+                  dns_base_,
+                  ssl_context_,
               },
           .download = WebSocketDownload(
               std::chrono::seconds{FLAGS_download_timeout_secs},
               [this](auto state) { return download(state); }),
       },
-      _rest{
+      rest_{
           .connection =
               {
                   *this,
                   config,
-                  _random,
-                  _base,
-                  _dns_base,
-                  _ssl_context,
+                  random_,
+                  base_,
+                  dns_base_,
+                  ssl_context_,
               },
       },
-      _bid(FLAGS_cache_mbp_max_depth), _ask(FLAGS_cache_mbp_max_depth),
-      _trade(FLAGS_cache_trades_max_depth), _fill(FLAGS_cache_fills_max_depth) {
+      bid_(FLAGS_cache_mbp_max_depth), ask_(FLAGS_cache_mbp_max_depth),
+      trade_(FLAGS_cache_trades_max_depth), fill_(FLAGS_cache_fills_max_depth) {
   LOG_IF(WARNING, FLAGS_ws_cancel_on_disconnect == false)
   ("Orders will *NOT* be cancelled on disconnect");
 }
 
 void Gateway::operator()(const Event<Start> &event) {
   LOG(INFO)("Starting the gateway...");
-  _web_socket.connection(event);
-  _rest.connection(event);
+  web_socket_.connection(event);
+  rest_.connection(event);
 }
 
 void Gateway::operator()(const Event<Stop> &event) {
   LOG(INFO)("Stopping the gateway...");
-  _rest.connection(event);
-  _web_socket.connection(event);
+  rest_.connection(event);
+  web_socket_.connection(event);
 }
 
 void Gateway::operator()(const Event<Timer> &event) {
   // web socket
-  _web_socket.connection(event);
+  web_socket_.connection(event);
   // rest
   /*
-  if (_web_socket.download.has_expired()) {
+  if (web_socket_.download.has_expired()) {
     LOG(WARNING)("Rest download has timed out");
-    _web_socket.download.reset();
-    _rest.connection.close();
+    web_socket_.download.reset();
+    rest_.connection.close();
   } else {
-    _rest.connection(event);
+    rest_.connection(event);
   }
   */
-  _rest.connection(event);
-  _base.loop(EVLOOP_NONBLOCK);
+  rest_.connection(event);
+  base_.loop(EVLOOP_NONBLOCK);
 }
 
 void Gateway::operator()(const Event<Connection> &) {
@@ -137,7 +137,7 @@ void Gateway::operator()(
     const Event<CreateOrder> &event,
     const std::string_view &request_id,
     [[maybe_unused]] uint32_t gateway_order_id) {
-  _rest.connection.create_order(event.value, request_id, [this](auto &promise) {
+  rest_.connection.create_order(event.value, request_id, [this](auto &promise) {
     try {
       (*this)(promise.get());
       /*
@@ -157,7 +157,7 @@ void Gateway::operator()(
     const Event<ModifyOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
-  _rest.connection.modify_order(
+  rest_.connection.modify_order(
       event.value, request_id, order, [this](auto &promise) {
         try {
           (*this)(promise.get());
@@ -178,7 +178,7 @@ void Gateway::operator()(
     const Event<CancelOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
-  _rest.connection.cancel_order(
+  rest_.connection.cancel_order(
       event.value, request_id, order, [this](auto &promise) {
         try {
           (*this)(promise.get());
@@ -196,19 +196,19 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
-  _web_socket.connection(writer);
-  _rest.connection(writer);
+  web_socket_.connection(writer);
+  rest_.connection(writer);
 }
 
 // ws
 
 void Gateway::operator()(const WebSocket &) {
-  if (_web_socket.connection.ready()) {
-    _web_socket.download.begin();
+  if (web_socket_.connection.ready()) {
+    web_socket_.download.begin();
   } else {
-    _web_socket.download.reset();
-    _symbols.clear();
-    _snapshot = {};
+    web_socket_.download.reset();
+    symbols_.clear();
+    snapshot_ = {};
   }
 }
 
@@ -284,7 +284,7 @@ void Gateway::operator()(
         .timestamp = item.timestamp,  // XXX transact_time?
         .external_order_id = item.order_id,
     };
-    auto found = _dispatcher.find_order(
+    auto found = dispatcher_.find_order(
         item.order_id,
         item.cl_ord_id,
         order_lookup,
@@ -301,13 +301,13 @@ void Gateway::operator()(
           }
 
           if (item.exec_type == json::ExecType::TRADE) {
-            success = fill_update(_dispatcher, _fill, fill_length, item);
+            success = fill_update(dispatcher_, fill_, fill_length, item);
             if (ROQ_UNLIKELY(success == false)) {
               LOG(FATAL)
               (R"(Insufficient fill array size: )"
                R"(len(trade)={}/{})",
                fill_length,
-               _fill.size());
+               fill_.size());
             }
           }
 
@@ -325,12 +325,12 @@ void Gateway::operator()(
                   .update_time_utc = item.timestamp,  // XXX transact_time?
                   .gateway_order_id = order.gateway_order_id,
                   .external_order_id = order.external_order_id,
-                  .fills = {_fill.data(), fill_length},
+                  .fills = {fill_.data(), fill_length},
               };
               server::create_trace_and_dispatch(
                   trace_info,
                   trade_update,
-                  _dispatcher,
+                  dispatcher_,
                   true,
                   order.user_id);  // HANS
             } else {
@@ -338,7 +338,7 @@ void Gateway::operator()(
               (R"(Insufficient fill array size: )"
                R"(len(fill)={}/{})",
                fill_length,
-               _fill.size());
+               fill_.size());
             }
           }
         });
@@ -611,12 +611,12 @@ void Gateway::operator()(
       LOG(FATAL)("Unexpected");
       break;
     case json::Action::PARTIAL:
-      if (_snapshot.instrument == false) {
-        _snapshot.instrument = true;
+      if (snapshot_.instrument == false) {
+        snapshot_.instrument = true;
         // assert(_download != Download::READY);
         size_t security_count = 0;
         for (auto &item : instrument.data) {
-          if (_dispatcher.discard_symbol(item.symbol)) {
+          if (dispatcher_.discard_symbol(item.symbol)) {
             VLOG(1)(R"(Drop symbol="{}")", item.symbol);
             continue;
           }
@@ -624,14 +624,14 @@ void Gateway::operator()(
           auto &product = find_product(item);
           auto reference_data = product.create_reference_data(item);
           server::create_trace_and_dispatch(
-              trace_info, reference_data, _dispatcher, false);
+              trace_info, reference_data, dispatcher_, false);
           auto market_status = product.create_market_status(item);
           server::create_trace_and_dispatch(
-              trace_info, market_status, _dispatcher, true);
+              trace_info, market_status, dispatcher_, true);
         }
         VLOG(2)
         (R"(- securities: {} (/{}))", security_count, instrument.data.size());
-        _web_socket.download.check_relaxed(
+        web_socket_.download.check_relaxed(
             WebSocketDownload::State::INSTRUMENT);
       }
       break;
@@ -640,12 +640,12 @@ void Gateway::operator()(
       break;
     case json::Action::UPDATE: {
       for (auto &item : instrument.data) {
-        if (_dispatcher.discard_symbol(item.symbol)) continue;
+        if (dispatcher_.discard_symbol(item.symbol)) continue;
         auto &product = find_product(item);
         // XXX check if dirty
         auto market_status = product.create_market_status(item);
         server::create_trace_and_dispatch(
-            trace_info, market_status, _dispatcher, true);
+            trace_info, market_status, dispatcher_, true);
       }
       break;
     }
@@ -672,7 +672,7 @@ void Gateway::operator()(
   // note!
   //   first partial update will include *all* instruments
   //   drop everything received before partial (see: API documentation)
-  if (snapshot == false && _snapshot.order_book_l2 == false) return;
+  if (snapshot == false && snapshot_.order_book_l2 == false) return;
   std::string_view previous;
   bool success = true;
   size_t bid_length = 0, ask_length = 0;
@@ -690,10 +690,10 @@ void Gateway::operator()(
     if (std::isfinite(price_size.first)) {
       switch (item.side) {
         case json::Side::BUY:
-          success = mbp_update(_bid, bid_length, price_size);
+          success = mbp_update(bid_, bid_length, price_size);
           break;
         case json::Side::SELL:
-          success = mbp_update(_ask, ask_length, price_size);
+          success = mbp_update(ask_, ask_length, price_size);
           break;
         default:
           LOG(FATAL)("Unexpected");
@@ -706,7 +706,7 @@ void Gateway::operator()(
        item.id,
        item.price,
        item.size);
-      _web_socket.connection.close();
+      web_socket_.connection.close();
       return;
     }
   }
@@ -715,17 +715,17 @@ void Gateway::operator()(
     (R"(Insufficient bid/ask array size(s): )"
      R"(len(bid)={}/{}, len(ask)={}/{})",
      bid_length,
-     _bid.size(),
+     bid_.size(),
      ask_length,
-     _ask.size());
+     ask_.size());
   }
   assert(previous.empty() == false);
   publish_market_by_price(
       previous, bid_length, ask_length, snapshot, trace, true);
   // download complete?
   if (snapshot) {
-    _snapshot.order_book_l2 = true;
-    _web_socket.download.check_relaxed(WebSocketDownload::State::ORDER_BOOK_L2);
+    snapshot_.order_book_l2 = true;
+    web_socket_.download.check_relaxed(WebSocketDownload::State::ORDER_BOOK_L2);
   }
 }
 
@@ -736,7 +736,7 @@ void Gateway::operator()(
   DLOG(INFO)("action={}, position={}", action, position);
   for (auto &item : position.data) {
     PositionUpdate buy{
-        .account = _account,
+        .account = account_,
         .exchange = FLAGS_exchange,
         .symbol = item.symbol,
         .side = Side::BUY,
@@ -747,7 +747,7 @@ void Gateway::operator()(
         .position_cost_yesterday = 0.0,
     };
     PositionUpdate sell{
-        .account = _account,
+        .account = account_,
         .exchange = FLAGS_exchange,
         .symbol = item.symbol,
         .side = Side::SELL,
@@ -757,8 +757,8 @@ void Gateway::operator()(
         .position_yesterday = 0.0,
         .position_cost_yesterday = 0.0,
     };
-    server::create_trace_and_dispatch(trace_info, buy, _dispatcher, false);
-    server::create_trace_and_dispatch(trace_info, sell, _dispatcher, true);
+    server::create_trace_and_dispatch(trace_info, buy, dispatcher_, false);
+    server::create_trace_and_dispatch(trace_info, sell, dispatcher_, true);
   }
   /*
   {
@@ -879,7 +879,7 @@ void Gateway::operator()(
     server::create_trace_and_dispatch(
         trace_info,
         top_of_book,
-        _dispatcher,
+        dispatcher_,
         true);  // XXX not always correct
   }
 }
@@ -911,26 +911,26 @@ void Gateway::operator()(
             .symbol = previous,
             .trades =
                 {
-                    .items = _trade.data(),
+                    .items = trade_.data(),
                     .length = trade_length,
                 },
             .exchange_time_utc = timestamp,
         };
         VLOG(3)(R"(trade_summary={})", trade_summary);
         server::create_trace_and_dispatch(
-            trace_info, trade_summary, _dispatcher, false);
+            trace_info, trade_summary, dispatcher_, false);
       }
       previous = item.symbol;
       trade_length = 0;
     }
-    success = trade_update(_trade, trade_length, item);
+    success = trade_update(trade_, trade_length, item);
   }
   if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)
     (R"(Insufficient trade array size: )"
      R"(len(trade)={}/{})",
      trade_length,
-     _trade.size());
+     trade_.size());
   }
   if (previous.empty() == false && trade_length > 0) {
     TradeSummary trade_summary{
@@ -938,21 +938,21 @@ void Gateway::operator()(
         .symbol = previous,
         .trades =
             {
-                .items = _trade.data(),
+                .items = trade_.data(),
                 .length = trade_length,
             },
         .exchange_time_utc = timestamp,
     };
     VLOG(3)(R"(trade_summary={})", trade_summary);
     server::create_trace_and_dispatch(
-        trace_info, trade_summary, _dispatcher, true);
+        trace_info, trade_summary, dispatcher_, true);
   }
 }
 
 // rest
 
 int32_t Gateway::download(WebSocketDownload::State state) {
-  if (_rest.connection.ready() == false) return -1;
+  if (rest_.connection.ready() == false) return -1;
   switch (state) {
     case WebSocketDownload::State::UNDEFINED:
       break;
@@ -979,7 +979,7 @@ int32_t Gateway::download(WebSocketDownload::State state) {
 }
 
 void Gateway::operator()(const Rest &) {
-  if (_rest.connection.ready()) _web_socket.download.bump();
+  if (rest_.connection.ready()) web_socket_.download.bump();
 }
 
 auto compute_order_status(auto ord_status, auto working_status) {
@@ -1057,7 +1057,7 @@ void Gateway::operator()(const json::OrderItem &order_item) {
       .timestamp = order_item.timestamp,  // XXX transact_time?
       .external_order_id = order_item.order_id,
   };
-  auto found = _dispatcher.find_order(
+  auto found = dispatcher_.find_order(
       order_item.order_id,
       order_item.cl_ord_id,
       order_lookup,
@@ -1088,87 +1088,87 @@ void Gateway::operator()(const json::Order &order) {
 // UTILS:
 
 void Gateway::update_market_data(GatewayStatus gateway_status) {
-  if (gateway_status == _market_data_status) return;
-  _market_data_status = gateway_status;
+  if (gateway_status == market_data_status_) return;
+  market_data_status_ = gateway_status;
   server::TraceInfo trace_info;
   MarketDataStatus market_data_status{
-      .status = _market_data_status,
+      .status = market_data_status_,
   };
   server::create_trace_and_dispatch(
-      trace_info, market_data_status, _dispatcher, true);
-  LOG(INFO)(R"(market_data_status={})", _market_data_status);
+      trace_info, market_data_status, dispatcher_, true);
+  LOG(INFO)(R"(market_data_status={})", market_data_status_);
 }
 
 void Gateway::update_order_manager(GatewayStatus gateway_status) {
-  if (gateway_status == _order_manager_status) return;
-  _order_manager_status = gateway_status;
+  if (gateway_status == order_manager_status_) return;
+  order_manager_status_ = gateway_status;
   server::TraceInfo trace_info;
   OrderManagerStatus order_manager_status{
-      .account = _account,
-      .status = _order_manager_status,
+      .account = account_,
+      .status = order_manager_status_,
   };
   server::create_trace_and_dispatch(
-      trace_info, order_manager_status, _dispatcher, true);
-  LOG(INFO)(R"(order_manager_status={})", _order_manager_status);
+      trace_info, order_manager_status, dispatcher_, true);
+  LOG(INFO)(R"(order_manager_status={})", order_manager_status_);
 }
 
 void Gateway::download_accounts() {
   assert(false);
   /*
   constexpr auto state = WebSocketDownload::State::ACCOUNTS;
-  auto sequence = _web_socket.download.sequence();
-  _rest.connection.get<json::Accounts>(
+  auto sequence = web_socket_.download.sequence();
+  rest_.connection.get<json::Accounts>(
       [this, sequence](auto& promise) {
     try {
-      if (_web_socket.download.skip(sequence, state))
+      if (web_socket_.download.skip(sequence, state))
         return;
       (*this)(promise.get());
-      _web_socket.download.check(state);
+      web_socket_.download.check(state);
     } catch (NetworkError&) {
-      _web_socket.download.retry(state);
+      web_socket_.download.retry(state);
     }
   });
   */
 }
 
 void Gateway::subscribe_instrument() {
-  _web_socket.connection.subscribe("instrument");
+  web_socket_.connection.subscribe("instrument");
 }
 
 void Gateway::subscribe_order_book_l2() {
-  _web_socket.connection.subscribe("orderBookL2", _symbols);
+  web_socket_.connection.subscribe("orderBookL2", symbols_);
 
   // XXX not here
-  _web_socket.connection.subscribe("funding", _symbols);
-  _web_socket.connection.subscribe("liquidation", _symbols);
-  _web_socket.connection.subscribe("quote", _symbols);
-  _web_socket.connection.subscribe("settlement", _symbols);
-  _web_socket.connection.subscribe("trade", _symbols);
+  web_socket_.connection.subscribe("funding", symbols_);
+  web_socket_.connection.subscribe("liquidation", symbols_);
+  web_socket_.connection.subscribe("quote", symbols_);
+  web_socket_.connection.subscribe("settlement", symbols_);
+  web_socket_.connection.subscribe("trade", symbols_);
   // XXX private
-  _web_socket.connection.subscribe("execution", _symbols);
-  _web_socket.connection.subscribe("order", _symbols);
-  _web_socket.connection.subscribe("margin", _symbols);
-  _web_socket.connection.subscribe("position", _symbols);
+  web_socket_.connection.subscribe("execution", symbols_);
+  web_socket_.connection.subscribe("order", symbols_);
+  web_socket_.connection.subscribe("margin", symbols_);
+  web_socket_.connection.subscribe("position", symbols_);
   // XXX other
   // cancelAllAfter
   // authKeyExpires
 }
 
 const Product &Gateway::find_product(const json::InstrumentItem &item) {
-  auto iter = _product_cache.find(item.symbol);
-  if (iter == _product_cache.end()) {
-    iter = _product_cache.emplace(std::string(item.symbol), item).first;
+  auto iter = product_cache_.find(item.symbol);
+  if (iter == product_cache_.end()) {
+    iter = product_cache_.emplace(std::string(item.symbol), item).first;
   } else {
     (*iter).second.update(item);
   }
-  assert(iter != _product_cache.end());
+  assert(iter != product_cache_.end());
   return (*iter).second;
 }
 
 std::pair<double, double> Gateway::find_price(
     json::Action action, uint64_t id, double price, double size) {
   auto result = std::numeric_limits<double>::quiet_NaN();
-  auto iter = _price_lookup.find(id);
+  auto iter = price_lookup_.find(id);
   switch (action) {
     case json::Action::UNDEFINED:
     case json::Action::UNKNOWN:
@@ -1177,8 +1177,8 @@ std::pair<double, double> Gateway::find_price(
     case json::Action::PARTIAL:
     case json::Action::INSERT:
       if (std::isnan(price) == false && std::isnan(size) == false) {
-        if (iter == _price_lookup.end()) {
-          iter = _price_lookup.emplace(id, price).first;
+        if (iter == price_lookup_.end()) {
+          iter = price_lookup_.emplace(id, price).first;
           result = (*iter).second;
         } else {
           auto previous = (*iter).second;
@@ -1197,7 +1197,7 @@ std::pair<double, double> Gateway::find_price(
     case json::Action::UPDATE:
       if (std::isnan(price) && std::isnan(size) == false &&
           std::fabs(size) > TOLERANCE) {
-        if (iter != _price_lookup.end()) {
+        if (iter != price_lookup_.end()) {
           result = (*iter).second;
         } else {
           // unable to find the cached price ==> fail
@@ -1209,9 +1209,9 @@ std::pair<double, double> Gateway::find_price(
     case json::Action::DELETE:
       if (std::isnan(price) &&
           (std::isnan(size) || std::fabs(size) < TOLERANCE)) {
-        if (iter != _price_lookup.end()) {
+        if (iter != price_lookup_.end()) {
           result = (*iter).second;
-          _price_lookup.erase(iter);
+          price_lookup_.erase(iter);
         } else {
           // unable to find the cached price ==> fail
         }
@@ -1238,12 +1238,12 @@ void Gateway::publish_market_by_price(
       .symbol = symbol,
       .bids =
           {
-              .items = _bid.data(),
+              .items = bid_.data(),
               .length = bid_length,
           },
       .asks =
           {
-              .items = _ask.data(),
+              .items = ask_.data(),
               .length = ask_length,
           },
       .snapshot = snapshot,
@@ -1251,7 +1251,7 @@ void Gateway::publish_market_by_price(
   };
   VLOG(3)(R"(market_by_price_update={})", market_by_price_update);
   server::create_trace_and_dispatch(
-      trace_info, market_by_price_update, _dispatcher, is_last);
+      trace_info, market_by_price_update, dispatcher_, is_last);
 }
 
 }  // namespace bitmex
