@@ -18,6 +18,9 @@ namespace bitmex {
 namespace {
 constexpr std::string_view CONNECTION = "rest";
 
+static const std::string_view ACCEPT_JSON{"application/json"};
+static const std::string_view CONTENT_TYPE_JSON{"application/json"};
+
 static auto create_counter(const std::string_view &function) {
   return core::metrics::Counter(FLAGS_name, CONNECTION, function);
 }
@@ -139,6 +142,8 @@ void Rest::create_order(
       method,
       path,
       std::string_view(),  // query
+      ACCEPT_JSON,
+      CONTENT_TYPE_JSON,
       headers,
       message,
       [this, callback](auto &response) {
@@ -184,6 +189,8 @@ void Rest::modify_order(
       method,
       path,
       std::string_view(),  // query
+      ACCEPT_JSON,
+      CONTENT_TYPE_JSON,
       headers,
       message,
       [this, callback](auto &response) {
@@ -225,6 +232,8 @@ void Rest::cancel_order(
       method,
       path,
       std::string_view(),  // query
+      ACCEPT_JSON,
+      CONTENT_TYPE_JSON,
       headers,
       message,
       [this, callback](auto &response) {
