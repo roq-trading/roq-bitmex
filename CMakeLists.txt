@@ -88,7 +88,7 @@ endif(BUILD_BENCHMARK)
 
 # install
 
-install(FILES "share/config.toml" DESTINATION "${CMAKE_INSTALL_DATADIR}/roq/bitmex")
+install(FILES "share/config.toml" DESTINATION "${CMAKE_INSTALL_DATADIR}/roq-bitmex")
 
 install(FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/${PROJECT_NAME}")
