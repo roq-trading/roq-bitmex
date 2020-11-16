@@ -146,7 +146,7 @@ void Rest::create_order(
       CONTENT_TYPE_JSON,
       headers,
       message,
-      [this, callback](auto &response) {
+      [this, callback{std::move(callback)}](auto &response) {
         profile_.create_order([&]() {
           try {
             response.expect(core::http::Status::OK);
@@ -193,7 +193,7 @@ void Rest::modify_order(
       CONTENT_TYPE_JSON,
       headers,
       message,
-      [this, callback](auto &response) {
+      [this, callback{std::move(callback)}](auto &response) {
         profile_.modify_order([&]() {
           try {
             response.expect(core::http::Status::OK);
@@ -236,7 +236,7 @@ void Rest::cancel_order(
       CONTENT_TYPE_JSON,
       headers,
       message,
-      [this, callback](auto &response) {
+      [this, callback{std::move(callback)}](auto &response) {
         profile_.cancel_order([&]() {
           try {
             response.expect(core::http::Status::OK);
@@ -268,7 +268,7 @@ void Rest::get(
       std::string_view(),  // query
       std::string_view(),  // headers
       std::string_view(),  // body
-      [this, callback](auto& response) {
+      [this, callback{std::move(callback)}](auto& response) {
     profile_.accounts(
         [&]() {
       try {
