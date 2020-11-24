@@ -12,10 +12,14 @@ namespace bitmex {
 Product::Product(const json::InstrumentItem &item)
     : quote_currency_(item.quote_currency),
       settl_currency_(item.settl_currency), tick_size_(item.tick_size),
-      limit_up_price_(item.limit_up_price),
-      limit_down_price_(item.limit_down_price), multiplier_(item.multiplier),
-      lot_size_(item.lot_size), option_strike_price_(item.option_strike_price),
-      state_(item.state) {
+      multiplier_(item.multiplier), lot_size_(item.lot_size),
+      option_strike_price_(item.option_strike_price),
+      state_(item.state), statistics_{
+                              Statistics{StatisticsType::UPPER_LIMIT_PRICE,
+                                         item.limit_up_price},
+
+                              Statistics{StatisticsType::LOWER_LIMIT_PRICE,
+                                         item.limit_down_price}} {
 }
 
 bool Product::update(const json::InstrumentItem &item) {
@@ -38,8 +42,6 @@ ReferenceData Product::create_reference_data(
       .settlement_currency = settl_currency_,
       .commission_currency = std::string_view(),
       .tick_size = tick_size_,
-      .limit_up = limit_up_price_,
-      .limit_down = limit_down_price_,
       .multiplier = multiplier_,
       .min_trade_vol = lot_size_,            // XXX correct?
       .option_type = OptionType::UNDEFINED,  // XXX typ?
@@ -55,6 +57,18 @@ MarketStatus Product::create_market_status(
       .exchange = FLAGS_exchange,
       .symbol = item.symbol,
       .trading_status = json::map(state_),
+  };
+}
+
+StatisticsUpdate Product::create_statistics_update(
+    const json::InstrumentItem &item) const {
+  assert(item.symbol.empty() == false);
+  return StatisticsUpdate{
+      .exchange = FLAGS_exchange,
+      .symbol = item.symbol,
+      .statistics = {statistics_.data(), statistics_.size()},
+      .snapshot = false,
+      .exchange_time_utc = {},
   };
 }
 

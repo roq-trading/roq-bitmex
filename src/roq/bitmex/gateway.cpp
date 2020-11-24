@@ -615,6 +615,9 @@ void Gateway::operator()(
           auto market_status = product.create_market_status(item);
           server::create_trace_and_dispatch(
               trace_info, market_status, dispatcher_, true);
+          auto statistics_update = product.create_statistics_update(item);
+          server::create_trace_and_dispatch(
+              trace_info, statistics_update, dispatcher_, false);
         }
         VLOG(2)
         (R"(- securities: {} (/{}))", security_count, instrument.data.size());

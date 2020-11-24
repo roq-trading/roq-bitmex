@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <array>
 #include <limits>
 #include <string>
 
@@ -23,19 +24,21 @@ class Product final {
 
   ReferenceData create_reference_data(const json::InstrumentItem &) const;
   MarketStatus create_market_status(const json::InstrumentItem &) const;
+  StatisticsUpdate create_statistics_update(const json::InstrumentItem &) const;
 
  private:
   // reference data
   std::string quote_currency_;
   std::string settl_currency_;
   double tick_size_ = std::numeric_limits<double>::quiet_NaN();
-  double limit_up_price_ = std::numeric_limits<double>::quiet_NaN();
-  double limit_down_price_ = std::numeric_limits<double>::quiet_NaN();
   double multiplier_ = std::numeric_limits<double>::quiet_NaN();
   double lot_size_ = std::numeric_limits<double>::quiet_NaN();
   double option_strike_price_ = std::numeric_limits<double>::quiet_NaN();
   // market status
   json::State state_ = json::State::UNDEFINED;
+  // statistics update
+  // FIXME because of StatisticsUpdate::span<Statistics>
+  mutable std::array<Statistics, 2> statistics_;
 };
 
 }  // namespace bitmex
