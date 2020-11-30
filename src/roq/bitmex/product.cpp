@@ -9,11 +9,16 @@
 namespace roq {
 namespace bitmex {
 
+// XXX markPrice ?
+// XXX openInterest ?
+
 Product::Product(const json::InstrumentItem &item)
     : quote_currency_(item.quote_currency),
       settl_currency_(item.settl_currency), tick_size_(item.tick_size),
       multiplier_(item.multiplier), lot_size_(item.lot_size),
       option_strike_price_(item.option_strike_price),
+      underlying_symbol_(item.underlying_symbol), expiry_(item.expiry),
+      settle_(item.settle),
       state_(item.state), statistics_{
                               Statistics{StatisticsType::UPPER_LIMIT_PRICE,
                                          item.limit_up_price},
@@ -47,6 +52,10 @@ ReferenceData Product::create_reference_data(
       .option_type = OptionType::UNDEFINED,  // XXX typ?
       .strike_currency = std::string_view(),
       .strike_price = option_strike_price_,
+      .underlying = underlying_symbol_,
+      .issue_date_utc = {},
+      .expiry_time_utc = expiry_,
+      .settlement_date_utc = settle_,
   };
 }
 

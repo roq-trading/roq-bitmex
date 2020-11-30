@@ -34,6 +34,9 @@ class Product final {
   double multiplier_ = std::numeric_limits<double>::quiet_NaN();
   double lot_size_ = std::numeric_limits<double>::quiet_NaN();
   double option_strike_price_ = std::numeric_limits<double>::quiet_NaN();
+  std::string underlying_symbol_;
+  std::chrono::nanoseconds expiry_ = {};
+  std::chrono::nanoseconds settle_ = {};
   // market status
   json::State state_ = json::State::UNDEFINED;
   // statistics update
