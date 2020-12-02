@@ -6,7 +6,7 @@ DEFINE_string(config_file, "", "config file (path)");
 
 DEFINE_string(exchange, "bitmex", "exchange identifier (string)");
 
-DEFINE_uint32(download_timeout_secs, 15, "download time-out (seconds)");
+// rest
 
 DEFINE_string(rest_uri, "https://testnet.bitmex.com", "REST end-point (URI)");
 
@@ -33,10 +33,19 @@ DEFINE_uint32(
 
 DEFINE_uint32(rest_expires_timeout_secs, 1, "expires time-out (seconds)");
 
+DEFINE_bool(
+    rest_allow_order_updates,
+    false,
+    "allow inconsistent order updates? (bool)");
+
+// ws
+
 DEFINE_string(
     ws_uri, "wss://testnet.bitmex.com/realtime", "WebSocket end-point (URI)");
 
 DEFINE_uint32(ws_ping_freq_secs, 5, "ping frequency (seconds)");
+
+DEFINE_uint32(ws_request_timeout_secs, 15, "request time-out (seconds)");
 
 DEFINE_bool(
     ws_cancel_on_disconnect, true, "cancel orders on disconnect? (bool)");
@@ -46,11 +55,8 @@ DEFINE_uint32(
     15,
     "cancel all after (seconds), requires cancel-on-disconnect");
 
+// XXX review
+
 DEFINE_uint32(encode_buffer_size, 1048576, "encode buffer size");
 
 DEFINE_uint32(decode_buffer_size, 10485760, "decode buffer size");
-
-DEFINE_bool(
-    allow_inconsistent_order_updates,
-    false,
-    "allow inconsistent order updates? (bool)");

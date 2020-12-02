@@ -81,7 +81,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
           .download = WebSocketDownload(
-              std::chrono::seconds{FLAGS_download_timeout_secs},
+              std::chrono::seconds{FLAGS_ws_request_timeout_secs},
               [this](auto state) { return download(state); }),
       },
       rest_{
@@ -1018,7 +1018,7 @@ auto compute_request_status(auto request_type, auto ord_status) {
 }
 
 void Gateway::operator()(const json::OrderItem &order_item) {
-  if (FLAGS_allow_inconsistent_order_updates == false) return;
+  if (FLAGS_rest_allow_order_updates == false) return;
 
   server::TraceInfo trace_info;  // XXX not correct (*after* parsing)
 
