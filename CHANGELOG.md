@@ -4,6 +4,11 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* PositionUpdate now uses side == Side::UNDEFINED rather than
+  trying to invent buy/sell
+
 ## 0.4.5 &ndash; 2020-11-09
 
 ## 0.4.4 &ndash; 2020-09-20

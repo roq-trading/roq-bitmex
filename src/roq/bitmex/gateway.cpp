@@ -724,30 +724,19 @@ void Gateway::operator()(
     const server::TraceInfo &trace_info) {
   DLOG(INFO)("action={}, position={}", action, position);
   for (auto &item : position.data) {
-    PositionUpdate buy{
+    PositionUpdate position_update{
         .account = account_,
         .exchange = FLAGS_exchange,
         .symbol = item.symbol,
-        .side = Side::BUY,
-        .position = std::max<double>(0.0, item.current_qty),
+        .side = Side::UNDEFINED,
+        .position = item.current_qty,
         .last_trade_id = 0,
         .position_cost = 0.0,
         .position_yesterday = 0.0,
         .position_cost_yesterday = 0.0,
     };
-    PositionUpdate sell{
-        .account = account_,
-        .exchange = FLAGS_exchange,
-        .symbol = item.symbol,
-        .side = Side::SELL,
-        .position = std::max<double>(0.0, -item.current_qty),
-        .last_trade_id = 0,
-        .position_cost = 0.0,
-        .position_yesterday = 0.0,
-        .position_cost_yesterday = 0.0,
-    };
-    server::create_trace_and_dispatch(trace_info, buy, dispatcher_, false);
-    server::create_trace_and_dispatch(trace_info, sell, dispatcher_, true);
+    server::create_trace_and_dispatch(
+        trace_info, position_update, dispatcher_, false);
   }
   /*
   {
