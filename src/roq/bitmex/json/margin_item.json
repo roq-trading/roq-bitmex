@@ -37,7 +37,7 @@
 	{ "name": "syntheticMargin", "type": "double" },
 	{ "name": "targetExcessMargin", "type": "double" },
 	{ "name": "taxableMargin", "type": "double" },
-	{ "name": "timestamp", "type": "std::chrono::nanoseconds" },
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
 	{ "name": "unrealisedPnl", "type": "double" },
 	{ "name": "unrealisedProfit", "type": "double" },
 	{ "name": "varMargin", "type": "double" },

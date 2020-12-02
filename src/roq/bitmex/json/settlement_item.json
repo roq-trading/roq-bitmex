@@ -10,6 +10,6 @@
 	{ "name": "symbol", "type": "std::string_view" },
 	{ "name": "taxBase", "type": "double" },
 	{ "name": "taxRate", "type": "double" },
-	{ "name": "timestamp", "type": "std::chrono::nanoseconds" }
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" }
 ]
 }

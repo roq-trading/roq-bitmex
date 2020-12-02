@@ -64,15 +64,15 @@ struct Parser final {
   };
 
   std::string_view action;
-  std::chrono::nanoseconds cancel_time = {};
+  std::chrono::milliseconds cancel_time = {};
   std::string_view error;
   bool failure = false;
-  std::chrono::nanoseconds now = {};
+  std::chrono::milliseconds now = {};
   int32_t status = 0;
   std::string_view subscribe;
   bool success = false;
   std::string_view table;
-  std::chrono::nanoseconds timestamp = {};
+  std::chrono::milliseconds timestamp = {};
   std::string_view version;
 
   static void dispatch(

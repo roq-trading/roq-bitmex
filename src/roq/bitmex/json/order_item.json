@@ -31,8 +31,8 @@
 	{ "name": "symbol", "type": "std::string_view" },
 	{ "name": "text", "type": "std::string_view" },
 	{ "name": "timeInForce", "type": "TimeInForce" },
-	{ "name": "timestamp", "type": "std::chrono::nanoseconds" },
-	{ "name": "transactTime", "type": "std::chrono::nanoseconds" },
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
+	{ "name": "transactTime", "type": "std::chrono::milliseconds" },
 	{ "name": "triggered", "type": "std::string_view" },
 	{ "name": "workingIndicator", "type": "bool" }
 ]

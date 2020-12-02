@@ -2,7 +2,7 @@
 "name": "CancelAllAfter",
 "type": "struct",
 "values": [
-	{ "name": "cancelTime", "type": "std::chrono::nanoseconds" },
-	{ "name": "now", "type": "std::chrono::nanoseconds" }
+	{ "name": "cancelTime", "type": "std::chrono::milliseconds" },
+	{ "name": "now", "type": "std::chrono::milliseconds" }
 ]
 }

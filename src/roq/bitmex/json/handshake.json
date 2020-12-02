@@ -4,7 +4,7 @@
 "values": [
 	{ "name": "docs", "type": "std::string_view" },
 	{ "name": "info", "type": "std::string_view" },
-	{ "name": "timestamp", "type": "std::chrono::nanoseconds" },
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
 	{ "name": "version", "type": "std::string_view" }
 ]
 }

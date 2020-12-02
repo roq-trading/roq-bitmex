@@ -33,23 +33,24 @@ inline void update(T &result, const core::json::value_t &value) {
 
 template <>
 inline void update(
-    std::chrono::nanoseconds &result, const core::json::value_t &value) {
+    std::chrono::milliseconds &result, const core::json::value_t &value) {
   return std::visit(
       overloaded{
           [&](const core::json::null_t &) {
-            result = std::chrono::nanoseconds{};
+            result = std::chrono::milliseconds{};
           },
           [](bool) { throw std::bad_cast(); },
           [&](int64_t value) {
-            result = std::chrono::nanoseconds{
-                static_cast<uint64_t>(value * int64_t{1000000000})};
+            result = std::chrono::milliseconds{
+                static_cast<uint64_t>(value * int64_t{1000})};
           },
           [&](double value) {
             result =
-                std::chrono::nanoseconds{static_cast<uint64_t>(value * 1.0e9)};
+                std::chrono::milliseconds{static_cast<uint64_t>(value * 1.0e3)};
           },
           [&](const std::string_view &value) {
-            result = core::charconv::to_datetime(value);
+            result = core::charconv::datetime_from_string<
+                std::remove_reference<decltype(result)>::type>(value);
           },
           [](const core::json::object_t &) { throw std::bad_cast(); },
           [](const core::json::array_t &) { throw std::bad_cast(); },
