@@ -42,20 +42,28 @@ ReferenceData Product::create_reference_data(
   return ReferenceData{
       .exchange = FLAGS_exchange,
       .symbol = item.symbol,
+      .description = {},
       .security_type = SecurityType::UNDEFINED,  // XXX typ?
       .currency = quote_currency_,               // XXX or position_currency?
       .settlement_currency = settl_currency_,
-      .commission_currency = std::string_view(),
+      .commission_currency = {},
       .tick_size = tick_size_,
       .multiplier = multiplier_,
       .min_trade_vol = lot_size_,            // XXX correct?
       .option_type = OptionType::UNDEFINED,  // XXX typ?
-      .strike_currency = std::string_view(),
+      .strike_currency = {},
       .strike_price = option_strike_price_,
       .underlying = underlying_symbol_,
-      .issue_date_utc = {},
-      .expiry_time_utc = expiry_,
-      .settlement_date_utc = settle_,
+      .time_zone = {},
+      .issue_date = {},
+      .settlement_date =
+          std::chrono::duration_cast<decltype(ReferenceData::settlement_date)>(
+              settle_),
+      .expiry_datetime =
+          std::chrono::duration_cast<decltype(ReferenceData::expiry_datetime)>(
+              expiry_),
+      .expiry_datetime_utc = std::chrono::duration_cast<decltype(
+          ReferenceData::expiry_datetime_utc)>(expiry_),
   };
 }
 

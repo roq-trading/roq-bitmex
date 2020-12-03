@@ -271,6 +271,7 @@ void Gateway::operator()(
         .remaining_quantity = item.leaves_qty,
         .traded_quantity = item.cum_qty,
         .timestamp = item.timestamp,  // XXX transact_time?
+        .external_account = {},
         .external_order_id = item.order_id,
     };
     auto found = dispatcher_.find_order(
@@ -309,10 +310,11 @@ void Gateway::operator()(
                   .symbol = order.symbol,
                   .side = order.side,
                   .position_effect = PositionEffect::UNDEFINED,
-                  .order_template = std::string_view(),
+                  .order_template = {},
                   .create_time_utc = item.timestamp,  // XXX transact_time?
                   .update_time_utc = item.timestamp,  // XXX transact_time?
                   .gateway_order_id = order.gateway_order_id,
+                  .external_account = {},
                   .external_order_id = order.external_order_id,
                   .fills = {fill_.data(), fill_length},
               };
@@ -734,6 +736,7 @@ void Gateway::operator()(
         .position_cost = 0.0,
         .position_yesterday = 0.0,
         .position_cost_yesterday = 0.0,
+        .external_account = {},
     };
     server::create_trace_and_dispatch(
         trace_info, position_update, dispatcher_, false);
@@ -1023,6 +1026,7 @@ void Gateway::operator()(const json::OrderItem &order_item) {
       .remaining_quantity = order_item.leaves_qty,
       .traded_quantity = order_item.cum_qty,
       .timestamp = order_item.timestamp,  // XXX transact_time?
+      .external_account = {},
       .external_order_id = order_item.order_id,
   };
   auto found = dispatcher_.find_order(

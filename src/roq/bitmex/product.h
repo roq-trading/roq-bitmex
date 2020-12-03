@@ -28,6 +28,7 @@ class Product final {
 
  private:
   // reference data
+  std::string description_;
   std::string quote_currency_;
   std::string settl_currency_;
   double tick_size_ = std::numeric_limits<double>::quiet_NaN();
