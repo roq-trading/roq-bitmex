@@ -57,7 +57,6 @@ target_link_libraries(
   absl::flat_hash_map
   absl::flat_hash_set
   gflags
-  ${CROSSGUID_LIBRARIES}
   ${UUID_LIBRARIES}
   ${RT_LIBRARIES})
 

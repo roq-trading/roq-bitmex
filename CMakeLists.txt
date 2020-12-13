@@ -41,7 +41,6 @@ include(GNUInstallDirs)
 
 # dependencies
 
-find_package(Crossguid REQUIRED)
 find_package(Libevent REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(absl REQUIRED)

@@ -23,7 +23,6 @@ requirements:
     - roq-api =={{ version }}
     - roq-core =={{ version }}
     - roq-server =={{ version }}
-    - roq-oss-crossguid
     - roq-oss-date
     - roq-oss-http-parser
     - roq-oss-benchmark
