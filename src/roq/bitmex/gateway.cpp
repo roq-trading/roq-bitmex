@@ -26,8 +26,8 @@ constexpr auto DEFAULT_MULTIPLIER = double{1.0};
 
 constexpr auto TOLERANCE = double{1.0e-10};
 
-template <typename T>
-static bool mbp_update(auto &data, size_t &offset, const T &item) {
+template <typename C, typename T>
+static bool mbp_update(C &data, size_t &offset, const T &item) {
   auto &obj = data[offset];
   new (&obj) MBPUpdate{
       .price = item.first,
@@ -37,8 +37,8 @@ static bool mbp_update(auto &data, size_t &offset, const T &item) {
   return offset < data.size();
 }
 
-template <typename T>
-static bool trade_update(auto &data, size_t &offset, const T &item) {
+template <typename C, typename T>
+static bool trade_update(C &data, size_t &offset, const T &item) {
   auto &obj = data[offset];
   new (&obj) Trade{
       .side = json::map(item.side),  // XXX check
@@ -50,9 +50,9 @@ static bool trade_update(auto &data, size_t &offset, const T &item) {
   return offset < data.size();
 }
 
-template <typename T>
+template <typename C, typename T>
 static bool fill_update(
-    auto &dispatcher, auto &data, size_t &offset, const T &item) {
+    server::Dispatcher &dispatcher, C &data, size_t &offset, const T &item) {
   auto trade_id = dispatcher.next_trade_id();
   auto &obj = data[offset];
   new (&obj) Fill{
@@ -212,7 +212,8 @@ void Gateway::operator()(const WebSocket &) {
   }
 }
 
-auto compute_request_status_2(auto request_type, auto exec_type) {
+auto compute_request_status_2(
+    RequestType request_type, json::ExecType exec_type) {
   switch (exec_type) {
     case json::ExecType::UNDEFINED:
     case json::ExecType::UNKNOWN: break;
@@ -962,7 +963,7 @@ void Gateway::operator()(const Rest &) {
   if (rest_.connection.ready()) web_socket_.download.bump();
 }
 
-auto compute_order_status(auto ord_status, auto working_status) {
+auto compute_order_status(json::OrdStatus ord_status, bool working_status) {
   switch (ord_status) {
     case json::OrdStatus::UNDEFINED:
     case json::OrdStatus::UNKNOWN:
@@ -976,7 +977,8 @@ auto compute_order_status(auto ord_status, auto working_status) {
   return OrderStatus::UNDEFINED;
 }
 
-auto compute_request_status(auto request_type, auto ord_status) {
+auto compute_request_status(
+    RequestType request_type, json::OrdStatus ord_status) {
   switch (ord_status) {
     case json::OrdStatus::UNDEFINED:
     case json::OrdStatus::UNKNOWN: break;
