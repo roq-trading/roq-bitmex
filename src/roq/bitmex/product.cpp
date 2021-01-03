@@ -18,13 +18,12 @@ Product::Product(const json::InstrumentItem &item)
       multiplier_(item.multiplier), lot_size_(item.lot_size),
       option_strike_price_(item.option_strike_price),
       underlying_symbol_(item.underlying_symbol), expiry_(item.expiry),
-      settle_(item.settle),
-      state_(item.state), statistics_{
-                              Statistics{StatisticsType::UPPER_LIMIT_PRICE,
-                                         item.limit_up_price},
+      settle_(item.settle), state_(item.state),
+      statistics_{
+          Statistics{StatisticsType::UPPER_LIMIT_PRICE, item.limit_up_price},
 
-                              Statistics{StatisticsType::LOWER_LIMIT_PRICE,
-                                         item.limit_down_price}} {
+          Statistics{
+              StatisticsType::LOWER_LIMIT_PRICE, item.limit_down_price}} {
 }
 
 bool Product::update(const json::InstrumentItem &item) {

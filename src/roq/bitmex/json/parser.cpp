@@ -237,8 +237,8 @@ void Parser::dispatch(
       }
       case Type::INFO: {
         Handshake handshake{
-            .docs = nullptr,
-            .info = nullptr,
+            .docs = {},
+            .info = {},
             .timestamp = result.timestamp,
             .version = result.version,
         };

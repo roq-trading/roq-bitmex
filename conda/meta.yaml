@@ -20,12 +20,12 @@ requirements:
     - cmake
     - make
   host:
+    - benchmark
     - roq-api =={{ version }}
     - roq-core =={{ version }}
-    - roq-server =={{ version }}
     - roq-oss-date
     - roq-oss-http-parser
-    - roq-oss-benchmark
+    - roq-server =={{ version }}
 
 about:
   home: https://roq-trading.com
