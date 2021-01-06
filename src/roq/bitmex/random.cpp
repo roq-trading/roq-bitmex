@@ -41,7 +41,8 @@ std::string Random::create_signature(
   hmac_.update(method_);
   hmac_.update(path);
   hmac_.update(expires_);
-  if (body.empty() == false) hmac_.update(body);
+  if (body.empty() == false)
+    hmac_.update(body);
   std::array<char, 32> buffer;
   auto length = hmac_.digest(buffer.data(), buffer.size());
   assert(length == buffer.size());

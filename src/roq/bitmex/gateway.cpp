@@ -633,7 +633,8 @@ void Gateway::operator()(
       break;
     case json::Action::UPDATE: {
       for (auto &item : instrument.data) {
-        if (dispatcher_.discard_symbol(item.symbol)) continue;
+        if (dispatcher_.discard_symbol(item.symbol))
+          continue;
         auto &product = find_product(item);
         // XXX check if dirty
         auto market_status = product.create_market_status(item);
@@ -665,12 +666,14 @@ void Gateway::operator()(
   // note!
   //   first partial update will include *all* instruments
   //   drop everything received before partial (see: API documentation)
-  if (snapshot == false && snapshot_.order_book_l2 == false) return;
+  if (snapshot == false && snapshot_.order_book_l2 == false)
+    return;
   std::string_view previous;
   bool success = true;
   size_t bid_length = 0, ask_length = 0;
   for (auto &item : order_book_l2.data) {
-    if (success == false) break;
+    if (success == false)
+      break;
     if (previous.empty()) {
       previous = item.symbol;
     } else if (previous.compare(item.symbol) != 0) {
@@ -874,13 +877,15 @@ void Gateway::operator()(
     const json::Action action,
     const json::Trade &trade,
     const server::TraceInfo &trace_info) {
-  if (action != json::Action::INSERT) return;
+  if (action != json::Action::INSERT)
+    return;
   std::string_view previous;
   bool success = true;
   size_t trade_length = 0;
   std::chrono::nanoseconds timestamp = {};
   for (auto &item : trade.data) {
-    if (success == false) break;
+    if (success == false)
+      break;
     if (timestamp.count() == 0) {
       timestamp = item.timestamp;
     } else {
@@ -934,7 +939,8 @@ void Gateway::operator()(
 // rest
 
 int32_t Gateway::download(WebSocketDownload::State state) {
-  if (rest_.connection.ready() == false) return -1;
+  if (rest_.connection.ready() == false)
+    return -1;
   switch (state) {
     case WebSocketDownload::State::UNDEFINED: break;
     case WebSocketDownload::State::ACCOUNTS: {
@@ -960,14 +966,16 @@ int32_t Gateway::download(WebSocketDownload::State state) {
 }
 
 void Gateway::operator()(const Rest &) {
-  if (rest_.connection.ready()) web_socket_.download.bump();
+  if (rest_.connection.ready())
+    web_socket_.download.bump();
 }
 
 auto compute_order_status(json::OrdStatus ord_status, bool working_status) {
   switch (ord_status) {
     case json::OrdStatus::UNDEFINED:
     case json::OrdStatus::UNKNOWN:
-      if (working_status) return OrderStatus::WORKING;
+      if (working_status)
+        return OrderStatus::WORKING;
       break;
     case json::OrdStatus::NEW:
       return working_status ? OrderStatus::WORKING : OrderStatus::ACCEPTED;
@@ -1012,7 +1020,8 @@ auto compute_request_status(
 }
 
 void Gateway::operator()(const json::OrderItem &order_item) {
-  if (FLAGS_rest_allow_order_updates == false) return;
+  if (FLAGS_rest_allow_order_updates == false)
+    return;
 
   server::TraceInfo trace_info;  // XXX not correct (*after* parsing)
 
@@ -1062,7 +1071,8 @@ void Gateway::operator()(const json::Order &order) {
 // UTILS:
 
 void Gateway::update_market_data(GatewayStatus gateway_status) {
-  if (gateway_status == market_data_status_) return;
+  if (gateway_status == market_data_status_)
+    return;
   market_data_status_ = gateway_status;
   server::TraceInfo trace_info;
   MarketDataStatus market_data_status{
@@ -1074,7 +1084,8 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
 }
 
 void Gateway::update_order_manager(GatewayStatus gateway_status) {
-  if (gateway_status == order_manager_status_) return;
+  if (gateway_status == order_manager_status_)
+    return;
   order_manager_status_ = gateway_status;
   server::TraceInfo trace_info;
   OrderManagerStatus order_manager_status{
@@ -1202,7 +1213,8 @@ void Gateway::publish_market_by_price(
     const server::TraceInfo &trace_info,
     bool is_last) {
   assert(symbol.empty() == false);
-  if ((bid_length + ask_length) == 0) return;
+  if ((bid_length + ask_length) == 0)
+    return;
   LOG_IF(INFO, snapshot)
   (R"(Received market data snapshot for symbol="{}")", symbol);
   MarketByPriceUpdate market_by_price_update{

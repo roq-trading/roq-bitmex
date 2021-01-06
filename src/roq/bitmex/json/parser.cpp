@@ -255,7 +255,8 @@ void Parser::dispatch(
         return;
       }
       case Type::TABLE:
-        if (dispatched) return;
+        if (dispatched)
+          return;
         // perhaps we were just unlucky with the ordering of keys
         // XXX increment warning counter
         break;

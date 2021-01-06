@@ -95,7 +95,8 @@ void WebSocket::operator()(const Event<Stop> &) {
 }
 
 void WebSocket::operator()(const Event<Timer> &event) {
-  if (connection_.refresh(event.value.now) == false) return;
+  if (connection_.refresh(event.value.now) == false)
+    return;
   if (FLAGS_ws_cancel_on_disconnect && FLAGS_ws_cancel_all_after_secs &&
       ready_ && next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ =
