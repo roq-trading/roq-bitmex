@@ -216,15 +216,19 @@ auto compute_request_status_2(
     RequestType request_type, json::ExecType exec_type) {
   switch (exec_type) {
     case json::ExecType::UNDEFINED:
-    case json::ExecType::UNKNOWN: break;
+    case json::ExecType::UNKNOWN:
+      break;
     case json::ExecType::NEW: {
       switch (request_type) {
         case RequestType::UNDEFINED:
           LOG(WARNING)("*** EXTERNAL ACTION ***");
           break;
-        case RequestType::CREATE_ORDER: return RequestStatus::ACCEPTED;
+        case RequestType::CREATE_ORDER:
+          return RequestStatus::ACCEPTED;
         case RequestType::MODIFY_ORDER:
-        case RequestType::CANCEL_ORDER: DLOG(FATAL)("UNEXPECTED"); break;
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+          break;
       }
       break;
     }
@@ -233,9 +237,12 @@ auto compute_request_status_2(
         case RequestType::UNDEFINED:
           LOG(WARNING)("*** EXTERNAL ACTION ***");
           break;
-        case RequestType::MODIFY_ORDER: return RequestStatus::ACCEPTED;
+        case RequestType::MODIFY_ORDER:
+          return RequestStatus::ACCEPTED;
         case RequestType::CREATE_ORDER:
-        case RequestType::CANCEL_ORDER: DLOG(FATAL)("UNEXPECTED"); break;
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+          break;
       }
       break;
     }
@@ -244,13 +251,17 @@ auto compute_request_status_2(
         case RequestType::UNDEFINED:
           LOG(WARNING)("*** EXTERNAL ACTION ***");
           break;
-        case RequestType::CANCEL_ORDER: return RequestStatus::ACCEPTED;
+        case RequestType::CANCEL_ORDER:
+          return RequestStatus::ACCEPTED;
         case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER: DLOG(FATAL)("UNEXPECTED"); break;
+        case RequestType::MODIFY_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+          break;
       }
       break;
     }
-    case json::ExecType::TRADE: break;
+    case json::ExecType::TRADE:
+      break;
   }
   return RequestStatus::UNDEFINED;
 }
@@ -599,7 +610,9 @@ void Gateway::operator()(
     const server::TraceInfo &trace_info) {
   switch (action) {
     case json::Action::UNDEFINED:
-    case json::Action::UNKNOWN: LOG(FATAL)("Unexpected"); break;
+    case json::Action::UNKNOWN:
+      LOG(FATAL)("Unexpected");
+      break;
     case json::Action::PARTIAL:
       if (snapshot_.instrument == false) {
         snapshot_.instrument = true;
@@ -691,7 +704,8 @@ void Gateway::operator()(
         case json::Side::SELL:
           success = mbp_update(ask_, ask_length, price_size);
           break;
-        default: LOG(FATAL)("Unexpected");
+        default:
+          LOG(FATAL)("Unexpected");
       }
     } else {
       LOG(WARNING)
@@ -942,7 +956,8 @@ int32_t Gateway::download(WebSocketDownload::State state) {
   if (rest_.connection.ready() == false)
     return -1;
   switch (state) {
-    case WebSocketDownload::State::UNDEFINED: break;
+    case WebSocketDownload::State::UNDEFINED:
+      break;
     case WebSocketDownload::State::ACCOUNTS: {
       // download_accounts();
       // return 1;
@@ -979,8 +994,10 @@ auto compute_order_status(json::OrdStatus ord_status, bool working_status) {
       break;
     case json::OrdStatus::NEW:
       return working_status ? OrderStatus::WORKING : OrderStatus::ACCEPTED;
-    case json::OrdStatus::FILLED: return OrderStatus::COMPLETED;
-    case json::OrdStatus::CANCELED: return OrderStatus::CANCELED;
+    case json::OrdStatus::FILLED:
+      return OrderStatus::COMPLETED;
+    case json::OrdStatus::CANCELED:
+      return OrderStatus::CANCELED;
   }
   return OrderStatus::UNDEFINED;
 }
@@ -989,15 +1006,19 @@ auto compute_request_status(
     RequestType request_type, json::OrdStatus ord_status) {
   switch (ord_status) {
     case json::OrdStatus::UNDEFINED:
-    case json::OrdStatus::UNKNOWN: break;
+    case json::OrdStatus::UNKNOWN:
+      break;
     case json::OrdStatus::NEW: {
       switch (request_type) {
         case RequestType::UNDEFINED:
           LOG(WARNING)("*** EXTERNAL ACTION ***");
           break;
         case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER: return RequestStatus::ACCEPTED;
-        case RequestType::CANCEL_ORDER: DLOG(FATAL)("UNEXPECTED"); break;
+        case RequestType::MODIFY_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+          break;
       }
       break;
     }
@@ -1009,9 +1030,12 @@ auto compute_request_status(
         case RequestType::UNDEFINED:
           LOG(WARNING)("*** EXTERNAL ACTION ***");
           break;
-        case RequestType::CANCEL_ORDER: return RequestStatus::ACCEPTED;
+        case RequestType::CANCEL_ORDER:
+          return RequestStatus::ACCEPTED;
         case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER: DLOG(FATAL)("UNEXPECTED"); break;
+        case RequestType::MODIFY_ORDER:
+          DLOG(FATAL)("UNEXPECTED");
+          break;
       }
       break;
     }
@@ -1156,7 +1180,9 @@ std::pair<double, double> Gateway::find_price(
   auto iter = price_lookup_.find(id);
   switch (action) {
     case json::Action::UNDEFINED:
-    case json::Action::UNKNOWN: LOG(FATAL)("Unexpected"); break;
+    case json::Action::UNKNOWN:
+      LOG(FATAL)("Unexpected");
+      break;
     case json::Action::PARTIAL:
     case json::Action::INSERT:
       if (std::isnan(price) == false && std::isnan(size) == false) {

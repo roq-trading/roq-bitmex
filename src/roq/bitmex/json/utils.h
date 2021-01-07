@@ -133,33 +133,48 @@ inline void update(Typ &result, const core::json::value_t &value) {
 
 inline roq::TradingStatus map(json::State state) {
   switch (state) {
-    case json::State::UNDEFINED: break;
-    case json::State::UNKNOWN: break;
-    case json::State::CLOSED: return roq::TradingStatus::CLOSED;
-    case json::State::OPEN: return roq::TradingStatus::OPEN;
-    case json::State::SETTLED: break;
-    case json::State::UNLISTED: break;
+    case json::State::UNDEFINED:
+      break;
+    case json::State::UNKNOWN:
+      break;
+    case json::State::CLOSED:
+      return roq::TradingStatus::CLOSED;
+    case json::State::OPEN:
+      return roq::TradingStatus::OPEN;
+    case json::State::SETTLED:
+      break;
+    case json::State::UNLISTED:
+      break;
   }
   return roq::TradingStatus::UNDEFINED;
 }
 
 inline roq::Side map(json::Side side) {
   switch (side) {
-    case json::Side::UNDEFINED: break;
-    case json::Side::UNKNOWN: break;
-    case json::Side::BUY: return roq::Side::BUY;
-    case json::Side::SELL: return roq::Side::SELL;
+    case json::Side::UNDEFINED:
+      break;
+    case json::Side::UNKNOWN:
+      break;
+    case json::Side::BUY:
+      return roq::Side::BUY;
+    case json::Side::SELL:
+      return roq::Side::SELL;
   }
   return roq::Side::UNDEFINED;
 }
 
 inline roq::OrderStatus map(json::OrdStatus state) {
   switch (state) {
-    case OrdStatus::UNDEFINED: break;
-    case OrdStatus::UNKNOWN: break;
-    case OrdStatus::NEW: return roq::OrderStatus::WORKING;
-    case OrdStatus::FILLED: return roq::OrderStatus::COMPLETED;
-    case OrdStatus::CANCELED: return roq::OrderStatus::CANCELED;
+    case OrdStatus::UNDEFINED:
+      break;
+    case OrdStatus::UNKNOWN:
+      break;
+    case OrdStatus::NEW:
+      return roq::OrderStatus::WORKING;
+    case OrdStatus::FILLED:
+      return roq::OrderStatus::COMPLETED;
+    case OrdStatus::CANCELED:
+      return roq::OrderStatus::CANCELED;
   }
   return roq::OrderStatus::UNDEFINED;
 }
@@ -168,42 +183,56 @@ inline roq::OrderStatus map(json::OrdStatus state) {
 
 inline json::Side map(roq::Side side) {
   switch (side) {
-    case roq::Side::UNDEFINED: break;
-    case roq::Side::BUY: return json::Side::BUY;
-    case roq::Side::SELL: return json::Side::SELL;
+    case roq::Side::UNDEFINED:
+      break;
+    case roq::Side::BUY:
+      return json::Side::BUY;
+    case roq::Side::SELL:
+      return json::Side::SELL;
   }
   return json::Side::UNDEFINED;
 }
 
 inline json::OrdType map(roq::OrderType order_type) {
   switch (order_type) {
-    case roq::OrderType::UNDEFINED: break;
-    case roq::OrderType::MARKET: return json::OrdType::MARKET;
-    case roq::OrderType::LIMIT: return json::OrdType::LIMIT;
+    case roq::OrderType::UNDEFINED:
+      break;
+    case roq::OrderType::MARKET:
+      return json::OrdType::MARKET;
+    case roq::OrderType::LIMIT:
+      return json::OrdType::LIMIT;
   }
   return json::OrdType::UNDEFINED;
 }
 
 inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   switch (time_in_force) {
-    case roq::TimeInForce::UNDEFINED: break;
-    case roq::TimeInForce::FOK: break;
-    case roq::TimeInForce::IOC: break;
-    case roq::TimeInForce::GFD: break;
-    case roq::TimeInForce::GTC: return json::TimeInForce::GOOD_TILL_CANCEL;
+    case roq::TimeInForce::UNDEFINED:
+      break;
+    case roq::TimeInForce::FOK:
+      break;
+    case roq::TimeInForce::IOC:
+      break;
+    case roq::TimeInForce::GFD:
+      break;
+    case roq::TimeInForce::GTC:
+      return json::TimeInForce::GOOD_TILL_CANCEL;
   }
   return json::TimeInForce::UNDEFINED;
 }
 
 inline json::ExecInst map(roq::ExecutionInstruction execution_instruction) {
   switch (execution_instruction) {
-    case roq::ExecutionInstruction::UNDEFINED: break;
+    case roq::ExecutionInstruction::UNDEFINED:
+      break;
     case roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE:
       return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
-    case roq::ExecutionInstruction::CANCEL_IF_NOT_BEST: break;
+    case roq::ExecutionInstruction::CANCEL_IF_NOT_BEST:
+      break;
     case roq::ExecutionInstruction::DO_NOT_INCREASE:
       return json::ExecInst::REDUCE_ONLY;
-    case roq::ExecutionInstruction::DO_NOT_REDUCE: break;
+    case roq::ExecutionInstruction::DO_NOT_REDUCE:
+      break;
   }
   return json::ExecInst::UNDEFINED;
 }

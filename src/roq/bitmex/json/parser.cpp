@@ -50,8 +50,12 @@ void Parser::dispatch(
     for (auto [key, value] : std::get<core::json::object_t>(root)) {
       auto field = Field(key);
       switch (field) {
-        case Field::UNDEFINED: LOG(FATAL)("Unexpected"); break;
-        case Field::UNKNOWN: DLOG(FATAL)(R"(Unknown key="{}")", key); break;
+        case Field::UNDEFINED:
+          LOG(FATAL)("Unexpected");
+          break;
+        case Field::UNKNOWN:
+          DLOG(FATAL)(R"(Unknown key="{}")", key);
+          break;
         case Field::ACTION:
           update(result.action, value);
           update(type, Type::TABLE);
@@ -71,7 +75,8 @@ void Parser::dispatch(
           } else {
             switch (table) {
               case Table::UNDEFINED:
-              case Table::UNKNOWN: break;
+              case Table::UNKNOWN:
+                break;
               case Table::EXECUTION: {
                 Execution execution(value, buffer);
                 dispatched = true;
@@ -218,7 +223,8 @@ void Parser::dispatch(
       }
     }
     switch (type) {
-      case Type::UNKNOWN: throw std::runtime_error("Can't detect message type");
+      case Type::UNKNOWN:
+        throw std::runtime_error("Can't detect message type");
       case Type::CANCEL_ALL_AFTER: {
         CancelAllAfter cancel_all_after = {
             .cancel_time = result.cancel_time,
