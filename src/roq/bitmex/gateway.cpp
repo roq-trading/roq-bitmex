@@ -667,7 +667,8 @@ void Gateway::operator()(
     const json::Order &order,
     const server::TraceInfo &) {
   DLOG(INFO)(R"(action={} order={})", action, order);
-  for (auto &iter : order.data) (*this)(iter);
+  for (auto &iter : order.data)
+    (*this)(iter);
 }
 
 void Gateway::operator()(
@@ -1089,7 +1090,8 @@ void Gateway::operator()(const json::OrderItem &order_item) {
 
 void Gateway::operator()(const json::Order &order) {
   DLOG(INFO)(R"(order={})", order);
-  for (auto &iter : order.data) (*this)(iter);
+  for (auto &iter : order.data)
+    (*this)(iter);
 }
 
 // UTILS:

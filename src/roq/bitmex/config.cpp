@@ -24,8 +24,10 @@ std::string Config::get_account() const {
 void Config::dispatch(server::Config::Handler &handler) const {
   handler(FLAGS_exchange);
   handler(symbols);
-  for (auto iter : accounts) handler(iter.second);
-  for (auto &user : users) handler(user);
+  for (auto iter : accounts)
+    handler(iter.second);
+  for (auto &user : users)
+    handler(user);
 }
 
 void Config::operator()(server::Symbols &&symbols) {
