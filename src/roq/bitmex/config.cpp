@@ -34,11 +34,11 @@ void Config::operator()(server::Symbols &&symbols) {
   (*this).symbols = std::move(symbols);
 }
 
-void Config::operator()(Account &&account) {
+void Config::operator()(server::Account &&account) {
   accounts.emplace(account.name, std::move(account));
 }
 
-void Config::operator()(User &&user) {
+void Config::operator()(server::User &&user) {
   users.emplace_back(std::move(user));
 }
 

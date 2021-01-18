@@ -42,14 +42,14 @@ class Config final : public server::Config,
 
   // server::ConfigReader::Handler
   void operator()(server::Symbols &&symbols) override;
-  void operator()(Account &&account) override;
-  void operator()(User &&user) override;
+  void operator()(server::Account &&account) override;
+  void operator()(server::User &&user) override;
   void operator()(const std::string_view &key, cpptoml::base &base) override;
 
  public:
-  std::vector<User> users;
+  std::vector<server::User> users;
   server::Symbols symbols;
-  absl::flat_hash_map<std::string, Account> accounts;
+  absl::flat_hash_map<std::string, server::Account> accounts;
 };
 
 /*

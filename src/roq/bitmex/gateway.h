@@ -13,8 +13,6 @@
 #include "roq/download.h"
 #include "roq/server.h"
 
-#include "roq/core/container/hash_map.h"
-
 #include "roq/core/ssl/ssl.h"
 
 #include "roq/core/event/base.h"
@@ -154,7 +152,7 @@ class Gateway final : public server::Handler,
     Rest connection;
   } rest_;
   // reference data
-  core::container::hash_map<std::string, Product> product_cache_;
+  absl::flat_hash_map<std::string, Product> product_cache_;
   std::vector<std::string> symbols_;
   struct {
     bool instrument = false;

@@ -17,7 +17,8 @@ class Product final {
  public:
   explicit Product(const json::InstrumentItem &);
 
-  Product(Product &&) = delete;
+  Product(Product &&) = default;
+
   Product(const Product &) = delete;
 
   bool update(const json::InstrumentItem &);
