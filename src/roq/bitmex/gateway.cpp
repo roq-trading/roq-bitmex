@@ -1168,7 +1168,7 @@ void Gateway::subscribe_order_book_l2() {
 const Product &Gateway::find_product(const json::InstrumentItem &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == product_cache_.end()) {
-    iter = product_cache_.emplace(std::string(item.symbol), item).first;
+    iter = product_cache_.emplace(item.symbol, item).first;
   } else {
     (*iter).second.update(item);
   }
