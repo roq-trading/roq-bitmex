@@ -2,61 +2,76 @@
 
 #include "roq/bitmex/options.h"
 
-DEFINE_string(config_file, "", "config file (path)");
+#include <absl/flags/flag.h>
 
-DEFINE_string(exchange, "bitmex", "exchange identifier (string)");
+ABSL_FLAG(std::string, config_file, "", "config file (path)");
+
+ABSL_FLAG(std::string, exchange, "bitmex", "exchange identifier (string)");
 
 // rest
 
-DEFINE_string(rest_uri, "https://testnet.bitmex.com", "REST end-point (URI)");
+ABSL_FLAG(
+    std::string,
+    rest_uri,
+    "https://testnet.bitmex.com",
+    "REST end-point (URI)");
 
-DEFINE_uint32(rest_ping_freq_secs, 5, "ping frequency (seconds)");
+ABSL_FLAG(uint32_t, rest_ping_freq_secs, 5, "ping frequency (seconds)");
 
-DEFINE_string(
+ABSL_FLAG(
+    std::string,
     rest_ping_path,
     "/",
     "URI path used for REST connection keep-alive messages");
 
-DEFINE_uint32(rest_request_queue_depth, 5, "request: max queue depth");
+ABSL_FLAG(uint32_t, rest_request_queue_depth, 5, "request: max queue depth");
 
-DEFINE_uint32(rest_request_timeout_secs, 30, "request: timeout (seconds)");
+ABSL_FLAG(
+    uint32_t, rest_request_timeout_secs, 30, "request: timeout (seconds)");
 
-DEFINE_uint32(
+ABSL_FLAG(
+    uint32_t,
     rest_rate_limit_interval_secs,
     60,
     "rate limit: monitor interval (seconds)");
 
-DEFINE_uint32(
+ABSL_FLAG(
+    uint32_t,
     rest_rate_limit_max_requests,
     60,
     "rate limit: max requests (per interval)");
 
-DEFINE_uint32(rest_expires_timeout_secs, 1, "expires time-out (seconds)");
+ABSL_FLAG(uint32_t, rest_expires_timeout_secs, 1, "expires time-out (seconds)");
 
-DEFINE_bool(
+ABSL_FLAG(
+    bool,
     rest_allow_order_updates,
     false,
     "allow inconsistent order updates? (bool)");
 
 // ws
 
-DEFINE_string(
-    ws_uri, "wss://testnet.bitmex.com/realtime", "WebSocket end-point (URI)");
+ABSL_FLAG(
+    std::string,
+    ws_uri,
+    "wss://testnet.bitmex.com/realtime",
+    "WebSocket end-point (URI)");
 
-DEFINE_uint32(ws_ping_freq_secs, 5, "ping frequency (seconds)");
+ABSL_FLAG(uint32_t, ws_ping_freq_secs, 5, "ping frequency (seconds)");
 
-DEFINE_uint32(ws_request_timeout_secs, 15, "request time-out (seconds)");
+ABSL_FLAG(uint32_t, ws_request_timeout_secs, 15, "request time-out (seconds)");
 
-DEFINE_bool(
-    ws_cancel_on_disconnect, true, "cancel orders on disconnect? (bool)");
+ABSL_FLAG(
+    bool, ws_cancel_on_disconnect, true, "cancel orders on disconnect? (bool)");
 
-DEFINE_uint32(
+ABSL_FLAG(
+    uint32_t,
     ws_cancel_all_after_secs,
     15,
     "cancel all after (seconds), requires cancel-on-disconnect");
 
 // XXX review
 
-DEFINE_uint32(encode_buffer_size, 1048576, "encode buffer size");
+ABSL_FLAG(uint32_t, encode_buffer_size, 1048576, "encode buffer size");
 
-DEFINE_uint32(decode_buffer_size, 10485760, "decode buffer size");
+ABSL_FLAG(uint32_t, decode_buffer_size, 10485760, "decode buffer size");

@@ -2,6 +2,8 @@
 
 #include "roq/bitmex/random.h"
 
+#include <absl/flags/flag.h>
+
 #include <fmt/format.h>
 
 #include <cassert>
@@ -16,7 +18,7 @@ namespace roq {
 namespace bitmex {
 
 static auto create_base_path() {
-  core::URI uri(FLAGS_rest_uri);
+  core::URI uri(absl::GetFlag(FLAGS_rest_uri));
   return uri.path;
 }
 

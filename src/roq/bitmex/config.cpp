@@ -2,6 +2,8 @@
 
 #include "roq/bitmex/config.h"
 
+#include <absl/flags/flag.h>
+
 #include <utility>
 
 #include "roq/logging.h"
@@ -22,7 +24,7 @@ std::string Config::get_account() const {
 }
 
 void Config::dispatch(server::Config::Handler &handler) const {
-  handler(FLAGS_exchange);
+  handler(absl::GetFlag(FLAGS_exchange));
   handler(symbols);
   for (auto iter : accounts)
     handler(iter.second);

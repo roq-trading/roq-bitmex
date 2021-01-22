@@ -2,36 +2,39 @@
 
 #pragma once
 
-#include <gflags/gflags.h>
+#include <absl/flags/declare.h>
 
-DECLARE_string(config_file);
+#include <cstdint>
+#include <string>
 
-DECLARE_string(exchange);
+ABSL_DECLARE_FLAG(std::string, config_file);
+
+ABSL_DECLARE_FLAG(std::string, exchange);
 
 // rest
-DECLARE_string(rest_uri);
-DECLARE_uint32(rest_ping_freq_secs);
-DECLARE_string(rest_ping_path);
-DECLARE_uint32(rest_request_queue_depth);
-DECLARE_uint32(rest_request_timeout_secs);
-DECLARE_uint32(rest_rate_limit_interval_secs);
-DECLARE_uint32(rest_rate_limit_max_requests);
-DECLARE_uint32(rest_expires_timeout_secs);
-DECLARE_bool(rest_allow_order_updates);
+ABSL_DECLARE_FLAG(std::string, rest_uri);
+ABSL_DECLARE_FLAG(uint32_t, rest_ping_freq_secs);
+ABSL_DECLARE_FLAG(std::string, rest_ping_path);
+ABSL_DECLARE_FLAG(uint32_t, rest_request_queue_depth);
+ABSL_DECLARE_FLAG(uint32_t, rest_request_timeout_secs);
+ABSL_DECLARE_FLAG(uint32_t, rest_rate_limit_interval_secs);
+ABSL_DECLARE_FLAG(uint32_t, rest_rate_limit_max_requests);
+ABSL_DECLARE_FLAG(uint32_t, rest_expires_timeout_secs);
+ABSL_DECLARE_FLAG(bool, rest_allow_order_updates);
 
 // ws
-DECLARE_string(ws_uri);
-DECLARE_uint32(ws_ping_freq_secs);
-DECLARE_uint32(ws_request_timeout_secs);
-DECLARE_bool(ws_cancel_on_disconnect);
-DECLARE_uint32(ws_cancel_all_after_secs);
+ABSL_DECLARE_FLAG(std::string, ws_uri);
+ABSL_DECLARE_FLAG(uint32_t, ws_ping_freq_secs);
+ABSL_DECLARE_FLAG(uint32_t, ws_request_timeout_secs);
+ABSL_DECLARE_FLAG(bool, ws_cancel_on_disconnect);
+ABSL_DECLARE_FLAG(uint32_t, ws_cancel_all_after_secs);
 
 // XXX review
-DECLARE_uint32(encode_buffer_size);
-DECLARE_uint32(decode_buffer_size);
+ABSL_DECLARE_FLAG(uint32_t, encode_buffer_size);
+ABSL_DECLARE_FLAG(uint32_t, decode_buffer_size);
 
 // external
-DECLARE_string(name);
-DECLARE_uint32(cache_mbp_max_depth);
-DECLARE_uint32(cache_trades_max_depth);
-DECLARE_uint32(cache_fills_max_depth);
+ABSL_DECLARE_FLAG(std::string, name);
+ABSL_DECLARE_FLAG(uint32_t, cache_mbp_max_depth);
+ABSL_DECLARE_FLAG(uint32_t, cache_trades_max_depth);
+ABSL_DECLARE_FLAG(uint32_t, cache_fills_max_depth);

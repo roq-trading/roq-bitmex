@@ -2,6 +2,8 @@
 
 #include "roq/bitmex/product.h"
 
+#include <absl/flags/flag.h>
+
 #include "roq/bitmex/options.h"
 
 #include "roq/bitmex/json/utils.h"
@@ -39,7 +41,7 @@ ReferenceData Product::create_reference_data(
     const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return ReferenceData{
-      .exchange = FLAGS_exchange,
+      .exchange = absl::GetFlag(FLAGS_exchange),
       .symbol = item.symbol,
       .description = {},
       .security_type = SecurityType::UNDEFINED,  // XXX typ?
@@ -70,7 +72,7 @@ MarketStatus Product::create_market_status(
     const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return MarketStatus{
-      .exchange = FLAGS_exchange,
+      .exchange = absl::GetFlag(FLAGS_exchange),
       .symbol = item.symbol,
       .trading_status = json::map(state_),
   };
@@ -80,7 +82,7 @@ StatisticsUpdate Product::create_statistics_update(
     const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return StatisticsUpdate{
-      .exchange = FLAGS_exchange,
+      .exchange = absl::GetFlag(FLAGS_exchange),
       .symbol = item.symbol,
       .statistics = {statistics_.data(), statistics_.size()},
       .snapshot = false,
