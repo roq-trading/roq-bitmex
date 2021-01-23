@@ -3,13 +3,13 @@ set(TARGET_NAME "${PROJECT_NAME}")
 set(SOURCES
     application.cpp
     config.cpp
+    flags.cpp
     gateway.cpp
-    main.cpp
-    options.cpp
     product.cpp
     random.cpp
     rest.cpp
-    web_socket.cpp)
+    web_socket.cpp
+    main.cpp)
 
 add_subdirectory("json")
 

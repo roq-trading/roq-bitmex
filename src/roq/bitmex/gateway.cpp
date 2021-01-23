@@ -2,8 +2,6 @@
 
 #include "roq/bitmex/gateway.h"
 
-#include <absl/flags/flag.h>
-
 #include <algorithm>
 #include <limits>
 #include <utility>
@@ -17,7 +15,7 @@
 
 #include "roq/core/http/exceptions.h"
 
-#include "roq/bitmex/options.h"
+#include "roq/bitmex/flags.h"
 
 #include "roq/bitmex/json/utils.h"
 
@@ -83,8 +81,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
           .download = WebSocketDownload(
-              std::chrono::seconds{
-                  absl::GetFlag(FLAGS_ws_request_timeout_secs)},
+              std::chrono::seconds{Flags::ws_request_timeout_secs()},
               [this](auto state) { return download(state); }),
       },
       rest_{
@@ -98,11 +95,10 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
       },
-      bid_(absl::GetFlag(FLAGS_cache_mbp_max_depth)),
-      ask_(absl::GetFlag(FLAGS_cache_mbp_max_depth)),
-      trade_(absl::GetFlag(FLAGS_cache_trades_max_depth)),
-      fill_(absl::GetFlag(FLAGS_cache_fills_max_depth)) {
-  LOG_IF(WARNING, absl::GetFlag(FLAGS_ws_cancel_on_disconnect) == false)
+      bid_(Flags::cache_mbp_max_depth()), ask_(Flags::cache_mbp_max_depth()),
+      trade_(Flags::cache_trades_max_depth()),
+      fill_(Flags::cache_fills_max_depth()) {
+  LOG_IF(WARNING, Flags::ws_cancel_on_disconnect() == false)
   ("Orders will *NOT* be cancelled on disconnect");
 }
 
@@ -752,7 +748,7 @@ void Gateway::operator()(
   for (auto &item : position.data) {
     PositionUpdate position_update{
         .account = account_,
-        .exchange = absl::GetFlag(FLAGS_exchange),
+        .exchange = Flags::exchange(),
         .symbol = item.symbol,
         .side = Side::UNDEFINED,
         .position = item.current_qty,
@@ -868,7 +864,7 @@ void Gateway::operator()(
     const server::TraceInfo &trace_info) {
   for (auto &item : quote.data) {
     TopOfBook top_of_book{
-        .exchange = absl::GetFlag(FLAGS_exchange),
+        .exchange = Flags::exchange(),
         .symbol = item.symbol,
         .layer =
             {
@@ -914,7 +910,7 @@ void Gateway::operator()(
     if (item.symbol.compare(previous) != 0) {
       if (previous.empty() == false && trade_length > 0) {
         TradeSummary trade_summary{
-            .exchange = absl::GetFlag(FLAGS_exchange),
+            .exchange = Flags::exchange(),
             .symbol = previous,
             .trades =
                 {
@@ -941,7 +937,7 @@ void Gateway::operator()(
   }
   if (previous.empty() == false && trade_length > 0) {
     TradeSummary trade_summary{
-        .exchange = absl::GetFlag(FLAGS_exchange),
+        .exchange = Flags::exchange(),
         .symbol = previous,
         .trades =
             {
@@ -1050,7 +1046,7 @@ auto compute_request_status(
 }
 
 void Gateway::operator()(const json::OrderItem &order_item) {
-  if (absl::GetFlag(FLAGS_rest_allow_order_updates) == false)
+  if (Flags::rest_allow_order_updates() == false)
     return;
 
   server::TraceInfo trace_info;  // XXX not correct (*after* parsing)
@@ -1251,7 +1247,7 @@ void Gateway::publish_market_by_price(
   LOG_IF(INFO, snapshot)
   (R"(Received market data snapshot for symbol="{}")", symbol);
   MarketByPriceUpdate market_by_price_update{
-      .exchange = absl::GetFlag(FLAGS_exchange),
+      .exchange = Flags::exchange(),
       .symbol = symbol,
       .bids =
           {

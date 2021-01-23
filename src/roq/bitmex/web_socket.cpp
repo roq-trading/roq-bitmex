@@ -2,8 +2,6 @@
 
 #include "roq/bitmex/web_socket.h"
 
-#include <absl/flags/flag.h>
-
 #include <fmt/format.h>
 
 #include "roq/core/patterns.h"
@@ -12,7 +10,7 @@
 
 #include "roq/core/charconv.h"
 
-#include "roq/bitmex/options.h"
+#include "roq/bitmex/flags.h"
 
 namespace roq {
 namespace bitmex {
@@ -21,18 +19,15 @@ namespace {
 constexpr std::string_view CONNECTION = "ws";
 
 static auto create_counter(const std::string_view &function) {
-  return core::metrics::Counter(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Counter(Flags::name(), CONNECTION, function);
 }
 
 static auto create_profile(const std::string_view &function) {
-  return core::metrics::Profile(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Profile(Flags::name(), CONNECTION, function);
 }
 
 static auto create_latency(const std::string_view &function) {
-  return core::metrics::Latency(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Latency(Flags::name(), CONNECTION, function);
 }
 }  // namespace
 
@@ -49,13 +44,13 @@ WebSocket::WebSocket(
           base,
           dns_base,
           ssl_context,
-          core::URI(absl::GetFlag(FLAGS_ws_uri)),
+          core::URI(Flags::ws_uri()),
           std::string_view(),  // query
-          std::chrono::seconds{absl::GetFlag(FLAGS_ws_ping_freq_secs)},
-          absl::GetFlag(FLAGS_decode_buffer_size),  // XXX need read buffer size
-          absl::GetFlag(FLAGS_encode_buffer_size),
+          std::chrono::seconds{Flags::ws_ping_freq_secs()},
+          Flags::decode_buffer_size(),  // XXX need read buffer size
+          Flags::encode_buffer_size(),
           [this]() { return create_upgrade_headers(); }),
-      decode_buffer_(absl::GetFlag(FLAGS_decode_buffer_size)),
+      decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_counter("disconnect"),
       },
@@ -102,14 +97,13 @@ void WebSocket::operator()(const Event<Stop> &) {
 void WebSocket::operator()(const Event<Timer> &event) {
   if (connection_.refresh(event.value.now) == false)
     return;
-  if (absl::GetFlag(FLAGS_ws_cancel_on_disconnect) &&
-      absl::GetFlag(FLAGS_ws_cancel_all_after_secs) && ready_ &&
-      next_cancel_all_after_ <= event.value.now) {
+  if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after_secs() &&
+      ready_ && next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ =
         event.value.now +
-        std::chrono::seconds{absl::GetFlag(FLAGS_ws_cancel_all_after_secs) / 4};
+        std::chrono::seconds{Flags::ws_cancel_all_after_secs() / 4};
     send_cancel_all_after(
-        std::chrono::seconds{absl::GetFlag(FLAGS_ws_cancel_all_after_secs)});
+        std::chrono::seconds{Flags::ws_cancel_all_after_secs()});
   }
 }
 
@@ -246,8 +240,8 @@ void WebSocket::operator()(const json::Handshake &handshake) {
     assert(ready_ == false);
     ready_ = true;
     handler_(*this);
-    if (absl::GetFlag(FLAGS_ws_cancel_on_disconnect) == false ||
-        absl::GetFlag(FLAGS_ws_cancel_all_after_secs) == 0)
+    if (Flags::ws_cancel_on_disconnect() == false ||
+        Flags::ws_cancel_all_after_secs() == 0)
       send_cancel_all_after(std::chrono::seconds{});
   });
 }

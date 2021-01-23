@@ -2,15 +2,13 @@
 
 #include "roq/bitmex/rest.h"
 
-#include <absl/flags/flag.h>
-
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 
 #include <chrono>
 #include <utility>
 
-#include "roq/bitmex/options.h"
+#include "roq/bitmex/flags.h"
 
 #include "roq/bitmex/json/utils.h"
 
@@ -24,24 +22,20 @@ static const std::string_view ACCEPT_JSON{"application/json"};
 static const std::string_view CONTENT_TYPE_JSON{"application/json"};
 
 static auto create_counter(const std::string_view &function) {
-  return core::metrics::Counter(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Counter(Flags::name(), CONNECTION, function);
 }
 
 static auto create_profile(const std::string_view &function) {
-  return core::metrics::Profile(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Profile(Flags::name(), CONNECTION, function);
 }
 
 static auto create_latency(const std::string_view &function) {
-  return core::metrics::Latency(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Latency(Flags::name(), CONNECTION, function);
 }
 
 static auto compute_expires() {
-  auto result =
-      core::get_realtime_clock() +
-      std::chrono::seconds{absl::GetFlag(FLAGS_rest_expires_timeout_secs)};
+  auto result = core::get_realtime_clock() +
+                std::chrono::seconds{Flags::rest_expires_timeout_secs()};
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
 }  // namespace
@@ -59,19 +53,18 @@ Rest::Rest(
           base,
           dns_base,
           ssl_context,
-          core::URI(absl::GetFlag(FLAGS_rest_uri)),
+          core::URI(Flags::rest_uri()),
           ROQ_PACKAGE_NAME,
           true,  // keep alive
-          absl::GetFlag(FLAGS_rest_request_queue_depth),
-          std::chrono::seconds{absl::GetFlag(FLAGS_rest_request_timeout_secs)},
-          std::chrono::seconds{
-              absl::GetFlag(FLAGS_rest_rate_limit_interval_secs)},
-          absl::GetFlag(FLAGS_rest_rate_limit_max_requests),
-          std::chrono::seconds{absl::GetFlag(FLAGS_rest_ping_freq_secs)},
-          absl::GetFlag(FLAGS_decode_buffer_size),
-          absl::GetFlag(FLAGS_encode_buffer_size),
-          absl::GetFlag(FLAGS_rest_ping_path)),
-      decode_buffer_(absl::GetFlag(FLAGS_decode_buffer_size)),
+          Flags::rest_request_queue_depth(),
+          std::chrono::seconds{Flags::rest_request_timeout_secs()},
+          std::chrono::seconds{Flags::rest_rate_limit_interval_secs()},
+          Flags::rest_rate_limit_max_requests(),
+          std::chrono::seconds{Flags::rest_ping_freq_secs()},
+          Flags::decode_buffer_size(),
+          Flags::encode_buffer_size(),
+          Flags::rest_ping_path()),
+      decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_counter("disconnect"),
       },

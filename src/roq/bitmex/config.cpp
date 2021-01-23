@@ -2,13 +2,11 @@
 
 #include "roq/bitmex/config.h"
 
-#include <absl/flags/flag.h>
-
 #include <utility>
 
 #include "roq/logging.h"
 
-#include "roq/bitmex/options.h"
+#include "roq/bitmex/flags.h"
 
 namespace roq {
 namespace bitmex {
@@ -24,7 +22,7 @@ std::string Config::get_account() const {
 }
 
 void Config::dispatch(server::Config::Handler &handler) const {
-  handler(absl::GetFlag(FLAGS_exchange));
+  handler(Flags::exchange());
   handler(symbols);
   for (auto iter : accounts)
     handler(iter.second);
