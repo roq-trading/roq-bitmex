@@ -13,17 +13,15 @@ namespace bitmex {
 // XXX openInterest ?
 
 Product::Product(const json::InstrumentItem &item)
-    : quote_currency_(item.quote_currency),
-      settl_currency_(item.settl_currency), tick_size_(item.tick_size),
-      multiplier_(item.multiplier), lot_size_(item.lot_size),
-      option_strike_price_(item.option_strike_price),
-      underlying_symbol_(item.underlying_symbol), expiry_(item.expiry),
-      settle_(item.settle), state_(item.state),
-      statistics_{
-          Statistics{StatisticsType::UPPER_LIMIT_PRICE, item.limit_up_price},
+    : quote_currency_(item.quote_currency), settl_currency_(item.settl_currency),
+      tick_size_(item.tick_size), multiplier_(item.multiplier), lot_size_(item.lot_size),
+      option_strike_price_(item.option_strike_price), underlying_symbol_(item.underlying_symbol),
+      expiry_(item.expiry), settle_(item.settle),
+      state_(item.state), statistics_{
+                              Statistics{StatisticsType::UPPER_LIMIT_PRICE, item.limit_up_price},
 
-          Statistics{
-              StatisticsType::LOWER_LIMIT_PRICE, item.limit_down_price}} {
+                              Statistics{
+                                  StatisticsType::LOWER_LIMIT_PRICE, item.limit_down_price}} {
 }
 
 bool Product::update(const json::InstrumentItem &item) {
@@ -35,8 +33,7 @@ bool Product::update(const json::InstrumentItem &item) {
   return updated;
 }
 
-ReferenceData Product::create_reference_data(
-    const json::InstrumentItem &item) const {
+ReferenceData Product::create_reference_data(const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return ReferenceData{
       .exchange = Flags::exchange(),
@@ -56,18 +53,15 @@ ReferenceData Product::create_reference_data(
       .time_zone = {},
       .issue_date = {},
       .settlement_date =
-          std::chrono::duration_cast<decltype(ReferenceData::settlement_date)>(
-              settle_),
+          std::chrono::duration_cast<decltype(ReferenceData::settlement_date)>(settle_),
       .expiry_datetime =
-          std::chrono::duration_cast<decltype(ReferenceData::expiry_datetime)>(
-              expiry_),
-      .expiry_datetime_utc = std::chrono::duration_cast<decltype(
-          ReferenceData::expiry_datetime_utc)>(expiry_),
+          std::chrono::duration_cast<decltype(ReferenceData::expiry_datetime)>(expiry_),
+      .expiry_datetime_utc =
+          std::chrono::duration_cast<decltype(ReferenceData::expiry_datetime_utc)>(expiry_),
   };
 }
 
-MarketStatus Product::create_market_status(
-    const json::InstrumentItem &item) const {
+MarketStatus Product::create_market_status(const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return MarketStatus{
       .exchange = Flags::exchange(),
@@ -76,8 +70,7 @@ MarketStatus Product::create_market_status(
   };
 }
 
-StatisticsUpdate Product::create_statistics_update(
-    const json::InstrumentItem &item) const {
+StatisticsUpdate Product::create_statistics_update(const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return StatisticsUpdate{
       .exchange = Flags::exchange(),

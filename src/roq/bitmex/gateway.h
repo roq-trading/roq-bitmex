@@ -34,9 +34,7 @@ namespace bitmex {
 
 class WebSocket;
 
-class Gateway final : public server::Handler,
-                      public Rest::Handler,
-                      public WebSocket::Handler {
+class Gateway final : public server::Handler, public Rest::Handler, public WebSocket::Handler {
  public:
   Gateway(server::Dispatcher &dispatcher, const Config &config);
 
@@ -66,38 +64,15 @@ class Gateway final : public server::Handler,
   // WebSocket::Handler
 
   void operator()(const WebSocket &) override;
+  void operator()(const json::Action, const json::Execution &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Instrument &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Order &, const server::TraceInfo &) override;
   void operator()(
-      const json::Action,
-      const json::Execution &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Instrument &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Order &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::OrderBookL2 &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Position &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Quote &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Settlement &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Trade &,
-      const server::TraceInfo &) override;
+      const json::Action, const json::OrderBookL2 &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Position &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Quote &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Settlement &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Trade &, const server::TraceInfo &) override;
 
   // Rest::Handler
 
@@ -114,8 +89,7 @@ class Gateway final : public server::Handler,
 
   const Product &find_product(const json::InstrumentItem &);
 
-  std::pair<double, double> find_price(
-      json::Action action, uint64_t id, double price, double size);
+  std::pair<double, double> find_price(json::Action action, uint64_t id, double price, double size);
 
   void publish_market_by_price(
       const std::string_view &symbol,

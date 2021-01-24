@@ -95,8 +95,7 @@ class Rest final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile products, accounts, create_order, modify_order,
-        cancel_order;
+    core::metrics::Profile products, accounts, create_order, modify_order, cancel_order;
   } profile_;
   struct {
     core::metrics::Latency ping;

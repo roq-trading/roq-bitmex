@@ -51,8 +51,7 @@ static bool trade_update(C &data, size_t &offset, const T &item) {
 }
 
 template <typename C, typename T>
-static bool fill_update(
-    server::Dispatcher &dispatcher, C &data, size_t &offset, const T &item) {
+static bool fill_update(server::Dispatcher &dispatcher, C &data, size_t &offset, const T &item) {
   auto trade_id = dispatcher.next_trade_id();
   auto &obj = data[offset];
   new (&obj) Fill{
@@ -68,8 +67,7 @@ static bool fill_update(
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
     : dispatcher_(dispatcher), account_(config.get_account()),
-      random_(config.get_api_key(), config.get_secret()),
-      dns_base_(base_, true),
+      random_(config.get_api_key(), config.get_secret()), dns_base_(base_, true),
       web_socket_{
           .connection =
               {
@@ -96,8 +94,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
               },
       },
       bid_(Flags::cache_mbp_max_depth()), ask_(Flags::cache_mbp_max_depth()),
-      trade_(Flags::cache_trades_max_depth()),
-      fill_(Flags::cache_fills_max_depth()) {
+      trade_(Flags::cache_trades_max_depth()), fill_(Flags::cache_fills_max_depth()) {
   LOG_IF(WARNING, Flags::ws_cancel_on_disconnect() == false)
   ("Orders will *NOT* be cancelled on disconnect");
 }
@@ -158,42 +155,40 @@ void Gateway::operator()(
     const Event<ModifyOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
-  rest_.connection.modify_order(
-      event.value, request_id, order, [this](auto &promise) {
-        try {
-          (*this)(promise.get());
-          /*
-          case core::http::Status::BAD_REQUEST:   // 400
-          case core::http::Status::UNAUTHORIZED:  // 401
-          case core::http::Status::FORBIDDEN:     // 403
-          case core::http::Status::NOT_FOUND: {   // 404
-          */
-        } catch (NetworkError &e) {
-          // XXX send ack failure
-          LOG(FATAL)(R"(Unexpected what="{}")", e.what());
-        }
-      });
+  rest_.connection.modify_order(event.value, request_id, order, [this](auto &promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+      */
+    } catch (NetworkError &e) {
+      // XXX send ack failure
+      LOG(FATAL)(R"(Unexpected what="{}")", e.what());
+    }
+  });
 }
 
 void Gateway::operator()(
     const Event<CancelOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
-  rest_.connection.cancel_order(
-      event.value, request_id, order, [this](auto &promise) {
-        try {
-          (*this)(promise.get());
-          /*
-          case core::http::Status::BAD_REQUEST:   // 400
-          case core::http::Status::UNAUTHORIZED:  // 401
-          case core::http::Status::FORBIDDEN:     // 403
-          case core::http::Status::NOT_FOUND: {   // 404
-          */
-        } catch (NetworkError &e) {
-          // XXX send ack failure
-          LOG(FATAL)(R"(Unexpected what="{}")", e.what());
-        }
-      });
+  rest_.connection.cancel_order(event.value, request_id, order, [this](auto &promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+      */
+    } catch (NetworkError &e) {
+      // XXX send ack failure
+      LOG(FATAL)(R"(Unexpected what="{}")", e.what());
+    }
+  });
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
@@ -213,8 +208,7 @@ void Gateway::operator()(const WebSocket &) {
   }
 }
 
-auto compute_request_status_2(
-    RequestType request_type, json::ExecType exec_type) {
+auto compute_request_status_2(RequestType request_type, json::ExecType exec_type) {
   switch (exec_type) {
     case json::ExecType::UNDEFINED:
     case json::ExecType::UNKNOWN:
@@ -293,13 +287,11 @@ void Gateway::operator()(
         order_lookup,
         trace_info,
         [&](const auto &order, auto &result) {
-          result.request_status =
-              compute_request_status_2(order.request_type, item.exec_type);
+          result.request_status = compute_request_status_2(order.request_type, item.exec_type);
 
           if (result.request_status != RequestStatus::UNDEFINED) {
             result.origin = Origin::EXCHANGE;
-            result.error =
-                item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+            result.error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
             result.text = item.ord_rej_reason;
           }
 
@@ -606,9 +598,7 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(
-    json::Action action,
-    const json::Instrument &instrument,
-    const server::TraceInfo &trace_info) {
+    json::Action action, const json::Instrument &instrument, const server::TraceInfo &trace_info) {
   switch (action) {
     case json::Action::UNDEFINED:
     case json::Action::UNKNOWN:
@@ -627,19 +617,15 @@ void Gateway::operator()(
           ++security_count;
           auto &product = find_product(item);
           auto reference_data = product.create_reference_data(item);
-          server::create_trace_and_dispatch(
-              trace_info, reference_data, dispatcher_, false);
+          server::create_trace_and_dispatch(trace_info, reference_data, dispatcher_, false);
           auto market_status = product.create_market_status(item);
-          server::create_trace_and_dispatch(
-              trace_info, market_status, dispatcher_, true);
+          server::create_trace_and_dispatch(trace_info, market_status, dispatcher_, true);
           auto statistics_update = product.create_statistics_update(item);
-          server::create_trace_and_dispatch(
-              trace_info, statistics_update, dispatcher_, false);
+          server::create_trace_and_dispatch(trace_info, statistics_update, dispatcher_, false);
         }
         VLOG(2)
         (R"(- securities: {} (/{}))", security_count, instrument.data.size());
-        web_socket_.download.check_relaxed(
-            WebSocketDownload::State::INSTRUMENT);
+        web_socket_.download.check_relaxed(WebSocketDownload::State::INSTRUMENT);
       }
       break;
     case json::Action::INSERT:
@@ -652,8 +638,7 @@ void Gateway::operator()(
         auto &product = find_product(item);
         // XXX check if dirty
         auto market_status = product.create_market_status(item);
-        server::create_trace_and_dispatch(
-            trace_info, market_status, dispatcher_, true);
+        server::create_trace_and_dispatch(trace_info, market_status, dispatcher_, true);
       }
       break;
     }
@@ -664,9 +649,7 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(
-    const json::Action action,
-    const json::Order &order,
-    const server::TraceInfo &) {
+    const json::Action action, const json::Order &order, const server::TraceInfo &) {
   DLOG(INFO)(R"(action={} order={})", action, order);
   for (auto &iter : order.data)
     (*this)(iter);
@@ -692,8 +675,7 @@ void Gateway::operator()(
     if (previous.empty()) {
       previous = item.symbol;
     } else if (previous.compare(item.symbol) != 0) {
-      publish_market_by_price(
-          previous, bid_length, ask_length, snapshot, trace, false);
+      publish_market_by_price(previous, bid_length, ask_length, snapshot, trace, false);
       previous = item.symbol;
       bid_length = ask_length = 0;
     }
@@ -731,8 +713,7 @@ void Gateway::operator()(
      ask_.size());
   }
   assert(previous.empty() == false);
-  publish_market_by_price(
-      previous, bid_length, ask_length, snapshot, trace, true);
+  publish_market_by_price(previous, bid_length, ask_length, snapshot, trace, true);
   // download complete?
   if (snapshot) {
     snapshot_.order_book_l2 = true;
@@ -758,8 +739,7 @@ void Gateway::operator()(
         .position_cost_yesterday = 0.0,
         .external_account = {},
     };
-    server::create_trace_and_dispatch(
-        trace_info, position_update, dispatcher_, false);
+    server::create_trace_and_dispatch(trace_info, position_update, dispatcher_, false);
   }
   /*
   {
@@ -859,9 +839,7 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(
-    const json::Action,
-    const json::Quote &quote,
-    const server::TraceInfo &trace_info) {
+    const json::Action, const json::Quote &quote, const server::TraceInfo &trace_info) {
   for (auto &item : quote.data) {
     TopOfBook top_of_book{
         .exchange = Flags::exchange(),
@@ -885,14 +863,11 @@ void Gateway::operator()(
   }
 }
 
-void Gateway::operator()(
-    const json::Action, const json::Settlement &, const server::TraceInfo &) {
+void Gateway::operator()(const json::Action, const json::Settlement &, const server::TraceInfo &) {
 }
 
 void Gateway::operator()(
-    const json::Action action,
-    const json::Trade &trade,
-    const server::TraceInfo &trace_info) {
+    const json::Action action, const json::Trade &trade, const server::TraceInfo &trace_info) {
   if (action != json::Action::INSERT)
     return;
   std::string_view previous;
@@ -920,8 +895,7 @@ void Gateway::operator()(
             .exchange_time_utc = timestamp,
         };
         VLOG(3)(R"(trade_summary={})", trade_summary);
-        server::create_trace_and_dispatch(
-            trace_info, trade_summary, dispatcher_, false);
+        server::create_trace_and_dispatch(trace_info, trade_summary, dispatcher_, false);
       }
       previous = item.symbol;
       trade_length = 0;
@@ -947,8 +921,7 @@ void Gateway::operator()(
         .exchange_time_utc = timestamp,
     };
     VLOG(3)(R"(trade_summary={})", trade_summary);
-    server::create_trace_and_dispatch(
-        trace_info, trade_summary, dispatcher_, true);
+    server::create_trace_and_dispatch(trace_info, trade_summary, dispatcher_, true);
   }
 }
 
@@ -1004,8 +977,7 @@ auto compute_order_status(json::OrdStatus ord_status, bool working_status) {
   return OrderStatus::UNDEFINED;
 }
 
-auto compute_request_status(
-    RequestType request_type, json::OrdStatus ord_status) {
+auto compute_request_status(RequestType request_type, json::OrdStatus ord_status) {
   switch (ord_status) {
     case json::OrdStatus::UNDEFINED:
     case json::OrdStatus::UNKNOWN:
@@ -1051,8 +1023,7 @@ void Gateway::operator()(const json::OrderItem &order_item) {
 
   server::TraceInfo trace_info;  // XXX not correct (*after* parsing)
 
-  auto order_status =
-      compute_order_status(order_item.ord_status, order_item.working_indicator);
+  auto order_status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   DLOG(INFO)(R"(order_status={})", order_status);
 
   server::OMS_Lookup order_lookup{
@@ -1072,13 +1043,11 @@ void Gateway::operator()(const json::OrderItem &order_item) {
       order_lookup,
       trace_info,
       [&](const auto &order, auto &result) {
-        result.request_status =
-            compute_request_status(order.request_type, order_item.ord_status);
+        result.request_status = compute_request_status(order.request_type, order_item.ord_status);
 
         if (result.request_status != RequestStatus::UNDEFINED) {
           result.origin = Origin::EXCHANGE;
-          result.error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED
-                                                           : Error::UNKNOWN,
+          result.error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
           result.text = order_item.ord_rej_reason;  // XXX text ???
         }
       });
@@ -1105,8 +1074,7 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
   MarketDataStatus market_data_status{
       .status = market_data_status_,
   };
-  server::create_trace_and_dispatch(
-      trace_info, market_data_status, dispatcher_, true);
+  server::create_trace_and_dispatch(trace_info, market_data_status, dispatcher_, true);
   LOG(INFO)(R"(market_data_status={})", market_data_status_);
 }
 
@@ -1119,8 +1087,7 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
       .account = account_,
       .status = order_manager_status_,
   };
-  server::create_trace_and_dispatch(
-      trace_info, order_manager_status, dispatcher_, true);
+  server::create_trace_and_dispatch(trace_info, order_manager_status, dispatcher_, true);
   LOG(INFO)(R"(order_manager_status={})", order_manager_status_);
 }
 
@@ -1207,8 +1174,7 @@ std::pair<double, double> Gateway::find_price(
       }
       break;
     case json::Action::UPDATE:
-      if (std::isnan(price) && std::isnan(size) == false &&
-          std::fabs(size) > TOLERANCE) {
+      if (std::isnan(price) && std::isnan(size) == false && std::fabs(size) > TOLERANCE) {
         if (iter != price_lookup_.end()) {
           result = (*iter).second;
         } else {
@@ -1219,8 +1185,7 @@ std::pair<double, double> Gateway::find_price(
       }
       break;
     case json::Action::DELETE:
-      if (std::isnan(price) &&
-          (std::isnan(size) || std::fabs(size) < TOLERANCE)) {
+      if (std::isnan(price) && (std::isnan(size) || std::fabs(size) < TOLERANCE)) {
         if (iter != price_lookup_.end()) {
           result = (*iter).second;
           price_lookup_.erase(iter);
@@ -1263,8 +1228,7 @@ void Gateway::publish_market_by_price(
       .exchange_time_utc = {},
   };
   VLOG(3)(R"(market_by_price_update={})", market_by_price_update);
-  server::create_trace_and_dispatch(
-      trace_info, market_by_price_update, dispatcher_, is_last);
+  server::create_trace_and_dispatch(trace_info, market_by_price_update, dispatcher_, is_last);
 }
 
 }  // namespace bitmex

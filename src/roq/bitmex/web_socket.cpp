@@ -97,13 +97,11 @@ void WebSocket::operator()(const Event<Stop> &) {
 void WebSocket::operator()(const Event<Timer> &event) {
   if (connection_.refresh(event.value.now) == false)
     return;
-  if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after_secs() &&
-      ready_ && next_cancel_all_after_ <= event.value.now) {
+  if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after_secs() && ready_ &&
+      next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ =
-        event.value.now +
-        std::chrono::seconds{Flags::ws_cancel_all_after_secs() / 4};
-    send_cancel_all_after(
-        std::chrono::seconds{Flags::ws_cancel_all_after_secs()});
+        event.value.now + std::chrono::seconds{Flags::ws_cancel_all_after_secs() / 4};
+    send_cancel_all_after(std::chrono::seconds{Flags::ws_cancel_all_after_secs()});
   }
 }
 
@@ -117,8 +115,7 @@ void WebSocket::subscribe(const std::string_view &topic) {
   connection_.send_text(message);
 }
 
-void WebSocket::subscribe(
-    const std::string_view &topic, const std::vector<std::string> &filter) {
+void WebSocket::subscribe(const std::string_view &topic, const std::vector<std::string> &filter) {
   if (filter.empty()) {
     subscribe(topic);
   } else {
@@ -178,8 +175,7 @@ void WebSocket::operator()(const core::web::Socket::Close &) {
 
 void WebSocket::operator()(const core::web::Socket::Latency &latency) {
   latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
-          .count());
+      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
 }
 
 void WebSocket::operator()(const core::web::Socket::Text &text) {
@@ -189,8 +185,7 @@ void WebSocket::operator()(const core::web::Socket::Text &text) {
 std::string WebSocket::create_upgrade_headers() {
   auto expires = std::chrono::duration_cast<std::chrono::seconds>(
       core::get_realtime_clock() + std::chrono::seconds{5});
-  return random_.create_headers(
-      expires, core::http::Method::GET, "/realtime", std::string_view());
+  return random_.create_headers(expires, core::http::Method::GET, "/realtime", std::string_view());
 }
 
 void WebSocket::parse(const std::string_view &message) {
@@ -223,9 +218,7 @@ void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
 }
 
 void WebSocket::operator()(const json::CancelAllAfter &cancel_all_after) {
-  profile_.cancel_all_after([&]() {
-    VLOG(1)(R"(cancel_all_after={})", cancel_all_after);
-  });
+  profile_.cancel_all_after([&]() { VLOG(1)(R"(cancel_all_after={})", cancel_all_after); });
 }
 
 void WebSocket::operator()(const json::Error &error) {
@@ -240,8 +233,7 @@ void WebSocket::operator()(const json::Handshake &handshake) {
     assert(ready_ == false);
     ready_ = true;
     handler_(*this);
-    if (Flags::ws_cancel_on_disconnect() == false ||
-        Flags::ws_cancel_all_after_secs() == 0)
+    if (Flags::ws_cancel_on_disconnect() == false || Flags::ws_cancel_all_after_secs() == 0)
       send_cancel_all_after(std::chrono::seconds{});
   });
 }
@@ -274,9 +266,7 @@ void WebSocket::operator()(
 }
 
 void WebSocket::operator()(
-    const json::Action action,
-    const json::Funding &funding,
-    const server::TraceInfo &) {
+    const json::Action action, const json::Funding &funding, const server::TraceInfo &) {
   profile_.funding([&]() {
     VLOG(2)(R"(action={}, funding={})", action, funding);
     // XXX not used
@@ -294,9 +284,7 @@ void WebSocket::operator()(
 }
 
 void WebSocket::operator()(
-    const json::Action action,
-    const json::Liquidation &liquidation,
-    const server::TraceInfo &) {
+    const json::Action action, const json::Liquidation &liquidation, const server::TraceInfo &) {
   profile_.liquidation([&]() {
     VLOG(2)(R"(action={}, liquidation={})", action, liquidation);
     /// XXX not used
@@ -304,9 +292,7 @@ void WebSocket::operator()(
 }
 
 void WebSocket::operator()(
-    const json::Action action,
-    const json::Margin &margin,
-    const server::TraceInfo &) {
+    const json::Action action, const json::Margin &margin, const server::TraceInfo &) {
   profile_.margin([&]() {
     VLOG(2)(R"(action={}, margin={})", action, margin);
     /// XXX not used
@@ -314,9 +300,7 @@ void WebSocket::operator()(
 }
 
 void WebSocket::operator()(
-    const json::Action action,
-    const json::Order &order,
-    const server::TraceInfo &trace_info) {
+    const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
   profile_.order([&]() {
     VLOG(1)(R"(action={}, order={})", action, order);
     handler_(action, order, trace_info);
@@ -344,9 +328,7 @@ void WebSocket::operator()(
 }
 
 void WebSocket::operator()(
-    const json::Action action,
-    const json::Quote &quote,
-    const server::TraceInfo &trace_info) {
+    const json::Action action, const json::Quote &quote, const server::TraceInfo &trace_info) {
   profile_.quote([&]() {
     VLOG(3)(R"(action={}, quote={})", action, quote);
     handler_(action, quote, trace_info);
@@ -364,9 +346,7 @@ void WebSocket::operator()(
 }
 
 void WebSocket::operator()(
-    const json::Action action,
-    const json::Trade &trade,
-    const server::TraceInfo &trace_info) {
+    const json::Action action, const json::Trade &trade, const server::TraceInfo &trace_info) {
   profile_.trade([&]() {
     VLOG(2)(R"(action={}, trade={})", action, trade);
     handler_(action, trade, trace_info);

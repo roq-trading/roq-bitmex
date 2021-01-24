@@ -27,37 +27,23 @@
 namespace roq {
 namespace bitmex {
 
-class WebSocket final : public core::web::Socket::Handler,
-                        public json::Parser::Handler {
+class WebSocket final : public core::web::Socket::Handler, public json::Parser::Handler {
  public:
   struct Handler {
     virtual void operator()(const WebSocket &) = 0;
     virtual void operator()(
-        const json::Action,
-        const json::Execution &,
-        const server::TraceInfo &) = 0;
+        const json::Action, const json::Execution &, const server::TraceInfo &) = 0;
     virtual void operator()(
-        const json::Action,
-        const json::Instrument &,
-        const server::TraceInfo &) = 0;
+        const json::Action, const json::Instrument &, const server::TraceInfo &) = 0;
+    virtual void operator()(const json::Action, const json::Order &, const server::TraceInfo &) = 0;
     virtual void operator()(
-        const json::Action, const json::Order &, const server::TraceInfo &) = 0;
+        const json::Action, const json::OrderBookL2 &, const server::TraceInfo &) = 0;
     virtual void operator()(
-        const json::Action,
-        const json::OrderBookL2 &,
-        const server::TraceInfo &) = 0;
+        const json::Action, const json::Position &, const server::TraceInfo &) = 0;
+    virtual void operator()(const json::Action, const json::Quote &, const server::TraceInfo &) = 0;
     virtual void operator()(
-        const json::Action,
-        const json::Position &,
-        const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action, const json::Quote &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action,
-        const json::Settlement &,
-        const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action, const json::Trade &, const server::TraceInfo &) = 0;
+        const json::Action, const json::Settlement &, const server::TraceInfo &) = 0;
+    virtual void operator()(const json::Action, const json::Trade &, const server::TraceInfo &) = 0;
   };
 
   WebSocket(
@@ -81,8 +67,7 @@ class WebSocket final : public core::web::Socket::Handler,
 
   void subscribe(const std::string_view &topic);
 
-  void subscribe(
-      const std::string_view &topic, const std::vector<std::string> &filter);
+  void subscribe(const std::string_view &topic, const std::vector<std::string> &filter);
 
   void operator()(metrics::Writer &writer);
 
@@ -103,50 +88,19 @@ class WebSocket final : public core::web::Socket::Handler,
   void operator()(const json::Handshake &) override;
   void operator()(const json::Subscribe &) override;
 
+  void operator()(const json::Action, const json::Execution &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Funding &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Instrument &, const server::TraceInfo &) override;
   void operator()(
-      const json::Action,
-      const json::Execution &,
-      const server::TraceInfo &) override;
+      const json::Action, const json::Liquidation &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Margin &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Order &, const server::TraceInfo &) override;
   void operator()(
-      const json::Action,
-      const json::Funding &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Instrument &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Liquidation &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Margin &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Order &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::OrderBookL2 &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Position &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Quote &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Settlement &,
-      const server::TraceInfo &) override;
-  void operator()(
-      const json::Action,
-      const json::Trade &,
-      const server::TraceInfo &) override;
+      const json::Action, const json::OrderBookL2 &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Position &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Quote &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Settlement &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Trade &, const server::TraceInfo &) override;
 
  private:
   std::string create_upgrade_headers();
@@ -169,9 +123,9 @@ class WebSocket final : public core::web::Socket::Handler,
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, cancel_all_after, error, execution, funding,
-        handshake, instrument, liquidation, margin, order, order_book_l2,
-        position, quote, settlement, subscribe, trade;
+    core::metrics::Profile parse, cancel_all_after, error, execution, funding, handshake,
+        instrument, liquidation, margin, order, order_book_l2, position, quote, settlement,
+        subscribe, trade;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

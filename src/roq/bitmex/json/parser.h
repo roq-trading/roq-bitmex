@@ -39,28 +39,17 @@ struct Parser final {
     virtual void operator()(const Handshake &) = 0;
     virtual void operator()(const Subscribe &) = 0;
     // table
-    virtual void operator()(
-        const Action, const Execution &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Funding &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Instrument &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Liquidation &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Margin &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Order &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const OrderBookL2 &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Position &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Quote &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Settlement &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const Action, const Trade &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Execution &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Funding &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Instrument &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Liquidation &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Margin &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Order &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const OrderBookL2 &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Position &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Quote &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Settlement &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Action, const Trade &, const server::TraceInfo &) = 0;
   };
 
   std::string_view action;

@@ -21,13 +21,11 @@ static auto create_base_path() {
 }
 
 static auto create_timestamp_secs(std::chrono::nanoseconds value) {
-  return fmt::format(
-      "{}", std::chrono::duration_cast<std::chrono::seconds>(value).count());
+  return fmt::format("{}", std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 
 Random::Random(const std::string_view &key, const std::string_view &secret)
-    : base_path(create_base_path()), key_(key),
-      hmac_(secret.data(), secret.length()) {
+    : base_path(create_base_path()), key_(key), hmac_(secret.data(), secret.length()) {
 }
 
 std::string Random::create_signature(

@@ -34,8 +34,8 @@ static auto create_latency(const std::string_view &function) {
 }
 
 static auto compute_expires() {
-  auto result = core::get_realtime_clock() +
-                std::chrono::seconds{Flags::rest_expires_timeout_secs()};
+  auto result =
+      core::get_realtime_clock() + std::chrono::seconds{Flags::rest_expires_timeout_secs()};
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
 }  // namespace
@@ -150,8 +150,7 @@ void Rest::create_order(
         profile_.create_order([&]() {
           try {
             response.expect(core::http::Status::OK);
-            auto order_item =
-                core::json::Parser::create<json::OrderItem>(response.body());
+            auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
             VLOG(1)(R"(order_item={})", order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
@@ -197,8 +196,7 @@ void Rest::modify_order(
         profile_.modify_order([&]() {
           try {
             response.expect(core::http::Status::OK);
-            auto order_item =
-                core::json::Parser::create<json::OrderItem>(response.body());
+            auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
             VLOG(1)(R"(order_item={})", order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
@@ -241,8 +239,7 @@ void Rest::cancel_order(
           try {
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
-            auto order = core::json::Parser::create<json::Order>(
-                response.body(), buffer);
+            auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
             VLOG(1)(R"(order={})", order);
             core::Promise<json::Order> promise(order);
             callback(promise);
@@ -304,8 +301,7 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
   latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
-          .count());
+      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
 }
 
 }  // namespace bitmex
