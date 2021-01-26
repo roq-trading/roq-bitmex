@@ -61,6 +61,9 @@ class Gateway final : public server::Handler, public Rest::Handler, public WebSo
 
   void operator()(metrics::Writer &writer) override;
 
+  // all
+  void operator()(const ExternalLatency &, const server::TraceInfo &) override;
+
   // WebSocket::Handler
 
   void operator()(const WebSocket &) override;

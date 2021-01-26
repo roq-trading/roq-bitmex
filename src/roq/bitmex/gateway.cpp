@@ -196,6 +196,13 @@ void Gateway::operator()(metrics::Writer &writer) {
   rest_.connection(writer);
 }
 
+// all
+
+void Gateway::operator()(
+    const ExternalLatency &external_latency, const server::TraceInfo &trace_info) {
+  create_trace_and_dispatch(trace_info, external_latency, dispatcher_);
+}
+
 // ws
 
 void Gateway::operator()(const WebSocket &) {

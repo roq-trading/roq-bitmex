@@ -31,6 +31,7 @@ class WebSocket final : public core::web::Socket::Handler, public json::Parser::
  public:
   struct Handler {
     virtual void operator()(const WebSocket &) = 0;
+    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
     virtual void operator()(
         const json::Action, const json::Execution &, const server::TraceInfo &) = 0;
     virtual void operator()(

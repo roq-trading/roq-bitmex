@@ -34,6 +34,7 @@ class Rest final : public core::web::Client::Handler {
  public:
   struct Handler {
     virtual void operator()(const Rest &) = 0;
+    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
   };
 
   Rest(
