@@ -174,8 +174,7 @@ void WebSocket::operator()(const core::web::Socket::Close &) {
 }
 
 void WebSocket::operator()(const core::web::Socket::Latency &latency) {
-  latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
+  latency_.ping.update(latency.sample);
 }
 
 void WebSocket::operator()(const core::web::Socket::Text &text) {

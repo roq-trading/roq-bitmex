@@ -300,8 +300,7 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 }
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
-  latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
+  latency_.ping.update(latency.sample);
 }
 
 }  // namespace bitmex
