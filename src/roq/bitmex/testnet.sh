@@ -3,7 +3,7 @@
 CWD="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 if [ "$1" == "debug" ]; then
-	PREFIX="libtool --mode=execute gdb --args"
+	PREFIX="gdb --args"
 else
 	PREFIX=
 fi
@@ -19,9 +19,9 @@ WS_URI="wss://$URI/realtime"
 
 $PREFIX ./roq-bitmex \
 	--name "bitmex" \
-	--config-file "$CONFIG_FILE" \
-	--client-listen-address $CWD/$NAME.sock \
-	--metrics-listen-address 1234 \
-	--ws-uri "$WS_URI" \
-	--rest-uri "$REST_URI" \
+	--config_file "$CONFIG_FILE" \
+	--client_listen_address $CWD/$NAME.sock \
+	--metrics_listen_address 1234 \
+	--ws_uri "$WS_URI" \
+	--rest_uri "$REST_URI" \
 	$@
