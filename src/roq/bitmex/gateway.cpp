@@ -886,7 +886,7 @@ void Gateway::operator()(
   for (auto &item : trade.data) {
     if (success == false)
       break;
-    if (timestamp.count() == 0) {
+    if (timestamp == timestamp.zero()) {
       timestamp = item.timestamp;
     } else {
       assert(timestamp == item.timestamp);
