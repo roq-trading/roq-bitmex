@@ -896,11 +896,7 @@ void Gateway::operator()(
         TradeSummary trade_summary{
             .exchange = Flags::exchange(),
             .symbol = previous,
-            .trades =
-                {
-                    .items = trade_.data(),
-                    .length = trade_length,
-                },
+            .trades = {trade_.data(), trade_length},
             .exchange_time_utc = timestamp,
         };
         VLOG(3)(R"(trade_summary={})", trade_summary);
@@ -919,11 +915,7 @@ void Gateway::operator()(
     TradeSummary trade_summary{
         .exchange = Flags::exchange(),
         .symbol = previous,
-        .trades =
-            {
-                .items = trade_.data(),
-                .length = trade_length,
-            },
+        .trades = {trade_.data(), trade_length},
         .exchange_time_utc = timestamp,
     };
     VLOG(3)(R"(trade_summary={})", trade_summary);
@@ -1220,16 +1212,8 @@ void Gateway::publish_market_by_price(
   MarketByPriceUpdate market_by_price_update{
       .exchange = Flags::exchange(),
       .symbol = symbol,
-      .bids =
-          {
-              .items = bid_.data(),
-              .length = bid_length,
-          },
-      .asks =
-          {
-              .items = ask_.data(),
-              .length = ask_length,
-          },
+      .bids = {bid_.data(), bid_length},
+      .asks = {ask_.data(), ask_length},
       .snapshot = snapshot,
       .exchange_time_utc = {},
   };
