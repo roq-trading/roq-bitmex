@@ -218,7 +218,6 @@ void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
       R"("args":{})"
       R"(}})",
       seconds.count() * 1000);  // milliseconds
-  DLOG(INFO)("message={}", message);
   connection_.send_text(message);
 }
 

@@ -5,6 +5,7 @@
 	{ "name": "New" },
 	{ "name": "Replaced" },
 	{ "name": "Canceled" },
-	{ "name": "Trade" }
+	{ "name": "Trade" },
+	{ "name": "Funding" }
 ]
 }
