@@ -11,105 +11,107 @@
 #include "roq/core/flags/non_zero.h"
 #include "roq/core/flags/uri.h"
 
+using namespace std::literals;  // NOLINT
+
 ABSL_FLAG(  //
     roq::core::flags::NonEmpty<std::string>,
     config_file,
     {},
-    "config file (path)");
+    "config file (path)"sv);
 
 ABSL_FLAG(  //
     roq::core::flags::NonEmpty<std::string>,
     exchange,
-    {"bitmex"},
-    "exchange identifier (string)");
+    "bitmex"s,
+    "exchange identifier (string)"sv);
 
 // rest
 
 ABSL_FLAG(  //
     roq::core::flags::URI<std::string>,
     rest_uri,
-    {"https://testnet.bitmex.com"},
-    "REST end-point (URI)");
+    "https://testnet.bitmex.com"s,
+    "REST end-point (URI)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_ping_freq_secs,
     uint32_t{5},
-    "ping frequency (seconds)");
+    "ping frequency (seconds)"sv);
 
 ABSL_FLAG(  //
     roq::core::flags::URI<std::string>,
     rest_ping_path,
-    {"/"},
-    "URI path used for REST connection keep-alive messages");
+    "/"s,
+    "URI path used for REST connection keep-alive messages"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_request_queue_depth,
     uint32_t{5},
-    "request: max queue depth");
+    "request: max queue depth"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_request_timeout_secs,
     uint32_t{30},
-    "request: timeout (seconds)");
+    "request: timeout (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_rate_limit_interval_secs,
     uint32_t{60},
-    "rate limit: monitor interval (seconds)");
+    "rate limit: monitor interval (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_rate_limit_max_requests,
     uint32_t{60},
-    "rate limit: max requests (per interval)");
+    "rate limit: max requests (per interval)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_expires_timeout_secs,
     uint32_t{1},
-    "expires time-out (seconds)");
+    "expires time-out (seconds)"sv);
 
 ABSL_FLAG(  //
     bool,
     rest_allow_order_updates,
     false,
-    "allow inconsistent order updates? (bool)");
+    "allow inconsistent order updates? (bool)"sv);
 
 // ws
 
 ABSL_FLAG(  //
     roq::core::flags::URI<std::string>,
     ws_uri,
-    {"wss://testnet.bitmex.com/realtime"},
-    "WebSocket end-point (URI)");
+    "wss://testnet.bitmex.com/realtime"s,
+    "WebSocket end-point (URI)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_ping_freq_secs,
     uint32_t{5},
-    "ping frequency (seconds)");
+    "ping frequency (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_request_timeout_secs,
     uint32_t{15},
-    "request time-out (seconds)");
+    "request time-out (seconds)"sv);
 
 ABSL_FLAG(  //
     bool,
     ws_cancel_on_disconnect,
     true,
-    "cancel orders on disconnect? (bool)");
+    "cancel orders on disconnect? (bool)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_cancel_all_after_secs,
     uint32_t{15},
-    "cancel all after (seconds), requires cancel-on-disconnect");
+    "cancel all after (seconds), requires cancel-on-disconnect"sv);
 
 // XXX review
 
@@ -117,13 +119,13 @@ ABSL_FLAG(  //
     roq::core::flags::NonZero<uint32_t>,
     encode_buffer_size,
     uint32_t{1048576},
-    "encode buffer size");
+    "encode buffer size"sv);
 
 ABSL_FLAG(  //
     roq::core::flags::NonZero<uint32_t>,
     decode_buffer_size,
     uint32_t{10485760},
-    "decode buffer size");
+    "decode buffer size"sv);
 
 // external
 

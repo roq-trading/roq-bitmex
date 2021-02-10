@@ -52,6 +52,8 @@ find_package(roq-server REQUIRED)
 find_package(rt REQUIRED)
 find_package(uuid REQUIRED)
 
+find_program(CLANG_FORMAT clang-format REQUIRED)
+
 # include
 
 include_directories(

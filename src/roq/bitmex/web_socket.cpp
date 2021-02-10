@@ -12,11 +12,13 @@
 
 #include "roq/bitmex/flags.h"
 
+using namespace std::literals;  // NOLINT
+
 namespace roq {
 namespace bitmex {
 
 namespace {
-constexpr std::string_view CONNECTION = "ws";
+constexpr std::string_view CONNECTION = "ws"sv;
 
 static auto create_counter(const std::string_view &function) {
   return core::metrics::Counter(Flags::name(), CONNECTION, function);
@@ -52,29 +54,29 @@ WebSocket::WebSocket(
           [this]() { return create_upgrade_headers(); }),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"),
+          .disconnect = create_counter("disconnect"sv),
       },
       profile_{
-          .parse = create_profile("parse"),
-          .cancel_all_after = create_profile("cancel_all_after"),
-          .error = create_profile("error"),
-          .execution = create_profile("execution"),
-          .funding = create_profile("funding"),
-          .handshake = create_profile("handshake"),
-          .instrument = create_profile("instrument"),
-          .liquidation = create_profile("liquidation"),
-          .margin = create_profile("margin"),
-          .order = create_profile("order"),
-          .order_book_l2 = create_profile("order_book_l2"),
-          .position = create_profile("position"),
-          .quote = create_profile("quote"),
-          .settlement = create_profile("settlement"),
-          .subscribe = create_profile("subscribe"),
-          .trade = create_profile("trade"),
+          .parse = create_profile("parse"sv),
+          .cancel_all_after = create_profile("cancel_all_after"sv),
+          .error = create_profile("error"sv),
+          .execution = create_profile("execution"sv),
+          .funding = create_profile("funding"sv),
+          .handshake = create_profile("handshake"sv),
+          .instrument = create_profile("instrument"sv),
+          .liquidation = create_profile("liquidation"sv),
+          .margin = create_profile("margin"sv),
+          .order = create_profile("order"sv),
+          .order_book_l2 = create_profile("order_book_l2"sv),
+          .position = create_profile("position"sv),
+          .quote = create_profile("quote"sv),
+          .settlement = create_profile("settlement"sv),
+          .subscribe = create_profile("subscribe"sv),
+          .trade = create_profile("trade"sv),
       },
       latency_{
-          .ping = create_latency("ping"),
-          .heartbeat = create_latency("heartbeat"),
+          .ping = create_latency("ping"sv),
+          .heartbeat = create_latency("heartbeat"sv),
       } {
 }
 
@@ -110,7 +112,7 @@ void WebSocket::subscribe(const std::string_view &topic) {
       R"({{)"
       R"("op":"subscribe",)"
       R"("args":"{}")"
-      R"(}})",
+      R"(}})"sv,
       topic);
   connection_.send_text(message);
 }
@@ -123,9 +125,9 @@ void WebSocket::subscribe(const std::string_view &topic, const std::vector<std::
         R"({{)"
         R"("op":"subscribe",)"
         R"("args":"{}:{}")"
-        R"(}})",
+        R"(}})"sv,
         topic,
-        fmt::join(filter, ","));
+        fmt::join(filter, ","sv));
     connection_.send_text(message);
   }
 }
@@ -190,17 +192,18 @@ void WebSocket::operator()(const core::web::Socket::Text &text) {
 std::string WebSocket::create_upgrade_headers() {
   auto expires = std::chrono::duration_cast<std::chrono::seconds>(
       core::get_realtime_clock() + std::chrono::seconds{5});
-  return random_.create_headers(expires, core::http::Method::GET, "/realtime", std::string_view());
+  return random_.create_headers(
+      expires, core::http::Method::GET, "/realtime"sv, std::string_view());
 }
 
 void WebSocket::parse(const std::string_view &message) {
-  VLOG(4)(R"(message={})", message);
+  VLOG(4)(R"(message={})"sv, message);
   profile_.parse([&]() {
     try {
       parse_helper(message);
     } catch (std::exception &e) {
-      LOG(WARNING)(R"(message="{}")", message);
-      LOG(FATAL)(R"(ERROR what="{}")", e.what());
+      LOG(WARNING)(R"(message="{}")"sv, message);
+      LOG(FATAL)(R"(ERROR what="{}")"sv, e.what());
     }
   });
 }
@@ -216,24 +219,24 @@ void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
       R"({{)"
       R"("op":"cancelAllAfter",)"
       R"("args":{})"
-      R"(}})",
+      R"(}})"sv,
       seconds.count() * 1000);  // milliseconds
   connection_.send_text(message);
 }
 
 void WebSocket::operator()(const json::CancelAllAfter &cancel_all_after) {
-  profile_.cancel_all_after([&]() { VLOG(1)(R"(cancel_all_after={})", cancel_all_after); });
+  profile_.cancel_all_after([&]() { VLOG(1)(R"(cancel_all_after={})"sv, cancel_all_after); });
 }
 
 void WebSocket::operator()(const json::Error &error) {
-  profile_.error([&]() { LOG(WARNING)(R"(error={})", error); });
+  profile_.error([&]() { LOG(WARNING)(R"(error={})"sv, error); });
   connection_.close();
 }
 
 void WebSocket::operator()(const json::Handshake &handshake) {
   profile_.handshake([&]() {
-    VLOG(1)(R"(handshake={})", handshake);
-    LOG(INFO)("Ready");
+    VLOG(1)(R"(handshake={})"sv, handshake);
+    LOG(INFO)("Ready"sv);
     assert(ready_ == false);
     ready_ = true;
     handler_(*this);
@@ -244,16 +247,16 @@ void WebSocket::operator()(const json::Handshake &handshake) {
 
 void WebSocket::operator()(const json::Subscribe &subscribe) {
   profile_.subscribe([&]() {
-    VLOG(1)(R"(subscribe={})", subscribe);
+    VLOG(1)(R"(subscribe={})"sv, subscribe);
     if (subscribe.success) {
       assert(subscribe.failure == false);
       LOG(INFO)
-      (R"(Successfully subscribed to topic="{}")", subscribe.subscribe);
+      (R"(Successfully subscribed to topic="{}")"sv, subscribe.subscribe);
     } else if (subscribe.failure) {
       assert(subscribe.success == false);
-      LOG(WARNING)(R"(Failed to subscribe topic="{}")", subscribe.subscribe);
+      LOG(WARNING)(R"(Failed to subscribe topic="{}")"sv, subscribe.subscribe);
     } else {
-      LOG(FATAL)("Expected success or failure");
+      LOG(FATAL)("Expected success or failure"sv);
     }
     // TODO(thraneh): clear timeout
   });
@@ -264,7 +267,7 @@ void WebSocket::operator()(
     const json::Execution &execution,
     const server::TraceInfo &trace_info) {
   profile_.execution([&]() {
-    VLOG(1)(R"(action={}, execution={})", action, execution);
+    VLOG(1)(R"(action={}, execution={})"sv, action, execution);
     handler_(action, execution, trace_info);
   });
 }
@@ -272,7 +275,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Funding &funding, const server::TraceInfo &) {
   profile_.funding([&]() {
-    VLOG(2)(R"(action={}, funding={})", action, funding);
+    VLOG(2)(R"(action={}, funding={})"sv, action, funding);
     // XXX not used
   });
 }
@@ -282,7 +285,7 @@ void WebSocket::operator()(
     const json::Instrument &instrument,
     const server::TraceInfo &trace_info) {
   profile_.instrument([&]() {
-    VLOG(2)(R"(action={}, instrument={})", action, instrument);
+    VLOG(2)(R"(action={}, instrument={})"sv, action, instrument);
     handler_(action, instrument, trace_info);
   });
 }
@@ -290,7 +293,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Liquidation &liquidation, const server::TraceInfo &) {
   profile_.liquidation([&]() {
-    VLOG(2)(R"(action={}, liquidation={})", action, liquidation);
+    VLOG(2)(R"(action={}, liquidation={})"sv, action, liquidation);
     /// XXX not used
   });
 }
@@ -298,7 +301,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Margin &margin, const server::TraceInfo &) {
   profile_.margin([&]() {
-    VLOG(2)(R"(action={}, margin={})", action, margin);
+    VLOG(2)(R"(action={}, margin={})"sv, action, margin);
     /// XXX not used
   });
 }
@@ -306,7 +309,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
   profile_.order([&]() {
-    VLOG(1)(R"(action={}, order={})", action, order);
+    VLOG(1)(R"(action={}, order={})"sv, action, order);
     handler_(action, order, trace_info);
   });
 }
@@ -316,7 +319,7 @@ void WebSocket::operator()(
     const json::OrderBookL2 &order_book_l2,
     const server::TraceInfo &trace_info) {
   profile_.order_book_l2([&]() {
-    VLOG(3)(R"(action={}, order_book_l2={})", action, order_book_l2);
+    VLOG(3)(R"(action={}, order_book_l2={})"sv, action, order_book_l2);
     handler_(action, order_book_l2, trace_info);
   });
 }
@@ -326,7 +329,7 @@ void WebSocket::operator()(
     const json::Position &position,
     const server::TraceInfo &trace_info) {
   profile_.position([&]() {
-    VLOG(2)(R"(action={}, position={})", action, position);
+    VLOG(2)(R"(action={}, position={})"sv, action, position);
     handler_(action, position, trace_info);
   });
 }
@@ -334,7 +337,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Quote &quote, const server::TraceInfo &trace_info) {
   profile_.quote([&]() {
-    VLOG(3)(R"(action={}, quote={})", action, quote);
+    VLOG(3)(R"(action={}, quote={})"sv, action, quote);
     handler_(action, quote, trace_info);
   });
 }
@@ -344,7 +347,7 @@ void WebSocket::operator()(
     const json::Settlement &settlement,
     const server::TraceInfo &trace_info) {
   profile_.settlement([&]() {
-    VLOG(3)(R"(action={}, settlement={})", action, settlement);
+    VLOG(3)(R"(action={}, settlement={})"sv, action, settlement);
     handler_(action, settlement, trace_info);
   });
 }
@@ -352,7 +355,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Trade &trade, const server::TraceInfo &trace_info) {
   profile_.trade([&]() {
-    VLOG(2)(R"(action={}, trade={})", action, trade);
+    VLOG(2)(R"(action={}, trade={})"sv, action, trade);
     handler_(action, trade, trace_info);
   });
 }

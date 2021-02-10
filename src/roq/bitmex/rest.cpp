@@ -12,14 +12,16 @@
 
 #include "roq/bitmex/json/utils.h"
 
+using namespace std::literals;  // NOLINT
+
 namespace roq {
 namespace bitmex {
 
 namespace {
-constexpr std::string_view CONNECTION = "rest";
+constexpr std::string_view CONNECTION = "rest"sv;
 
-static const std::string_view ACCEPT_JSON{"application/json"};
-static const std::string_view CONTENT_TYPE_JSON{"application/json"};
+static const std::string_view ACCEPT_JSON{"application/json"sv};
+static const std::string_view CONTENT_TYPE_JSON{"application/json"sv};
 
 static auto create_counter(const std::string_view &function) {
   return core::metrics::Counter(Flags::name(), CONNECTION, function);
@@ -66,17 +68,17 @@ Rest::Rest(
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"),
+          .disconnect = create_counter("disconnect"sv),
       },
       profile_{
-          .products = create_profile("products"),
-          .accounts = create_profile("accounts"),
-          .create_order = create_profile("create_order"),
-          .modify_order = create_profile("modify_order"),
-          .cancel_order = create_profile("cancel_order"),
+          .products = create_profile("products"sv),
+          .accounts = create_profile("accounts"sv),
+          .create_order = create_profile("create_order"sv),
+          .modify_order = create_profile("modify_order"sv),
+          .cancel_order = create_profile("cancel_order"sv),
       },
       latency_{
-          .ping = create_latency("ping"),
+          .ping = create_latency("ping"sv),
       } {
 }
 
@@ -112,7 +114,7 @@ void Rest::create_order(
     const std::string_view &cl_ord_id,
     std::function<void(const core::Promise<json::OrderItem> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/api/v1/order";
+  constexpr std::string_view path = "/api/v1/order"sv;
   auto expires = compute_expires();
   // XXX use encode buffer
   auto message = fmt::format(
@@ -125,7 +127,7 @@ void Rest::create_order(
       R"("ordType":"{}",)"
       R"("timeInForce":"{}",)"
       R"("execInst":"{}")"
-      R"(}})",
+      R"(}})"sv,
       cl_ord_id,
       create_order.symbol,
       json::map(create_order.side).as_raw_text(),
@@ -136,7 +138,7 @@ void Rest::create_order(
       create_order.execution_instruction == ExecutionInstruction::UNDEFINED
           ? std::string_view()
           : json::map(create_order.execution_instruction).as_raw_text());
-  DLOG(INFO)(R"(body="{}")", message);
+  DLOG(INFO)(R"(body="{}")"sv, message);
   auto headers = random_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -151,12 +153,12 @@ void Rest::create_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            VLOG(1)(R"(order_item={})", order_item);
+            VLOG(1)(R"(order_item={})"sv, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")", typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -170,7 +172,7 @@ void Rest::modify_order(
     const server::OMS_Order &order,
     std::function<void(const core::Promise<json::OrderItem> &)> &&callback) {
   constexpr auto method = core::http::Method::PUT;
-  constexpr std::string_view path = "/api/v1/order";
+  constexpr std::string_view path = "/api/v1/order"sv;
   auto expires = compute_expires();
   // XXX use encode buffer
   auto message = fmt::format(
@@ -178,11 +180,11 @@ void Rest::modify_order(
       R"("orderID":"{}",)"
       R"("orderQty":{},)"
       R"("price":{})"
-      R"(}})",
+      R"(}})"sv,
       order.external_order_id,
       modify_order.quantity,
       modify_order.price);
-  DLOG(INFO)(R"(body="{}")", message);
+  DLOG(INFO)(R"(body="{}")"sv, message);
   auto headers = random_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -197,12 +199,12 @@ void Rest::modify_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            VLOG(1)(R"(order_item={})", order_item);
+            VLOG(1)(R"(order_item={})"sv, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")", typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -216,15 +218,15 @@ void Rest::cancel_order(
     const server::OMS_Order &order,
     std::function<void(const core::Promise<json::Order> &)> &&callback) {
   constexpr auto method = core::http::Method::DELETE;
-  constexpr std::string_view path = "/api/v1/order";
+  constexpr std::string_view path = "/api/v1/order"sv;
   auto expires = compute_expires();
   // XXX use encode buffer
   auto message = fmt::format(
       R"({{)"
       R"("orderID":"{}")"
-      R"(}})",
+      R"(}})"sv,
       order.external_order_id);
-  DLOG(INFO)(R"(body="{}")", message);
+  DLOG(INFO)(R"(body="{}")"sv, message);
   auto headers = random_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -240,12 +242,12 @@ void Rest::cancel_order(
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
             auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-            VLOG(1)(R"(order={})", order);
+            VLOG(1)(R"(order={})"sv, order);
             core::Promise<json::Order> promise(order);
             callback(promise);
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")", typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
             core::Promise<json::Order> promise(std::current_exception());
             callback(promise);
           }
@@ -258,7 +260,7 @@ template <>
 void Rest::get(
     std::function<void(const core::Promise<json::Accounts>&)>&& callback) {
   constexpr auto method = core::http::Method::GET;
-  constexpr std::string_view path = "/api/v1/accounts";
+  constexpr std::string_view path = "/api/v1/accounts"sv;
   connection_.request(
       method,
       path,
@@ -274,12 +276,12 @@ void Rest::get(
         auto accounts = json::Accounts::parse(
             response.body(),
             buffer);
-        VLOG(1)("accounts={}", accounts);
+        VLOG(1)("accounts={}"sv, accounts);
         core::Promise<json::Accounts> promise(accounts);
         callback(promise);
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            R"(Exception type={}, what="{}")",
+            R"(Exception type={}, what="{}")"sv,
             typeid(e).name(),
             e.what());
         core::Promise<json::Accounts> promise(std::current_exception());

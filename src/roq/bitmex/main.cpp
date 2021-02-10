@@ -2,8 +2,10 @@
 
 #include "roq/bitmex/application.h"
 
+using namespace std::literals;  // NOLINT
+
 namespace {
-constexpr std::string_view DESCRIPTION = "Roq BitMEX Gateway";
+static const auto DESCRIPTION = "Roq BitMEX Gateway"sv;
 }  // namespace
 
 int main(int argc, char **argv) {
