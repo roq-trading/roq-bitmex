@@ -56,7 +56,7 @@ void Parser::dispatch(
           LOG(FATAL)("Unexpected"_sv);
           break;
         case Field::UNKNOWN:
-          DLOG(FATAL)(R"(Unknown key="{}")"_sv, key);
+          DLOG(FATAL)(R"(Unknown key="{}")"_fmt, key);
           break;
         case Field::ACTION:
           update(result.action, value);
@@ -270,7 +270,7 @@ void Parser::dispatch(
         break;
     }
   }
-  LOG(WARNING)(R"(message="{}")"_sv, message);
+  LOG(WARNING)(R"(message="{}")"_fmt, message);
   LOG(FATAL)("Unexpected"_sv);
 }
 

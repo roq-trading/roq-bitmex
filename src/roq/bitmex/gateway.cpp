@@ -152,7 +152,7 @@ void Gateway::operator()(
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
-      LOG(FATAL)(R"(Unexpected what="{}")"_sv, e.what());
+      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
 }
@@ -172,7 +172,7 @@ void Gateway::operator()(
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
-      LOG(FATAL)(R"(Unexpected what="{}")"_sv, e.what());
+      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
 }
@@ -192,7 +192,7 @@ void Gateway::operator()(
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
-      LOG(FATAL)(R"(Unexpected what="{}")"_sv, e.what());
+      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
 }
@@ -280,7 +280,7 @@ void Gateway::operator()(
     [[maybe_unused]] json::Action action,
     const json::Execution &execution,
     const server::TraceInfo &trace_info) {
-  DLOG(INFO)("execution={}"_sv, execution);
+  DLOG(INFO)("execution={}"_fmt, execution);
   size_t fill_length = 0, index = 0;
   bool success = true;
   for (auto &item : execution.data) {
@@ -315,7 +315,7 @@ void Gateway::operator()(
             if (ROQ_UNLIKELY(success == false)) {
               LOG(FATAL)
               (R"(Insufficient fill array size: )"
-               R"(len(trade)={}/{})"_sv,
+               R"(len(trade)={}/{})"_fmt,
                fill_length,
                fill_.size());
             }
@@ -347,7 +347,7 @@ void Gateway::operator()(
             } else {
               LOG(FATAL)
               (R"(Insufficient fill array size: )"
-               R"(len(fill)={}/{})"_sv,
+               R"(len(fill)={}/{})"_fmt,
                fill_length,
                fill_.size());
             }
@@ -355,7 +355,7 @@ void Gateway::operator()(
         });
     if (found == false) {
       LOG(WARNING)("*** EXTERNAL ORDER ***"_sv);
-      LOG(WARNING)("action={}, execution={}"_sv, action, execution);
+      LOG(WARNING)("action={}, execution={}"_fmt, action, execution);
     }
   }
   /*
@@ -626,7 +626,7 @@ void Gateway::operator()(
         size_t security_count = 0;
         for (auto &item : instrument.data) {
           if (dispatcher_.discard_symbol(item.symbol)) {
-            VLOG(1)(R"(Drop symbol="{}")"_sv, item.symbol);
+            VLOG(1)(R"(Drop symbol="{}")"_fmt, item.symbol);
             continue;
           }
           ++security_count;
@@ -639,7 +639,7 @@ void Gateway::operator()(
           server::create_trace_and_dispatch(trace_info, statistics_update, dispatcher_, false);
         }
         VLOG(2)
-        (R"(- securities: {} (/{}))"_sv, security_count, instrument.data.size());
+        (R"(- securities: {} (/{}))"_fmt, security_count, instrument.data.size());
         web_socket_.download.check_relaxed(WebSocketDownload::State::INSTRUMENT);
       }
       break;
@@ -665,7 +665,7 @@ void Gateway::operator()(
 
 void Gateway::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &) {
-  DLOG(INFO)(R"(action={} order={})"_sv, action, order);
+  DLOG(INFO)(R"(action={} order={})"_fmt, action, order);
   for (auto &iter : order.data)
     (*this)(iter);
 }
@@ -709,7 +709,7 @@ void Gateway::operator()(
     } else {
       LOG(WARNING)
       (R"(Closing web-socket: )"
-       R"(unexpected action={} id={} price={} size={})"_sv,
+       R"(unexpected action={} id={} price={} size={})"_fmt,
        action,
        item.id,
        item.price,
@@ -720,7 +720,7 @@ void Gateway::operator()(
   }
   LOG_IF(WARNING, !success)
   (R"(Insufficient bid/ask array size(s): )"
-   R"(symbol="{}", len(bid)={}/{}, len(ask)={}/{})"_sv,
+   R"(symbol="{}", len(bid)={}/{}, len(ask)={}/{})"_fmt,
    previous,
    bid_length,
    bid_.size(),
@@ -739,7 +739,7 @@ void Gateway::operator()(
     const json::Action action,
     const json::Position &position,
     const server::TraceInfo &trace_info) {
-  DLOG(INFO)("action={}, position={}"_sv, action, position);
+  DLOG(INFO)("action={}, position={}"_fmt, action, position);
   for (auto &item : position.data) {
     PositionUpdate position_update{
         .account = account_,
@@ -868,7 +868,7 @@ void Gateway::operator()(
         .snapshot = false,  // XXX ???
         .exchange_time_utc = item.timestamp,
     };
-    VLOG(3)(R"(top_of_book={})"_sv, top_of_book);
+    VLOG(3)(R"(top_of_book={})"_fmt, top_of_book);
     server::create_trace_and_dispatch(
         trace_info,
         top_of_book,
@@ -904,7 +904,7 @@ void Gateway::operator()(
             .trades = {trade_.data(), trade_length},
             .exchange_time_utc = timestamp,
         };
-        VLOG(3)(R"(trade_summary={})"_sv, trade_summary);
+        VLOG(3)(R"(trade_summary={})"_fmt, trade_summary);
         server::create_trace_and_dispatch(trace_info, trade_summary, dispatcher_, false);
       }
       previous = item.symbol;
@@ -914,7 +914,7 @@ void Gateway::operator()(
   }
   LOG_IF(WARNING, !success)
   (R"(Insufficient trade array size: )"
-   R"(symbol="{}", len(trade)={}/{})"_sv,
+   R"(symbol="{}", len(trade)={}/{})"_fmt,
    trade.data.size(),
    trade_.size());
   if (previous.empty() == false && trade_length > 0) {
@@ -924,7 +924,7 @@ void Gateway::operator()(
         .trades = {trade_.data(), trade_length},
         .exchange_time_utc = timestamp,
     };
-    VLOG(3)(R"(trade_summary={})"_sv, trade_summary);
+    VLOG(3)(R"(trade_summary={})"_fmt, trade_summary);
     server::create_trace_and_dispatch(trace_info, trade_summary, dispatcher_, true);
   }
 }
@@ -1028,7 +1028,7 @@ void Gateway::operator()(const json::OrderItem &order_item) {
   server::TraceInfo trace_info;  // XXX not correct (*after* parsing)
 
   auto order_status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  DLOG(INFO)(R"(order_status={})"_sv, order_status);
+  DLOG(INFO)(R"(order_status={})"_fmt, order_status);
 
   server::OMS_Lookup order_lookup{
       .symbol = order_item.symbol,
@@ -1058,12 +1058,12 @@ void Gateway::operator()(const json::OrderItem &order_item) {
 
   if (found == false) {
     LOG(WARNING)("*** EXTERNAL ORDER ***"_sv);
-    LOG(WARNING)("order_item={}"_sv, order_item);
+    LOG(WARNING)("order_item={}"_fmt, order_item);
   }
 }
 
 void Gateway::operator()(const json::Order &order) {
-  DLOG(INFO)(R"(order={})"_sv, order);
+  DLOG(INFO)(R"(order={})"_fmt, order);
   for (auto &iter : order.data)
     (*this)(iter);
 }
@@ -1079,7 +1079,7 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
       .status = market_data_status_,
   };
   server::create_trace_and_dispatch(trace_info, market_data_status, dispatcher_, true);
-  LOG(INFO)(R"(market_data_status={})"_sv, market_data_status_);
+  LOG(INFO)(R"(market_data_status={})"_fmt, market_data_status_);
 }
 
 void Gateway::update_order_manager(GatewayStatus gateway_status) {
@@ -1092,7 +1092,7 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
       .status = order_manager_status_,
   };
   server::create_trace_and_dispatch(trace_info, order_manager_status, dispatcher_, true);
-  LOG(INFO)(R"(order_manager_status={})"_sv, order_manager_status_);
+  LOG(INFO)(R"(order_manager_status={})"_fmt, order_manager_status_);
 }
 
 void Gateway::download_accounts() {
@@ -1174,7 +1174,7 @@ std::pair<double, double> Gateway::find_price(
       } else {
         // unexpected price or size ==> fail
         DLOG(FATAL)
-        (R"(action={} id={} price={} size={})"_sv, action, id, price, size);
+        (R"(action={} id={} price={} size={})"_fmt, action, id, price, size);
       }
       break;
     case json::Action::UPDATE:
@@ -1214,7 +1214,7 @@ void Gateway::publish_market_by_price(
   if ((bid_length + ask_length) == 0)
     return;
   LOG_IF(INFO, snapshot)
-  (R"(Received market data snapshot for symbol="{}")"_sv, symbol);
+  (R"(Received market data snapshot for symbol="{}")"_fmt, symbol);
   MarketByPriceUpdate market_by_price_update{
       .exchange = Flags::exchange(),
       .symbol = symbol,
@@ -1223,7 +1223,7 @@ void Gateway::publish_market_by_price(
       .snapshot = snapshot,
       .exchange_time_utc = {},
   };
-  VLOG(3)(R"(market_by_price_update={})"_sv, market_by_price_update);
+  VLOG(3)(R"(market_by_price_update={})"_fmt, market_by_price_update);
   server::create_trace_and_dispatch(trace_info, market_by_price_update, dispatcher_, is_last);
 }
 

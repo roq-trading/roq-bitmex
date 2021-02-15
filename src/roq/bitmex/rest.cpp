@@ -137,7 +137,7 @@ void Rest::create_order(
       create_order.execution_instruction == ExecutionInstruction::UNDEFINED
           ? std::string_view()
           : json::map(create_order.execution_instruction).as_raw_text());
-  DLOG(INFO)(R"(body="{}")"_sv, message);
+  DLOG(INFO)(R"(body="{}")"_fmt, message);
   auto headers = random_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -152,12 +152,12 @@ void Rest::create_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            VLOG(1)(R"(order_item={})"_sv, order_item);
+            VLOG(1)(R"(order_item={})"_fmt, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -183,7 +183,7 @@ void Rest::modify_order(
       order.external_order_id,
       modify_order.quantity,
       modify_order.price);
-  DLOG(INFO)(R"(body="{}")"_sv, message);
+  DLOG(INFO)(R"(body="{}")"_fmt, message);
   auto headers = random_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -198,12 +198,12 @@ void Rest::modify_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            VLOG(1)(R"(order_item={})"_sv, order_item);
+            VLOG(1)(R"(order_item={})"_fmt, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -225,7 +225,7 @@ void Rest::cancel_order(
       R"("orderID":"{}")"
       R"(}})"_fmt,
       order.external_order_id);
-  DLOG(INFO)(R"(body="{}")"_sv, message);
+  DLOG(INFO)(R"(body="{}")"_fmt, message);
   auto headers = random_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -241,12 +241,12 @@ void Rest::cancel_order(
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
             auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-            VLOG(1)(R"(order={})"_sv, order);
+            VLOG(1)(R"(order={})"_fmt, order);
             core::Promise<json::Order> promise(order);
             callback(promise);
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::Order> promise(std::current_exception());
             callback(promise);
           }
@@ -275,12 +275,12 @@ void Rest::get(
         auto accounts = json::Accounts::parse(
             response.body(),
             buffer);
-        VLOG(1)("accounts={}"_sv, accounts);
+        VLOG(1)("accounts={}"_fmt, accounts);
         core::Promise<json::Accounts> promise(accounts);
         callback(promise);
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            R"(Exception type={}, what="{}")"_sv,
+            R"(Exception type={}, what="{}")"_fmt,
             typeid(e).name(),
             e.what());
         core::Promise<json::Accounts> promise(std::current_exception());

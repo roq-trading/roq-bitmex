@@ -195,13 +195,13 @@ std::string WebSocket::create_upgrade_headers() {
 }
 
 void WebSocket::parse(const std::string_view &message) {
-  VLOG(4)(R"(message={})"_sv, message);
+  VLOG(4)(R"(message={})"_fmt, message);
   profile_.parse([&]() {
     try {
       parse_helper(message);
     } catch (std::exception &e) {
-      LOG(WARNING)(R"(message="{}")"_sv, message);
-      LOG(FATAL)(R"(ERROR what="{}")"_sv, e.what());
+      LOG(WARNING)(R"(message="{}")"_fmt, message);
+      LOG(FATAL)(R"(ERROR what="{}")"_fmt, e.what());
     }
   });
 }
@@ -223,17 +223,17 @@ void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
 }
 
 void WebSocket::operator()(const json::CancelAllAfter &cancel_all_after) {
-  profile_.cancel_all_after([&]() { VLOG(1)(R"(cancel_all_after={})"_sv, cancel_all_after); });
+  profile_.cancel_all_after([&]() { VLOG(1)(R"(cancel_all_after={})"_fmt, cancel_all_after); });
 }
 
 void WebSocket::operator()(const json::Error &error) {
-  profile_.error([&]() { LOG(WARNING)(R"(error={})"_sv, error); });
+  profile_.error([&]() { LOG(WARNING)(R"(error={})"_fmt, error); });
   connection_.close();
 }
 
 void WebSocket::operator()(const json::Handshake &handshake) {
   profile_.handshake([&]() {
-    VLOG(1)(R"(handshake={})"_sv, handshake);
+    VLOG(1)(R"(handshake={})"_fmt, handshake);
     LOG(INFO)("Ready"_sv);
     assert(ready_ == false);
     ready_ = true;
@@ -245,14 +245,14 @@ void WebSocket::operator()(const json::Handshake &handshake) {
 
 void WebSocket::operator()(const json::Subscribe &subscribe) {
   profile_.subscribe([&]() {
-    VLOG(1)(R"(subscribe={})"_sv, subscribe);
+    VLOG(1)(R"(subscribe={})"_fmt, subscribe);
     if (subscribe.success) {
       assert(subscribe.failure == false);
       LOG(INFO)
-      (R"(Successfully subscribed to topic="{}")"_sv, subscribe.subscribe);
+      (R"(Successfully subscribed to topic="{}")"_fmt, subscribe.subscribe);
     } else if (subscribe.failure) {
       assert(subscribe.success == false);
-      LOG(WARNING)(R"(Failed to subscribe topic="{}")"_sv, subscribe.subscribe);
+      LOG(WARNING)(R"(Failed to subscribe topic="{}")"_fmt, subscribe.subscribe);
     } else {
       LOG(FATAL)("Expected success or failure"_sv);
     }
@@ -265,7 +265,7 @@ void WebSocket::operator()(
     const json::Execution &execution,
     const server::TraceInfo &trace_info) {
   profile_.execution([&]() {
-    VLOG(1)(R"(action={}, execution={})"_sv, action, execution);
+    VLOG(1)(R"(action={}, execution={})"_fmt, action, execution);
     handler_(action, execution, trace_info);
   });
 }
@@ -273,7 +273,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Funding &funding, const server::TraceInfo &) {
   profile_.funding([&]() {
-    VLOG(2)(R"(action={}, funding={})"_sv, action, funding);
+    VLOG(2)(R"(action={}, funding={})"_fmt, action, funding);
     // XXX not used
   });
 }
@@ -283,7 +283,7 @@ void WebSocket::operator()(
     const json::Instrument &instrument,
     const server::TraceInfo &trace_info) {
   profile_.instrument([&]() {
-    VLOG(2)(R"(action={}, instrument={})"_sv, action, instrument);
+    VLOG(2)(R"(action={}, instrument={})"_fmt, action, instrument);
     handler_(action, instrument, trace_info);
   });
 }
@@ -291,7 +291,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Liquidation &liquidation, const server::TraceInfo &) {
   profile_.liquidation([&]() {
-    VLOG(2)(R"(action={}, liquidation={})"_sv, action, liquidation);
+    VLOG(2)(R"(action={}, liquidation={})"_fmt, action, liquidation);
     /// XXX not used
   });
 }
@@ -299,7 +299,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Margin &margin, const server::TraceInfo &) {
   profile_.margin([&]() {
-    VLOG(2)(R"(action={}, margin={})"_sv, action, margin);
+    VLOG(2)(R"(action={}, margin={})"_fmt, action, margin);
     /// XXX not used
   });
 }
@@ -307,7 +307,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
   profile_.order([&]() {
-    VLOG(1)(R"(action={}, order={})"_sv, action, order);
+    VLOG(1)(R"(action={}, order={})"_fmt, action, order);
     handler_(action, order, trace_info);
   });
 }
@@ -317,7 +317,7 @@ void WebSocket::operator()(
     const json::OrderBookL2 &order_book_l2,
     const server::TraceInfo &trace_info) {
   profile_.order_book_l2([&]() {
-    VLOG(3)(R"(action={}, order_book_l2={})"_sv, action, order_book_l2);
+    VLOG(3)(R"(action={}, order_book_l2={})"_fmt, action, order_book_l2);
     handler_(action, order_book_l2, trace_info);
   });
 }
@@ -327,7 +327,7 @@ void WebSocket::operator()(
     const json::Position &position,
     const server::TraceInfo &trace_info) {
   profile_.position([&]() {
-    VLOG(2)(R"(action={}, position={})"_sv, action, position);
+    VLOG(2)(R"(action={}, position={})"_fmt, action, position);
     handler_(action, position, trace_info);
   });
 }
@@ -335,7 +335,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Quote &quote, const server::TraceInfo &trace_info) {
   profile_.quote([&]() {
-    VLOG(3)(R"(action={}, quote={})"_sv, action, quote);
+    VLOG(3)(R"(action={}, quote={})"_fmt, action, quote);
     handler_(action, quote, trace_info);
   });
 }
@@ -345,7 +345,7 @@ void WebSocket::operator()(
     const json::Settlement &settlement,
     const server::TraceInfo &trace_info) {
   profile_.settlement([&]() {
-    VLOG(3)(R"(action={}, settlement={})"_sv, action, settlement);
+    VLOG(3)(R"(action={}, settlement={})"_fmt, action, settlement);
     handler_(action, settlement, trace_info);
   });
 }
@@ -353,7 +353,7 @@ void WebSocket::operator()(
 void WebSocket::operator()(
     const json::Action action, const json::Trade &trade, const server::TraceInfo &trace_info) {
   profile_.trade([&]() {
-    VLOG(2)(R"(action={}, trade={})"_sv, action, trade);
+    VLOG(2)(R"(action={}, trade={})"_fmt, action, trade);
     handler_(action, trade, trace_info);
   });
 }
