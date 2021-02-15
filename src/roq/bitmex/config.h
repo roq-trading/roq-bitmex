@@ -25,15 +25,15 @@ class Config final : public server::Config, public server::ConfigReader::Handler
   std::string get_account() const;
 
   auto get_api_key() const {
-    using namespace std::literals;  // NOLINT
+    using namespace roq::literals;
     if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported"s);
+      throw std::runtime_error("More accounts not yet supported"_s);
     return (*accounts.begin()).second.login;
   }
   auto get_secret() const {
-    using namespace std::literals;  // NOLINT
+    using namespace roq::literals;
     if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported"s);
+      throw std::runtime_error("More accounts not yet supported"_s);
     return (*accounts.begin()).second.secret;
   }
 
@@ -68,22 +68,18 @@ class Config final : public server::Config, public server::ConfigReader::Handler
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::bitmex::Config> {
-  template <typename C>
-  constexpr auto parse(C &ctx) {
-    return ctx.begin();
-  }
+struct fmt::formatter<roq::bitmex::Config> : public roq::formatter {
   template <typename C>
   auto format(const roq::bitmex::Config &value, C &ctx) {
-    using namespace std::literals;  // NOLINT
+    using namespace roq::literals;
     // FIXME(thraneh): proper
-    return format_to(
+    return roq::format_to(
         ctx.out(),
         "{{"
         "users=[{}], "
         "accounts=..."
-        "}}"sv,
-        fmt::join(value.users, ", "sv));
-    // fmt::join(value.accounts, ", "sv));
+        "}}"_sv,
+        fmt::join(value.users, ", "_sv));
+    // fmt::join(value.accounts, ", "_sv));
   }
 };

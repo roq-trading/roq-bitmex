@@ -8,7 +8,7 @@
 
 #include "roq/bitmex/flags.h"
 
-using namespace std::literals;  // NOLINT
+using namespace roq::literals;
 
 namespace roq {
 namespace bitmex {
@@ -19,7 +19,7 @@ Config::Config(const std::string_view &path) {
 
 std::string Config::get_account() const {
   if (accounts.size() != 1)
-    throw std::runtime_error("Only supporting 1 account"s);
+    throw std::runtime_error("Only supporting 1 account"_s);
   return (*accounts.begin()).first;
 }
 
@@ -47,7 +47,7 @@ void Config::operator()(server::User &&user) {
 }
 
 void Config::operator()(const std::string_view &key, cpptoml::base &) {
-  LOG(WARNING)(R"(UNKNOWN KEY="{}")"sv, key);
+  LOG(WARNING)(R"(UNKNOWN KEY="{}")"_sv, key);
 }
 
 }  // namespace bitmex

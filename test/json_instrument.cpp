@@ -8,8 +8,8 @@
 
 #include "roq/bitmex/json/instrument.h"
 
-using namespace roq;          // NOLINT
-using namespace roq::bitmex;  // NOLINT
+using namespace roq;
+using namespace roq::bitmex;
 
 constexpr double TOLERANCE = 1.0e-10;
 

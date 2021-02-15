@@ -12,7 +12,7 @@
 
 #include "roq/bitmex/flags.h"
 
-using namespace std::literals;  // NOLINT
+using namespace roq::literals;
 
 namespace roq {
 namespace bitmex {
@@ -23,7 +23,7 @@ static auto create_base_path() {
 }
 
 static auto create_timestamp_secs(std::chrono::nanoseconds value) {
-  return fmt::format("{}"sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
+  return roq::format("{}"_sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 
 Random::Random(const std::string_view &key, const std::string_view &secret)
@@ -55,10 +55,10 @@ std::string Random::create_headers(
     const std::string_view &path,
     const std::string_view &body) {
   auto signature = create_signature(expires, method, path, body);
-  return fmt::format(
+  return roq::format(
       "api-signature: {}\r\n"
       "api-expires: {}\r\n"
-      "api-key: {}\r\n"sv,
+      "api-key: {}\r\n"_sv,
       signature,
       std::chrono::duration_cast<std::chrono::seconds>(expires).count(),
       key_);
