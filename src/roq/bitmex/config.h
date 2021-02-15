@@ -6,8 +6,6 @@
 
 #include <absl/container/flat_hash_map.h>
 
-#include <fmt/format.h>
-
 #include <string>
 #include <string_view>
 #include <vector>
@@ -78,8 +76,8 @@ struct fmt::formatter<roq::bitmex::Config> : public roq::formatter {
         "{{"
         "users=[{}], "
         "accounts=..."
-        "}}"_sv,
-        fmt::join(value.users, ", "_sv));
-    // fmt::join(value.accounts, ", "_sv));
+        "}}"_fmt,
+        roq::join(value.users, ", "_sv));
+    // roq::join(value.accounts, ", "_sv));
   }
 };

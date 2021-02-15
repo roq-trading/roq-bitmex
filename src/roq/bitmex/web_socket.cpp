@@ -2,8 +2,6 @@
 
 #include "roq/bitmex/web_socket.h"
 
-#include <fmt/format.h>
-
 #include "roq/core/patterns.h"
 
 #include "roq/core/clock.h"
@@ -112,7 +110,7 @@ void WebSocket::subscribe(const std::string_view &topic) {
       R"({{)"
       R"("op":"subscribe",)"
       R"("args":"{}")"
-      R"(}})"_sv,
+      R"(}})"_fmt,
       topic);
   connection_.send_text(message);
 }
@@ -125,9 +123,9 @@ void WebSocket::subscribe(const std::string_view &topic, const std::vector<std::
         R"({{)"
         R"("op":"subscribe",)"
         R"("args":"{}:{}")"
-        R"(}})"_sv,
+        R"(}})"_fmt,
         topic,
-        fmt::join(filter, ","_sv));
+        roq::join(filter, ","_sv));
     connection_.send_text(message);
   }
 }
@@ -219,7 +217,7 @@ void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
       R"({{)"
       R"("op":"cancelAllAfter",)"
       R"("args":{})"
-      R"(}})"_sv,
+      R"(}})"_fmt,
       seconds.count() * 1000);  // milliseconds
   connection_.send_text(message);
 }

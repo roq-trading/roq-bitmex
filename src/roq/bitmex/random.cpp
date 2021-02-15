@@ -2,8 +2,6 @@
 
 #include "roq/bitmex/random.h"
 
-#include <fmt/format.h>
-
 #include <cassert>
 
 #include "roq/core/binascii/hex.h"
@@ -23,7 +21,7 @@ static auto create_base_path() {
 }
 
 static auto create_timestamp_secs(std::chrono::nanoseconds value) {
-  return roq::format("{}"_sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
+  return roq::format("{}"_fmt, std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 
 Random::Random(const std::string_view &key, const std::string_view &secret)
@@ -58,7 +56,7 @@ std::string Random::create_headers(
   return roq::format(
       "api-signature: {}\r\n"
       "api-expires: {}\r\n"
-      "api-key: {}\r\n"_sv,
+      "api-key: {}\r\n"_fmt,
       signature,
       std::chrono::duration_cast<std::chrono::seconds>(expires).count(),
       key_);

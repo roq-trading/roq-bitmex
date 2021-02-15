@@ -3,7 +3,6 @@
 #include "roq/bitmex/rest.h"
 
 #include <fmt/chrono.h>
-#include <fmt/format.h>
 
 #include <chrono>
 #include <utility>
@@ -127,7 +126,7 @@ void Rest::create_order(
       R"("ordType":"{}",)"
       R"("timeInForce":"{}",)"
       R"("execInst":"{}")"
-      R"(}})"_sv,
+      R"(}})"_fmt,
       cl_ord_id,
       create_order.symbol,
       json::map(create_order.side).as_raw_text(),
@@ -180,7 +179,7 @@ void Rest::modify_order(
       R"("orderID":"{}",)"
       R"("orderQty":{},)"
       R"("price":{})"
-      R"(}})"_sv,
+      R"(}})"_fmt,
       order.external_order_id,
       modify_order.quantity,
       modify_order.price);
@@ -224,7 +223,7 @@ void Rest::cancel_order(
   auto message = roq::format(
       R"({{)"
       R"("orderID":"{}")"
-      R"(}})"_sv,
+      R"(}})"_fmt,
       order.external_order_id);
   DLOG(INFO)(R"(body="{}")"_sv, message);
   auto headers = random_.create_headers(expires, method, path, message);
