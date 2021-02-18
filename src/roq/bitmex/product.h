@@ -32,10 +32,10 @@ class Product final {
   std::string description_;
   std::string quote_currency_;
   std::string settl_currency_;
-  double tick_size_ = std::numeric_limits<double>::quiet_NaN();
-  double multiplier_ = std::numeric_limits<double>::quiet_NaN();
-  double lot_size_ = std::numeric_limits<double>::quiet_NaN();
-  double option_strike_price_ = std::numeric_limits<double>::quiet_NaN();
+  double tick_size_ = NaN;
+  double multiplier_ = NaN;
+  double lot_size_ = NaN;
+  double option_strike_price_ = NaN;
   std::string underlying_symbol_;
   std::chrono::milliseconds expiry_ = {};
   std::chrono::milliseconds settle_ = {};

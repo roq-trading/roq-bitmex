@@ -1150,7 +1150,7 @@ const Product &Gateway::find_product(const json::InstrumentItem &item) {
 
 std::pair<double, double> Gateway::find_price(
     json::Action action, uint64_t id, double price, double size) {
-  auto result = std::numeric_limits<double>::quiet_NaN();
+  auto result = NaN;
   auto iter = price_lookup_.find(id);
   switch (action) {
     case json::Action::UNDEFINED:
