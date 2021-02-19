@@ -92,3 +92,10 @@ install(FILES "share/config.toml" DESTINATION "${CMAKE_INSTALL_DATADIR}/roq-bitm
 
 install(FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/${PROJECT_NAME}")
+
+# debian
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "thraneh@gmail.com")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "roq-api, roq-logging, roq-server")
+include(CPack)
