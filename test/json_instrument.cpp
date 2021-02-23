@@ -128,8 +128,8 @@ TEST(json_instrument_item, unlisted) {
   EXPECT_EQ(obj.quote_currency, "XXX");
   EXPECT_EQ(obj.reference, "BMEX");
   EXPECT_EQ(obj.reference_symbol, ".BETHXBT");
-  EXPECT_EQ(obj.calc_interval, core::datetime(2000, 1, 8, 0, 0, 0));
-  EXPECT_EQ(obj.publish_interval, core::datetime(2000, 1, 1, 0, 5, 0));
+  EXPECT_EQ(obj.calc_interval, core::datetime(2000, 1u, 8u, 0u, 0u, 0u));
+  EXPECT_EQ(obj.publish_interval, core::datetime(2000, 1u, 1u, 0u, 5u, 0u));
   EXPECT_NEAR(obj.tick_size, 0.01, TOLERANCE);
   EXPECT_EQ(obj.is_quanto, false);
   EXPECT_EQ(obj.is_inverse, false);
@@ -143,7 +143,7 @@ TEST(json_instrument_item, unlisted) {
   EXPECT_EQ(obj.has_liquidity, false);
   EXPECT_NEAR(obj.open_value, 0.0, TOLERANCE);
   EXPECT_NEAR(obj.mark_price, 6.93, TOLERANCE);
-  EXPECT_EQ(obj.timestamp, core::datetime(2020, 1, 23, 4, 50, 0));
+  EXPECT_EQ(obj.timestamp, core::datetime(2020, 1u, 23u, 4u, 50u, 0u));
 }
 
 TEST(json_instrument_item, open) {
@@ -257,10 +257,10 @@ TEST(json_instrument_item, open) {
   EXPECT_EQ(obj.root_symbol, "XRP");
   EXPECT_EQ(obj.state, json::State::OPEN);
   EXPECT_EQ(obj.typ, json::Typ::FFCCSX);
-  EXPECT_EQ(obj.listing, core::datetime(2019, 12, 6, 4, 0, 0));
-  EXPECT_EQ(obj.front, core::datetime(2020, 2, 28, 12, 0, 0));
-  EXPECT_EQ(obj.expiry, core::datetime(2020, 3, 27, 12, 0, 0));
-  EXPECT_EQ(obj.settle, core::datetime(2020, 3, 27, 12, 0, 0));
+  EXPECT_EQ(obj.listing, core::datetime(2019, 12u, 6u, 4u, 0u, 0u));
+  EXPECT_EQ(obj.front, core::datetime(2020, 2u, 28u, 12u, 0u, 0u));
+  EXPECT_EQ(obj.expiry, core::datetime(2020, 3u, 27u, 12u, 0u, 0u));
+  EXPECT_EQ(obj.settle, core::datetime(2020, 3u, 27u, 12u, 0u, 0u));
   EXPECT_EQ(obj.position_currency, "XRP");
   EXPECT_EQ(obj.underlying, "XRP");
   EXPECT_EQ(obj.quote_currency, "XBT");
@@ -288,9 +288,9 @@ TEST(json_instrument_item, open) {
   EXPECT_NEAR(obj.taker_fee, 0.0025, TOLERANCE);
   EXPECT_NEAR(obj.settlement_fee, 0.0, TOLERANCE);
   EXPECT_NEAR(obj.insurance_fee, 0.0, TOLERANCE);
-  EXPECT_EQ(obj.opening_timestamp, core::datetime(2020, 1, 22, 19, 0, 0));
-  EXPECT_EQ(obj.closing_timestamp, core::datetime(2020, 1, 22, 20, 0, 0));
-  EXPECT_EQ(obj.session_interval, core::datetime(2000, 1, 1, 1, 0, 0));
+  EXPECT_EQ(obj.opening_timestamp, core::datetime(2020, 1u, 22u, 19u, 0u, 0u));
+  EXPECT_EQ(obj.closing_timestamp, core::datetime(2020, 1u, 22u, 20u, 0u, 0u));
+  EXPECT_EQ(obj.session_interval, core::datetime(2000, 1u, 1u, 1u, 0u, 0u));
   EXPECT_NEAR(obj.prev_close_price, 0.00002701, TOLERANCE);
   EXPECT_NEAR(obj.prev_total_volume, 26517101.0, TOLERANCE);
   EXPECT_NEAR(obj.total_volume, 26517103.0, TOLERANCE);
@@ -326,7 +326,7 @@ TEST(json_instrument_item, open) {
   EXPECT_EQ(obj.mark_method, "FairPrice");
   EXPECT_NEAR(obj.mark_price, 0.0000268, TOLERANCE);
   EXPECT_NEAR(obj.indicative_settle_price, 0.00002723, TOLERANCE);
-  EXPECT_EQ(obj.timestamp, core::datetime(2020, 1, 22, 19, 9, 30));
+  EXPECT_EQ(obj.timestamp, core::datetime(2020, 1u, 22u, 19u, 9u, 30u));
 }
 
 TEST(json_instrument, empty) {
