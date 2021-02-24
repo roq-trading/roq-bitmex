@@ -12,10 +12,7 @@
 #include "roq/core/metrics/latency.h"
 #include "roq/core/metrics/profile.h"
 
-#include "roq/core/ssl/ssl.h"
-
-#include "roq/core/event/base.h"
-#include "roq/core/event/dns_base.h"
+#include "roq/core/io/context.h"
 
 #include "roq/core/web/client.h"
 
@@ -37,13 +34,7 @@ class Rest final : public core::web::Client::Handler {
     virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
   };
 
-  Rest(
-      Handler &handler,
-      const Config &config,
-      Random &random,
-      core::event::Base &base,
-      core::event::DNSBase &dns_base,
-      core::ssl::Context &ssl_context);
+  Rest(Handler &handler, const Config &config, Random &random, core::io::Context &context);
 
   Rest(Rest &&) = delete;
   Rest(const Rest &) = delete;

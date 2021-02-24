@@ -45,15 +45,11 @@ Rest::Rest(
     Handler &handler,
     [[maybe_unused]] const Config &config,
     Random &random,
-    core::event::Base &base,
-    core::event::DNSBase &dns_base,
-    core::ssl::Context &ssl_context)
+    core::io::Context &context)
     : handler_(handler), random_(random),
       connection_(
           *this,
-          base,
-          dns_base,
-          ssl_context,
+          context,
           core::URI(Flags::rest_uri()),
           ROQ_PACKAGE_NAME,
           true,  // keep alive
