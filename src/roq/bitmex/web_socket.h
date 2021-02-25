@@ -19,7 +19,7 @@
 #include "roq/server.h"
 
 #include "roq/bitmex/config.h"
-#include "roq/bitmex/random.h"
+#include "roq/bitmex/security.h"
 
 #include "roq/bitmex/json/parser.h"
 
@@ -46,7 +46,7 @@ class WebSocket final : public core::web::Socket::Handler, public json::Parser::
     virtual void operator()(const json::Action, const json::Trade &, const server::TraceInfo &) = 0;
   };
 
-  WebSocket(Handler &handler, const Config &config, Random &random, core::io::Context &context);
+  WebSocket(Handler &handler, const Config &config, Security &security, core::io::Context &context);
 
   WebSocket(WebSocket &&) = delete;
   WebSocket(const WebSocket &) = delete;
@@ -106,8 +106,8 @@ class WebSocket final : public core::web::Socket::Handler, public json::Parser::
 
  private:
   Handler &handler_;
-  // authentication
-  Random &random_;
+  // security
+  Security &security_;
   // connection
   core::web::Socket connection_;
   // buffers

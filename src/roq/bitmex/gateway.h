@@ -16,7 +16,7 @@
 #include "roq/core/io/context.h"
 
 #include "roq/bitmex/config.h"
-#include "roq/bitmex/random.h"
+#include "roq/bitmex/security.h"
 
 #include "roq/bitmex/product.h"
 #include "roq/bitmex/rest.h"
@@ -82,8 +82,6 @@ class Gateway final : public server::Handler, public Rest::Handler, public WebSo
   void update_market_data(GatewayStatus gateway_status);
   void update_order_manager(GatewayStatus gateway_status);
 
-  void download_accounts();
-
   void subscribe_instrument();
   void subscribe_order_book_l2();
 
@@ -110,8 +108,8 @@ class Gateway final : public server::Handler, public Rest::Handler, public WebSo
   server::Dispatcher &dispatcher_;
   // config
   const std::string account_;
-  // authentication
-  Random random_;
+  // security
+  Security security_;
   // io
   core::io::Context context_;
   // connections

@@ -18,7 +18,7 @@ Config::Config(const std::string_view &path) {
 }
 
 std::string Config::get_account() const {
-  if (accounts.size() != 1)
+  if (accounts.size() != 1u)
     throw std::runtime_error("Only supporting 1 account"_s);
   return (*accounts.begin()).first;
 }

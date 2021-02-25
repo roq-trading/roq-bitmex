@@ -17,22 +17,24 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-constexpr std::string_view CONNECTION = "rest"_sv;
+static const auto CONNECTION = "rest"_sv;
 
-static const std::string_view ACCEPT_JSON = "application/json"_sv;
-static const std::string_view CONTENT_TYPE_JSON = "application/json"_sv;
+static const auto ACCEPT_JSON = "application/json"_sv;
+static const auto CONTENT_TYPE_JSON = "application/json"_sv;
 
-static auto create_counter(const std::string_view &function) {
-  return core::metrics::Counter(Flags::name(), CONNECTION, function);
-}
+class create_metrics final {
+ public:
+  explicit create_metrics(const std::string_view &function) : function_(function) {}
+  create_metrics(create_metrics &&) = default;
+  create_metrics(const create_metrics &) = delete;
+  template <typename T>
+  operator T() {
+    return T(Flags::name(), CONNECTION, function_);
+  }
 
-static auto create_profile(const std::string_view &function) {
-  return core::metrics::Profile(Flags::name(), CONNECTION, function);
-}
-
-static auto create_latency(const std::string_view &function) {
-  return core::metrics::Latency(Flags::name(), CONNECTION, function);
-}
+ private:
+  std::string_view function_;
+};
 
 static auto compute_expires() {
   auto result =
@@ -44,9 +46,9 @@ static auto compute_expires() {
 Rest::Rest(
     Handler &handler,
     [[maybe_unused]] const Config &config,
-    Random &random,
+    Security &security,
     core::io::Context &context)
-    : handler_(handler), random_(random),
+    : handler_(handler), security_(security),
       connection_(
           *this,
           context,
@@ -63,17 +65,17 @@ Rest::Rest(
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"_sv),
+          .disconnect = create_metrics("disconnect"_sv),
       },
       profile_{
-          .products = create_profile("products"_sv),
-          .accounts = create_profile("accounts"_sv),
-          .create_order = create_profile("create_order"_sv),
-          .modify_order = create_profile("modify_order"_sv),
-          .cancel_order = create_profile("cancel_order"_sv),
+          .products = create_metrics("products"_sv),
+          .accounts = create_metrics("accounts"_sv),
+          .create_order = create_metrics("create_order"_sv),
+          .modify_order = create_metrics("modify_order"_sv),
+          .cancel_order = create_metrics("cancel_order"_sv),
       },
       latency_{
-          .ping = create_latency("ping"_sv),
+          .ping = create_metrics("ping"_sv),
       } {
 }
 
@@ -134,7 +136,7 @@ void Rest::create_order(
           ? std::string_view()
           : json::map(create_order.execution_instruction).as_raw_text());
   DLOG(INFO)(R"(body="{}")"_fmt, message);
-  auto headers = random_.create_headers(expires, method, path, message);
+  auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
       path,
@@ -180,7 +182,7 @@ void Rest::modify_order(
       modify_order.quantity,
       modify_order.price);
   DLOG(INFO)(R"(body="{}")"_fmt, message);
-  auto headers = random_.create_headers(expires, method, path, message);
+  auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
       path,
@@ -222,7 +224,7 @@ void Rest::cancel_order(
       R"(}})"_fmt,
       order.external_order_id);
   DLOG(INFO)(R"(body="{}")"_fmt, message);
-  auto headers = random_.create_headers(expires, method, path, message);
+  auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
       path,
@@ -249,43 +251,6 @@ void Rest::cancel_order(
         });
       });
 }
-
-/* 20200512 -- doesn't look like anything real
-template <>
-void Rest::get(
-    std::function<void(const core::Promise<json::Accounts>&)>&& callback) {
-  constexpr auto method = core::http::Method::GET;
-  constexpr std::string_view path = "/api/v1/accounts"_sv;
-  connection_.request(
-      method,
-      path,
-      std::string_view(),  // query
-      std::string_view(),  // headers
-      std::string_view(),  // body
-      [this, callback{std::move(callback)}](auto& response) {
-    profile_.accounts(
-        [&]() {
-      try {
-        response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(decode_buffer_);
-        auto accounts = json::Accounts::parse(
-            response.body(),
-            buffer);
-        VLOG(1)("accounts={}"_fmt, accounts);
-        core::Promise<json::Accounts> promise(accounts);
-        callback(promise);
-      } catch (NetworkError& e) {
-        LOG(WARNING)(
-            R"(Exception type={}, what="{}")"_fmt,
-            typeid(e).name(),
-            e.what());
-        core::Promise<json::Accounts> promise(std::current_exception());
-        callback(promise);
-      }
-    });
-  });
-}
-*/
 
 void Rest::operator()(const core::web::Client::Connected &) {
   handler_(*this);

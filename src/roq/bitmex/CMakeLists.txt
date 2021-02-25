@@ -6,8 +6,8 @@ set(SOURCES
     flags.cpp
     gateway.cpp
     product.cpp
-    random.cpp
     rest.cpp
+    security.cpp
     web_socket.cpp
     main.cpp)
 

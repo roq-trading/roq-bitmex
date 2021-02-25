@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2021, Hans Erik Thrane */
 
-#include "roq/bitmex/random.h"
+#include "roq/bitmex/security.h"
 
 #include <cassert>
 
@@ -15,6 +15,7 @@ using namespace roq::literals;
 namespace roq {
 namespace bitmex {
 
+namespace {
 static auto create_base_path() {
   core::URI uri(Flags::rest_uri());
   return uri.path;
@@ -23,31 +24,32 @@ static auto create_base_path() {
 static auto create_timestamp_secs(std::chrono::nanoseconds value) {
   return roq::format("{}"_fmt, std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
+}  // namespace
 
-Random::Random(const std::string_view &key, const std::string_view &secret)
-    : base_path(create_base_path()), key_(key), hmac_(secret.data(), secret.length()) {
+Security::Security(const Config &config)
+    : base_path(create_base_path()), key_(config.get_api_key()), hmac_(config.get_secret()) {
 }
 
-std::string Random::create_signature(
+std::string Security::create_signature(
     std::chrono::nanoseconds expires,
     const core::http::Method &method,
     const std::string_view &path,
     const std::string_view &body) {
   auto expires_ = create_timestamp_secs(expires);
-  auto method_ = std::string_view(core::http::EnumNameMethod(method));
+  auto method_ = core::http::EnumNameMethod(method);
   hmac_.clear();
   hmac_.update(method_);
   hmac_.update(path);
   hmac_.update(expires_);
   if (body.empty() == false)
     hmac_.update(body);
-  std::array<char, 32> buffer;
-  auto length = hmac_.digest(buffer.data(), buffer.size());
+  std::array<char, 32u> buffer;
+  auto length = hmac_.digest(buffer);
   assert(length == buffer.size());
-  return core::binascii::Hex::encode(buffer.data(), buffer.size());
+  return core::binascii::Hex::encode(buffer);
 }
 
-std::string Random::create_headers(
+std::string Security::create_headers(
     std::chrono::nanoseconds expires,
     const core::http::Method &method,
     const std::string_view &path,

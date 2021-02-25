@@ -2,12 +2,30 @@
 
 #include "roq/bitmex/product.h"
 
+#include "roq/core/update.h"
+
 #include "roq/bitmex/flags.h"
 
 #include "roq/bitmex/json/utils.h"
 
 namespace roq {
 namespace bitmex {
+
+namespace {
+class create_duration final {
+ public:
+  explicit create_duration(std::chrono::nanoseconds value) : value_(value) {}
+  create_duration(create_duration &&) = default;
+  create_duration(const create_duration &) = delete;
+  template <typename T>
+  operator T() const {
+    return std::chrono::duration_cast<T>(value_);
+  }
+
+ private:
+  std::chrono::nanoseconds value_;
+};
+}  // namespace
 
 // XXX markPrice ?
 // XXX openInterest ?
@@ -19,18 +37,12 @@ Product::Product(const json::InstrumentItem &item)
       expiry_(item.expiry), settle_(item.settle),
       state_(item.state), statistics_{
                               Statistics{StatisticsType::UPPER_LIMIT_PRICE, item.limit_up_price},
-
-                              Statistics{
-                                  StatisticsType::LOWER_LIMIT_PRICE, item.limit_down_price}} {
+                              Statistics{StatisticsType::LOWER_LIMIT_PRICE, item.limit_down_price},
+                          } {
 }
 
 bool Product::update(const json::InstrumentItem &item) {
-  bool updated = false;
-  if (item.state != json::State::UNDEFINED && item.state != state_) {
-    state_ = item.state;
-    updated = true;
-  }
-  return updated;
+  return core::update(state_, item.state);
 }
 
 ReferenceData Product::create_reference_data(const json::InstrumentItem &item) const {
@@ -39,25 +51,22 @@ ReferenceData Product::create_reference_data(const json::InstrumentItem &item) c
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .description = {},
-      .security_type = SecurityType::UNDEFINED,  // XXX typ?
-      .currency = quote_currency_,               // XXX or position_currency?
+      .security_type = {},          // XXX typ?
+      .currency = quote_currency_,  // XXX or position_currency?
       .settlement_currency = settl_currency_,
       .commission_currency = {},
       .tick_size = tick_size_,
       .multiplier = multiplier_,
-      .min_trade_vol = lot_size_,            // XXX correct?
-      .option_type = OptionType::UNDEFINED,  // XXX typ?
+      .min_trade_vol = lot_size_,  // XXX correct?
+      .option_type = {},           // XXX typ?
       .strike_currency = {},
       .strike_price = option_strike_price_,
       .underlying = underlying_symbol_,
       .time_zone = {},
       .issue_date = {},
-      .settlement_date =
-          std::chrono::duration_cast<decltype(ReferenceData::settlement_date)>(settle_),
-      .expiry_datetime =
-          std::chrono::duration_cast<decltype(ReferenceData::expiry_datetime)>(expiry_),
-      .expiry_datetime_utc =
-          std::chrono::duration_cast<decltype(ReferenceData::expiry_datetime_utc)>(expiry_),
+      .settlement_date = create_duration(settle_),
+      .expiry_datetime = create_duration(expiry_),
+      .expiry_datetime_utc = create_duration(expiry_),
   };
 }
 
@@ -75,7 +84,7 @@ StatisticsUpdate Product::create_statistics_update(const json::InstrumentItem &i
   return StatisticsUpdate{
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
-      .statistics = {statistics_.data(), statistics_.size()},
+      .statistics = statistics_,
       .snapshot = false,
       .exchange_time_utc = {},
   };

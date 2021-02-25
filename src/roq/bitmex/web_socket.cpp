@@ -16,27 +16,31 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-constexpr std::string_view CONNECTION = "ws"_sv;
+static const auto CONNECTION = "ws"_sv;
 
-static auto create_counter(const std::string_view &function) {
-  return core::metrics::Counter(Flags::name(), CONNECTION, function);
-}
+static const auto REQUEST_EXPIRES = std::chrono::seconds{5};
 
-static auto create_profile(const std::string_view &function) {
-  return core::metrics::Profile(Flags::name(), CONNECTION, function);
-}
+class create_metrics final {
+ public:
+  explicit create_metrics(const std::string_view &function) : function_(function) {}
+  create_metrics(create_metrics &&) = default;
+  create_metrics(const create_metrics &) = delete;
+  template <typename T>
+  operator T() {
+    return T(Flags::name(), CONNECTION, function_);
+  }
 
-static auto create_latency(const std::string_view &function) {
-  return core::metrics::Latency(Flags::name(), CONNECTION, function);
-}
+ private:
+  std::string_view function_;
+};
 }  // namespace
 
 WebSocket::WebSocket(
     Handler &handler,
     [[maybe_unused]] const Config &config,
-    Random &random,
+    Security &security,
     core::io::Context &context)
-    : handler_(handler), random_(random),
+    : handler_(handler), security_(security),
       connection_(
           *this,
           context,
@@ -48,29 +52,29 @@ WebSocket::WebSocket(
           [this]() { return create_upgrade_headers(); }),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"_sv),
+          .disconnect = create_metrics("disconnect"_sv),
       },
       profile_{
-          .parse = create_profile("parse"_sv),
-          .cancel_all_after = create_profile("cancel_all_after"_sv),
-          .error = create_profile("error"_sv),
-          .execution = create_profile("execution"_sv),
-          .funding = create_profile("funding"_sv),
-          .handshake = create_profile("handshake"_sv),
-          .instrument = create_profile("instrument"_sv),
-          .liquidation = create_profile("liquidation"_sv),
-          .margin = create_profile("margin"_sv),
-          .order = create_profile("order"_sv),
-          .order_book_l2 = create_profile("order_book_l2"_sv),
-          .position = create_profile("position"_sv),
-          .quote = create_profile("quote"_sv),
-          .settlement = create_profile("settlement"_sv),
-          .subscribe = create_profile("subscribe"_sv),
-          .trade = create_profile("trade"_sv),
+          .parse = create_metrics("parse"_sv),
+          .cancel_all_after = create_metrics("cancel_all_after"_sv),
+          .error = create_metrics("error"_sv),
+          .execution = create_metrics("execution"_sv),
+          .funding = create_metrics("funding"_sv),
+          .handshake = create_metrics("handshake"_sv),
+          .instrument = create_metrics("instrument"_sv),
+          .liquidation = create_metrics("liquidation"_sv),
+          .margin = create_metrics("margin"_sv),
+          .order = create_metrics("order"_sv),
+          .order_book_l2 = create_metrics("order_book_l2"_sv),
+          .position = create_metrics("position"_sv),
+          .quote = create_metrics("quote"_sv),
+          .settlement = create_metrics("settlement"_sv),
+          .subscribe = create_metrics("subscribe"_sv),
+          .trade = create_metrics("trade"_sv),
       },
       latency_{
-          .ping = create_latency("ping"_sv),
-          .heartbeat = create_latency("heartbeat"_sv),
+          .ping = create_metrics("ping"_sv),
+          .heartbeat = create_metrics("heartbeat"_sv),
       } {
 }
 
@@ -96,7 +100,7 @@ void WebSocket::operator()(const Event<Timer> &event) {
   if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after_secs() && ready_ &&
       next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ =
-        event.value.now + std::chrono::seconds{Flags::ws_cancel_all_after_secs() / 4};
+        event.value.now + std::chrono::seconds{Flags::ws_cancel_all_after_secs() / 4u};
     send_cancel_all_after(std::chrono::seconds{Flags::ws_cancel_all_after_secs()});
   }
 }
@@ -185,8 +189,8 @@ void WebSocket::operator()(const core::web::Socket::Text &text) {
 
 std::string WebSocket::create_upgrade_headers() {
   auto expires = std::chrono::duration_cast<std::chrono::seconds>(
-      core::get_realtime_clock() + std::chrono::seconds{5});
-  return random_.create_headers(
+      core::get_realtime_clock() + REQUEST_EXPIRES);
+  return security_.create_headers(
       expires, core::http::Method::GET, "/realtime"_sv, std::string_view());
 }
 
@@ -214,7 +218,7 @@ void WebSocket::send_cancel_all_after(std::chrono::seconds seconds) {
       R"("op":"cancelAllAfter",)"
       R"("args":{})"
       R"(}})"_fmt,
-      seconds.count() * 1000);  // milliseconds
+      std::chrono::duration_cast<std::chrono::milliseconds>(seconds).count());
   connection_.send_text(message);
 }
 

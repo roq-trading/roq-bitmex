@@ -10,15 +10,17 @@
 
 #include "roq/core/http/method.h"
 
+#include "roq/bitmex/config.h"
+
 namespace roq {
 namespace bitmex {
 
-class Random final {
+class Security final {
  public:
-  Random(const std::string_view &key, const std::string_view &secret);
+  Security(const Config &);
 
-  Random(Random &&) = delete;
-  Random(const Random &) = delete;
+  Security(Security &&) = delete;
+  Security(const Security &) = delete;
 
   std::string create_signature(
       std::chrono::nanoseconds expires,

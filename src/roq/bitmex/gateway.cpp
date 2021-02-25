@@ -24,9 +24,9 @@ using namespace roq::literals;
 namespace roq {
 namespace bitmex {
 
-constexpr auto DEFAULT_MULTIPLIER = double{1.0};
-
-constexpr auto TOLERANCE = double{1.0e-10};
+namespace {
+constexpr const auto DEFAULT_MULTIPLIER = 1.0;
+constexpr const auto TOLERANCE = 1.0e-10;
 
 template <typename C, typename T>
 static bool mbp_update(C &data, size_t &offset, const T &item) {
@@ -70,16 +70,16 @@ static bool fill_update(server::Dispatcher &dispatcher, C &data, size_t &offset,
   ++offset;
   return offset < data.size();
 }
+}  // namespace
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
-    : dispatcher_(dispatcher), account_(config.get_account()),
-      random_(config.get_api_key(), config.get_secret()),
+    : dispatcher_(dispatcher), account_(config.get_account()), security_(config),
       web_socket_{
           .connection =
               {
                   *this,
                   config,
-                  random_,
+                  security_,
                   context_,
               },
           .download = WebSocketDownload(
@@ -91,7 +91,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
               {
                   *this,
                   config,
-                  random_,
+                  security_,
                   context_,
               },
       },
@@ -117,15 +117,6 @@ void Gateway::operator()(const Event<Timer> &event) {
   // web socket
   web_socket_.connection(event);
   // rest
-  /*
-  if (web_socket_.download.has_expired()) {
-    LOG(WARNING)("Rest download has timed out"_sv);
-    web_socket_.download.reset();
-    rest_.connection.close();
-  } else {
-    rest_.connection(event);
-  }
-  */
   rest_.connection(event);
   context_.dispatch(true);
 }
@@ -144,7 +135,7 @@ void Gateway::operator()(
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
+      case core::http::Status::NOT_FOUND:     // 404
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
@@ -164,7 +155,7 @@ void Gateway::operator()(
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
+      case core::http::Status::NOT_FOUND:     // 404
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
@@ -184,7 +175,7 @@ void Gateway::operator()(
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
+      case core::http::Status::NOT_FOUND:     // 404
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
@@ -277,7 +268,7 @@ void Gateway::operator()(
     const json::Execution &execution,
     const server::TraceInfo &trace_info) {
   DLOG(INFO)("execution={}"_fmt, execution);
-  size_t fill_length = 0, index = 0;
+  size_t fill_length = {}, index = {};
   bool success = true;
   for (auto &item : execution.data) {
     auto last = execution.data.size() == ++index;
@@ -354,258 +345,6 @@ void Gateway::operator()(
       LOG(WARNING)("action={}, execution={}"_fmt, action, execution);
     }
   }
-  /*
-  {
-  account=273093
-  avg_px=0.0
-  cl_ord_id="roq-1586872864-4"
-  cl_ord_link_id=""
-  commission=0.0
-  contingency_type=""
-  cum_qty=0.0
-  currency="USD"
-  display_qty=0.0
-  ex_destination="XBME"
-  exec_comm=0.0
-  exec_cost=0.0
-  exec_id="0cf1e0f7-89a7-2b16-0413-77d3443750b8"
-  exec_inst=""
-  exec_type="New"
-  foreign_notional=0.0
-  home_notional=0.0
-  last_liquidity_ind=""
-  last_mkt=""
-  last_px=0.0
-  last_qty=0.0
-  leaves_qty=1.0
-  multi_leg_reporting_type="SingleSecurity"
-  order_id="3a174d58-1d40-19d4-71fd-1040eb2a35be"
-  order_qty=1.0
-  ord_rej_reason=""
-  ord_status="New"
-  ord_type="Limit"
-  peg_offset_value=0.0
-  peg_price_type=""
-  price=6883.0
-  settl_currency="XBt"
-  side="Buy"
-  simple_cum_qty=0.0
-  simple_leaves_qty=0.0
-  simple_order_qty=0.0
-  stop_px=0.0
-  symbol="XBTUSD"
-  text="Submitted via API."
-  time_in_force="GoodTillCancel"
-  timestamp=1586873125585000000ns
-  trade_publish_indicator=""
-  transact_time=1586873125585000000ns
-  trd_match_id="00000000-0000-0000-0000-000000000000"
-  triggered=""
-  underlying_last_px=0.0
-  working_indicator=true
-  }
-
-  {
-  account=273093
-  avg_px=0.0
-  cl_ord_id="roq-1586872864-4"
-  cl_ord_link_id=""
-  commission=0.0
-  contingency_type=""
-  cum_qty=0.0
-  currency="USD"
-  display_qty=0.0
-  ex_destination="XBME"
-  exec_comm=0.0
-  exec_cost=0.0
-  exec_id="e66711c6-2f86-4df0-39e5-4f4faa5cf57e"
-  exec_inst=""
-  exec_type="Replaced"
-  foreign_notional=0.0
-  home_notional=0.0
-  last_liquidity_ind=""
-  last_mkt=""
-  last_px=0.0
-  last_qty=0.0
-  leaves_qty=1.0
-  multi_leg_reporting_type="SingleSecurity"
-  order_id="3a174d58-1d40-19d4-71fd-1040eb2a35be"
-  order_qty=1.0
-  ord_rej_reason=""
-  ord_status="New"
-  ord_type="Limit"
-  peg_offset_value=0.0
-  peg_price_type=""
-  price=6883.5
-  settl_currency="XBt"
-  side="Buy"
-  simple_cum_qty=0.0
-  simple_leaves_qty=0.0
-  simple_order_qty=0.0
-  stop_px=0.0
-  symbol="XBTUSD"
-  text="Amended orderQty price: Amended via API.\nSubmitted via API."
-  time_in_force="GoodTillCancel"
-  timestamp=1586873245657000000ns
-  trade_publish_indicator=""
-  transact_time=1586873245657000000ns
-  trd_match_id="00000000-0000-0000-0000-000000000000"
-  triggered=""
-  underlying_last_px=0.0
-  working_indicator=true
-  }
-
-
-  {
-  account=273093
-  avg_px=6883.75
-  cl_ord_id="roq-1586872864-4"
-  cl_ord_link_id=""
-  commission=0.0007500000000000002
-  contingency_type=""
-  cum_qty=1.0
-  currency="USD"
-  display_qty=0.0
-  ex_destination="XBME"
-  exec_comm=10.0
-  exec_cost=-14527.0
-  exec_id="66f13afe-5e57-4d37-ad43-fe8d0f8c603c"
-  exec_inst=""
-  exec_type="Trade"
-  foreign_notional=-1.0
-  home_notional=0.00014527000000000005
-  last_liquidity_ind="RemovedLiquidity"
-  last_mkt="XBME"
-  last_px=6883.5
-  last_qty=1.0
-  leaves_qty=0.0
-  multi_leg_reporting_type="SingleSecurity"
-  order_id="3a174d58-1d40-19d4-71fd-1040eb2a35be"
-  order_qty=1.0
-  ord_rej_reason=""
-  ord_status="Filled"
-  ord_type="Limit"
-  peg_offset_value=0.0
-  peg_price_type=""
-  price=6883.5
-  settl_currency="XBt"
-  side="Buy"
-  simple_cum_qty=0.0
-  simple_leaves_qty=0.0
-  simple_order_qty=0.0
-  stop_px=0.0
-  symbol="XBTUSD"
-  text="Amended orderQty price: Amended via API.\nSubmitted via API."
-  time_in_force="GoodTillCancel"
-  timestamp=1586873245657000000ns
-  trade_publish_indicator="PublishTrade"
-  transact_time=1586873245657000000ns
-  trd_match_id="15b03a0f-03de-6826-4c63-3f49ba0c8190"
-  triggered=""
-  underlying_last_px=0.0
-  working_indicator=false
-  }
-
-  {
-  account=273093
-  avg_px=6885.0
-  cl_ord_id=""
-  cl_ord_link_id=""
-  commission=-0.0002500000000000001
-  contingency_type=""
-  cum_qty=3.0
-  currency="USD"
-  display_qty=0.0
-  ex_destination="XBME"
-  exec_comm=-10.0
-  exec_cost=43572.0
-  exec_id="8c2a2682-04aa-ff1e-ef44-027062134e22"
-  exec_inst=""
-  exec_type="Trade"
-  foreign_notional=3.0
-  home_notional=-0.00043572000000000017
-  last_liquidity_ind="AddedLiquidity"
-  last_mkt="XBME"
-  last_px=6885.0
-  last_qty=3.0
-  leaves_qty=0.0
-  multi_leg_reporting_type="SingleSecurity"
-  order_id="018c5318-0442-eafd-b4df-b2d261323d1a"
-  order_qty=3.0
-  ord_rej_reason=""
-  ord_status="Filled"
-  ord_type="Limit"
-  peg_offset_value=0.0
-  peg_price_type=""
-  price=6885.0
-  settl_currency="XBt"
-  side="Sell"
-  simple_cum_qty=0.0
-  simple_leaves_qty=0.0
-  simple_order_qty=0.0
-  stop_px=0.0
-  symbol="XBTUSD"
-  text="Submission from testnet.bitmex.com"
-  time_in_force="GoodTillCancel"
-  timestamp=1586873368899000000ns
-  trade_publish_indicator="PublishTrade"
-  transact_time=1586873368899000000ns
-  trd_match_id="77db132c-3b26-0bc9-b750-5fbeb04d5ff6"
-  triggered=""
-  underlying_last_px=0.0
-  working_indicator=false
-  }
-
-  {
-  account=273093
-  avg_px=0.0
-  cl_ord_id="roq-1586872864-3"
-  cl_ord_link_id=""
-  commission=0.0
-  contingency_type=""
-  cum_qty=0.0
-  currency="USD"
-  display_qty=0.0
-  ex_destination="XBME"
-  exec_comm=0.0
-  exec_cost=0.0
-  exec_id="a2455064-a337-d36f-1008-21c648f49d12"
-  exec_inst=""
-  exec_type="Canceled"
-  foreign_notional=0.0
-  home_notional=0.0
-  last_liquidity_ind=""
-  last_mkt=""
-  last_px=0.0
-  last_qty=0.0
-  leaves_qty=0.0
-  multi_leg_reporting_type="SingleSecurity"
-  order_id="73c01791-d59f-a4a6-6b65-1ceb561f7c8c"
-  order_qty=1.0
-  ord_rej_reason=""
-  ord_status="Canceled"
-  ord_type="Limit"
-  peg_offset_value=0.0
-  peg_price_type=""
-  price=6883.0
-  settl_currency="XBt"
-  side="Buy"
-  simple_cum_qty=0.0
-  simple_leaves_qty=0.0
-  simple_order_qty=0.0
-  stop_px=0.0
-  symbol="XBTUSD"
-  text="Canceled: Cancel from testnet.bitmex.com\nSubmitted via API."
-  time_in_force="GoodTillCancel"
-  timestamp=1586873099436000000ns
-  trade_publish_indicator=""
-  transact_time=1586873099436000000ns
-  trd_match_id="00000000-0000-0000-0000-000000000000"
-  triggered=""
-  underlying_last_px=0.0
-  working_indicator=false
-  }
-  */
 }
 
 void Gateway::operator()(
@@ -618,8 +357,7 @@ void Gateway::operator()(
     case json::Action::PARTIAL:
       if (snapshot_.instrument == false) {
         snapshot_.instrument = true;
-        // assert(_download != Download::READY);
-        size_t security_count = 0;
+        size_t security_count = {};
         for (auto &item : instrument.data) {
           if (dispatcher_.discard_symbol(item.symbol)) {
             VLOG(1)(R"(Drop symbol="{}")"_fmt, item.symbol);
@@ -679,7 +417,7 @@ void Gateway::operator()(
     return;
   std::string_view previous;
   bool success = true;
-  size_t bid_length = 0, ask_length = 0;
+  size_t bid_length = {}, ask_length = {};
   for (auto &item : order_book_l2.data) {
     if (success == false)
       break;
@@ -688,7 +426,7 @@ void Gateway::operator()(
     } else if (previous.compare(item.symbol) != 0) {
       publish_market_by_price(previous, bid_length, ask_length, snapshot, trace, false);
       previous = item.symbol;
-      bid_length = ask_length = 0;
+      bid_length = ask_length = 0u;
     }
     auto price_size = find_price(action, item.id, item.price, item.size);
     if (std::isfinite(price_size.first)) {
@@ -751,101 +489,6 @@ void Gateway::operator()(
     };
     server::create_trace_and_dispatch(trace_info, position_update, dispatcher_, false);
   }
-  /*
-  {
-  account=273093
-  avg_cost_price=6885.0
-  avg_entry_price=6885.0
-  bankrupt_price=100000000.0
-  break_even_price=6926.0
-  commission=0.0007500000000000002
-  cross_margin=true
-  currency="XBt"
-  current_comm=186.0
-  current_cost=29421.0
-  current_qty=-1.0   ///////////////////////////
-  current_timestamp=1586929105385000000ns
-  deleverage_percentile=1.0
-  exec_buy_cost=29091.0
-  exec_buy_qty=2.0
-  exec_comm=20.0
-  exec_cost=-29091.0
-  exec_qty=2.0
-  exec_sell_cost=0.0
-  exec_sell_qty=0.0
-  foreign_notional=1.0
-  gross_exec_cost=0.0
-  gross_open_cost=0.0
-  gross_open_premium=0.0
-  home_notional=-0.00014558000000000008
-  indicative_tax=0.0
-  indicative_tax_rate=0.0
-  init_margin=0.0
-  init_margin_req=0.010000000000000002
-  is_open=true
-  last_price=6869.2
-  last_value=14558.0
-  leverage=100.0
-  liquidation_price=100000000.0
-  long_bankrupt=0.0
-  maint_margin=192.0
-  maint_margin_req=0.004500000000000002
-  margin_call_price=100000000.0
-  mark_price=6869.2
-  mark_value=14558.0
-  opening_comm=166.0
-  opening_cost=58512.0
-  opening_qty=-3.0   ///////////////////////////
-  opening_timestamp=1586926800000000000ns
-  open_order_buy_cost=0.0
-  open_order_buy_premium=0.0
-  open_order_buy_qty=0.0
-  open_order_sell_cost=0.0
-  open_order_sell_premium=0.0
-  open_order_sell_qty=0.0
-  pos_allowance=0.0
-  pos_comm=12.0
-  pos_cost=14524.0
-  pos_cost2=14539.0
-  pos_cross=15.0
-  pos_init=146.0
-  pos_loss=15.0
-  pos_maint=138.0
-  pos_margin=158.0
-  pos_state=nan
-  prev_close_price=6877.35
-  prev_realised_pnl=-21322.0
-  prev_unrealised_pnl=0.0
-  quote_currency="USD"
-  realised_cost=14897.0
-  realised_gross_pnl=-14897.0
-  realised_pnl=-15083.0
-  realised_tax=0.0
-  rebalanced_pnl=15169.0
-  risk_limit=20000000000.0
-  risk_value=14558.0
-  session_margin=0.0
-  short_bankrupt=0.0
-  simple_cost=0.0
-  simple_pnl=0.0
-  simple_pnl_pcnt=0.0
-  simple_qty=0.0
-  simple_value=0.0
-  symbol="XBTUSD"   ///////////////////////////
-  target_excess_margin=0.0
-  taxable_margin=0.0
-  tax_base=0.0
-  timestamp=1586929105385000000ns
-  underlying="XBT"
-  unrealised_cost=14524.0
-  unrealised_gross_pnl=34.0
-  unrealised_pnl=34.0
-  unrealised_pnl_pcnt=0.0023000000000000004
-  unrealised_roe_pcnt=0.2341
-  unrealised_tax=0.0
-  var_margin=0.0
-  }
-  */
 }
 
 void Gateway::operator()(
@@ -882,7 +525,7 @@ void Gateway::operator()(
     return;
   std::string_view previous;
   bool success = true;
-  size_t trade_length = 0;
+  size_t trade_length = {};
   std::chrono::nanoseconds timestamp = {};
   for (auto &item : trade.data) {
     if (success == false)
@@ -893,7 +536,7 @@ void Gateway::operator()(
       assert(timestamp == item.timestamp);
     }
     if (item.symbol.compare(previous) != 0) {
-      if (previous.empty() == false && trade_length > 0) {
+      if (previous.empty() == false && trade_length > 0u) {
         TradeSummary trade_summary{
             .exchange = Flags::exchange(),
             .symbol = previous,
@@ -913,7 +556,7 @@ void Gateway::operator()(
    R"(symbol="{}", len(trade)={}/{})"_fmt,
    trade.data.size(),
    trade_.size());
-  if (previous.empty() == false && trade_length > 0) {
+  if (previous.empty() == false && trade_length > 0u) {
     TradeSummary trade_summary{
         .exchange = Flags::exchange(),
         .symbol = previous,
@@ -934,8 +577,6 @@ int32_t Gateway::download(WebSocketDownload::State state) {
     case WebSocketDownload::State::UNDEFINED:
       break;
     case WebSocketDownload::State::ACCOUNTS: {
-      // download_accounts();
-      // return 1;
       return 0;
     }
     case WebSocketDownload::State::INSTRUMENT: {
@@ -1089,25 +730,6 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
   };
   server::create_trace_and_dispatch(trace_info, order_manager_status, dispatcher_, true);
   LOG(INFO)(R"(order_manager_status={})"_fmt, order_manager_status_);
-}
-
-void Gateway::download_accounts() {
-  assert(false);
-  /*
-  constexpr auto state = WebSocketDownload::State::ACCOUNTS;
-  auto sequence = web_socket_.download.sequence();
-  rest_.connection.get<json::Accounts>(
-      [this, sequence](auto& promise) {
-    try {
-      if (web_socket_.download.skip(sequence, state))
-        return;
-      (*this)(promise.get());
-      web_socket_.download.check(state);
-    } catch (NetworkError&) {
-      web_socket_.download.retry(state);
-    }
-  });
-  */
 }
 
 void Gateway::subscribe_instrument() {
