@@ -7,6 +7,8 @@
 #include <chrono>
 #include <utility>
 
+#include "roq/core/metrics/factory.h"
+
 #include "roq/bitmex/flags.h"
 
 #include "roq/bitmex/json/utils.h"
@@ -22,18 +24,9 @@ static const auto CONNECTION = "rest"_sv;
 static const auto ACCEPT_JSON = "application/json"_sv;
 static const auto CONTENT_TYPE_JSON = "application/json"_sv;
 
-class create_metrics final {
- public:
-  explicit create_metrics(const std::string_view &function) : function_(function) {}
-  create_metrics(create_metrics &&) = default;
-  create_metrics(const create_metrics &) = delete;
-  template <typename T>
-  operator T() {
-    return T(Flags::name(), CONNECTION, function_);
-  }
-
- private:
-  std::string_view function_;
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(const std::string_view &function)
+      : core::metrics::Factory(Flags::name(), CONNECTION, function) {}
 };
 
 static auto compute_expires() {

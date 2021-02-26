@@ -2,11 +2,11 @@
 
 #include "roq/bitmex/web_socket.h"
 
+#include "roq/core/charconv.h"
+#include "roq/core/clock.h"
 #include "roq/core/patterns.h"
 
-#include "roq/core/clock.h"
-
-#include "roq/core/charconv.h"
+#include "roq/core/metrics/factory.h"
 
 #include "roq/bitmex/flags.h"
 
@@ -20,18 +20,9 @@ static const auto CONNECTION = "ws"_sv;
 
 static const auto REQUEST_EXPIRES = std::chrono::seconds{5};
 
-class create_metrics final {
- public:
-  explicit create_metrics(const std::string_view &function) : function_(function) {}
-  create_metrics(create_metrics &&) = default;
-  create_metrics(const create_metrics &) = delete;
-  template <typename T>
-  operator T() {
-    return T(Flags::name(), CONNECTION, function_);
-  }
-
- private:
-  std::string_view function_;
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(const std::string_view &function)
+      : core::metrics::Factory(Flags::name(), CONNECTION, function) {}
 };
 }  // namespace
 

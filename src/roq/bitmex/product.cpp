@@ -2,6 +2,7 @@
 
 #include "roq/bitmex/product.h"
 
+#include "roq/core/convert.h"
 #include "roq/core/update.h"
 
 #include "roq/bitmex/flags.h"
@@ -10,22 +11,6 @@
 
 namespace roq {
 namespace bitmex {
-
-namespace {
-class create_duration final {
- public:
-  explicit create_duration(std::chrono::nanoseconds value) : value_(value) {}
-  create_duration(create_duration &&) = default;
-  create_duration(const create_duration &) = delete;
-  template <typename T>
-  operator T() const {
-    return std::chrono::duration_cast<T>(value_);
-  }
-
- private:
-  std::chrono::nanoseconds value_;
-};
-}  // namespace
 
 // XXX markPrice ?
 // XXX openInterest ?
@@ -64,9 +49,9 @@ ReferenceData Product::create_reference_data(const json::InstrumentItem &item) c
       .underlying = underlying_symbol_,
       .time_zone = {},
       .issue_date = {},
-      .settlement_date = create_duration(settle_),
-      .expiry_datetime = create_duration(expiry_),
-      .expiry_datetime_utc = create_duration(expiry_),
+      .settlement_date = core::convert(settle_),
+      .expiry_datetime = core::convert(expiry_),
+      .expiry_datetime_utc = core::convert(expiry_),
   };
 }
 
