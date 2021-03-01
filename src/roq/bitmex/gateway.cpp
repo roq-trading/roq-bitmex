@@ -83,8 +83,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   context_,
               },
           .download = WebSocketDownload(
-              std::chrono::seconds{Flags::ws_request_timeout_secs()},
-              [this](auto state) { return download(state); }),
+              Flags::ws_request_timeout(), [this](auto state) { return download(state); }),
       },
       rest_{
           .connection =

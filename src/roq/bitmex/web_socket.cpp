@@ -37,7 +37,7 @@ WebSocket::WebSocket(
           context,
           core::URI(Flags::ws_uri()),
           std::string_view(),  // query
-          std::chrono::seconds{Flags::ws_ping_freq_secs()},
+          Flags::ws_ping_freq(),
           Flags::decode_buffer_size(),  // XXX need read buffer size
           Flags::encode_buffer_size(),
           [this]() { return create_upgrade_headers(); }),
@@ -88,11 +88,10 @@ void WebSocket::operator()(const Event<Stop> &) {
 void WebSocket::operator()(const Event<Timer> &event) {
   if (connection_.refresh(event.value.now) == false)
     return;
-  if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after_secs() && ready_ &&
+  if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after().count() && ready_ &&
       next_cancel_all_after_ <= event.value.now) {
-    next_cancel_all_after_ =
-        event.value.now + std::chrono::seconds{Flags::ws_cancel_all_after_secs() / 4u};
-    send_cancel_all_after(std::chrono::seconds{Flags::ws_cancel_all_after_secs()});
+    next_cancel_all_after_ = event.value.now + Flags::ws_cancel_all_after() / 4;
+    send_cancel_all_after(Flags::ws_cancel_all_after());
   }
 }
 
@@ -229,7 +228,7 @@ void WebSocket::operator()(const json::Handshake &handshake) {
     assert(ready_ == false);
     ready_ = true;
     handler_(*this);
-    if (Flags::ws_cancel_on_disconnect() == false || Flags::ws_cancel_all_after_secs() == 0)
+    if (Flags::ws_cancel_on_disconnect() == false || Flags::ws_cancel_all_after().count() == 0)
       send_cancel_all_after(std::chrono::seconds{});
   });
 }

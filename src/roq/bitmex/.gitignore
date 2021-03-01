@@ -4,5 +4,7 @@ roq-bitmex
 ????-W??/
 
 # auto-generated
+flags.cpp
+flags.h
 web_socket_state.cpp
 web_socket_state.h

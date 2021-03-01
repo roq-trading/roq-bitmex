@@ -15,7 +15,7 @@ add_subdirectory("json")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS web_socket_state.json)
+set(AUTOGEN_SCHEMAS web_socket_state.json flags.json)
 
 roq_autogen(
   OUTPUT

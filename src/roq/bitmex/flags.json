@@ -1,0 +1,160 @@
+{
+  "name": "Flags",
+  "type": "flags",
+  "values": [
+    {
+      "name": "config_file",
+      "type": "std::string",
+      "validator": "roq::core::flags::Path<std::string>",
+      "description": "config file (path)"
+    },
+    {
+      "name": "exchange",
+      "type": "std::string",
+      "validator": "roq::core::flags::NonEmpty<std::string>",
+      "default": "bitmex",
+      "description": "exchange identifier (string)"
+    },
+    {
+      "name": "rest_uri",
+      "type": "roq::core::URI",
+      "validator": "roq::core::flags::URI<std::string>",
+      "default": "https://testnet.bitmex.com",
+      "description": "REST end-point (URI)"
+    },
+    {
+      "name": "rest_ping_freq",
+      "flag_name": "rest_ping_freq_secs",
+      "type": "std::chrono::seconds",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 5,
+      "description": "ping frequency (seconds)"
+    },
+    {
+      "name": "rest_ping_path",
+      "type": "std::string",
+      "validator": "roq::core::flags::Path<std::string>",
+      "default": "/",
+      "description": "URI path used for REST connection keep-alive messages"
+    },
+    {
+      "name": "rest_request_queue_depth",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 5,
+      "description": "request: max queue depth"
+    },
+    {
+      "name": "rest_request_timeout",
+      "flag_name": "rest_request_timeout_secs",
+      "type": "std::chrono::seconds",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 30,
+      "description": "request: timeout (seconds)"
+    },
+    {
+      "name": "rest_rate_limit_interval",
+      "flag_name": "rest_rate_limit_interval_secs",
+      "type": "std::chrono::seconds",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 60,
+      "description": "rate limit: monitor interval (seconds)"
+    },
+    {
+      "name": "rest_rate_limit_max_requests",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 60,
+      "description": "rate limit: max requests (per interval)"
+    },
+    {
+      "name": "rest_expires_timeout",
+      "flag_name": "rest_expires_timeout_secs",
+      "type": "std::chrono::seconds",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 1,
+      "description": "expires time-out (seconds)"
+    },
+    {
+      "name": "rest_allow_order_updates",
+      "type": "bool",
+      "default": false,
+      "description": "allow inconsistent order updates? (bool)"
+    },
+    {
+      "name": "ws_uri",
+      "type": "roq::core::URI",
+      "validator": "roq::core::flags::URI<std::string>",
+      "default": "wss://testnet.bitmex.com/realtime",
+      "description": "WebSocket end-point (URI)"
+    },
+    {
+      "name": "ws_ping_freq",
+      "flag_name": "ws_ping_freq_secs",
+      "type": "std::chrono::seconds",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 5,
+      "description": "ping frequency (seconds)"
+    },
+    {
+      "name": "ws_request_timeout",
+      "flag_name": "ws_request_timeout_secs",
+      "type": "std::chrono::seconds",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 15,
+      "description": "request time-out (seconds)"
+    },
+    {
+      "name": "ws_cancel_on_disconnect",
+      "type": "bool",
+      "default": true,
+      "description": "cancel orders on disconnect? (bool)"
+    },
+    {
+      "name": "ws_cancel_all_after",
+      "flag_name": "ws_cancel_all_after_secs",
+      "type": "std::chrono::seconds",
+      "validator": "roq::core::flags::Positive<int32_t>",
+      "default": 15,
+      "description": "cancel all after (seconds), requires cancel-on-disconnect"
+    },
+    {
+      "name": "encode_buffer_size",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 1048576,
+      "description": "encode buffer size"
+    },
+    {
+      "name": "decode_buffer_size",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 10485760,
+      "description": "decode buffer size"
+    },
+    {
+      "name": "name",
+      "type": "std::string",
+      "validator": "roq::core::flags::NonEmpty<std::string>",
+      "external": true
+    },
+    {
+      "name": "cache_mbp_max_depth",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "external": true
+    },
+    {
+      "name": "cache_trades_max_depth",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "external": true
+    },
+    {
+      "name": "cache_fills_max_depth",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "external": true
+    }
+  ]
+}
