@@ -310,6 +310,7 @@ void Gateway::operator()(
           if (last && fill_length) {
             if (ROQ_LIKELY(success)) {
               TradeUpdate trade_update{
+                  .stream_id = {},
                   .account = order.account,
                   .order_id = order.user_order_id,
                   .exchange = order.exchange,
@@ -475,6 +476,7 @@ void Gateway::operator()(
   DLOG(INFO)("action={}, position={}"_fmt, action, position);
   for (auto &item : position.data) {
     PositionUpdate position_update{
+        .stream_id = {},
         .account = account_,
         .exchange = Flags::exchange(),
         .symbol = item.symbol,
@@ -494,6 +496,7 @@ void Gateway::operator()(
     const json::Action, const json::Quote &quote, const server::TraceInfo &trace_info) {
   for (auto &item : quote.data) {
     TopOfBook top_of_book{
+        .stream_id = {},
         .exchange = Flags::exchange(),
         .symbol = item.symbol,
         .layer =
@@ -537,6 +540,7 @@ void Gateway::operator()(
     if (item.symbol.compare(previous) != 0) {
       if (previous.empty() == false && trade_length > 0u) {
         TradeSummary trade_summary{
+            .stream_id = {},
             .exchange = Flags::exchange(),
             .symbol = previous,
             .trades = {trade_.data(), trade_length},
@@ -557,6 +561,7 @@ void Gateway::operator()(
    trade_.size());
   if (previous.empty() == false && trade_length > 0u) {
     TradeSummary trade_summary{
+        .stream_id = {},
         .exchange = Flags::exchange(),
         .symbol = previous,
         .trades = {trade_.data(), trade_length},
@@ -712,6 +717,7 @@ void Gateway::update_market_data(GatewayStatus gateway_status) {
   market_data_status_ = gateway_status;
   server::TraceInfo trace_info;
   MarketDataStatus market_data_status{
+      .stream_id = {},
       .status = market_data_status_,
   };
   server::create_trace_and_dispatch(trace_info, market_data_status, dispatcher_, true);
@@ -724,6 +730,7 @@ void Gateway::update_order_manager(GatewayStatus gateway_status) {
   order_manager_status_ = gateway_status;
   server::TraceInfo trace_info;
   OrderManagerStatus order_manager_status{
+      .stream_id = {},
       .account = account_,
       .status = order_manager_status_,
   };
@@ -833,6 +840,7 @@ void Gateway::publish_market_by_price(
   LOG_IF(INFO, snapshot)
   (R"(Received market data snapshot for symbol="{}")"_fmt, symbol);
   MarketByPriceUpdate market_by_price_update{
+      .stream_id = {},
       .exchange = Flags::exchange(),
       .symbol = symbol,
       .bids = {bid_.data(), bid_length},

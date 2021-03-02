@@ -255,6 +255,7 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 void Rest::operator()(const core::web::Client::Latency &latency) {
   server::TraceInfo trace_info;
   ExternalLatency external_latency{
+      .stream_id = {},
       .name = CONNECTION,
       .latency = latency.sample,
   };

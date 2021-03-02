@@ -33,6 +33,7 @@ bool Product::update(const json::InstrumentItem &item) {
 ReferenceData Product::create_reference_data(const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return ReferenceData{
+      .stream_id = {},
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .description = {},
@@ -58,6 +59,7 @@ ReferenceData Product::create_reference_data(const json::InstrumentItem &item) c
 MarketStatus Product::create_market_status(const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return MarketStatus{
+      .stream_id = {},
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .trading_status = json::map(state_),
@@ -67,6 +69,7 @@ MarketStatus Product::create_market_status(const json::InstrumentItem &item) con
 StatisticsUpdate Product::create_statistics_update(const json::InstrumentItem &item) const {
   assert(item.symbol.empty() == false);
   return StatisticsUpdate{
+      .stream_id = {},
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .statistics = statistics_,
