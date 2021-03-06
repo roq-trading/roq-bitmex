@@ -1,15 +1,18 @@
 /* Copyright (c) 2017-2021, Hans Erik Thrane */
 
-#include "roq/bitmex/rest.h"
+#include "roq/bitmex/order_entry.h"
 
 #include <fmt/chrono.h>
 
 #include <chrono>
 #include <utility>
 
+#include "roq/core/update.h"
+
 #include "roq/core/metrics/factory.h"
 
 #include "roq/bitmex/flags.h"
+#include "roq/bitmex/order_update.h"
 
 #include "roq/bitmex/json/utils.h"
 
@@ -19,14 +22,14 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-static const auto CONNECTION = "rest"_sv;
+static const auto CONNECTION = "om"_sv;
 
 static const auto ACCEPT_JSON = "application/json"_sv;
 static const auto CONTENT_TYPE_JSON = "application/json"_sv;
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(const std::string_view &function)
-      : core::metrics::Factory(Flags::name(), CONNECTION, function) {}
+  explicit create_metrics(const std::string_view &group, const std::string_view &function)
+      : core::metrics::Factory(Flags::name(), group, function) {}
 };
 
 static auto compute_expires() {
@@ -35,58 +38,58 @@ static auto compute_expires() {
 }
 }  // namespace
 
-Rest::Rest(
+OrderEntry::OrderEntry(
     Handler &handler,
-    [[maybe_unused]] const Config &config,
+    core::io::Context &context,
+    uint16_t stream_id,
     Security &security,
-    core::io::Context &context)
-    : handler_(handler), security_(security), connection_(
-                                                  *this,
-                                                  context,
-                                                  core::URI(Flags::rest_uri()),
-                                                  ROQ_PACKAGE_NAME,
-                                                  true,  // keep alive
-                                                  Flags::rest_request_queue_depth(),
-                                                  Flags::rest_request_timeout(),
-                                                  Flags::rest_rate_limit_interval(),
-                                                  Flags::rest_rate_limit_max_requests(),
-                                                  Flags::rest_ping_freq(),
-                                                  Flags::decode_buffer_size(),
-                                                  Flags::encode_buffer_size(),
-                                                  Flags::rest_ping_path()),
+    Shared &shared)
+    : handler_(handler), stream_id_(stream_id),
+      name_(roq::format("{}_{}"_fmt, CONNECTION, stream_id_)),
+      connection_(
+          *this,
+          context,
+          core::URI(Flags::rest_uri()),
+          ROQ_PACKAGE_NAME,
+          true,  // keep alive
+          Flags::rest_request_queue_depth(),
+          Flags::rest_request_timeout(),
+          Flags::rest_rate_limit_interval(),
+          Flags::rest_rate_limit_max_requests(),
+          Flags::rest_ping_freq(),
+          Flags::decode_buffer_size(),
+          Flags::encode_buffer_size(),
+          Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_metrics("disconnect"_sv),
+          .disconnect = create_metrics(name_, "disconnect"_sv),
       },
       profile_{
-          .products = create_metrics("products"_sv),
-          .accounts = create_metrics("accounts"_sv),
-          .create_order = create_metrics("create_order"_sv),
-          .modify_order = create_metrics("modify_order"_sv),
-          .cancel_order = create_metrics("cancel_order"_sv),
+          .products = create_metrics(name_, "products"_sv),
+          .accounts = create_metrics(name_, "accounts"_sv),
+          .create_order = create_metrics(name_, "create_order"_sv),
+          .modify_order = create_metrics(name_, "modify_order"_sv),
+          .cancel_order = create_metrics(name_, "cancel_order"_sv),
       },
       latency_{
-          .ping = create_metrics("ping"_sv),
-      } {
+          .ping = create_metrics(name_, "ping"_sv),
+      },
+      security_(security), shared_(shared) {
 }
 
-bool Rest::ready() const {
-  return connection_.ready();
-}
-
-void Rest::operator()(const Event<Start> &) {
+void OrderEntry::operator()(const Event<Start> &) {
   connection_.start();
 }
 
-void Rest::operator()(const Event<Stop> &) {
+void OrderEntry::operator()(const Event<Stop> &) {
   connection_.stop();
 }
 
-void Rest::operator()(const Event<Timer> &event) {
+void OrderEntry::operator()(const Event<Timer> &event) {
   connection_.refresh(event.value.now);
 }
 
-void Rest::operator()(metrics::Writer &writer) {
+void OrderEntry::operator()(metrics::Writer &writer) {
   writer
       // counter
       .write(counter_.disconnect, metrics::COUNTER)
@@ -97,7 +100,100 @@ void Rest::operator()(metrics::Writer &writer) {
       .write(latency_.ping, metrics::LATENCY);
 }
 
-void Rest::create_order(
+void OrderEntry::operator()(
+    const Event<CreateOrder> &event,
+    const std::string_view &request_id,
+    [[maybe_unused]] uint32_t gateway_order_id) {
+  create_order(event.value, request_id, [this](auto &promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND:     // 404
+      */
+    } catch (NetworkError &e) {
+      // XXX send ack failure
+      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
+    }
+  });
+}
+
+void OrderEntry::operator()(
+    const Event<ModifyOrder> &event,
+    const std::string_view &request_id,
+    const server::OMS_Order &order) {
+  modify_order(event.value, request_id, order, [this](auto &promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND:     // 404
+      */
+    } catch (NetworkError &e) {
+      // XXX send ack failure
+      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
+    }
+  });
+}
+
+void OrderEntry::operator()(
+    const Event<CancelOrder> &event,
+    const std::string_view &request_id,
+    const server::OMS_Order &order) {
+  cancel_order(event.value, request_id, order, [this](auto &promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND:     // 404
+      */
+    } catch (NetworkError &e) {
+      // XXX send ack failure
+      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
+    }
+  });
+}
+
+void OrderEntry::operator()(const core::web::Client::Connected &) {
+  (*this)(GatewayStatus::READY);
+}
+
+void OrderEntry::operator()(const core::web::Client::Disconnected &) {
+  ++counter_.disconnect;
+  (*this)(GatewayStatus::DISCONNECTED);
+}
+
+void OrderEntry::operator()(const core::web::Client::Latency &latency) {
+  server::TraceInfo trace_info;
+  ExternalLatency external_latency{
+      .stream_id = stream_id_,
+      .name = name_,
+      .latency = latency.sample,
+  };
+  server::create_trace_and_dispatch(trace_info, external_latency, handler_);
+  latency_.ping.update(latency.sample);
+}
+
+void OrderEntry::operator()(GatewayStatus status) {
+  if (core::update(status_, status)) {
+    server::TraceInfo trace_info;
+    OrderManagerStatus order_manager_status{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .status = status_,
+    };
+    LOG(INFO)("order_manager_status={}"_fmt, order_manager_status);
+    server::create_trace_and_dispatch(trace_info, order_manager_status, handler_);
+  }
+}
+
+void OrderEntry::create_order(
     const CreateOrder &create_order,
     const std::string_view &cl_ord_id,
     std::function<void(const core::Promise<json::OrderItem> &)> &&callback) {
@@ -126,7 +222,7 @@ void Rest::create_order(
       create_order.execution_instruction == ExecutionInstruction::UNDEFINED
           ? std::string_view()
           : json::map(create_order.execution_instruction).as_raw_text());
-  DLOG(INFO)(R"(body="{}")"_fmt, message);
+  DLOG(INFO)(R"(DEBUG: body="{}")"_fmt, message);
   auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -154,7 +250,7 @@ void Rest::create_order(
       });
 }
 
-void Rest::modify_order(
+void OrderEntry::modify_order(
     const ModifyOrder &modify_order,
     [[maybe_unused]] const std::string_view &request_id,
     const server::OMS_Order &order,
@@ -172,7 +268,7 @@ void Rest::modify_order(
       order.external_order_id,
       modify_order.quantity,
       modify_order.price);
-  DLOG(INFO)(R"(body="{}")"_fmt, message);
+  DLOG(INFO)(R"(DEBUG: body="{}")"_fmt, message);
   auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -200,7 +296,7 @@ void Rest::modify_order(
       });
 }
 
-void Rest::cancel_order(
+void OrderEntry::cancel_order(
     [[maybe_unused]] const CancelOrder &cancel_order,
     [[maybe_unused]] const std::string_view &request_id,
     const server::OMS_Order &order,
@@ -214,7 +310,7 @@ void Rest::cancel_order(
       R"("orderID":"{}")"
       R"(}})"_fmt,
       order.external_order_id);
-  DLOG(INFO)(R"(body="{}")"_fmt, message);
+  DLOG(INFO)(R"(DEBUG: body="{}")"_fmt, message);
   auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -243,24 +339,14 @@ void Rest::cancel_order(
       });
 }
 
-void Rest::operator()(const core::web::Client::Connected &) {
-  handler_(*this);
-}
-
-void Rest::operator()(const core::web::Client::Disconnected &) {
-  handler_(*this);
-  ++counter_.disconnect;
-}
-
-void Rest::operator()(const core::web::Client::Latency &latency) {
+void OrderEntry::operator()(const json::OrderItem &order_item) {
   server::TraceInfo trace_info;
-  ExternalLatency external_latency{
-      .stream_id = {},
-      .name = CONNECTION,
-      .latency = latency.sample,
-  };
-  handler_(external_latency, trace_info);
-  latency_.ping.update(latency.sample);
+  OrderUpdate{shared_}(order_item, trace_info);
+}
+
+void OrderEntry::operator()(const json::Order &order) {
+  server::TraceInfo trace_info;
+  OrderUpdate{shared_}(order, trace_info);
 }
 
 }  // namespace bitmex

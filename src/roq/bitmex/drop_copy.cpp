@@ -1,0 +1,503 @@
+/* Copyright (c) 2017-2021, Hans Erik Thrane */
+
+#include "roq/bitmex/drop_copy.h"
+
+#include "roq/core/back_emplacer.h"
+#include "roq/core/update.h"
+
+#include "roq/core/metrics/factory.h"
+
+#include "roq/bitmex/flags.h"
+#include "roq/bitmex/order_update.h"
+
+#include "roq/bitmex/json/utils.h"
+
+using namespace roq::literals;
+
+namespace roq {
+namespace bitmex {
+
+namespace {
+static const auto CONNECTION = "ex"_sv;
+
+static const auto REQUEST_EXPIRES = std::chrono::seconds{5};
+
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(const std::string_view &group, const std::string_view &function)
+      : core::metrics::Factory(Flags::name(), group, function) {}
+};
+
+template <typename T>
+void emplace(Fill &result, const T &value, uint32_t trade_id) {
+  new (&result) Fill{
+      .quantity = value.last_qty,
+      .price = value.last_px,
+      .trade_id = trade_id,
+      .gateway_trade_id = trade_id,
+      .external_trade_id = value.trd_match_id,
+  };
+}
+}  // namespace
+
+DropCopy::DropCopy(
+    Handler &handler,
+    core::io::Context &context,
+    uint16_t stream_id,
+    Security &security,
+    Shared &shared)
+    : handler_(handler), stream_id_(stream_id),
+      name_(roq::format("{}_{}"_fmt, CONNECTION, stream_id_)),
+      connection_(
+          *this,
+          context,
+          core::URI(Flags::ws_uri()),
+          std::string_view(),  // query
+          Flags::ws_ping_freq(),
+          Flags::decode_buffer_size(),  // XXX need read buffer size
+          Flags::encode_buffer_size(),
+          [this]() { return create_upgrade_headers(); }),
+      decode_buffer_(Flags::decode_buffer_size()),
+      counter_{
+          .disconnect = create_metrics(name_, "disconnect"_sv),
+      },
+      profile_{
+          .parse = create_metrics(name_, "parse"_sv),
+          .cancel_all_after = create_metrics(name_, "cancel_all_after"_sv),
+          .error = create_metrics(name_, "error"_sv),
+          .execution = create_metrics(name_, "execution"_sv),
+          .handshake = create_metrics(name_, "handshake"_sv),
+          .margin = create_metrics(name_, "margin"_sv),
+          .order = create_metrics(name_, "order"_sv),
+          .position = create_metrics(name_, "position"_sv),
+          .subscribe = create_metrics(name_, "subscribe"_sv),
+      },
+      latency_{
+          .ping = create_metrics(name_, "ping"_sv),
+          .heartbeat = create_metrics(name_, "heartbeat"_sv),
+      },
+      security_(security), shared_(shared),
+      download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
+}
+
+void DropCopy::operator()(const Event<Start> &) {
+  connection_.start();
+}
+
+void DropCopy::operator()(const Event<Stop> &) {
+  connection_.stop();
+}
+
+void DropCopy::operator()(const Event<Timer> &event) {
+  if (connection_.refresh(event.value.now) == false)
+    return;
+  if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after().count() && ready_ &&
+      next_cancel_all_after_ <= event.value.now) {
+    next_cancel_all_after_ = event.value.now + Flags::ws_cancel_all_after() / 4;
+    send_cancel_all_after(Flags::ws_cancel_all_after());
+  }
+}
+
+void DropCopy::operator()(metrics::Writer &writer) {
+  writer
+      // counter
+      .write(counter_.disconnect, metrics::COUNTER)
+      // profile
+      .write(profile_.parse, metrics::PROFILE)
+      .write(profile_.cancel_all_after, metrics::PROFILE)
+      .write(profile_.error, metrics::PROFILE)
+      .write(profile_.execution, metrics::PROFILE)
+      .write(profile_.handshake, metrics::PROFILE)
+      .write(profile_.margin, metrics::PROFILE)
+      .write(profile_.order, metrics::PROFILE)
+      .write(profile_.position, metrics::PROFILE)
+      .write(profile_.subscribe, metrics::PROFILE)
+      // latency
+      .write(latency_.ping, metrics::LATENCY)
+      .write(latency_.heartbeat, metrics::LATENCY);
+}
+
+void DropCopy::operator()(const core::web::Socket::Connected &) {
+  // note! don't notify gateway: wait for ready
+}
+
+void DropCopy::operator()(const core::web::Socket::Disconnected &) {
+  ready_ = false;
+  next_cancel_all_after_ = {};
+  partial_received_ = {};
+  (*this)(GatewayStatus::DISCONNECTED);
+}
+
+void DropCopy::operator()(const core::web::Socket::Ready &) {
+  // note! don't notify gateway: wait for handshake
+  (*this)(GatewayStatus::LOGIN_SENT);
+}
+
+void DropCopy::operator()(const core::web::Socket::Close &) {
+}
+
+void DropCopy::operator()(const core::web::Socket::Latency &latency) {
+  server::TraceInfo trace_info;
+  ExternalLatency external_latency{
+      .stream_id = stream_id_,
+      .name = name_,
+      .latency = latency.sample,
+  };
+  server::create_trace_and_dispatch(trace_info, external_latency, handler_);
+  latency_.ping.update(latency.sample);
+}
+
+void DropCopy::operator()(const core::web::Socket::Text &text) {
+  parse(text.payload);
+}
+
+void DropCopy::operator()(GatewayStatus status) {
+  if (core::update(status_, status)) {
+    server::TraceInfo trace_info;
+    OrderManagerStatus order_manager_status{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .status = status_,
+    };
+    LOG(INFO)("order_manager_status={}"_fmt, order_manager_status);
+    server::create_trace_and_dispatch(trace_info, order_manager_status, handler_);
+  }
+}
+
+void DropCopy::send_cancel_all_after(std::chrono::seconds seconds) {
+  auto message = roq::format(
+      R"({{)"
+      R"("op":"cancelAllAfter",)"
+      R"("args":{})"
+      R"(}})"_fmt,
+      std::chrono::duration_cast<std::chrono::milliseconds>(seconds).count());
+  connection_.send_text(message);
+}
+
+void DropCopy::send_subscribe(const std::string_view &topic) {
+  auto message = roq::format(
+      R"({{)"
+      R"("op":"subscribe",)"
+      R"("args":"{}")"
+      R"(}})"_fmt,
+      topic);
+  DLOG(INFO)(R"(DEBUG: message="{}")"_fmt, message);
+  connection_.send_text(message);
+}
+
+void DropCopy::send_subscribe(const roq::span<std::string_view> &topics) {
+  assert(!topics.empty());
+  if (std::size(topics) == 1u) {
+    send_subscribe(topics[0]);
+  } else {
+    auto message = roq::format(
+        R"({{)"
+        R"("op":"subscribe",)"
+        R"("args":["{}"])"
+        R"(}})"_fmt,
+        roq::join(topics, R"(",")"_sv));
+    DLOG(INFO)(R"(DEBUG: message="{}")"_fmt, message);
+    connection_.send_text(message);
+  }
+}
+
+uint32_t DropCopy::download(DropCopyState state) {
+  switch (state) {
+    case DropCopyState::UNDEFINED:
+      assert(false);
+      break;
+    case DropCopyState::SUBSCRIBE:
+      subscribe();
+      return 1u;
+    case DropCopyState::DONE:
+      (*this)(GatewayStatus::READY);
+      assert(!ready_);
+      ready_ = true;
+      return {};
+  }
+  assert(false);
+  return {};
+}
+
+void DropCopy::subscribe() {
+  std::string_view topics[] = {
+      "execution"_sv,
+      "order"_sv,
+      "margin"_sv,
+      "position"_sv,
+  };
+  send_subscribe(topics);
+  // XXX other topics?
+  // cancelAllAfter
+  // authKeyExpires
+}
+
+void DropCopy::parse(const std::string_view &message) {
+  VLOG(4)(R"(message={})"_fmt, message);
+  profile_.parse([&]() {
+    try {
+      parse_helper(message);
+    } catch (std::exception &e) {
+      LOG(WARNING)(R"(message="{}")"_fmt, message);
+      LOG(FATAL)(R"(ERROR what="{}")"_fmt, e.what());
+    }
+  });
+}
+
+void DropCopy::parse_helper(const std::string_view &message) {
+  server::TraceInfo trace_info;
+  core::json::Buffer buffer(decode_buffer_);
+  json::Parser::dispatch(*this, message, buffer, trace_info);
+}
+
+void DropCopy::operator()(const json::CancelAllAfter &cancel_all_after) {
+  profile_.cancel_all_after([&]() { VLOG(1)(R"(cancel_all_after={})"_fmt, cancel_all_after); });
+}
+
+void DropCopy::operator()(const json::Error &error) {
+  profile_.error([&]() { LOG(WARNING)(R"(error={})"_fmt, error); });
+  connection_.close();
+}
+
+void DropCopy::operator()(const json::Handshake &handshake) {
+  profile_.handshake([&]() {
+    VLOG(1)(R"(handshake={})"_fmt, handshake);
+    (*this)(GatewayStatus::DOWNLOADING);
+    download_.begin();
+    if (Flags::ws_cancel_on_disconnect() == false || Flags::ws_cancel_all_after().count() == 0)
+      send_cancel_all_after(std::chrono::seconds{});
+  });
+}
+
+void DropCopy::operator()(const json::Subscribe &subscribe) {
+  profile_.subscribe([&]() {
+    VLOG(1)(R"(subscribe={})"_fmt, subscribe);
+    if (subscribe.success) {
+      assert(subscribe.failure == false);
+      LOG(INFO)
+      (R"(Successfully subscribed to topic="{}")"_fmt, subscribe.subscribe);
+    } else if (subscribe.failure) {
+      assert(subscribe.success == false);
+      LOG(WARNING)(R"(Failed to subscribe topic="{}")"_fmt, subscribe.subscribe);
+    } else {
+      LOG(FATAL)("Expected success or failure"_sv);
+    }
+    // TODO(thraneh): clear timeout
+  });
+}
+
+namespace {
+auto compute_request_status(RequestType request_type, json::ExecType exec_type) {
+  switch (exec_type) {
+    case json::ExecType::UNDEFINED:
+    case json::ExecType::UNKNOWN:
+      break;
+    case json::ExecType::NEW: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***"_sv);
+          break;
+        case RequestType::CREATE_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::MODIFY_ORDER:
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("DEBUG: UNEXPECTED"_sv);
+          break;
+      }
+      break;
+    }
+    case json::ExecType::REPLACED: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***"_sv);
+          break;
+        case RequestType::MODIFY_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::CREATE_ORDER:
+        case RequestType::CANCEL_ORDER:
+          DLOG(FATAL)("DEBUG: UNEXPECTED"_sv);
+          break;
+      }
+      break;
+    }
+    case json::ExecType::CANCELED: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          LOG(WARNING)("*** EXTERNAL ACTION ***"_sv);
+          break;
+        case RequestType::CANCEL_ORDER:
+          return RequestStatus::ACCEPTED;
+        case RequestType::CREATE_ORDER:
+        case RequestType::MODIFY_ORDER:
+          DLOG(FATAL)("DEBUG: UNEXPECTED"_sv);
+          break;
+      }
+      break;
+    }
+    case json::ExecType::TRADE:
+      break;
+    case json::ExecType::FUNDING:
+      break;
+  }
+  return RequestStatus::UNDEFINED;
+}
+}  // namespace
+
+void DropCopy::operator()(
+    const json::Action action,
+    const json::Execution &execution,
+    const server::TraceInfo &trace_info) {
+  profile_.execution([&]() {
+    VLOG(1)(R"(action={}, execution={})"_fmt, action, execution);
+    core::back_emplacer fills(shared_.fills);
+    size_t index = {};
+    for (auto &item : execution.data) {
+      auto last = execution.data.size() == ++index;
+      server::OMS_Lookup order_lookup{
+          .symbol = item.symbol,
+          .side = json::map(item.side),
+          .status = json::map(item.ord_status),
+          .price = item.price,
+          .remaining_quantity = item.leaves_qty,
+          .traded_quantity = item.cum_qty,
+          .timestamp = item.timestamp,  // XXX transact_time?
+          .external_account = {},
+          .external_order_id = item.order_id,
+      };
+      auto found = shared_.find_order(
+          item.order_id,
+          item.cl_ord_id,
+          order_lookup,
+          trace_info,
+          [&](const auto &order, auto &result) {
+            result.request_status = compute_request_status(order.request_type, item.exec_type);
+            if (result.request_status != RequestStatus::UNDEFINED) {
+              result.origin = Origin::EXCHANGE;
+              result.error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+              result.text = item.ord_rej_reason;
+            }
+            if (item.exec_type == json::ExecType::TRADE) {
+              fills.emplace_back([&](auto &result) {
+                auto trade_id = shared_.next_trade_id();
+                emplace(result, item, trade_id);
+              });
+            }
+            if (last && !fills.empty()) {
+              TradeUpdate trade_update{
+                  .stream_id = stream_id_,
+                  .account = order.account,
+                  .order_id = order.user_order_id,
+                  .exchange = order.exchange,
+                  .symbol = order.symbol,
+                  .side = order.side,
+                  .position_effect = {},
+                  .order_template = {},
+                  .create_time_utc = item.timestamp,  // XXX transact_time?
+                  .update_time_utc = item.timestamp,  // XXX transact_time?
+                  .gateway_order_id = order.gateway_order_id,
+                  .external_account = {},
+                  .external_order_id = order.external_order_id,
+                  .fills = fills,
+              };
+              server::create_trace_and_dispatch(
+                  trace_info, trade_update, handler_, true, order.user_id);
+            }
+          });
+      if (found == false) {
+        LOG(WARNING)("*** EXTERNAL ORDER ***"_sv);
+        LOG(WARNING)("action={}, execution={}"_fmt, action, execution);
+      }
+    }
+  });
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Margin &margin, const server::TraceInfo &) {
+  profile_.margin([&]() {
+    VLOG(2)(R"(action={}, margin={})"_fmt, action, margin);
+    /// XXX not used
+  });
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
+  profile_.order([&]() {
+    VLOG(1)(R"(action={}, order={})"_fmt, action, order);
+    OrderUpdate{shared_}(order, trace_info);
+    // state management
+    if (!partial_received_.order && action == json::Action::PARTIAL) {
+      partial_received_.order = true;
+      // release download state
+      download_.check_relaxed(DropCopyState::SUBSCRIBE);
+    }
+  });
+}
+
+void DropCopy::operator()(
+    const json::Action action,
+    const json::Position &position,
+    const server::TraceInfo &trace_info) {
+  profile_.position([&]() {
+    VLOG(2)(R"(action={}, position={})"_fmt, action, position);
+    for (auto &item : position.data) {
+      PositionUpdate position_update{
+          .stream_id = stream_id_,
+          .account = security_.get_account(),
+          .exchange = Flags::exchange(),
+          .symbol = item.symbol,
+          .side = {},
+          .position = item.current_qty,
+          .last_trade_id = {},
+          .position_cost = 0.0,
+          .position_yesterday = 0.0,
+          .position_cost_yesterday = 0.0,
+          .external_account = {},
+      };
+      server::create_trace_and_dispatch(trace_info, position_update, handler_, false);
+    }
+  });
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Funding &funding, const server::TraceInfo &) {
+  LOG(FATAL)(R"(Unexpected: action={}, funding={})"_fmt, action, funding);
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Instrument &instrument, const server::TraceInfo &) {
+  LOG(FATAL)(R"(Unexpected: action={}, instrument={})"_fmt, action, instrument);
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Liquidation &liquidation, const server::TraceInfo &) {
+  LOG(FATAL)(R"(Unexpected: action={}, liquidation={})"_fmt, action, liquidation);
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::OrderBookL2 &order_book_l2, const server::TraceInfo &) {
+  LOG(FATAL)(R"(Unexpected: action={}, order_book_l2={})"_fmt, action, order_book_l2);
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Quote &quote, const server::TraceInfo &) {
+  LOG(FATAL)(R"(Unexpected: action={}, quote={})"_fmt, action, quote);
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Settlement &settlement, const server::TraceInfo &) {
+  LOG(FATAL)(R"(Unexpected: action={}, settlement={})"_fmt, action, settlement);
+}
+
+void DropCopy::operator()(
+    const json::Action action, const json::Trade &trade, const server::TraceInfo &) {
+  LOG(FATAL)(R"(Unexpected: action={}, trade={})"_fmt, action, trade);
+}
+
+std::string DropCopy::create_upgrade_headers() {
+  auto expires = std::chrono::duration_cast<std::chrono::seconds>(
+      core::get_realtime_clock() + REQUEST_EXPIRES);
+  return security_.create_headers(
+      expires, core::http::Method::GET, "/realtime"_sv, std::string_view());
+}
+
+}  // namespace bitmex
+}  // namespace roq

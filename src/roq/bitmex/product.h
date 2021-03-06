@@ -18,14 +18,13 @@ class Product final {
   explicit Product(const json::InstrumentItem &);
 
   Product(Product &&) = default;
-
   Product(const Product &) = delete;
 
   bool update(const json::InstrumentItem &);
 
-  ReferenceData create_reference_data(const json::InstrumentItem &) const;
-  MarketStatus create_market_status(const json::InstrumentItem &) const;
-  StatisticsUpdate create_statistics_update(const json::InstrumentItem &) const;
+  ReferenceData reference_data(const json::InstrumentItem &, uint16_t stream_id) const;
+  MarketStatus market_status(const json::InstrumentItem &, uint16_t stream_id) const;
+  StatisticsUpdate statistics_update(const json::InstrumentItem &, uint16_t stream_id) const;
 
  private:
   // reference data
@@ -40,7 +39,7 @@ class Product final {
   std::chrono::milliseconds expiry_ = {};
   std::chrono::milliseconds settle_ = {};
   // market status
-  json::State state_ = json::State::UNDEFINED;
+  json::State state_ = {};
   // statistics update
   // FIXME because of StatisticsUpdate::span<Statistics>
   mutable std::array<Statistics, 2u> statistics_;

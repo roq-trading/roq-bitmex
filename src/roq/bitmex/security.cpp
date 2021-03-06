@@ -26,8 +26,9 @@ static auto create_timestamp_secs(std::chrono::nanoseconds value) {
 }
 }  // namespace
 
-Security::Security(const Config &config)
-    : base_path(create_base_path()), key_(config.get_api_key()), hmac_(config.get_secret()) {
+Security::Security(const Config &config, const std::string_view &account)
+    : account_(account), base_path(create_base_path()), key_(config.get_api_key()),
+      hmac_(config.get_secret()) {
 }
 
 std::string Security::create_signature(

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <string>
 #include <string_view>
 
 #include "roq/core/promise.h"
@@ -18,8 +19,8 @@
 
 #include "roq/server.h"
 
-#include "roq/bitmex/config.h"
 #include "roq/bitmex/security.h"
+#include "roq/bitmex/shared.h"
 
 #include "roq/bitmex/json/order.h"
 #include "roq/bitmex/json/order_item.h"
@@ -27,25 +28,39 @@
 namespace roq {
 namespace bitmex {
 
-class Rest final : public core::web::Client::Handler {
+class OrderEntry final : public core::web::Client::Handler {
  public:
   struct Handler {
-    virtual void operator()(const Rest &) = 0;
-    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
+
+    virtual void operator()(const server::Trace<OrderManagerStatus> &) = 0;
   };
 
-  Rest(Handler &handler, const Config &config, Security &security, core::io::Context &context);
+  OrderEntry(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
 
-  Rest(Rest &&) = delete;
-  Rest(const Rest &) = delete;
-
-  bool ready() const;
+  OrderEntry(OrderEntry &&) = delete;
+  OrderEntry(const OrderEntry &) = delete;
 
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
   void operator()(metrics::Writer &writer);
+
+  void operator()(
+      const Event<CreateOrder> &, const std::string_view &request_id, uint32_t gateway_order_id);
+  void operator()(
+      const Event<ModifyOrder> &, const std::string_view &request_id, const server::OMS_Order &);
+  void operator()(
+      const Event<CancelOrder> &, const std::string_view &request_id, const server::OMS_Order &);
+
+ protected:
+  void operator()(const core::web::Client::Connected &) override;
+  void operator()(const core::web::Client::Disconnected &) override;
+  void operator()(const core::web::Client::Latency &) override;
+
+ private:
+  void operator()(GatewayStatus);
 
   void create_order(
       const CreateOrder &create_order,
@@ -64,20 +79,14 @@ class Rest final : public core::web::Client::Handler {
       const server::OMS_Order &order,
       std::function<void(const core::Promise<json::Order> &)> &&callback);
 
-  template <typename T>
-  void get(std::function<void(const core::Promise<T> &)> &&);
-
- protected:
-  // core::web::Client::Handler
-
-  void operator()(const core::web::Client::Connected &) override;
-  void operator()(const core::web::Client::Disconnected &) override;
-  void operator()(const core::web::Client::Latency &) override;
+  void operator()(const json::OrderItem &);
+  void operator()(const json::Order &);
 
  private:
   Handler &handler_;
-  // security
-  Security &security_;
+  // config
+  const uint16_t stream_id_;
+  const std::string name_;
   // connection
   core::web::Client connection_;
   // buffers
@@ -92,6 +101,12 @@ class Rest final : public core::web::Client::Handler {
   struct {
     core::metrics::Latency ping;
   } latency_;
+  // security
+  Security &security_;
+  // cache
+  Shared &shared_;
+  // state
+  GatewayStatus status_ = {};
 };
 
 }  // namespace bitmex

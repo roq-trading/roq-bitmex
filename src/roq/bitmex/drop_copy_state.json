@@ -1,0 +1,8 @@
+{
+"name": "DropCopyState",
+"type": "enum",
+"values": [
+	{ "name": "subscribe" },
+	{ "name": "done" }
+]
+}

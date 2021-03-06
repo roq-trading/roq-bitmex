@@ -3,10 +3,8 @@
 #pragma once
 
 #include <chrono>
-#include <memory>
 #include <string>
 #include <string_view>
-#include <vector>
 
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
@@ -16,58 +14,39 @@
 
 #include "roq/core/web/socket.h"
 
+#include "roq/download.h"
 #include "roq/server.h"
 
-#include "roq/bitmex/config.h"
+#include "roq/bitmex/drop_copy_state.h"
 #include "roq/bitmex/security.h"
+#include "roq/bitmex/shared.h"
 
 #include "roq/bitmex/json/parser.h"
 
 namespace roq {
 namespace bitmex {
 
-class WebSocket final : public core::web::Socket::Handler, public json::Parser::Handler {
+class DropCopy final : public core::web::Socket::Handler, public json::Parser::Handler {
  public:
   struct Handler {
-    virtual void operator()(const WebSocket &) = 0;
-    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action, const json::Execution &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action, const json::Instrument &, const server::TraceInfo &) = 0;
-    virtual void operator()(const json::Action, const json::Order &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action, const json::OrderBookL2 &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action, const json::Position &, const server::TraceInfo &) = 0;
-    virtual void operator()(const json::Action, const json::Quote &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Action, const json::Settlement &, const server::TraceInfo &) = 0;
-    virtual void operator()(const json::Action, const json::Trade &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const server::Trace<OrderManagerStatus> &) = 0;
+    virtual void operator()(const server::Trace<TradeUpdate> &, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(const server::Trace<PositionUpdate> &, bool is_last) = 0;
   };
 
-  WebSocket(Handler &handler, const Config &config, Security &security, core::io::Context &context);
+  DropCopy(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
 
-  WebSocket(WebSocket &&) = delete;
-  WebSocket(const WebSocket &) = delete;
-
-  bool ready() const;
-
-  void close();
+  DropCopy(DropCopy &&) = delete;
+  DropCopy(const DropCopy &) = delete;
 
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
-  void subscribe(const std::string_view &topic);
-
-  void subscribe(const std::string_view &topic, const std::vector<std::string> &filter);
-
   void operator()(metrics::Writer &writer);
 
  protected:
-  // core::web::Socket::Handler
-
   void operator()(const core::web::Socket::Connected &) override;
   void operator()(const core::web::Socket::Disconnected &) override;
   void operator()(const core::web::Socket::Ready &) override;
@@ -75,7 +54,20 @@ class WebSocket final : public core::web::Socket::Handler, public json::Parser::
   void operator()(const core::web::Socket::Latency &) override;
   void operator()(const core::web::Socket::Text &) override;
 
-  // json::Parser::Handler
+ private:
+  void operator()(GatewayStatus);
+
+  void send_cancel_all_after(std::chrono::seconds seconds);
+
+  void send_subscribe(const std::string_view &topic);
+  void send_subscribe(const roq::span<std::string_view> &topics);
+
+  uint32_t download(DropCopyState);
+
+  void subscribe();
+
+  void parse(const std::string_view &message);
+  void parse_helper(const std::string_view &message);
 
   void operator()(const json::CancelAllAfter &) override;
   void operator()(const json::Error &) override;
@@ -83,31 +75,29 @@ class WebSocket final : public core::web::Socket::Handler, public json::Parser::
   void operator()(const json::Subscribe &) override;
 
   void operator()(const json::Action, const json::Execution &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Margin &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Order &, const server::TraceInfo &) override;
+  void operator()(const json::Action, const json::Position &, const server::TraceInfo &) override;
+  // ... unexpected
   void operator()(const json::Action, const json::Funding &, const server::TraceInfo &) override;
   void operator()(const json::Action, const json::Instrument &, const server::TraceInfo &) override;
   void operator()(
       const json::Action, const json::Liquidation &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Margin &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Order &, const server::TraceInfo &) override;
   void operator()(
       const json::Action, const json::OrderBookL2 &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Position &, const server::TraceInfo &) override;
   void operator()(const json::Action, const json::Quote &, const server::TraceInfo &) override;
   void operator()(const json::Action, const json::Settlement &, const server::TraceInfo &) override;
   void operator()(const json::Action, const json::Trade &, const server::TraceInfo &) override;
 
- private:
+  // utilities
+
   std::string create_upgrade_headers();
-
-  void parse(const std::string_view &message);
-  void parse_helper(const std::string_view &message);
-
-  void send_cancel_all_after(std::chrono::seconds seconds);
 
  private:
   Handler &handler_;
-  // security
-  Security &security_;
+  // config
+  const uint16_t stream_id_;
+  const std::string name_;
   // connection
   core::web::Socket connection_;
   // buffers
@@ -117,16 +107,25 @@ class WebSocket final : public core::web::Socket::Handler, public json::Parser::
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, cancel_all_after, error, execution, funding, handshake,
-        instrument, liquidation, margin, order, order_book_l2, position, quote, settlement,
-        subscribe, trade;
+    core::metrics::Profile parse, cancel_all_after, error, execution, handshake, margin, order,
+        position, subscribe;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
   } latency_;
-  // session
+  // security
+  Security &security_;
+  // cache
+  Shared &shared_;
+  // state
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
+  GatewayStatus status_ = {};
+  server::Download<DropCopyState> download_;
+  struct {
+    bool order = false;
+    // XXX maybe everything else too?
+  } partial_received_;
 };
 
 }  // namespace bitmex

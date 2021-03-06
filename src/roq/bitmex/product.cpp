@@ -27,13 +27,13 @@ Product::Product(const json::InstrumentItem &item)
 }
 
 bool Product::update(const json::InstrumentItem &item) {
-  return core::update(state_, item.state);
+  return core::update(state_, item.state) != 0;
 }
 
-ReferenceData Product::create_reference_data(const json::InstrumentItem &item) const {
+ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t stream_id) const {
   assert(item.symbol.empty() == false);
   return ReferenceData{
-      .stream_id = {},
+      .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .description = {},
@@ -56,20 +56,21 @@ ReferenceData Product::create_reference_data(const json::InstrumentItem &item) c
   };
 }
 
-MarketStatus Product::create_market_status(const json::InstrumentItem &item) const {
+MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t stream_id) const {
   assert(item.symbol.empty() == false);
   return MarketStatus{
-      .stream_id = {},
+      .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .trading_status = json::map(state_),
   };
 }
 
-StatisticsUpdate Product::create_statistics_update(const json::InstrumentItem &item) const {
+StatisticsUpdate Product::statistics_update(
+    const json::InstrumentItem &item, uint16_t stream_id) const {
   assert(item.symbol.empty() == false);
   return StatisticsUpdate{
-      .stream_id = {},
+      .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .statistics = statistics_,

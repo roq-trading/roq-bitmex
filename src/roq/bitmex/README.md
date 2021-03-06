@@ -1,3 +1,15 @@
+Multiplexing
+-- we don't support -- we create many DropCopy connections
+
+
+
+
+
+
+
+
+
+
 
 fields we always receive
 * account
