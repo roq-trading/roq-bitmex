@@ -124,6 +124,7 @@ void DropCopy::operator()(const core::web::Socket::Disconnected &) {
   ready_ = false;
   next_cancel_all_after_ = {};
   partial_received_ = {};
+  download_.reset();
   (*this)(GatewayStatus::DISCONNECTED);
 }
 
