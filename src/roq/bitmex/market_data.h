@@ -49,7 +49,7 @@ class MarketData final : public core::web::Socket::Handler, public json::Parser:
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
-  void operator()(metrics::Writer &writer);
+  void operator()(metrics::Writer &);
 
  protected:
   void operator()(const core::web::Socket::Connected &) override;

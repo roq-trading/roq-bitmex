@@ -29,7 +29,7 @@ class Gateway final : public server::Handler,
                       public DropCopy::Handler,
                       public MarketData::Handler {
  public:
-  Gateway(server::Dispatcher &dispatcher, const Config &config);
+  Gateway(server::Dispatcher &, const Config &);
 
  protected:
   // server::Handler
@@ -54,19 +54,19 @@ class Gateway final : public server::Handler,
   void operator()(const server::Trace<PositionUpdate> &, bool is_last) override;
 
   void operator()(
-      const Event<CreateOrder> &event,
+      const Event<CreateOrder> &,
       const std::string_view &request_id,
       uint32_t gateway_order_id) override;
   void operator()(
-      const Event<ModifyOrder> &event,
+      const Event<ModifyOrder> &,
       const std::string_view &request_id,
-      const server::OMS_Order &order) override;
+      const server::OMS_Order &) override;
   void operator()(
-      const Event<CancelOrder> &event,
+      const Event<CancelOrder> &,
       const std::string_view &request_id,
-      const server::OMS_Order &order) override;
+      const server::OMS_Order &) override;
 
-  void operator()(metrics::Writer &writer) override;
+  void operator()(metrics::Writer &) override;
 
  private:
   OrderEntry &get_order_entry(const std::string_view &account);

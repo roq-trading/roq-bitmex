@@ -45,7 +45,7 @@ class OrderEntry final : public core::web::Client::Handler {
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
-  void operator()(metrics::Writer &writer);
+  void operator()(metrics::Writer &);
 
   void operator()(
       const Event<CreateOrder> &, const std::string_view &request_id, uint32_t gateway_order_id);
@@ -63,21 +63,21 @@ class OrderEntry final : public core::web::Client::Handler {
   void operator()(GatewayStatus);
 
   void create_order(
-      const CreateOrder &create_order,
+      const CreateOrder &,
       const std::string_view &cl_ord_id,
-      std::function<void(const core::Promise<json::OrderItem> &)> &&callback);
+      std::function<void(const core::Promise<json::OrderItem> &)> &&);
 
   void modify_order(
-      const ModifyOrder &modify_order,
+      const ModifyOrder &,
       const std::string_view &request_id,
-      const server::OMS_Order &order,
-      std::function<void(const core::Promise<json::OrderItem> &)> &&callback);
+      const server::OMS_Order &,
+      std::function<void(const core::Promise<json::OrderItem> &)> &&);
 
   void cancel_order(
       const CancelOrder &cancel_order,
       const std::string_view &request_id,
-      const server::OMS_Order &order,
-      std::function<void(const core::Promise<json::Order> &)> &&callback);
+      const server::OMS_Order &,
+      std::function<void(const core::Promise<json::Order> &)> &&);
 
   void operator()(const json::OrderItem &);
   void operator()(const json::Order &);
