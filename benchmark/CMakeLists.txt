@@ -9,6 +9,8 @@ target_link_libraries(
   # ${PROJECT_NAME}
   benchmark::benchmark)
 
+target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_17)
+
 set_target_properties("${TARGET_NAME}" PROPERTIES LINK_FLAGS_RELEASE -s)
 
 install(TARGETS ${TARGET_NAME})
