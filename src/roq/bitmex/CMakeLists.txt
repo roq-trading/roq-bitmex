@@ -1,5 +1,7 @@
 set(TARGET_NAME "${PROJECT_NAME}")
 
+add_subdirectory(flags)
+
 set(SOURCES
     application.cpp
     config.cpp
@@ -19,7 +21,7 @@ add_subdirectory("json")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS market_data_state.json drop_copy_state.json flags.json)
+set(AUTOGEN_SCHEMAS market_data_state.json drop_copy_state.json)
 
 roq_autogen(
   OUTPUT
@@ -54,6 +56,7 @@ add_dependencies("${TARGET_NAME}" autogen-headers autogen-json-headers)
 target_link_libraries(
   "${TARGET_NAME}"
   "${PROJECT_NAME}-json"
+  "${PROJECT_NAME}-flags"
   roq-server::roq-server
   roq-core::roq-core
   roq-api::roq-api
