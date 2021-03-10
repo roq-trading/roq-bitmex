@@ -45,8 +45,11 @@ find_package(roq-api REQUIRED)
 find_package(roq-core REQUIRED)
 find_package(roq-logging REQUIRED)
 find_package(roq-server REQUIRED)
-find_package(rt REQUIRED)
 find_package(uuid REQUIRED)
+
+if(UNIX AND NOT APPLE)
+  find_package(rt REQUIRED)
+endif()
 
 find_program(CLANG_FORMAT clang-format REQUIRED)
 
