@@ -46,7 +46,7 @@ void emplace(Trade &result, const T &value) {
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}_{}"_fmt, CONNECTION, stream_id_)),
+      name_(roq::format("{}:{}"_fmt, stream_id_, CONNECTION)),
       connection_(
           *this,
           context,

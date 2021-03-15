@@ -46,7 +46,7 @@ DropCopy::DropCopy(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}_{}"_fmt, CONNECTION, stream_id_)),
+      name_(roq::format("{}:{}:{}"_fmt, stream_id_, CONNECTION, security.get_account())),
       connection_(
           *this,
           context,

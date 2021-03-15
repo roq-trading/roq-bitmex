@@ -17,10 +17,8 @@ Config::Config(const std::string_view &path) {
   server::ConfigReader::parse(*this, path);
 }
 
-std::string Config::get_account() const {
-  if (accounts.size() != 1u)
-    throw std::runtime_error("Only supporting 1 account"_s);
-  return (*accounts.begin()).first;
+std::string Config::get_master_account() const {
+  return master_account_;
 }
 
 void Config::dispatch(server::Config::Handler &handler) const {
@@ -39,7 +37,9 @@ void Config::operator()(server::Symbols &&symbols) {
 }
 
 void Config::operator()(server::Account &&account) {
-  accounts.emplace(account.name, std::move(account));
+  auto res = accounts.emplace(account.name, std::move(account));
+  if (master_account_.empty())
+    master_account_ = (*res.first).first;
 }
 
 void Config::operator()(server::User &&user) {
