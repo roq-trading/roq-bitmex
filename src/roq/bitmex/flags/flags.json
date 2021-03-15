@@ -131,30 +131,6 @@
       "validator": "roq::core::flags::NonZero<uint32_t>",
       "default": 10485760,
       "description": "decode buffer size"
-    },
-    {
-      "name": "name",
-      "type": "std::string",
-      "validator": "roq::core::flags::NonEmpty<std::string>",
-      "external": true
-    },
-    {
-      "name": "cache_mbp_max_depth",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "external": true
-    },
-    {
-      "name": "cache_trades_max_depth",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "external": true
-    },
-    {
-      "name": "cache_fills_max_depth",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "external": true
     }
   ]
 }

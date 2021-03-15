@@ -24,7 +24,7 @@ static const auto REQUEST_EXPIRES = std::chrono::seconds{5};
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
-      : core::metrics::Factory(Flags::name(), group, function) {}
+      : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
 template <typename T>
