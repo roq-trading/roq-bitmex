@@ -2,8 +2,9 @@
 
 #include "roq/bitmex/product.h"
 
+#include "roq/update.h"
+
 #include "roq/core/convert.h"
-#include "roq/core/update.h"
 
 #include "roq/bitmex/flags.h"
 
@@ -27,7 +28,7 @@ Product::Product(const json::InstrumentItem &item)
 }
 
 bool Product::update(const json::InstrumentItem &item) {
-  return core::update(state_, item.state) != 0;
+  return roq::update(state_, item.state) != 0;
 }
 
 ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t stream_id) const {

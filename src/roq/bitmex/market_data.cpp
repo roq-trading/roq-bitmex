@@ -2,8 +2,9 @@
 
 #include "roq/bitmex/market_data.h"
 
+#include "roq/update.h"
+
 #include "roq/core/back_emplacer.h"
-#include "roq/core/update.h"
 
 #include "roq/core/metrics/factory.h"
 
@@ -151,7 +152,7 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
 }
 
 void MarketData::operator()(GatewayStatus status) {
-  if (core::update(status_, status)) {
+  if (update(status_, status)) {
     server::TraceInfo trace_info;
     MarketDataStatus market_data_status{
         .stream_id = stream_id_,

@@ -2,8 +2,9 @@
 
 #include "roq/bitmex/drop_copy.h"
 
+#include "roq/update.h"
+
 #include "roq/core/back_emplacer.h"
-#include "roq/core/update.h"
 
 #include "roq/core/metrics/factory.h"
 
@@ -152,7 +153,7 @@ void DropCopy::operator()(const core::web::Socket::Text &text) {
 }
 
 void DropCopy::operator()(GatewayStatus status) {
-  if (core::update(status_, status)) {
+  if (update(status_, status)) {
     server::TraceInfo trace_info;
     OrderManagerStatus order_manager_status{
         .stream_id = stream_id_,
