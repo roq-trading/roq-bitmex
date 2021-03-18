@@ -2,6 +2,7 @@
 
 #include "roq/bitmex/drop_copy.h"
 
+#include "roq/mask.h"
 #include "roq/update.h"
 
 #include "roq/core/back_emplacer.h"
@@ -19,7 +20,13 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-static const auto CONNECTION = "ex"_sv;
+static const auto NAME = "ex"_sv;
+static const auto SUPPORTS = Mask{
+    SupportType::ORDER_ACK,
+    SupportType::ORDER,
+    SupportType::TRADE,
+    SupportType::POSITION,
+};
 
 static const auto REQUEST_EXPIRES = std::chrono::seconds{5};
 
@@ -47,12 +54,12 @@ DropCopy::DropCopy(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_fmt, stream_id_, CONNECTION, security.get_account())),
+      name_(roq::format("{}:{}:{}"_fmt, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
           core::URI(Flags::ws_uri()),
-          std::string_view(),  // query
+          {},  // query
           Flags::ws_ping_freq(),
           Flags::decode_buffer_size(),  // XXX need read buffer size
           Flags::encode_buffer_size(),
@@ -155,13 +162,16 @@ void DropCopy::operator()(const core::web::Socket::Text &text) {
 void DropCopy::operator()(GatewayStatus status) {
   if (update(status_, status)) {
     server::TraceInfo trace_info;
-    OrderManagerStatus order_manager_status{
+    StreamUpdate stream_update{
         .stream_id = stream_id_,
+        .type = StreamType::WEB_SOCKET,
+        .supports = SUPPORTS.get(),
         .account = security_.get_account(),
+        .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("order_manager_status={}"_fmt, order_manager_status);
-    server::create_trace_and_dispatch(trace_info, order_manager_status, handler_);
+    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
 
@@ -498,7 +508,7 @@ std::string DropCopy::create_upgrade_headers() {
   auto expires = std::chrono::duration_cast<std::chrono::seconds>(
       core::get_realtime_clock() + REQUEST_EXPIRES);
   return security_.create_headers(
-      expires, core::http::Method::GET, "/realtime"_sv, std::string_view());
+      expires, core::http::Method::GET, "/realtime"_sv, std::string_view{});
 }
 
 }  // namespace bitmex

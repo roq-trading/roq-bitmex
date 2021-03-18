@@ -7,6 +7,7 @@
 #include <chrono>
 #include <utility>
 
+#include "roq/mask.h"
 #include "roq/update.h"
 
 #include "roq/core/metrics/factory.h"
@@ -22,7 +23,13 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-static const auto CONNECTION = "om"_sv;
+static const auto NAME = "om"_sv;
+static const auto SUPPORTS = Mask{
+    SupportType::CREATE_ORDER,
+    SupportType::MODIFY_ORDER,
+    SupportType::CANCEL_ORDER,
+    SupportType::ORDER_ACK,
+};
 
 static const auto ACCEPT_JSON = "application/json"_sv;
 static const auto CONTENT_TYPE_JSON = "application/json"_sv;
@@ -45,7 +52,7 @@ OrderEntry::OrderEntry(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_fmt, stream_id_, CONNECTION, security.get_account())),
+      name_(roq::format("{}:{}:{}"_fmt, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
@@ -183,13 +190,16 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::operator()(GatewayStatus status) {
   if (update(status_, status)) {
     server::TraceInfo trace_info;
-    OrderManagerStatus order_manager_status{
+    StreamUpdate stream_update{
         .stream_id = stream_id_,
+        .type = StreamType::REST,
+        .supports = SUPPORTS.get(),
         .account = security_.get_account(),
+        .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("order_manager_status={}"_fmt, order_manager_status);
-    server::create_trace_and_dispatch(trace_info, order_manager_status, handler_);
+    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
 
@@ -220,14 +230,14 @@ void OrderEntry::create_order(
       json::map(create_order.order_type).as_raw_text(),
       json::map(create_order.time_in_force).as_raw_text(),
       create_order.execution_instruction == ExecutionInstruction::UNDEFINED
-          ? std::string_view()
+          ? std::string_view{}
           : json::map(create_order.execution_instruction).as_raw_text());
   DLOG(INFO)(R"(DEBUG: body="{}")"_fmt, message);
   auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       ACCEPT_JSON,
       CONTENT_TYPE_JSON,
       headers,
@@ -273,7 +283,7 @@ void OrderEntry::modify_order(
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       ACCEPT_JSON,
       CONTENT_TYPE_JSON,
       headers,
@@ -315,7 +325,7 @@ void OrderEntry::cancel_order(
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       ACCEPT_JSON,
       CONTENT_TYPE_JSON,
       headers,

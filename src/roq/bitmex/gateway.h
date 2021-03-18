@@ -39,17 +39,14 @@ class Gateway final : public server::Handler,
   void operator()(const Event<Timer> &) override;
   void operator()(const Event<Connection> &) override;
 
+  void operator()(const server::Trace<StreamUpdate> &) override;
   void operator()(const server::Trace<ExternalLatency> &) override;
-
-  void operator()(const server::Trace<MarketDataStatus> &) override;
   void operator()(const server::Trace<ReferenceData> &, bool is_last) override;
   void operator()(const server::Trace<MarketStatus> &, bool is_last) override;
   void operator()(const server::Trace<TopOfBook> &, bool is_last) override;
   void operator()(const server::Trace<MarketByPriceUpdate> &, bool is_last) override;
   void operator()(const server::Trace<TradeSummary> &, bool is_last) override;
   void operator()(const server::Trace<StatisticsUpdate> &, bool is_last) override;
-
-  void operator()(const server::Trace<OrderManagerStatus> &) override;
   void operator()(const server::Trace<TradeUpdate> &, bool is_last, uint8_t user_id) override;
   void operator()(const server::Trace<PositionUpdate> &, bool is_last) override;
 

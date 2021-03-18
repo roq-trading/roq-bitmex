@@ -127,12 +127,12 @@ void Gateway::operator()(metrics::Writer &writer) {
   market_data_(writer);
 }
 
-void Gateway::operator()(const server::Trace<ExternalLatency> &event) {
+void Gateway::operator()(const server::Trace<StreamUpdate> &event) {
   dispatcher_(event);
 }
 
-void Gateway::operator()(const server::Trace<MarketDataStatus> &event) {
-  dispatcher_(event, true);
+void Gateway::operator()(const server::Trace<ExternalLatency> &event) {
+  dispatcher_(event);
 }
 
 void Gateway::operator()(const server::Trace<ReferenceData> &event, bool is_last) {
@@ -157,10 +157,6 @@ void Gateway::operator()(const server::Trace<TradeSummary> &event, bool is_last)
 
 void Gateway::operator()(const server::Trace<StatisticsUpdate> &event, bool is_last) {
   dispatcher_(event, is_last);
-}
-
-void Gateway::operator()(const server::Trace<OrderManagerStatus> &event) {
-  dispatcher_(event, true);
 }
 
 void Gateway::operator()(const server::Trace<TradeUpdate> &event, bool is_last, uint8_t user_id) {

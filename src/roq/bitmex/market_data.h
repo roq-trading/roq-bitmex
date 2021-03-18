@@ -30,8 +30,8 @@ namespace bitmex {
 class MarketData final : public core::web::Socket::Handler, public json::Parser::Handler {
  public:
   struct Handler {
+    virtual void operator()(const server::Trace<StreamUpdate> &) = 0;
     virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
-    virtual void operator()(const server::Trace<MarketDataStatus> &) = 0;
     virtual void operator()(const server::Trace<ReferenceData> &, bool is_last) = 0;
     virtual void operator()(const server::Trace<MarketStatus> &, bool is_last) = 0;
     virtual void operator()(const server::Trace<TopOfBook> &, bool is_last) = 0;
