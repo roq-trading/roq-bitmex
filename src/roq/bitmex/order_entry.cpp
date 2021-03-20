@@ -122,7 +122,7 @@ void OrderEntry::operator()(
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
-      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
+      log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
 }
@@ -142,7 +142,7 @@ void OrderEntry::operator()(
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
-      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
+      log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
 }
@@ -162,7 +162,7 @@ void OrderEntry::operator()(
       */
     } catch (NetworkError &e) {
       // XXX send ack failure
-      LOG(FATAL)(R"(Unexpected what="{}")"_fmt, e.what());
+      log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
 }
@@ -197,7 +197,7 @@ void OrderEntry::operator()(GatewayStatus status) {
         .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    log::info("stream_update={}"_fmt, stream_update);
     server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
@@ -231,7 +231,7 @@ void OrderEntry::create_order(
       create_order.execution_instruction == ExecutionInstruction::UNDEFINED
           ? std::string_view{}
           : json::map(create_order.execution_instruction).as_raw_text());
-  DLOG(INFO)(R"(DEBUG: body="{}")"_fmt, message);
+  log::debug(R"(DEBUG: body="{}")"_fmt, message);
   auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -246,12 +246,11 @@ void OrderEntry::create_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            VLOG(1)(R"(order_item={})"_fmt, order_item);
+            log::trace_1(R"(order_item={})"_fmt, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
-            LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -277,7 +276,7 @@ void OrderEntry::modify_order(
       order.external_order_id,
       modify_order.quantity,
       modify_order.price);
-  DLOG(INFO)(R"(DEBUG: body="{}")"_fmt, message);
+  log::debug(R"(DEBUG: body="{}")"_fmt, message);
   auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -292,12 +291,11 @@ void OrderEntry::modify_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            VLOG(1)(R"(order_item={})"_fmt, order_item);
+            log::trace_1(R"(order_item={})"_fmt, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
-            LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -319,7 +317,7 @@ void OrderEntry::cancel_order(
       R"("orderID":"{}")"
       R"(}})"_fmt,
       order.external_order_id);
-  DLOG(INFO)(R"(DEBUG: body="{}")"_fmt, message);
+  log::debug(R"(DEBUG: body="{}")"_fmt, message);
   auto headers = security_.create_headers(expires, method, path, message);
   connection_.request(
       method,
@@ -335,12 +333,11 @@ void OrderEntry::cancel_order(
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
             auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-            VLOG(1)(R"(order={})"_fmt, order);
+            log::trace_1(R"(order={})"_fmt, order);
             core::Promise<json::Order> promise(order);
             callback(promise);
           } catch (NetworkError &e) {
-            LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::Order> promise(std::current_exception());
             callback(promise);
           }

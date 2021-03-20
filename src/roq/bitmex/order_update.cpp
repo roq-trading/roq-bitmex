@@ -39,13 +39,13 @@ auto compute_request_status(RequestType request_type, json::OrdStatus ord_status
     case json::OrdStatus::NEW: {
       switch (request_type) {
         case RequestType::UNDEFINED:
-          LOG(WARNING)("*** EXTERNAL ACTION ***"_sv);
+          log::warn("*** EXTERNAL ACTION ***"_sv);
           break;
         case RequestType::CREATE_ORDER:
         case RequestType::MODIFY_ORDER:
           return RequestStatus::ACCEPTED;
         case RequestType::CANCEL_ORDER:
-          DLOG(FATAL)("DEBUG: UNEXPECTED"_sv);
+          log::fatal("DEBUG: UNEXPECTED"_sv);
           break;
       }
       break;
@@ -56,13 +56,13 @@ auto compute_request_status(RequestType request_type, json::OrdStatus ord_status
     case json::OrdStatus::CANCELED: {
       switch (request_type) {
         case RequestType::UNDEFINED:
-          LOG(WARNING)("*** EXTERNAL ACTION ***"_sv);
+          log::warn("*** EXTERNAL ACTION ***"_sv);
           break;
         case RequestType::CANCEL_ORDER:
           return RequestStatus::ACCEPTED;
         case RequestType::CREATE_ORDER:
         case RequestType::MODIFY_ORDER:
-          DLOG(FATAL)("DEBUG: UNEXPECTED"_sv);
+          log::fatal("DEBUG: UNEXPECTED"_sv);
           break;
       }
       break;
@@ -78,7 +78,7 @@ void OrderUpdate::operator()(
   if (!Flags::rest_allow_order_updates())
     return;
   auto order_status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  DLOG(INFO)(R"(DEBUG: order_status={})"_fmt, order_status);
+  log::debug(R"(DEBUG: order_status={})"_fmt, order_status);
   server::OMS_Lookup order_lookup{
       .symbol = order_item.symbol,
       .side = json::map(order_item.side),
@@ -106,13 +106,13 @@ void OrderUpdate::operator()(
       });
 
   if (!found) {
-    LOG(WARNING)("*** EXTERNAL ORDER ***"_sv);
-    LOG(WARNING)("order_item={}"_fmt, order_item);
+    log::warn("*** EXTERNAL ORDER ***"_sv);
+    log::warn("order_item={}"_fmt, order_item);
   }
 }
 
 void OrderUpdate::operator()(const json::Order &order, const server::TraceInfo &trace_info) {
-  DLOG(INFO)(R"(DEBUG: order={})"_fmt, order);
+  log::debug(R"(DEBUG: order={})"_fmt, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info);
 }

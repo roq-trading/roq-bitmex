@@ -53,10 +53,10 @@ void Parser::dispatch(
       auto field = Field(key);
       switch (field) {
         case Field::UNDEFINED:
-          LOG(FATAL)("Unexpected"_sv);
+          log::fatal("Unexpected"_sv);
           break;
         case Field::UNKNOWN:
-          DLOG(FATAL)(R"(Unknown key="{}")"_fmt, key);
+          log::fatal(R"(Unknown key="{}")"_fmt, key);
           break;
         case Field::ACTION:
           update(result.action, value);
@@ -270,8 +270,8 @@ void Parser::dispatch(
         break;
     }
   }
-  LOG(WARNING)(R"(message="{}")"_fmt, message);
-  LOG(FATAL)("Unexpected"_sv);
+  log::warn(R"(message="{}")"_fmt, message);
+  log::fatal("Unexpected"_sv);
 }
 
 }  // namespace json

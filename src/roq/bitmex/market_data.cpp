@@ -169,7 +169,7 @@ void MarketData::operator()(GatewayStatus status) {
         .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    log::info("stream_update={}"_fmt, stream_update);
     server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
@@ -181,7 +181,7 @@ void MarketData::send_subscribe(const std::string_view &topic) {
       R"("args":"{}")"
       R"(}})"_fmt,
       topic);
-  DLOG(INFO)(R"(DEBUG: message="{}")"_fmt, message);
+  log::debug(R"(DEBUG: message="{}")"_fmt, message);
   connection_.send_text(message);
 }
 
@@ -196,7 +196,7 @@ void MarketData::send_subscribe(const roq::span<std::string_view> &topics) {
         R"("args":["{}"])"
         R"(}})"_fmt,
         roq::join(topics, R"(",")"_sv));
-    DLOG(INFO)(R"(DEBUG: message="{}")"_fmt, message);
+    log::debug(R"(DEBUG: message="{}")"_fmt, message);
     connection_.send_text(message);
   }
 }
@@ -242,13 +242,13 @@ void MarketData::subscribe_order_book_l2() {
 }
 
 void MarketData::parse(const std::string_view &message) {
-  VLOG(4)(R"(message={})"_fmt, message);
+  log::trace_4(R"(message={})"_fmt, message);
   profile_.parse([&]() {
     try {
       parse_helper(message);
     } catch (std::exception &e) {
-      LOG(WARNING)(R"(message="{}")"_fmt, message);
-      LOG(FATAL)(R"(ERROR what="{}")"_fmt, e.what());
+      log::warn(R"(message="{}")"_fmt, message);
+      log::fatal(R"(ERROR what="{}")"_fmt, e.what());
     }
   });
 }
@@ -260,17 +260,18 @@ void MarketData::parse_helper(const std::string_view &message) {
 }
 
 void MarketData::operator()(const json::CancelAllAfter &cancel_all_after) {
-  profile_.cancel_all_after([&]() { VLOG(1)(R"(cancel_all_after={})"_fmt, cancel_all_after); });
+  profile_.cancel_all_after(
+      [&]() { log::trace_1(R"(cancel_all_after={})"_fmt, cancel_all_after); });
 }
 
 void MarketData::operator()(const json::Error &error) {
-  profile_.error([&]() { LOG(WARNING)(R"(error={})"_fmt, error); });
+  profile_.error([&]() { log::warn(R"(error={})"_fmt, error); });
   connection_.close();
 }
 
 void MarketData::operator()(const json::Handshake &handshake) {
   profile_.handshake([&]() {
-    VLOG(1)(R"(handshake={})"_fmt, handshake);
+    log::trace_1(R"(handshake={})"_fmt, handshake);
     (*this)(GatewayStatus::DOWNLOADING);
     download_.begin();
   });
@@ -278,16 +279,15 @@ void MarketData::operator()(const json::Handshake &handshake) {
 
 void MarketData::operator()(const json::Subscribe &subscribe) {
   profile_.subscribe([&]() {
-    VLOG(1)(R"(subscribe={})"_fmt, subscribe);
+    log::trace_1(R"(subscribe={})"_fmt, subscribe);
     if (subscribe.success) {
       assert(!subscribe.failure);
-      LOG(INFO)
-      (R"(Successfully subscribed to topic="{}")"_fmt, subscribe.subscribe);
+      log::info(R"(Successfully subscribed to topic="{}")"_fmt, subscribe.subscribe);
     } else if (subscribe.failure) {
       assert(!subscribe.success);
-      LOG(WARNING)(R"(Failed to subscribe topic="{}")"_fmt, subscribe.subscribe);
+      log::warn(R"(Failed to subscribe topic="{}")"_fmt, subscribe.subscribe);
     } else {
-      LOG(FATAL)("Expected success or failure"_sv);
+      log::fatal("Expected success or failure"_sv);
     }
     // TODO(thraneh): clear timeout
   });
@@ -296,7 +296,7 @@ void MarketData::operator()(const json::Subscribe &subscribe) {
 void MarketData::operator()(
     const json::Action action, const json::Funding &funding, const server::TraceInfo &) {
   profile_.funding([&]() {
-    VLOG(2)(R"(action={}, funding={})"_fmt, action, funding);
+    log::trace_2(R"(action={}, funding={})"_fmt, action, funding);
     // XXX not used
   });
 }
@@ -306,25 +306,25 @@ void MarketData::operator()(
     const json::Instrument &instrument,
     const server::TraceInfo &trace_info) {
   profile_.instrument([&]() {
-    VLOG(2)(R"(action={}, instrument={})"_fmt, action, instrument);
+    log::trace_2(R"(action={}, instrument={})"_fmt, action, instrument);
     // note!
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
     switch (action) {
       case json::Action::UNDEFINED:
       case json::Action::UNKNOWN:
-        LOG(FATAL)("Unexpected"_sv);
+        log::fatal("Unexpected"_sv);
         break;
       case json::Action::PARTIAL:
         if (partial_received_.instrument) {
-          DLOG(INFO)("DEBUG: action={}, instrument={})"_fmt, action, instrument);
+          log::debug("DEBUG: action={}, instrument={})"_fmt, action, instrument);
           assert(false);  // didn't expect this
         } else {
           partial_received_.instrument = true;
           size_t security_count = {};
           for (auto &item : instrument.data) {
             if (shared_.discard_symbol(item.symbol)) {
-              VLOG(1)(R"(Drop symbol="{}")"_fmt, item.symbol);
+              log::trace_1(R"(Drop symbol="{}")"_fmt, item.symbol);
               continue;
             }
             ++security_count;
@@ -336,14 +336,13 @@ void MarketData::operator()(
             auto statistics_update = product.statistics_update(item, stream_id_);
             server::create_trace_and_dispatch(trace_info, statistics_update, handler_, true);
           }
-          VLOG(2)
-          (R"(- securities: {} (/{}))"_fmt, security_count, instrument.data.size());
+          log::trace_2(R"(- securities: {} (/{}))"_fmt, security_count, instrument.data.size());
           // release download state
           download_.check_relaxed(MarketDataState::INSTRUMENT);
         }
         break;
       case json::Action::INSERT:
-        DLOG(INFO)("DEBUG: action={}, instrument={})"_fmt, action, instrument);
+        log::debug("DEBUG: action={}, instrument={})"_fmt, action, instrument);
         assert(false);  // XXX should we just drop these updates?
         break;
       case json::Action::UPDATE: {
@@ -371,7 +370,7 @@ void MarketData::operator()(
 void MarketData::operator()(
     const json::Action action, const json::Liquidation &liquidation, const server::TraceInfo &) {
   profile_.liquidation([&]() {
-    VLOG(2)(R"(action={}, liquidation={})"_fmt, action, liquidation);
+    log::trace_2(R"(action={}, liquidation={})"_fmt, action, liquidation);
     // don't use
   });
 }
@@ -381,7 +380,7 @@ void MarketData::operator()(
     const json::OrderBookL2 &order_book_l2,
     const server::TraceInfo &trace_info) {
   profile_.order_book_l2([&]() {
-    VLOG(3)(R"(action={}, order_book_l2={})"_fmt, action, order_book_l2);
+    log::trace_3(R"(action={}, order_book_l2={})"_fmt, action, order_book_l2);
     assert(action != json::Action::UNKNOWN);
     auto snapshot = action == json::Action::PARTIAL;
     // note!
@@ -396,8 +395,8 @@ void MarketData::operator()(
         previous = item.symbol;
       } else if (previous.compare(item.symbol) != 0) {
         assert(!(bids.empty() && asks.empty()));
-        LOG_IF(INFO, snapshot)
-        (R"(Received market data snapshot for symbol="{}")"_fmt, previous);
+        if (ROQ_UNLIKELY(snapshot))
+          log::info(R"(Received market data snapshot for symbol="{}")"_fmt, previous);
         MarketByPriceUpdate market_by_price_update{
             .stream_id = stream_id_,
             .exchange = Flags::exchange(),
@@ -407,7 +406,7 @@ void MarketData::operator()(
             .snapshot = snapshot,
             .exchange_time_utc = {},
         };
-        VLOG(3)(R"(market_by_price_update={})"_fmt, market_by_price_update);
+        log::trace_3(R"(market_by_price_update={})"_fmt, market_by_price_update);
         server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
         previous = item.symbol;
         bids.clear();
@@ -423,24 +422,24 @@ void MarketData::operator()(
             asks.emplace_back([&price_size](auto &result) { emplace(result, price_size); });
             break;
           default:
-            LOG(FATAL)("Unexpected"_sv);
+            log::fatal("Unexpected"_sv);
         }
       } else {
-        LOG(WARNING)
-        (R"(Closing web-socket: )"
-         R"(unexpected action={} id={} price={} size={})"_fmt,
-         action,
-         item.id,
-         item.price,
-         item.size);
+        log::warn(
+            R"(Closing web-socket: )"
+            R"(unexpected action={} id={} price={} size={})"_fmt,
+            action,
+            item.id,
+            item.price,
+            item.size);
         connection_.close();
         return;
       }
     }
     assert(!previous.empty());
     assert(!(bids.empty() && asks.empty()));
-    LOG_IF(INFO, snapshot)
-    (R"(Received market data snapshot for symbol="{}")"_fmt, previous);
+    if (ROQ_UNLIKELY(snapshot))
+      log::info(R"(Received market data snapshot for symbol="{}")"_fmt, previous);
     MarketByPriceUpdate market_by_price_update{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
@@ -450,7 +449,7 @@ void MarketData::operator()(
         .snapshot = snapshot,
         .exchange_time_utc = {},
     };
-    VLOG(3)(R"(market_by_price_update={})"_fmt, market_by_price_update);
+    log::trace_3(R"(market_by_price_update={})"_fmt, market_by_price_update);
     server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
     // state management
     if (snapshot) {
@@ -464,7 +463,7 @@ void MarketData::operator()(
 void MarketData::operator()(
     const json::Action action, const json::Quote &quote, const server::TraceInfo &trace_info) {
   profile_.quote([&]() {
-    VLOG(3)(R"(action={}, quote={})"_fmt, action, quote);
+    log::trace_3(R"(action={}, quote={})"_fmt, action, quote);
     for (auto &item : quote.data) {
       TopOfBook top_of_book{
           .stream_id = stream_id_,
@@ -487,7 +486,7 @@ void MarketData::operator()(
 void MarketData::operator()(
     const json::Action action, const json::Settlement &settlement, const server::TraceInfo &) {
   profile_.settlement([&]() {
-    VLOG(3)(R"(action={}, settlement={})"_fmt, action, settlement);
+    log::trace_3(R"(action={}, settlement={})"_fmt, action, settlement);
     // do nothing
   });
 }
@@ -495,7 +494,7 @@ void MarketData::operator()(
 void MarketData::operator()(
     const json::Action action, const json::Trade &trade, const server::TraceInfo &trace_info) {
   profile_.trade([&]() {
-    VLOG(2)(R"(action={}, trade={})"_fmt, action, trade);
+    log::trace_2(R"(action={}, trade={})"_fmt, action, trade);
     if (action != json::Action::INSERT)
       return;
     std::string_view previous;
@@ -538,22 +537,22 @@ void MarketData::operator()(
 
 void MarketData::operator()(
     const json::Action action, const json::Execution &execution, const server::TraceInfo &) {
-  LOG(FATAL)(R"(Unexpected: action={}, execution={})"_fmt, action, execution);
+  log::fatal(R"(Unexpected: action={}, execution={})"_fmt, action, execution);
 }
 
 void MarketData::operator()(
     const json::Action action, const json::Margin &margin, const server::TraceInfo &) {
-  LOG(FATAL)(R"(Unexpected: action={}, margin={})"_fmt, action, margin);
+  log::fatal(R"(Unexpected: action={}, margin={})"_fmt, action, margin);
 }
 
 void MarketData::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &) {
-  LOG(FATAL)(R"(Unexpected: action={}, order={})"_fmt, action, order);
+  log::fatal(R"(Unexpected: action={}, order={})"_fmt, action, order);
 }
 
 void MarketData::operator()(
     const json::Action action, const json::Position &position, const server::TraceInfo &) {
-  LOG(FATAL)(R"(Unexpected: action={}, position={})"_fmt, action, position);
+  log::fatal(R"(Unexpected: action={}, position={})"_fmt, action, position);
 }
 
 Product &MarketData::find_product(const json::InstrumentItem &item) {

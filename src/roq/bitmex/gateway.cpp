@@ -59,12 +59,12 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
       order_entry_(create_order_entry(*this, context_, stream_id_, security_, shared_)),
       drop_copy_(create_drop_copy(*this, context_, stream_id_, security_, shared_)),
       market_data_(*this, context_, ++stream_id_, shared_) {
-  LOG_IF(WARNING, !Flags::ws_cancel_on_disconnect())
-  ("Orders will *NOT* be cancelled on disconnect"_sv);
+  if (ROQ_UNLIKELY(!Flags::ws_cancel_on_disconnect()))
+    log::warn("Orders will *NOT* be cancelled on disconnect"_sv);
 }
 
 void Gateway::operator()(const Event<Start> &event) {
-  LOG(INFO)("Starting the gateway..."_sv);
+  log::info("Starting the gateway..."_sv);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -73,7 +73,7 @@ void Gateway::operator()(const Event<Start> &event) {
 }
 
 void Gateway::operator()(const Event<Stop> &event) {
-  LOG(INFO)("Stopping the gateway..."_sv);
+  log::info("Stopping the gateway..."_sv);
   market_data_(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);

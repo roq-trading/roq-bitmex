@@ -17,7 +17,7 @@ std::pair<double, double> PriceCache::operator()(
   switch (action) {
     case json::Action::UNDEFINED:
     case json::Action::UNKNOWN:
-      LOG(FATAL)("Unexpected"_sv);
+      log::fatal("Unexpected"_sv);
       break;
     case json::Action::PARTIAL:
     case json::Action::INSERT:
@@ -35,8 +35,7 @@ std::pair<double, double> PriceCache::operator()(
         }
       } else {
         // unexpected price or size ==> fail
-        DLOG(FATAL)
-        (R"(DEBUG: action={} id={} price={} size={})"_fmt, action, id, price, size);
+        log::fatal(R"(DEBUG: action={} id={} price={} size={})"_fmt, action, id, price, size);
       }
       break;
     case json::Action::UPDATE:
