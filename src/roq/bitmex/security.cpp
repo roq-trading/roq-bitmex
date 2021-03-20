@@ -42,7 +42,7 @@ std::string Security::create_signature(
   hmac_.update(method_);
   hmac_.update(path);
   hmac_.update(expires_);
-  if (body.empty() == false)
+  if (!body.empty())
     hmac_.update(body);
   std::array<char, 32u> buffer;
   auto length = hmac_.digest(buffer);

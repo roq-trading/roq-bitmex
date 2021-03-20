@@ -75,7 +75,7 @@ auto compute_request_status(RequestType request_type, json::OrdStatus ord_status
 
 void OrderUpdate::operator()(
     const json::OrderItem &order_item, const server::TraceInfo &trace_info) {
-  if (Flags::rest_allow_order_updates() == false)
+  if (!Flags::rest_allow_order_updates())
     return;
   auto order_status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   DLOG(INFO)(R"(DEBUG: order_status={})"_fmt, order_status);
@@ -105,7 +105,7 @@ void OrderUpdate::operator()(
         }
       });
 
-  if (found == false) {
+  if (!found) {
     LOG(WARNING)("*** EXTERNAL ORDER ***"_sv);
     LOG(WARNING)("order_item={}"_fmt, order_item);
   }

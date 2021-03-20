@@ -32,7 +32,7 @@ bool Product::update(const json::InstrumentItem &item) {
 }
 
 ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t stream_id) const {
-  assert(item.symbol.empty() == false);
+  assert(!item.symbol.empty());
   return ReferenceData{
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
@@ -58,7 +58,7 @@ ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t
 }
 
 MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t stream_id) const {
-  assert(item.symbol.empty() == false);
+  assert(!item.symbol.empty());
   return MarketStatus{
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
@@ -69,7 +69,7 @@ MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t s
 
 StatisticsUpdate Product::statistics_update(
     const json::InstrumentItem &item, uint16_t stream_id) const {
-  assert(item.symbol.empty() == false);
+  assert(!item.symbol.empty());
   return StatisticsUpdate{
       .stream_id = stream_id,
       .exchange = Flags::exchange(),

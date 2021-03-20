@@ -280,11 +280,11 @@ void MarketData::operator()(const json::Subscribe &subscribe) {
   profile_.subscribe([&]() {
     VLOG(1)(R"(subscribe={})"_fmt, subscribe);
     if (subscribe.success) {
-      assert(subscribe.failure == false);
+      assert(!subscribe.failure);
       LOG(INFO)
       (R"(Successfully subscribed to topic="{}")"_fmt, subscribe.subscribe);
     } else if (subscribe.failure) {
-      assert(subscribe.success == false);
+      assert(!subscribe.success);
       LOG(WARNING)(R"(Failed to subscribe topic="{}")"_fmt, subscribe.subscribe);
     } else {
       LOG(FATAL)("Expected success or failure"_sv);

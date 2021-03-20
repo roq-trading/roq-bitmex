@@ -96,7 +96,7 @@ void DropCopy::operator()(const Event<Stop> &) {
 }
 
 void DropCopy::operator()(const Event<Timer> &event) {
-  if (connection_.refresh(event.value.now) == false)
+  if (!connection_.refresh(event.value.now))
     return;
   if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after().count() && ready_ &&
       next_cancel_all_after_ <= event.value.now) {
@@ -274,7 +274,7 @@ void DropCopy::operator()(const json::Handshake &handshake) {
     VLOG(1)(R"(handshake={})"_fmt, handshake);
     (*this)(GatewayStatus::DOWNLOADING);
     download_.begin();
-    if (Flags::ws_cancel_on_disconnect() == false || Flags::ws_cancel_all_after().count() == 0)
+    if (!Flags::ws_cancel_on_disconnect() || Flags::ws_cancel_all_after().count() == 0)
       send_cancel_all_after(std::chrono::seconds{});
   });
 }
@@ -283,11 +283,11 @@ void DropCopy::operator()(const json::Subscribe &subscribe) {
   profile_.subscribe([&]() {
     VLOG(1)(R"(subscribe={})"_fmt, subscribe);
     if (subscribe.success) {
-      assert(subscribe.failure == false);
+      assert(!subscribe.failure);
       LOG(INFO)
       (R"(Successfully subscribed to topic="{}")"_fmt, subscribe.subscribe);
     } else if (subscribe.failure) {
-      assert(subscribe.success == false);
+      assert(!subscribe.success);
       LOG(WARNING)(R"(Failed to subscribe topic="{}")"_fmt, subscribe.subscribe);
     } else {
       LOG(FATAL)("Expected success or failure"_sv);
@@ -413,7 +413,7 @@ void DropCopy::operator()(
                   trace_info, trade_update, handler_, true, order.user_id);
             }
           });
-      if (found == false) {
+      if (!found) {
         LOG(WARNING)("*** EXTERNAL ORDER ***"_sv);
         LOG(WARNING)("action={}, execution={}"_fmt, action, execution);
       }

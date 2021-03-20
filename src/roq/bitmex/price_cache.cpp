@@ -21,7 +21,7 @@ std::pair<double, double> PriceCache::operator()(
       break;
     case json::Action::PARTIAL:
     case json::Action::INSERT:
-      if (std::isnan(price) == false && std::isnan(size) == false) {
+      if (!std::isnan(price) && !std::isnan(size)) {
         if (iter == price_lookup_.end()) {
           iter = price_lookup_.emplace(id, price).first;
           result = (*iter).second;

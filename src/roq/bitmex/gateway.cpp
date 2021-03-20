@@ -59,7 +59,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
       order_entry_(create_order_entry(*this, context_, stream_id_, security_, shared_)),
       drop_copy_(create_drop_copy(*this, context_, stream_id_, security_, shared_)),
       market_data_(*this, context_, ++stream_id_, shared_) {
-  LOG_IF(WARNING, Flags::ws_cancel_on_disconnect() == false)
+  LOG_IF(WARNING, !Flags::ws_cancel_on_disconnect())
   ("Orders will *NOT* be cancelled on disconnect"_sv);
 }
 
@@ -97,7 +97,7 @@ void Gateway::operator()(
     const Event<CreateOrder> &event,
     const std::string_view &request_id,
     uint32_t gateway_order_id) {
-  assert(event.value.account.empty() == false);
+  assert(!event.value.account.empty());
   get_order_entry(event.value.account)(event, request_id, gateway_order_id);
 }
 
@@ -105,7 +105,7 @@ void Gateway::operator()(
     const Event<ModifyOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
-  assert(event.value.account.empty() == false);
+  assert(!event.value.account.empty());
   assert(event.value.account == order.account);
   get_order_entry(event.value.account)(event, request_id, order);
 }
@@ -114,7 +114,7 @@ void Gateway::operator()(
     const Event<CancelOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
-  assert(event.value.account.empty() == false);
+  assert(!event.value.account.empty());
   assert(event.value.account == order.account);
   get_order_entry(event.value.account)(event, request_id, order);
 }
@@ -181,7 +181,7 @@ void Gateway::operator()(const MarketData &) {
 
 /*
 int32_t Gateway::download(MarketDataDownload::State state) {
-  if (order_entry_.connection.ready() == false)
+  if (!order_entry_.connection.ready())
     return -1;
   switch (state) {
     case MarketDataDownload::State::UNDEFINED:
