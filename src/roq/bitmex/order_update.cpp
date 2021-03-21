@@ -78,7 +78,7 @@ void OrderUpdate::operator()(
   if (!Flags::rest_allow_order_updates())
     return;
   auto order_status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug(R"(DEBUG: order_status={})"_fmt, order_status);
+  log::debug("DEBUG: order_status={}"_fmt, order_status);
   server::OMS_Lookup order_lookup{
       .symbol = order_item.symbol,
       .side = json::map(order_item.side),
@@ -112,7 +112,7 @@ void OrderUpdate::operator()(
 }
 
 void OrderUpdate::operator()(const json::Order &order, const server::TraceInfo &trace_info) {
-  log::debug(R"(DEBUG: order={})"_fmt, order);
+  log::debug("DEBUG: order={}"_fmt, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info);
 }

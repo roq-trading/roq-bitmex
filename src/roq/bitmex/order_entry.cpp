@@ -246,7 +246,7 @@ void OrderEntry::create_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            log::trace_1(R"(order_item={})"_fmt, order_item);
+            log::trace_1("order_item={}"_fmt, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
@@ -291,7 +291,7 @@ void OrderEntry::modify_order(
           try {
             response.expect(core::http::Status::OK);
             auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            log::trace_1(R"(order_item={})"_fmt, order_item);
+            log::trace_1("order_item={}"_fmt, order_item);
             core::Promise<json::OrderItem> promise(order_item);
             callback(promise);
           } catch (NetworkError &e) {
@@ -333,7 +333,7 @@ void OrderEntry::cancel_order(
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
             auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-            log::trace_1(R"(order={})"_fmt, order);
+            log::trace_1("order={}"_fmt, order);
             core::Promise<json::Order> promise(order);
             callback(promise);
           } catch (NetworkError &e) {
