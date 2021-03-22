@@ -2,8 +2,9 @@
 
 #include "roq/bitmex/price_cache.h"
 
-#include "roq/compare.h"
 #include "roq/logging.h"
+
+#include "roq/utils/compare.h"
 
 using namespace roq::literals;
 
@@ -27,7 +28,7 @@ std::pair<double, double> PriceCache::operator()(
           result = (*iter).second;
         } else {
           auto previous = (*iter).second;
-          if (compare(price, previous) == 0) {
+          if (utils::compare(price, previous) == 0) {
             result = (*iter).second;
           } else {
             // exists as a different price ==> fail
@@ -39,7 +40,7 @@ std::pair<double, double> PriceCache::operator()(
       }
       break;
     case json::Action::UPDATE:
-      if (std::isnan(price) && !std::isnan(size) && compare(size, 0.0) > 0) {
+      if (std::isnan(price) && !std::isnan(size) && utils::compare(size, 0.0) > 0) {
         if (iter != price_lookup_.end()) {
           result = (*iter).second;
         } else {
@@ -50,7 +51,7 @@ std::pair<double, double> PriceCache::operator()(
       }
       break;
     case json::Action::DELETE:
-      if (std::isnan(price) && (std::isnan(size) || compare(size, 0.0) == 0)) {
+      if (std::isnan(price) && (std::isnan(size) || utils::compare(size, 0.0) == 0)) {
         if (iter != price_lookup_.end()) {
           result = (*iter).second;
           price_lookup_.erase(iter);

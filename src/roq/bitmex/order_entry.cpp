@@ -7,8 +7,8 @@
 #include <chrono>
 #include <utility>
 
-#include "roq/mask.h"
-#include "roq/update.h"
+#include "roq/utils/mask.h"
+#include "roq/utils/update.h"
 
 #include "roq/core/metrics/factory.h"
 
@@ -24,7 +24,7 @@ namespace bitmex {
 
 namespace {
 static const auto NAME = "om"_sv;
-static const auto SUPPORTS = Mask{
+static const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
@@ -187,7 +187,7 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 }
 
 void OrderEntry::operator()(GatewayStatus status) {
-  if (update(status_, status)) {
+  if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
     StreamUpdate stream_update{
         .stream_id = stream_id_,
