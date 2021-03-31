@@ -7,7 +7,7 @@
 
 #include "roq/core/promise.h"
 
-#include "roq/core/utils/buffer.h"
+#include "roq/core/buffer.h"
 
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
@@ -89,7 +89,7 @@ class OrderEntry final : public core::web::Client::Handler {
   // connection
   core::web::Client connection_;
   // buffers
-  core::utils::Buffer decode_buffer_;
+  core::Buffer decode_buffer_;
   // metrics
   struct {
     core::metrics::Counter disconnect;

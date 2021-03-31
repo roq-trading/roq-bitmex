@@ -24,12 +24,16 @@ namespace bitmex {
 
 namespace {
 static const auto NAME = "om"_sv;
+
 static const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
+
+static const auto KEEP_ALIVE = true;
+static const auto ALLOW_PIPELINING = true;
 
 static const auto ACCEPT_JSON = "application/json"_sv;
 static const auto CONTENT_TYPE_JSON = "application/json"_sv;
@@ -56,16 +60,16 @@ OrderEntry::OrderEntry(
       connection_(
           *this,
           context,
+          Flags::decode_buffer_size(),
+          Flags::encode_buffer_size(),
           core::URI(Flags::rest_uri()),
           ROQ_PACKAGE_NAME,
-          true,  // keep alive
-          Flags::rest_request_queue_depth(),
+          KEEP_ALIVE,
+          ALLOW_PIPELINING,
           Flags::rest_request_timeout(),
           Flags::rest_rate_limit_interval(),
           Flags::rest_rate_limit_max_requests(),
           Flags::rest_ping_freq(),
-          Flags::decode_buffer_size(),
-          Flags::encode_buffer_size(),
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
@@ -241,6 +245,7 @@ void OrderEntry::create_order(
       CONTENT_TYPE_JSON,
       headers,
       message,
+      core::web::QualityOfService::IMMEDIATE,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.create_order([&]() {
           try {
@@ -286,6 +291,7 @@ void OrderEntry::modify_order(
       CONTENT_TYPE_JSON,
       headers,
       message,
+      core::web::QualityOfService::IMMEDIATE,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.modify_order([&]() {
           try {
@@ -327,6 +333,7 @@ void OrderEntry::cancel_order(
       CONTENT_TYPE_JSON,
       headers,
       message,
+      core::web::QualityOfService::IMMEDIATE,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.cancel_order([&]() {
           try {

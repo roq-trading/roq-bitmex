@@ -331,7 +331,7 @@ TEST(json_instrument_item, open) {
 
 TEST(json_instrument, empty) {
   const auto message = "[]"_sv;
-  core::utils::Buffer buffer(8192);
+  core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
   EXPECT_EQ(obj.data.size(), size_t{0});
@@ -549,7 +549,7 @@ TEST(json_instrument, simple) {
                        R"("timestamp":"2020-01-22T19:09:30.000Z")"
                        R"(})"
                        R"(])"_sv;
-  core::utils::Buffer buffer(8192);
+  core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
   EXPECT_EQ(obj.data.size(), size_t{2});
