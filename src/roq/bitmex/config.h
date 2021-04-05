@@ -25,13 +25,13 @@ class Config final : public server::Config, public server::ConfigReader::Handler
   auto get_api_key() const {
     using namespace roq::literals;
     if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported"_s);
+      throw RuntimeErrorException("More accounts not yet supported"_sv);
     return (*accounts.begin()).second.login;
   }
   auto get_secret() const {
     using namespace roq::literals;
     if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported"_s);
+      throw RuntimeErrorException("More accounts not yet supported"_sv);
     return (*accounts.begin()).second.secret;
   }
 

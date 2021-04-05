@@ -31,7 +31,7 @@ void update(Type &result, const Type type) {
   if (result == Type::UNKNOWN) {
     result = type;
   } else if (result != type) {
-    throw std::runtime_error("wrong type"_s);
+    throw RuntimeErrorException("wrong type"_sv);
   }
 }
 }  // namespace
@@ -226,7 +226,7 @@ void Parser::dispatch(
     }
     switch (type) {
       case Type::UNKNOWN:
-        throw std::runtime_error("Can't detect message type"_s);
+        throw RuntimeErrorException("Can't detect message type"_sv);
       case Type::CANCEL_ALL_AFTER: {
         CancelAllAfter cancel_all_after = {
             .cancel_time = result.cancel_time,

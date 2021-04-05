@@ -218,7 +218,7 @@ OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != order_entry_.end())
     return *(*iter).second;
-  throw std::runtime_error(roq::format(R"(Unknown account="{}")"_fmt, account));
+  throw RuntimeErrorException(R"(Unknown account="{}")"_fmt, account);
 }
 
 }  // namespace bitmex
