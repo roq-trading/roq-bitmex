@@ -59,7 +59,7 @@ class OrderEntry final : public core::web::Client::Handler {
   void operator()(const core::web::Client::Latency &) override;
 
  private:
-  void operator()(GatewayStatus);
+  void operator()(ConnectionStatus);
 
   void create_order(
       const CreateOrder &,
@@ -105,7 +105,7 @@ class OrderEntry final : public core::web::Client::Handler {
   // cache
   Shared &shared_;
   // state
-  GatewayStatus status_ = {};
+  ConnectionStatus status_ = {};
 };
 
 }  // namespace bitmex

@@ -90,7 +90,10 @@ void Gateway::operator()(const Event<Timer> &event) {
   context_.dispatch(true);
 }
 
-void Gateway::operator()(const Event<Connection> &) {
+void Gateway::operator()(const Event<Connected> &) {
+}
+
+void Gateway::operator()(const Event<Disconnected> &) {
 }
 
 void Gateway::operator()(
@@ -198,8 +201,8 @@ int32_t Gateway::download(MarketDataDownload::State state) {
       return 1;
     }
     case MarketDataDownload::State::DONE:
-      update_order_manager(GatewayStatus::READY);
-      update_market_data(GatewayStatus::READY);
+      update_order_manager(ConnectionStatus::READY);
+      update_market_data(ConnectionStatus::READY);
       return 0;
   }
   assert(false);

@@ -133,12 +133,12 @@ void MarketData::operator()(const core::web::Socket::Disconnected &) {
   ready_ = false;
   partial_received_ = {};
   download_.reset();
-  (*this)(GatewayStatus::DISCONNECTED);
+  (*this)(ConnectionStatus::DISCONNECTED);
 }
 
 void MarketData::operator()(const core::web::Socket::Ready &) {
   // note! don't notify gateway: wait for handshake
-  (*this)(GatewayStatus::LOGIN_SENT);
+  (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
 void MarketData::operator()(const core::web::Socket::Close &) {
@@ -158,7 +158,7 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
   parse(text.payload);
 }
 
-void MarketData::operator()(GatewayStatus status) {
+void MarketData::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
     StreamUpdate stream_update{
@@ -215,7 +215,7 @@ uint32_t MarketData::download(MarketDataState state) {
       subscribe_order_book_l2();
       return 1u;
     case MarketDataState::DONE:
-      (*this)(GatewayStatus::READY);
+      (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;
       return {};
@@ -271,7 +271,7 @@ void MarketData::operator()(const json::Error &error) {
 void MarketData::operator()(const json::Handshake &handshake) {
   profile_.handshake([&]() {
     log::trace_1("handshake={}"_fmt, handshake);
-    (*this)(GatewayStatus::DOWNLOADING);
+    (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
   });
 }

@@ -55,7 +55,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::Parser::H
   void operator()(const core::web::Socket::Text &) override;
 
  private:
-  void operator()(GatewayStatus);
+  void operator()(ConnectionStatus);
 
   void send_cancel_all_after(std::chrono::seconds seconds);
 
@@ -120,7 +120,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::Parser::H
   // state
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
-  GatewayStatus status_ = {};
+  ConnectionStatus status_ = {};
   server::Download<DropCopyState> download_;
   struct {
     bool order = false;

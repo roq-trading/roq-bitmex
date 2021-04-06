@@ -60,7 +60,7 @@ class MarketData final : public core::web::Socket::Handler, public json::Parser:
   void operator()(const core::web::Socket::Text &) override;
 
  private:
-  void operator()(GatewayStatus);
+  void operator()(ConnectionStatus);
 
   void send_subscribe(const std::string_view &topic);
   void send_subscribe(const roq::span<std::string_view> &topics);
@@ -122,7 +122,7 @@ class MarketData final : public core::web::Socket::Handler, public json::Parser:
   absl::flat_hash_map<std::string, Product> product_cache_;
   // state
   bool ready_ = false;
-  GatewayStatus status_ = {};
+  ConnectionStatus status_ = {};
   server::Download<MarketDataState> download_;
   struct {
     bool instrument = false;

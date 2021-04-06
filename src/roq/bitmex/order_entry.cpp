@@ -172,12 +172,12 @@ void OrderEntry::operator()(
 }
 
 void OrderEntry::operator()(const core::web::Client::Connected &) {
-  (*this)(GatewayStatus::READY);
+  (*this)(ConnectionStatus::READY);
 }
 
 void OrderEntry::operator()(const core::web::Client::Disconnected &) {
   ++counter_.disconnect;
-  (*this)(GatewayStatus::DISCONNECTED);
+  (*this)(ConnectionStatus::DISCONNECTED);
 }
 
 void OrderEntry::operator()(const core::web::Client::Latency &latency) {
@@ -190,7 +190,7 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void OrderEntry::operator()(GatewayStatus status) {
+void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
     StreamUpdate stream_update{

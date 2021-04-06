@@ -133,12 +133,12 @@ void DropCopy::operator()(const core::web::Socket::Disconnected &) {
   next_cancel_all_after_ = {};
   partial_received_ = {};
   download_.reset();
-  (*this)(GatewayStatus::DISCONNECTED);
+  (*this)(ConnectionStatus::DISCONNECTED);
 }
 
 void DropCopy::operator()(const core::web::Socket::Ready &) {
   // note! don't notify gateway: wait for handshake
-  (*this)(GatewayStatus::LOGIN_SENT);
+  (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
 void DropCopy::operator()(const core::web::Socket::Close &) {
@@ -158,7 +158,7 @@ void DropCopy::operator()(const core::web::Socket::Text &text) {
   parse(text.payload);
 }
 
-void DropCopy::operator()(GatewayStatus status) {
+void DropCopy::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
     StreamUpdate stream_update{
@@ -220,7 +220,7 @@ uint32_t DropCopy::download(DropCopyState state) {
       subscribe();
       return 1u;
     case DropCopyState::DONE:
-      (*this)(GatewayStatus::READY);
+      (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;
       return {};
@@ -272,7 +272,7 @@ void DropCopy::operator()(const json::Error &error) {
 void DropCopy::operator()(const json::Handshake &handshake) {
   profile_.handshake([&]() {
     log::trace_1("handshake={}"_fmt, handshake);
-    (*this)(GatewayStatus::DOWNLOADING);
+    (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
     if (!Flags::ws_cancel_on_disconnect() || Flags::ws_cancel_all_after().count() == 0)
       send_cancel_all_after(std::chrono::seconds{});
