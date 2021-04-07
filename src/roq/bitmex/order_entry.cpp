@@ -193,7 +193,7 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
-    StreamUpdate stream_update{
+    StreamStatus stream_status{
         .stream_id = stream_id_,
         .type = StreamType::REST,
         .supports = SUPPORTS.get(),
@@ -201,8 +201,8 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
         .status = status_,
     };
-    log::info("stream_update={}"_fmt, stream_update);
-    server::create_trace_and_dispatch(trace_info, stream_update, handler_);
+    log::info("stream_status={}"_fmt, stream_status);
+    server::create_trace_and_dispatch(trace_info, stream_status, handler_);
   }
 }
 

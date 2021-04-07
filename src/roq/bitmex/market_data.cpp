@@ -161,7 +161,7 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
 void MarketData::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
-    StreamUpdate stream_update{
+    StreamStatus stream_status{
         .stream_id = stream_id_,
         .type = StreamType::WEB_SOCKET,
         .supports = SUPPORTS.get(),
@@ -169,8 +169,8 @@ void MarketData::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
         .status = status_,
     };
-    log::info("stream_update={}"_fmt, stream_update);
-    server::create_trace_and_dispatch(trace_info, stream_update, handler_);
+    log::info("stream_status={}"_fmt, stream_status);
+    server::create_trace_and_dispatch(trace_info, stream_status, handler_);
   }
 }
 
