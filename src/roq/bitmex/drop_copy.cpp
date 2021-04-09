@@ -247,9 +247,9 @@ void DropCopy::parse(const std::string_view &message) {
   profile_.parse([&]() {
     try {
       parse_helper(message);
-    } catch (std::exception &e) {
+    } catch (...) {
       log::warn(R"(message="{}")"_fmt, message);
-      log::fatal(R"(ERROR what="{}")"_fmt, e.what());
+      core::tools::UnhandledException::terminate();
     }
   });
 }
