@@ -1,16 +1,13 @@
-{% set version = environ.get('GIT_DESCRIBE_TAG', '0.0.0') %}
-{% set number = environ.get('GIT_DESCRIBE_NUMBER', 0) %}
-
 package:
   name: roq-bitmex
-  version: {{ version }}
+  version: {{ GIT_DESCRIBE_TAG }}
 
 source:
   git_url: ..
 
 build:
   skip: True  # [win]
-  number: {{ number }}
+  number: {{ GIT_DESCRIBE_NUMBER }}
   run_exports:
     - {{ pin_subpackage('roq-bitmex', max_pin='x.x') }}
 
@@ -22,11 +19,11 @@ requirements:
     - make
   host:
     - benchmark
-    - roq-api =={{ version }}
-    - roq-core =={{ version }}
+    - roq-api
+    - roq-core
     - roq-oss-date
     - roq-oss-http-parser
-    - roq-server =={{ version }}
+    - roq-server
 
 about:
   home: https://roq-trading.com

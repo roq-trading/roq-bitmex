@@ -4,9 +4,9 @@
 	ignore = dirty
 [submodule "roq-autogen"]
 	path = autogen
-	url = ssh://git@quinclas.ch:1975/roq-trading/roq-autogen.git
+	url = http://haproxy.service/gogs/roq-trading/roq-autogen.git
 	ignore = dirty
 [submodule "roq-cmake"]
 	path = cmake
-	url = ssh://git@quinclas.ch:1975/roq-trading/roq-cmake.git
+	url = http://haproxy.service/gogs/roq-trading/roq-cmake.git
 	ignore = dirty
