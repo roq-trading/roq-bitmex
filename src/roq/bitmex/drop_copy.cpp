@@ -406,6 +406,7 @@ void DropCopy::operator()(
                   .gateway_order_id = order.gateway_order_id,
                   .external_account = {},
                   .external_order_id = order.external_order_id,
+                  .routing_id = order.routing_id,
                   .fills = fills,
               };
               server::create_trace_and_dispatch(
