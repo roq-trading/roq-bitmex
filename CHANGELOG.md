@@ -4,6 +4,16 @@ All notable changes will be documented in this file.
 
 ## Head
 
+## 0.7.0 &ndash; 2021-04-15
+
+### Added
+
+* Multi-account support
+
+### Changed
+
+* Streams to support load-balancing
+
 ## 0.6.1 &ndash; 2021-02-19
 
 ## 0.6.0 &ndash; 2021-02-02
