@@ -171,6 +171,11 @@ void OrderEntry::operator()(
   });
 }
 
+void OrderEntry::operator()(
+    const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
+  log::fatal("NOT IMPLEMENTED"_sv);
+}
+
 void OrderEntry::operator()(const core::web::Client::Connected &) {
   (*this)(ConnectionStatus::READY);
 }
