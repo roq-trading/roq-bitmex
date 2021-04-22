@@ -210,11 +210,11 @@ void OrderEntry::create_order(
     const CreateOrder &create_order,
     const std::string_view &cl_ord_id,
     std::function<void(const core::Promise<json::OrderItem> &)> &&callback) {
-  constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/api/v1/order"_sv;
+  auto method = core::http::Method::POST;
+  auto path = "/api/v1/order"_sv;
   auto expires = compute_expires();
   // XXX use encode buffer
-  auto message = roq::format(
+  auto body = roq::format(
       R"({{)"
       R"("clOrdID":"{}",)"
       R"("symbol":"{}",)"
@@ -235,8 +235,9 @@ void OrderEntry::create_order(
       create_order.execution_instruction == ExecutionInstruction::UNDEFINED
           ? std::string_view{}
           : json::map(create_order.execution_instruction).as_raw_text());
-  log::debug(R"(DEBUG: body="{}")"_fmt, message);
-  auto headers = security_.create_headers(expires, method, path, message);
+  log::debug(R"(DEBUG: body="{}")"_fmt, body);
+  auto headers = security_.create_headers(expires, method, path, body);
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -244,8 +245,9 @@ void OrderEntry::create_order(
       ACCEPT_JSON,
       CONTENT_TYPE_JSON,
       headers,
-      message,
+      body,
       core::web::QualityOfService::IMMEDIATE,
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.create_order([&]() {
           try {
@@ -268,11 +270,11 @@ void OrderEntry::modify_order(
     [[maybe_unused]] const std::string_view &request_id,
     const server::OMS_Order &order,
     std::function<void(const core::Promise<json::OrderItem> &)> &&callback) {
-  constexpr auto method = core::http::Method::PUT;
-  constexpr std::string_view path = "/api/v1/order"_sv;
+  auto method = core::http::Method::PUT;
+  auto path = "/api/v1/order"_sv;
   auto expires = compute_expires();
   // XXX use encode buffer
-  auto message = roq::format(
+  auto body = roq::format(
       R"({{)"
       R"("orderID":"{}",)"
       R"("orderQty":{},)"
@@ -281,8 +283,9 @@ void OrderEntry::modify_order(
       order.external_order_id,
       modify_order.quantity,
       modify_order.price);
-  log::debug(R"(DEBUG: body="{}")"_fmt, message);
-  auto headers = security_.create_headers(expires, method, path, message);
+  log::debug(R"(DEBUG: body="{}")"_fmt, body);
+  auto headers = security_.create_headers(expires, method, path, body);
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -290,8 +293,9 @@ void OrderEntry::modify_order(
       ACCEPT_JSON,
       CONTENT_TYPE_JSON,
       headers,
-      message,
+      body,
       core::web::QualityOfService::IMMEDIATE,
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.modify_order([&]() {
           try {
@@ -314,17 +318,18 @@ void OrderEntry::cancel_order(
     [[maybe_unused]] const std::string_view &request_id,
     const server::OMS_Order &order,
     std::function<void(const core::Promise<json::Order> &)> &&callback) {
-  constexpr auto method = core::http::Method::DELETE;
-  constexpr std::string_view path = "/api/v1/order"_sv;
+  auto method = core::http::Method::DELETE;
+  auto path = "/api/v1/order"_sv;
   auto expires = compute_expires();
   // XXX use encode buffer
-  auto message = roq::format(
+  auto body = roq::format(
       R"({{)"
       R"("orderID":"{}")"
       R"(}})"_fmt,
       order.external_order_id);
-  log::debug(R"(DEBUG: body="{}")"_fmt, message);
-  auto headers = security_.create_headers(expires, method, path, message);
+  log::debug(R"(DEBUG: body="{}")"_fmt, body);
+  auto headers = security_.create_headers(expires, method, path, body);
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -332,8 +337,9 @@ void OrderEntry::cancel_order(
       ACCEPT_JSON,
       CONTENT_TYPE_JSON,
       headers,
-      message,
+      body,
       core::web::QualityOfService::IMMEDIATE,
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.cancel_order([&]() {
           try {
