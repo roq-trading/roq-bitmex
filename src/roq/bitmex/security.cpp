@@ -44,7 +44,7 @@ std::string Security::create_signature(
   hmac_.update(expires_);
   if (!body.empty())
     hmac_.update(body);
-  std::array<char, 32u> buffer;
+  std::array<char, 32> buffer;
   auto length = hmac_.digest(buffer);
   assert(length == buffer.size());
   return core::binascii::Hex::encode(buffer);

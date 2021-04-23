@@ -42,7 +42,7 @@ class Product final {
   json::State state_ = {};
   // statistics update
   // FIXME because of StatisticsUpdate::span<Statistics>
-  mutable std::array<Statistics, 2u> statistics_;
+  mutable std::array<Statistics, 2> statistics_;
 };
 
 }  // namespace bitmex

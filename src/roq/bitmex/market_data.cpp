@@ -187,7 +187,7 @@ void MarketData::send_subscribe(const std::string_view &topic) {
 
 void MarketData::send_subscribe(const roq::span<std::string_view> &topics) {
   assert(!topics.empty());
-  if (std::size(topics) == 1u) {
+  if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
   } else {
     auto message = roq::format(
@@ -210,10 +210,10 @@ uint32_t MarketData::download(MarketDataState state) {
       return {};
     case MarketDataState::INSTRUMENT:
       subscribe_instrument();
-      return 1u;
+      return 1;
     case MarketDataState::ORDER_BOOK_L2:
       subscribe_order_book_l2();
-      return 1u;
+      return 1;
     case MarketDataState::DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);

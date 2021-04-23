@@ -197,7 +197,7 @@ void DropCopy::send_subscribe(const std::string_view &topic) {
 
 void DropCopy::send_subscribe(const roq::span<std::string_view> &topics) {
   assert(!topics.empty());
-  if (std::size(topics) == 1u) {
+  if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
   } else {
     auto message = roq::format(
@@ -218,7 +218,7 @@ uint32_t DropCopy::download(DropCopyState state) {
       break;
     case DropCopyState::SUBSCRIBE:
       subscribe();
-      return 1u;
+      return 1;
     case DropCopyState::DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
