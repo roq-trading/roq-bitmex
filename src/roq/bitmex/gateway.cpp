@@ -54,8 +54,7 @@ static auto create_drop_copy(
 }  // namespace
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
-    : dispatcher_(dispatcher), master_account_(config.get_master_account()),
-      security_(create_security(config)), shared_(dispatcher),
+    : dispatcher_(dispatcher), security_(create_security(config)), shared_(dispatcher),
       order_entry_(create_order_entry(*this, context_, stream_id_, security_, shared_)),
       drop_copy_(create_drop_copy(*this, context_, stream_id_, security_, shared_)),
       market_data_(*this, context_, ++stream_id_, shared_) {

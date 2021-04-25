@@ -73,7 +73,6 @@ class Gateway final : public server::Handler,
  private:
   server::Dispatcher &dispatcher_;
   // config
-  const std::string master_account_;
   // security
   absl::flat_hash_map<std::string, std::unique_ptr<Security>> security_;
   // io
