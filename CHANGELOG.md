@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Added
+
+* New statistics fields
+
 ## 0.7.0 &ndash; 2021-04-15
 
 ### Added

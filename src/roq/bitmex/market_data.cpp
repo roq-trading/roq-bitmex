@@ -329,11 +329,16 @@ void MarketData::operator()(
             ++security_count;
             auto &product = find_product(item);
             auto reference_data = product.reference_data(item, stream_id_);
-            server::create_trace_and_dispatch(trace_info, reference_data, handler_, false);
-            auto market_status = product.market_status(item, stream_id_);
-            server::create_trace_and_dispatch(trace_info, market_status, handler_, false);
-            auto statistics_update = product.statistics_update(item, stream_id_);
-            server::create_trace_and_dispatch(trace_info, statistics_update, handler_, true);
+            server::create_trace_and_dispatch(trace_info, reference_data, handler_, true);
+            if (product.is_market_status_dirty()) {
+              auto market_status = product.market_status(item, stream_id_);
+              server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
+            }
+            if (product.is_statistics_dirty()) {
+              auto statistics_update = product.statistics_update(item, stream_id_);
+              server::create_trace_and_dispatch(trace_info, statistics_update, handler_, true);
+            }
+            product.clear();
           }
           log::trace_2("- securities: {} (/{})"_fmt, security_count, instrument.data.size());
           // release download state
