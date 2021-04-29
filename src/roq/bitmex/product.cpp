@@ -2,6 +2,8 @@
 
 #include "roq/bitmex/product.h"
 
+#include <magic_enum.hpp>
+
 #include "roq/utils/safe_cast.h"
 #include "roq/utils/update.h"
 
@@ -19,15 +21,29 @@ Product::Product(const json::InstrumentItem &item)
     : quote_currency_(item.quote_currency), settl_currency_(item.settl_currency),
       tick_size_(item.tick_size), multiplier_(item.multiplier), lot_size_(item.lot_size),
       option_strike_price_(item.option_strike_price), underlying_symbol_(item.underlying_symbol),
-      expiry_(item.expiry), settle_(item.settle),
-      state_(item.state), statistics_{
-                              Statistics{StatisticsType::UPPER_LIMIT_PRICE, item.limit_up_price},
-                              Statistics{StatisticsType::LOWER_LIMIT_PRICE, item.limit_down_price},
-                          } {
+      expiry_(item.expiry), settle_(item.settle) {
+  statistics_.reserve(magic_enum::enum_count<StatisticsType::type_t>());
+  update(item);
 }
 
 bool Product::update(const json::InstrumentItem &item) {
-  return utils::update(state_, item.state) != 0;
+  // market status
+  market_status_dirty_ |= utils::update(state_, item.state) != 0;
+  // statistics update
+  if (utils::update(settlement_price_, item.mark_price) != 0)
+    statistics_.emplace_back(Statistics{StatisticsType::SETTLEMENT_PRICE, settlement_price_});
+  if (utils::update(open_interest_, item.open_interest) != 0)
+    statistics_.emplace_back(Statistics{StatisticsType::OPEN_INTEREST, open_interest_});
+  if (utils::update(indicative_settle_price_, item.indicative_settle_price) != 0)
+    statistics_.emplace_back(
+        Statistics{StatisticsType::PRE_SETTLEMENT_PRICE, indicative_settle_price_});
+  if (utils::update(limit_up_price_, item.limit_up_price) != 0)
+    statistics_.emplace_back(Statistics{StatisticsType::UPPER_LIMIT_PRICE, limit_up_price_});
+  if (utils::update(limit_down_price_, item.limit_down_price) != 0)
+    statistics_.emplace_back(Statistics{StatisticsType::LOWER_LIMIT_PRICE, limit_down_price_});
+  if (utils::update(fair_price_, item.fair_price) != 0)
+    statistics_.emplace_back(Statistics{StatisticsType::INDEX_VALUE, fair_price_});
+  return market_status_dirty_ || !statistics_.empty();
 }
 
 ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t stream_id) const {
@@ -73,7 +89,7 @@ StatisticsUpdate Product::statistics_update(
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
-      .statistics = statistics_,
+      .statistics = {statistics_.data(), statistics_.size()},
       .snapshot = false,
       .exchange_time_utc = {},
   };

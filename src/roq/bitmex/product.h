@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include <array>
 #include <limits>
 #include <string>
+#include <vector>
 
 #include "roq/api.h"
 
@@ -26,6 +26,14 @@ class Product final {
   MarketStatus market_status(const json::InstrumentItem &, uint16_t stream_id) const;
   StatisticsUpdate statistics_update(const json::InstrumentItem &, uint16_t stream_id) const;
 
+  bool is_market_status_dirty() const { return market_status_dirty_; }
+  bool is_statistics_dirty() const { return !statistics_.empty(); }
+
+  void clear() {
+    market_status_dirty_ = false;
+    statistics_.clear();
+  }
+
  private:
   // reference data
   std::string description_;
@@ -39,10 +47,16 @@ class Product final {
   std::chrono::milliseconds expiry_ = {};
   std::chrono::milliseconds settle_ = {};
   // market status
+  bool market_status_dirty_ = false;
   json::State state_ = {};
-  // statistics update
-  // FIXME because of StatisticsUpdate::span<Statistics>
-  mutable std::array<Statistics, 2> statistics_;
+  // statistics
+  double settlement_price_ = NaN;
+  double open_interest_ = NaN;
+  double indicative_settle_price_ = NaN;
+  double limit_up_price_ = NaN;
+  double limit_down_price_ = NaN;
+  double fair_price_ = NaN;
+  mutable std::vector<Statistics> statistics_;  // XXX mutable due to span
 };
 
 }  // namespace bitmex
