@@ -31,18 +31,22 @@ bool Product::update(const json::InstrumentItem &item) {
   market_status_dirty_ |= utils::update(state_, item.state) != 0;
   // statistics update
   if (utils::update(settlement_price_, item.mark_price) != 0)
-    statistics_.emplace_back(Statistics{StatisticsType::SETTLEMENT_PRICE, settlement_price_});
-  if (utils::update(open_interest_, item.open_interest) != 0)
-    statistics_.emplace_back(Statistics{StatisticsType::OPEN_INTEREST, open_interest_});
-  if (utils::update(indicative_settle_price_, item.indicative_settle_price) != 0)
     statistics_.emplace_back(
-        Statistics{StatisticsType::PRE_SETTLEMENT_PRICE, indicative_settle_price_});
+        Statistics{.type = StatisticsType::SETTLEMENT_PRICE, .value = settlement_price_});
+  if (utils::update(open_interest_, item.open_interest) != 0)
+    statistics_.emplace_back(
+        Statistics{.type = StatisticsType::OPEN_INTEREST, .value = open_interest_});
+  if (utils::update(indicative_settle_price_, item.indicative_settle_price) != 0)
+    statistics_.emplace_back(Statistics{
+        .type = StatisticsType::PRE_SETTLEMENT_PRICE, .value = indicative_settle_price_});
   if (utils::update(limit_up_price_, item.limit_up_price) != 0)
-    statistics_.emplace_back(Statistics{StatisticsType::UPPER_LIMIT_PRICE, limit_up_price_});
+    statistics_.emplace_back(
+        Statistics{.type = StatisticsType::UPPER_LIMIT_PRICE, .value = limit_up_price_});
   if (utils::update(limit_down_price_, item.limit_down_price) != 0)
-    statistics_.emplace_back(Statistics{StatisticsType::LOWER_LIMIT_PRICE, limit_down_price_});
+    statistics_.emplace_back(
+        Statistics{.type = StatisticsType::LOWER_LIMIT_PRICE, .value = limit_down_price_});
   if (utils::update(fair_price_, item.fair_price) != 0)
-    statistics_.emplace_back(Statistics{StatisticsType::INDEX_VALUE, fair_price_});
+    statistics_.emplace_back(Statistics{.type = StatisticsType::INDEX_VALUE, .value = fair_price_});
   return market_status_dirty_ || !statistics_.empty();
 }
 
