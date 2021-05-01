@@ -20,8 +20,6 @@ struct Shared final {
   Shared(Shared &&) = default;
   Shared(const Shared &) = delete;
 
-  auto next_request_id() { return dispatcher_.next_request_id(); }
-
   auto next_trade_id() { return dispatcher_.next_trade_id(); }
 
   auto discard_symbol(const std::string_view &name) const {

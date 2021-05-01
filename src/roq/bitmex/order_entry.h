@@ -46,8 +46,7 @@ class OrderEntry final : public core::web::Client::Handler {
 
   void operator()(metrics::Writer &);
 
-  void operator()(
-      const Event<CreateOrder> &, const std::string_view &request_id, uint32_t gateway_order_id);
+  void operator()(const Event<CreateOrder> &, const std::string_view &request_id);
   void operator()(
       const Event<ModifyOrder> &, const std::string_view &request_id, const server::OMS_Order &);
   void operator()(

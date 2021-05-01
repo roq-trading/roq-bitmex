@@ -111,10 +111,7 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(latency_.ping, metrics::LATENCY);
 }
 
-void OrderEntry::operator()(
-    const Event<CreateOrder> &event,
-    const std::string_view &request_id,
-    [[maybe_unused]] uint32_t gateway_order_id) {
+void OrderEntry::operator()(const Event<CreateOrder> &event, const std::string_view &request_id) {
   create_order(event.value, request_id, [this](auto &promise) {
     try {
       (*this)(promise.get());
@@ -218,6 +215,12 @@ void OrderEntry::create_order(
   auto method = core::http::Method::POST;
   auto path = "/api/v1/order"_sv;
   auto expires = compute_expires();
+  auto side = json::map(create_order.side).as_raw_text();
+  auto ord_type = json::map(create_order.order_type).as_raw_text();
+  auto time_in_force = json::map(create_order.time_in_force).as_raw_text();
+  auto exec_inst = create_order.execution_instruction == ExecutionInstruction::UNDEFINED
+                       ? std::string_view{}
+                       : json::map(create_order.execution_instruction).as_raw_text();
   // XXX use encode buffer
   auto body = roq::format(
       R"({{)"
@@ -232,14 +235,12 @@ void OrderEntry::create_order(
       R"(}})"_fmt,
       cl_ord_id,
       create_order.symbol,
-      json::map(create_order.side).as_raw_text(),
+      side,
       create_order.price,
       create_order.quantity,
-      json::map(create_order.order_type).as_raw_text(),
-      json::map(create_order.time_in_force).as_raw_text(),
-      create_order.execution_instruction == ExecutionInstruction::UNDEFINED
-          ? std::string_view{}
-          : json::map(create_order.execution_instruction).as_raw_text());
+      ord_type,
+      time_in_force,
+      exec_inst);
   log::debug(R"(DEBUG: body="{}")"_fmt, body);
   auto headers = security_.create_headers(expires, method, path, body);
   auto rate_limit_weight = 1;

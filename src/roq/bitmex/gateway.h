@@ -51,10 +51,7 @@ class Gateway final : public server::Handler,
   void operator()(const server::Trace<TradeUpdate> &, bool is_last, uint8_t user_id) override;
   void operator()(const server::Trace<PositionUpdate> &, bool is_last) override;
 
-  void operator()(
-      const Event<CreateOrder> &,
-      const std::string_view &request_id,
-      uint32_t gateway_order_id) override;
+  void operator()(const Event<CreateOrder> &, const std::string_view &request_id) override;
   void operator()(
       const Event<ModifyOrder> &,
       const std::string_view &request_id,

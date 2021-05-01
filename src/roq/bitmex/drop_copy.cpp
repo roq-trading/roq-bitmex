@@ -399,8 +399,8 @@ void DropCopy::operator()(
                   .exchange = order.exchange,
                   .symbol = order.symbol,
                   .side = order.side,
-                  .position_effect = {},
-                  .order_template = {},
+                  .position_effect = order.position_effect,
+                  .order_template = order.order_template,
                   .create_time_utc = item.timestamp,  // XXX transact_time?
                   .update_time_utc = item.timestamp,  // XXX transact_time?
                   .gateway_order_id = order.gateway_order_id,
