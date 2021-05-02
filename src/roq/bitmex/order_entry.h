@@ -46,12 +46,12 @@ class OrderEntry final : public core::web::Client::Handler {
 
   void operator()(metrics::Writer &);
 
-  void operator()(const Event<CreateOrder> &, const std::string_view &request_id);
-  void operator()(
+  uint16_t operator()(const Event<CreateOrder> &, const std::string_view &request_id);
+  uint16_t operator()(
       const Event<ModifyOrder> &, const std::string_view &request_id, const server::OMS_Order &);
-  void operator()(
+  uint16_t operator()(
       const Event<CancelOrder> &, const std::string_view &request_id, const server::OMS_Order &);
-  void operator()(const Event<CancelAllOrders> &, const std::string_view &request_id);
+  uint16_t operator()(const Event<CancelAllOrders> &, const std::string_view &request_id);
 
  protected:
   void operator()(const core::web::Client::Connected &) override;

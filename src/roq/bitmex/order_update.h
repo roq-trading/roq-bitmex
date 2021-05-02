@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include "roq/bitmex/shared.h"
 
 #include "roq/bitmex/json/order.h"
@@ -12,7 +14,8 @@ namespace bitmex {
 
 class OrderUpdate final {
  public:
-  explicit OrderUpdate(Shared &shared) : shared_(shared) {}
+  explicit OrderUpdate(Shared &shared, uint16_t stream_id, const std::string_view &account)
+      : shared_(shared), stream_id_(stream_id), account_(account) {}
 
   OrderUpdate(OrderUpdate &&) = delete;
   OrderUpdate(const OrderUpdate &) = delete;
@@ -22,6 +25,8 @@ class OrderUpdate final {
 
  private:
   Shared &shared_;
+  const uint16_t stream_id_;
+  const std::string_view account_;
 };
 
 }  // namespace bitmex

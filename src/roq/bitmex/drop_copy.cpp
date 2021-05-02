@@ -362,22 +362,34 @@ void DropCopy::operator()(
     size_t index = {};
     for (auto &item : execution.data) {
       auto last = execution.data.size() == ++index;
-      server::OMS_Lookup order_lookup{
+      auto status = json::map(item.ord_status);
+      auto side = json::map(item.side);
+      roq::OrderUpdate order_update{
+          .stream_id = stream_id_,
+          .account = security_.get_account(),
+          .order_id = {},
+          .exchange = Flags::exchange(),
           .symbol = item.symbol,
-          .side = json::map(item.side),
-          .status = json::map(item.ord_status),
+          .status = status,
+          .side = side,
           .price = item.price,
           .remaining_quantity = item.leaves_qty,
           .traded_quantity = item.cum_qty,
-          .timestamp = item.timestamp,  // XXX transact_time?
+          .position_effect = {},
+          .order_template = {},
+          .create_time_utc = {},
+          .update_time_utc = item.timestamp,  // XXX transact_time?
+          .gateway_order_id = {},
           .external_account = {},
           .external_order_id = item.order_id,
+          .routing_id = {},
       };
       auto found = shared_.find_order(
+          stream_id_,
+          trace_info,
+          order_update,
           item.order_id,
           item.cl_ord_id,
-          order_lookup,
-          trace_info,
           [&](const auto &order, auto &result) {
             result.request_status = compute_request_status(order.request_type, item.exec_type);
             if (result.request_status != RequestStatus::UNDEFINED) {
@@ -433,7 +445,7 @@ void DropCopy::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
   profile_.order([&]() {
     log::trace_1("action={}, order={}"_fmt, action, order);
-    OrderUpdate{shared_}(order, trace_info);
+    OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
     // state management
     if (!partial_received_.order && action == json::Action::PARTIAL) {
       partial_received_.order = true;

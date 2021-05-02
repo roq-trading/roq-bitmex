@@ -77,24 +77,35 @@ void OrderUpdate::operator()(
     const json::OrderItem &order_item, const server::TraceInfo &trace_info) {
   if (!Flags::rest_allow_order_updates())
     return;
-  auto order_status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug("DEBUG: order_status={}"_fmt, order_status);
-  server::OMS_Lookup order_lookup{
+  auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
+  auto side = json::map(order_item.side);
+  log::debug("DEBUG: status={}"_fmt, status);
+  roq::OrderUpdate order_update{
+      .stream_id = stream_id_,
+      .account = account_,
+      .order_id = {},
+      .exchange = Flags::exchange(),
       .symbol = order_item.symbol,
-      .side = json::map(order_item.side),
-      .status = order_status,
+      .status = status,
+      .side = side,
       .price = order_item.price,
       .remaining_quantity = order_item.leaves_qty,
       .traded_quantity = order_item.cum_qty,
-      .timestamp = order_item.timestamp,  // XXX transact_time?
+      .position_effect = {},
+      .order_template = {},
+      .create_time_utc = {},
+      .update_time_utc = order_item.timestamp,  // XXX transact_time?
+      .gateway_order_id = {},
       .external_account = {},
       .external_order_id = order_item.order_id,
+      .routing_id = {},
   };
   auto found = shared_.find_order(
+      stream_id_,
+      trace_info,
+      order_update,
       order_item.order_id,
       order_item.cl_ord_id,
-      order_lookup,
-      trace_info,
       [&](const auto &order, auto &result) {
         result.request_status = compute_request_status(order.request_type, order_item.ord_status);
 

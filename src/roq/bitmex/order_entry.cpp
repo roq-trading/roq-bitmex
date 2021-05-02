@@ -111,7 +111,8 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(latency_.ping, metrics::LATENCY);
 }
 
-void OrderEntry::operator()(const Event<CreateOrder> &event, const std::string_view &request_id) {
+uint16_t OrderEntry::operator()(
+    const Event<CreateOrder> &event, const std::string_view &request_id) {
   create_order(event.value, request_id, [this](auto &promise) {
     try {
       (*this)(promise.get());
@@ -126,9 +127,10 @@ void OrderEntry::operator()(const Event<CreateOrder> &event, const std::string_v
       log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
+  return stream_id_;
 }
 
-void OrderEntry::operator()(
+uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
@@ -146,9 +148,10 @@ void OrderEntry::operator()(
       log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
+  return stream_id_;
 }
 
-void OrderEntry::operator()(
+uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &event,
     const std::string_view &request_id,
     const server::OMS_Order &order) {
@@ -166,9 +169,10 @@ void OrderEntry::operator()(
       log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
     }
   });
+  return stream_id_;
 }
 
-void OrderEntry::operator()(
+uint16_t OrderEntry::operator()(
     const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
@@ -366,12 +370,12 @@ void OrderEntry::cancel_order(
 
 void OrderEntry::operator()(const json::OrderItem &order_item) {
   server::TraceInfo trace_info;
-  OrderUpdate{shared_}(order_item, trace_info);
+  OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info);
 }
 
 void OrderEntry::operator()(const json::Order &order) {
   server::TraceInfo trace_info;
-  OrderUpdate{shared_}(order, trace_info);
+  OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
 }
 
 }  // namespace bitmex
