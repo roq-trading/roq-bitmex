@@ -78,8 +78,9 @@ void OrderUpdate::operator()(
   if (!Flags::rest_allow_order_updates())
     return;
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  auto side = json::map(order_item.side);
   log::debug("DEBUG: status={}"_fmt, status);
+  auto side = json::map(order_item.side);
+  auto external_account = roq::format("{}"_fmt, order_item.account);  // XXX alloc
   roq::OrderUpdate order_update{
       .stream_id = stream_id_,
       .account = account_,
@@ -96,7 +97,7 @@ void OrderUpdate::operator()(
       .create_time_utc = {},
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .gateway_order_id = {},
-      .external_account = {},
+      .external_account = external_account,
       .external_order_id = order_item.order_id,
       .routing_id = {},
   };

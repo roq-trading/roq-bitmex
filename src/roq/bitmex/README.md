@@ -1,3 +1,25 @@
+I0502 13:53:07.861874 2029940 strategy.cpp:51] create_order={account="A1", order_id=1001, exchange="bitmex", symbol="XBTUSD", side=BUY, quantity=1, order_type=LIMIT, price=56845, time_in_force=GTC, position_effect=UNDEFINED, execution_instruction=UNDEFINED, stop_price=nan, max_show_quantity=nan, order_template="", routing_id="FooBar1234567890"}
+I0502 13:53:07.861971 2029940 strategy.cpp:205] order_ack={stream_id=1, account="A1", order_id=1001, type=CREATE_ORDER, origin=GATEWAY, status=FORWARDED, error=UNDEFINED, text="", gateway_order_id=1000001, external_account="", external_order_id="", routing_id="FooBar1234567890", request_id="cgHpAwAAtR0iesA9exbMFooBar1234567890"}
+I0502 13:53:07.973013 2029940 strategy.cpp:205] order_ack={stream_id=2, account="A1", order_id=1001, type=CREATE_ORDER, origin=EXCHANGE, status=ACCEPTED, error=UNDEFINED, text="", gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890", request_id="cgHpAwAAtR0iesA9exbMFooBar1234567890"}
+I0502 13:53:07.973028 2029940 strategy.cpp:211] order_update={stream_id=2, account="A1", order_id=1001, exchange="bitmex", symbol="XBTUSD", status=WORKING, side=BUY, price=56845, remaining_quantity=1, traded_quantity=0, position_effect=UNDEFINED, order_template="", create_time_utc=1619956387944000000ns, update_time_utc=1619956387944000000ns, gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890"}
+I0502 13:53:37.973043 2029940 strategy.cpp:66] modify_order={account="A1", order_id=1001, quantity=1, price=56846.5}
+I0502 13:53:37.973196 2029940 strategy.cpp:205] order_ack={stream_id=1, account="A1", order_id=1001, type=MODIFY_ORDER, origin=GATEWAY, status=FORWARDED, error=UNDEFINED, text="", gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890", request_id="cgHpAwAA/1PnfMc9exYMFooBar1234567890"}
+I0502 13:53:38.031753 2029940 strategy.cpp:205] order_ack={stream_id=2, account="A1", order_id=1001, type=MODIFY_ORDER, origin=EXCHANGE, status=ACCEPTED, error=UNDEFINED, text="", gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890", request_id="cgHpAwAA/1PnfMc9exYMFooBar1234567890"}
+I0502 13:53:38.031775 2029940 strategy.cpp:211] order_update={stream_id=2, account="A1", order_id=1001, exchange="bitmex", symbol="XBTUSD", status=WORKING, side=BUY, price=56846.5, remaining_quantity=1, traded_quantity=0, position_effect=UNDEFINED, order_template="", create_time_utc=1619956387944000000ns, update_time_utc=1619956418003000000ns, gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890"}
+I0502 13:54:08.031793 2029940 strategy.cpp:75] cancel_order={account="A1", order_id=1001}
+I0502 13:54:08.031921 2029940 strategy.cpp:205] order_ack={stream_id=1, account="A1", order_id=1001, type=CANCEL_ORDER, origin=GATEWAY, status=FORWARDED, error=UNDEFINED, text="", gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890", request_id="cgHpAwAAKCmLfM49exbEFooBar1234567890"}
+I0502 13:54:08.092283 2029940 strategy.cpp:205] order_ack={stream_id=2, account="A1", order_id=1001, type=CANCEL_ORDER, origin=EXCHANGE, status=ACCEPTED, error=UNDEFINED, text="", gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890", request_id="cgHpAwAAKCmLfM49exbEFooBar1234567890"}
+I0502 13:54:08.092299 2029940 strategy.cpp:211] order_update={stream_id=2, account="A1", order_id=1001, exchange="bitmex", symbol="XBTUSD", status=CANCELED, side=BUY, price=56846.5, remaining_quantity=0, traded_quantity=0, position_effect=UNDEFINED, order_template="", create_time_utc=1619956387944000000ns, update_time_utc=1619956448064000000ns, gateway_order_id=1000001, external_account="273093", external_order_id="7077cc84-4673-4c37-aab7-47b62df0aa52", routing_id="FooBar1234567890"}
+
+
+
+
+
+
+
+
+
+
 Multiplexing
 -- we don't support -- we create many DropCopy connections
 

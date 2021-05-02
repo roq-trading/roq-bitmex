@@ -364,6 +364,7 @@ void DropCopy::operator()(
       auto last = execution.data.size() == ++index;
       auto status = json::map(item.ord_status);
       auto side = json::map(item.side);
+      auto external_account = roq::format("{}"_fmt, item.account);  // XXX alloc
       roq::OrderUpdate order_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
@@ -380,7 +381,7 @@ void DropCopy::operator()(
           .create_time_utc = {},
           .update_time_utc = item.timestamp,  // XXX transact_time?
           .gateway_order_id = {},
-          .external_account = {},
+          .external_account = external_account,
           .external_order_id = item.order_id,
           .routing_id = {},
       };
@@ -416,7 +417,7 @@ void DropCopy::operator()(
                   .create_time_utc = item.timestamp,  // XXX transact_time?
                   .update_time_utc = item.timestamp,  // XXX transact_time?
                   .gateway_order_id = order.gateway_order_id,
-                  .external_account = {},
+                  .external_account = external_account,
                   .external_order_id = order.external_order_id,
                   .routing_id = order.routing_id,
                   .fills = fills,
@@ -462,6 +463,7 @@ void DropCopy::operator()(
   profile_.position([&]() {
     log::trace_2("action={}, position={}"_fmt, action, position);
     for (auto &item : position.data) {
+      auto external_account = roq::format("{}"_fmt, item.account);  // XXX alloc
       PositionUpdate position_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
@@ -473,7 +475,7 @@ void DropCopy::operator()(
           .position_cost = 0.0,
           .position_yesterday = 0.0,
           .position_cost_yesterday = 0.0,
-          .external_account = {},
+          .external_account = external_account,
       };
       server::create_trace_and_dispatch(trace_info, position_update, handler_, false);
     }

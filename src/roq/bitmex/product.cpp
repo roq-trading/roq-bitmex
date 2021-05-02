@@ -4,6 +4,8 @@
 
 #include <magic_enum.hpp>
 
+#include "roq/logging.h"
+
 #include "roq/utils/safe_cast.h"
 #include "roq/utils/update.h"
 
@@ -28,7 +30,7 @@ Product::Product(const json::InstrumentItem &item)
 
 bool Product::update(const json::InstrumentItem &item) {
   // market status
-  market_status_dirty_ |= utils::update(state_, item.state) != 0;
+  market_status_dirty_ |= item.state && utils::update(state_, item.state) != 0;
   // statistics update
   if (utils::update(settlement_price_, item.mark_price) != 0)
     statistics_.emplace_back(
@@ -78,11 +80,12 @@ ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t
 
 MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t stream_id) const {
   assert(!item.symbol.empty());
+  auto trading_status = json::map(state_);
   return MarketStatus{
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
-      .trading_status = json::map(state_),
+      .trading_status = trading_status,
   };
 }
 
