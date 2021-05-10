@@ -293,10 +293,19 @@ void MarketData::operator()(const json::Subscribe &subscribe) {
 }
 
 void MarketData::operator()(
-    const json::Action action, const json::Funding &funding, const server::TraceInfo &) {
+    const json::Action action, const json::Funding &funding, const server::TraceInfo &trace_info) {
   profile_.funding([&]() {
     log::trace_2("action={}, funding={}"_fmt, action, funding);
-    // XXX not used
+    for (auto &item : funding.data) {
+      auto &product = find_product(item);
+      if (product.update(item)) {
+        if (product.is_statistics_dirty()) {
+          auto statistics_update = product.statistics_update(item, stream_id_);
+          server::create_trace_and_dispatch(trace_info, statistics_update, handler_, true);
+        }
+        product.clear();
+      }
+    }
   });
 }
 
@@ -569,6 +578,18 @@ void MarketData::operator()(
 Product &MarketData::find_product(const json::InstrumentItem &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == product_cache_.end()) {
+    iter = product_cache_.emplace(item.symbol, item).first;
+  } else {
+    (*iter).second.update(item);
+  }
+  assert(iter != product_cache_.end());
+  return (*iter).second;
+}
+
+Product &MarketData::find_product(const json::FundingItem &item) {
+  auto iter = product_cache_.find(item.symbol);
+  if (iter == product_cache_.end()) {
+    log::warn(R"(Create product symbol="{}" from funding (no reference data))"_fmt, item.symbol);
     iter = product_cache_.emplace(item.symbol, item).first;
   } else {
     (*iter).second.update(item);

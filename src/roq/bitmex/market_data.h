@@ -96,6 +96,7 @@ class MarketData final : public core::web::Socket::Handler, public json::Parser:
   // utilities
 
   Product &find_product(const json::InstrumentItem &);
+  Product &find_product(const json::FundingItem &);
 
  private:
   Handler &handler_;
