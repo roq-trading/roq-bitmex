@@ -81,15 +81,22 @@ bool Product::update(const json::InstrumentItem &item) {
   return market_status_dirty_ || !statistics_.empty();
 }
 
+namespace {
+template <typename T>
+static std::chrono::seconds strip_time_part(T timestamp) {
+  auto seconds = std::chrono::duration_cast<std::chrono::seconds>(timestamp);
+  return std::chrono::seconds{seconds.count() % 86400};
+}
+}  // namespace
 bool Product::update(const json::FundingItem &item) {
   // statistics update
   using begin_time_t = decltype(Statistics::begin_time_utc);
   using end_time_t = decltype(Statistics::end_time_utc);
   auto begin_time_utc = std::chrono::duration_cast<begin_time_t>(item.timestamp);
-  auto end_time_utc =
-      begin_time_utc.count()
-          ? std::chrono::duration_cast<end_time_t>(begin_time_utc + item.funding_interval)
-          : end_time_t{};
+  auto duration = strip_time_part(item.funding_interval);
+  auto end_time_utc = begin_time_utc.count()
+                          ? std::chrono::duration_cast<end_time_t>(begin_time_utc + duration)
+                          : end_time_t{};
   auto update_funding_rate = false;
   update_funding_rate |= utils::update(funding_rate_.value, item.funding_rate) != 0;
   update_funding_rate |= utils::update(funding_rate_.begin_time_utc, begin_time_utc) != 0;
