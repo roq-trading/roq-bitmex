@@ -174,6 +174,54 @@ inline roq::OrderStatus map(json::OrdStatus state) {
   return roq::OrderStatus::UNDEFINED;
 }
 
+inline roq::OrderType map(json::OrdType state) {
+  switch (state) {
+    case OrdType::UNDEFINED:
+      break;
+    case OrdType::UNKNOWN:
+      break;
+    case OrdType::LIMIT:
+      return roq::OrderType::LIMIT;
+    case OrdType::MARKET:
+      return roq::OrderType::MARKET;
+    case OrdType::STOP:
+      return roq::OrderType::MARKET;
+    case OrdType::STOP_LIMIT:
+      return roq::OrderType::LIMIT;
+    case OrdType::MARKET_IF_TOUCHED:
+      return roq::OrderType::MARKET;
+    case OrdType::LIMIT_IF_TOUCHED:
+      return roq::OrderType::LIMIT;
+  }
+  return roq::OrderType{};
+}
+
+inline roq::TimeInForce map(json::TimeInForce state) {
+  switch (state) {
+    case TimeInForce::UNDEFINED:
+      break;
+    case TimeInForce::UNKNOWN:
+      break;
+    case TimeInForce::GOOD_TILL_CANCEL:
+      return roq::TimeInForce::GTC;
+  }
+  return roq::TimeInForce{};
+}
+
+inline roq::Liquidity map(json::LiquidityInd state) {
+  switch (state) {
+    case LiquidityInd::UNDEFINED:
+      break;
+    case LiquidityInd::UNKNOWN:
+      break;
+    case LiquidityInd::ADDED_LIQUIDITY:
+      return roq::Liquidity::ADDED;
+    case LiquidityInd::REMOVED_LIQUIDITY:
+      return roq::Liquidity::REMOVED;
+  }
+  return roq::Liquidity{};
+}
+
 // roq => bitmex
 
 inline json::Side map(roq::Side side) {

@@ -81,6 +81,9 @@ void OrderUpdate::operator()(
   log::debug("DEBUG: status={}"_fmt, status);
   auto side = json::map(order_item.side);
   auto external_account = roq::format("{}"_fmt, order_item.account);  // XXX alloc
+  auto order_type = json::map(order_item.ord_type);
+  auto time_in_force = json::map(order_item.time_in_force);
+  // XXX TODO(thraneh): execution_instruction
   roq::OrderUpdate order_update{
       .stream_id = stream_id_,
       .account = account_,
@@ -100,6 +103,15 @@ void OrderUpdate::operator()(
       .external_account = external_account,
       .external_order_id = order_item.order_id,
       .routing_id = {},
+      .order_type = order_type,
+      .time_in_force = time_in_force,
+      .execution_instruction = {},
+      .stop_price = order_item.stop_px,
+      .max_show_quantity = NaN,
+      .average_traded_price = order_item.avg_px,
+      .last_traded_price = NaN,
+      .last_traded_quantity = NaN,
+      .last_liquidity = {},
   };
   auto found = shared_.find_order(
       stream_id_,

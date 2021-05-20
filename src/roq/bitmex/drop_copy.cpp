@@ -365,6 +365,10 @@ void DropCopy::operator()(
       auto status = json::map(item.ord_status);
       auto side = json::map(item.side);
       auto external_account = roq::format("{}"_fmt, item.account);  // XXX alloc
+      auto order_type = json::map(item.ord_type);
+      auto time_in_force = json::map(item.time_in_force);
+      // XXX TODO(thraneh): execution_instruction
+      auto last_liquidity = json::map(item.last_liquidity_ind);
       roq::OrderUpdate order_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
@@ -384,6 +388,15 @@ void DropCopy::operator()(
           .external_account = external_account,
           .external_order_id = item.order_id,
           .routing_id = {},
+          .order_type = order_type,
+          .time_in_force = time_in_force,
+          .execution_instruction = {},
+          .stop_price = item.stop_px,
+          .max_show_quantity = NaN,
+          .average_traded_price = item.avg_px,
+          .last_traded_price = item.last_px,
+          .last_traded_quantity = item.last_qty,
+          .last_liquidity = last_liquidity,
       };
       auto found = shared_.find_order(
           stream_id_,
