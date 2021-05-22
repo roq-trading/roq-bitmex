@@ -215,9 +215,9 @@ inline roq::Liquidity map(json::LiquidityInd state) {
     case LiquidityInd::UNKNOWN:
       break;
     case LiquidityInd::ADDED_LIQUIDITY:
-      return roq::Liquidity::ADDED;
+      return roq::Liquidity::MAKER;
     case LiquidityInd::REMOVED_LIQUIDITY:
-      return roq::Liquidity::REMOVED;
+      return roq::Liquidity::TAKER;
   }
   return roq::Liquidity{};
 }
