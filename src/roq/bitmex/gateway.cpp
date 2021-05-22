@@ -92,7 +92,11 @@ void Gateway::operator()(const Event<Timer> &event) {
 void Gateway::operator()(const Event<Connected> &) {
 }
 
-void Gateway::operator()(const Event<Disconnected> &) {
+void Gateway::operator()(const Event<Disconnected> &event) {
+  const auto &[message_info, disconnected] = event;
+  if (disconnected.cancel_on_disconnect) {
+    log::warn("CANCEL-ON-DISCONNECT NOT IMPLEMENTED"_sv);
+  }
 }
 
 uint16_t Gateway::operator()(const Event<CreateOrder> &event, const std::string_view &request_id) {
