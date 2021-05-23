@@ -81,6 +81,7 @@ OrderEntry::OrderEntry(
           .create_order = create_metrics(name_, "create_order"_sv),
           .modify_order = create_metrics(name_, "modify_order"_sv),
           .cancel_order = create_metrics(name_, "cancel_order"_sv),
+          .cancel_all_orders = create_metrics(name_, "cancel_all_orders"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -107,6 +108,10 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       // profile
       .write(profile_.products, metrics::PROFILE)
       .write(profile_.accounts, metrics::PROFILE)
+      .write(profile_.create_order, metrics::PROFILE)
+      .write(profile_.modify_order, metrics::PROFILE)
+      .write(profile_.cancel_order, metrics::PROFILE)
+      .write(profile_.cancel_all_orders, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY);
 }
@@ -173,8 +178,22 @@ uint16_t OrderEntry::operator()(
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
+  cancel_all_orders(event.value, request_id, [this](auto &promise) {
+    try {
+      (*this)(promise.get());
+      /*
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND:     // 404
+      */
+    } catch (NetworkError &e) {
+      // XXX send ack failure
+      log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
+    }
+  });
+  return stream_id_;
 }
 
 void OrderEntry::operator()(const core::web::Client::Connected &) {
@@ -324,7 +343,7 @@ void OrderEntry::modify_order(
 }
 
 void OrderEntry::cancel_order(
-    [[maybe_unused]] const CancelOrder &cancel_order,
+    const CancelOrder &,
     [[maybe_unused]] const std::string_view &request_id,
     const server::OMS_Order &order,
     std::function<void(const core::Promise<json::Order> &)> &&callback) {
@@ -352,6 +371,47 @@ void OrderEntry::cancel_order(
       rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.cancel_order([&]() {
+          try {
+            response.expect(core::http::Status::OK);
+            core::json::Buffer buffer(decode_buffer_);
+            auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
+            log::trace_1("order={}"_fmt, order);
+            core::Promise<json::Order> promise(order);
+            callback(promise);
+          } catch (NetworkError &e) {
+            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            core::Promise<json::Order> promise(std::current_exception());
+            callback(promise);
+          }
+        });
+      });
+}
+
+void OrderEntry::cancel_all_orders(
+    const CancelAllOrders &,
+    [[maybe_unused]] const std::string_view &request_id,
+    std::function<void(const core::Promise<json::Order> &)> &&callback) {
+  auto method = core::http::Method::DELETE;
+  auto path = "/api/v1/order/all"_sv;
+  auto expires = compute_expires();
+  // XXX use encode buffer
+  auto body = roq::format(R"({{)"
+                          R"(}})"_sv);
+  log::debug(R"(DEBUG: body="{}")"_fmt, body);
+  auto headers = security_.create_headers(expires, method, path, body);
+  auto rate_limit_weight = 1;
+  connection_.request(
+      method,
+      path,
+      {},  // query
+      ACCEPT_JSON,
+      CONTENT_TYPE_JSON,
+      headers,
+      body,
+      core::web::QualityOfService::IMMEDIATE,
+      rate_limit_weight,
+      [this, callback{std::move(callback)}](auto &response) {
+        profile_.cancel_all_orders([&]() {
           try {
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);

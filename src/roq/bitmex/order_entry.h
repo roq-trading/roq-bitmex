@@ -73,9 +73,14 @@ class OrderEntry final : public core::web::Client::Handler {
       std::function<void(const core::Promise<json::OrderItem> &)> &&);
 
   void cancel_order(
-      const CancelOrder &cancel_order,
+      const CancelOrder &,
       const std::string_view &request_id,
       const server::OMS_Order &,
+      std::function<void(const core::Promise<json::Order> &)> &&);
+
+  void cancel_all_orders(
+      const CancelAllOrders &,
+      const std::string_view &request_id,
       std::function<void(const core::Promise<json::Order> &)> &&);
 
   void operator()(const json::OrderItem &);
@@ -95,7 +100,8 @@ class OrderEntry final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile products, accounts, create_order, modify_order, cancel_order;
+    core::metrics::Profile products, accounts, create_order, modify_order, cancel_order,
+        cancel_all_orders;
   } profile_;
   struct {
     core::metrics::Latency ping;
