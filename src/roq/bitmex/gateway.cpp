@@ -94,7 +94,7 @@ void Gateway::operator()(const Event<Connected> &) {
 
 void Gateway::operator()(const Event<Disconnected> &event) {
   const auto &[message_info, disconnected] = event;
-  if (disconnected.cancel_on_disconnect) {
+  if (disconnected.cancel_policy) {
     log::warn("CANCEL-ON-DISCONNECT NOT IMPLEMENTED"_sv);
   }
 }
