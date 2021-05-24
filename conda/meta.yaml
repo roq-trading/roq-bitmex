@@ -22,6 +22,7 @@ requirements:
     - roq-api
     - roq-core
     - roq-oss-abseil-cpp
+    - roq-oss-brotli
     - roq-oss-date
     - roq-oss-http-parser
     - roq-server
