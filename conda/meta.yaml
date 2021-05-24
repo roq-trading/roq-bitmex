@@ -25,6 +25,7 @@ requirements:
     - roq-oss-brotli
     - roq-oss-date
     - roq-oss-http-parser
+    - roq-oss-magic_enum
     - roq-server
 
 about:
