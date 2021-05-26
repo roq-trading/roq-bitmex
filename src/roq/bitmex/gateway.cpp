@@ -112,9 +112,8 @@ void Gateway::operator()(const Event<Disconnected> &event) {
           CancelAllOrders cancel_all_orders{
               .account = account,
           };
-          auto request_id = shared_.next_request_id();
           Event event(message_info, cancel_all_orders);
-          event.dispatch<uint16_t>(*order_entry, request_id);
+          event.dispatch<uint16_t>(*order_entry);
         }
       }
   }
@@ -143,10 +142,9 @@ uint16_t Gateway::operator()(
   return get_order_entry(event.value.account)(event, request_id, order);
 }
 
-uint16_t Gateway::operator()(
-    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
+uint16_t Gateway::operator()(const Event<CancelAllOrders> &event) {
   assert(!event.value.account.empty());
-  return get_order_entry(event.value.account)(event, request_id);
+  return get_order_entry(event.value.account)(event);
 }
 
 void Gateway::operator()(metrics::Writer &writer) {

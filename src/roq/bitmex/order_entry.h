@@ -51,7 +51,7 @@ class OrderEntry final : public core::web::Client::Handler {
       const Event<ModifyOrder> &, const std::string_view &request_id, const server::OMS_Order &);
   uint16_t operator()(
       const Event<CancelOrder> &, const std::string_view &request_id, const server::OMS_Order &);
-  uint16_t operator()(const Event<CancelAllOrders> &, const std::string_view &request_id);
+  uint16_t operator()(const Event<CancelAllOrders> &);
 
  protected:
   void operator()(const core::web::Client::Connected &) override;
@@ -79,9 +79,7 @@ class OrderEntry final : public core::web::Client::Handler {
       std::function<void(const core::Promise<json::Order> &)> &&);
 
   void cancel_all_orders(
-      const CancelAllOrders &,
-      const std::string_view &request_id,
-      std::function<void(const core::Promise<json::Order> &)> &&);
+      const CancelAllOrders &, std::function<void(const core::Promise<json::Order> &)> &&);
 
   void operator()(const json::OrderItem &);
   void operator()(const json::Order &);

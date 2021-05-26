@@ -60,7 +60,7 @@ class Gateway final : public server::Handler,
       const Event<CancelOrder> &,
       const std::string_view &request_id,
       const server::OMS_Order &) override;
-  uint16_t operator()(const Event<CancelAllOrders> &, const std::string_view &request_id) override;
+  uint16_t operator()(const Event<CancelAllOrders> &) override;
 
   void operator()(metrics::Writer &) override;
 

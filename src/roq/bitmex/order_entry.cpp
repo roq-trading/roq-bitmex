@@ -177,9 +177,8 @@ uint16_t OrderEntry::operator()(
   return stream_id_;
 }
 
-uint16_t OrderEntry::operator()(
-    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
-  cancel_all_orders(event.value, request_id, [this](auto &promise) {
+uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
+  cancel_all_orders(event.value, [this](auto &promise) {
     try {
       (*this)(promise.get());
       /*
@@ -388,9 +387,7 @@ void OrderEntry::cancel_order(
 }
 
 void OrderEntry::cancel_all_orders(
-    const CancelAllOrders &,
-    [[maybe_unused]] const std::string_view &request_id,
-    std::function<void(const core::Promise<json::Order> &)> &&callback) {
+    const CancelAllOrders &, std::function<void(const core::Promise<json::Order> &)> &&callback) {
   auto method = core::http::Method::DELETE;
   auto path = "/api/v1/order/all"_sv;
   auto expires = compute_expires();
