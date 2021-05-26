@@ -204,6 +204,8 @@ inline roq::TimeInForce map(json::TimeInForce state) {
       break;
     case TimeInForce::GOOD_TILL_CANCEL:
       return roq::TimeInForce::GTC;
+    case TimeInForce::AT_THE_CLOSE:
+      return roq::TimeInForce::GFD;  // HANS not correct
   }
   return roq::TimeInForce{};
 }
