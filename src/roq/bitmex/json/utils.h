@@ -164,12 +164,30 @@ inline roq::OrderStatus map(json::OrdStatus state) {
       break;
     case OrdStatus::UNKNOWN:
       break;
-    case OrdStatus::NEW:
-      return roq::OrderStatus::WORKING;
-    case OrdStatus::FILLED:
-      return roq::OrderStatus::COMPLETED;
     case OrdStatus::CANCELED:
       return roq::OrderStatus::CANCELED;
+    case OrdStatus::DONE_FOR_DAY:
+      return roq::OrderStatus::SUSPENDED;
+    case OrdStatus::EXPIRED:
+      return roq::OrderStatus::EXPIRED;
+    case OrdStatus::FILLED:
+      return roq::OrderStatus::COMPLETED;
+    case OrdStatus::NEW:
+      return roq::OrderStatus::WORKING;
+    case OrdStatus::PARTIALLY_FILLED:
+      return roq::OrderStatus::WORKING;
+    case OrdStatus::PENDING_CANCEL:  // XXX HANS what to do?
+      break;
+    case OrdStatus::PENDING_NEW:
+      return roq::OrderStatus::SENT;
+    case OrdStatus::REJECTED:
+      return roq::OrderStatus::REJECTED;
+    case OrdStatus::STOPPED:
+      return roq::OrderStatus::STOPPED;
+    case OrdStatus::UNTRIGGERED:
+      return roq::OrderStatus::ACCEPTED;
+    case OrdStatus::TRIGGERED:
+      return roq::OrderStatus::WORKING;
   }
   return roq::OrderStatus::UNDEFINED;
 }
@@ -202,10 +220,16 @@ inline roq::TimeInForce map(json::TimeInForce state) {
       break;
     case TimeInForce::UNKNOWN:
       break;
+    case TimeInForce::AT_THE_CLOSE:
+      return roq::TimeInForce::AT_THE_CLOSE;
+    case TimeInForce::DAY:
+      return roq::TimeInForce::GFD;
+    case TimeInForce::FILL_OR_KILL:
+      return roq::TimeInForce::FOK;
     case TimeInForce::GOOD_TILL_CANCEL:
       return roq::TimeInForce::GTC;
-    case TimeInForce::AT_THE_CLOSE:
-      return roq::TimeInForce::GFD;  // HANS not correct
+    case TimeInForce::IMMEDIATE_OR_CANCEL:
+      return roq::TimeInForce::IOC;
   }
   return roq::TimeInForce{};
 }
@@ -254,14 +278,32 @@ inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   switch (time_in_force) {
     case roq::TimeInForce::UNDEFINED:
       break;
-    case roq::TimeInForce::FOK:
-      break;
-    case roq::TimeInForce::IOC:
-      break;
     case roq::TimeInForce::GFD:
-      break;
+      return json::TimeInForce::DAY;
     case roq::TimeInForce::GTC:
       return json::TimeInForce::GOOD_TILL_CANCEL;
+    case roq::TimeInForce::OPG:
+      break;
+    case roq::TimeInForce::IOC:
+      return json::TimeInForce::IMMEDIATE_OR_CANCEL;
+    case roq::TimeInForce::FOK:
+      return json::TimeInForce::FILL_OR_KILL;
+    case roq::TimeInForce::GTD:
+      break;
+    case roq::TimeInForce::GTX:
+      break;
+    case roq::TimeInForce::AT_THE_CLOSE:
+      return json::TimeInForce::AT_THE_CLOSE;
+    case roq::TimeInForce::GOOD_THROUGH_CROSSING:
+      break;
+    case roq::TimeInForce::AT_CROSSING:
+      break;
+    case roq::TimeInForce::GOOD_FOR_TIME:
+      break;
+    case roq::TimeInForce::GFA:
+      break;
+    case roq::TimeInForce::GFM:
+      break;
   }
   return json::TimeInForce::UNDEFINED;
 }

@@ -2,8 +2,17 @@
 "name": "OrdStatus",
 "type": "enum",
 "values": [
-	{ "name": "New" },
+	{ "name": "Canceled" },
+	{ "name": "DoneForDay" },
+	{ "name": "Expired" },
 	{ "name": "Filled" },
-	{ "name": "Canceled" }
+	{ "name": "New" },
+	{ "name": "PartiallyFilled" },
+	{ "name": "PendingCancel" },
+	{ "name": "PendingNew" },
+	{ "name": "Rejected" },
+	{ "name": "Stopped" },
+	{ "name": "Triggered" },
+	{ "name": "Untriggered" }
 ]
 }

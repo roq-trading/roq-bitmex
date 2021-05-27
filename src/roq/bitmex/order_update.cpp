@@ -14,24 +14,46 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-auto compute_order_status(json::OrdStatus ord_status, bool working_status) {
+OrderStatus compute_order_status(json::OrdStatus ord_status, bool working_status) {
   switch (ord_status) {
     case json::OrdStatus::UNDEFINED:
     case json::OrdStatus::UNKNOWN:
+      // note! back-stop in case we didn't parse OrdStatus
       if (working_status)
         return OrderStatus::WORKING;
       break;
+    case json::OrdStatus::PENDING_NEW:
+      return OrderStatus::SENT;
     case json::OrdStatus::NEW:
-      return working_status ? OrderStatus::WORKING : OrderStatus::ACCEPTED;
+    case json::OrdStatus::TRIGGERED:
+      if (!working_status)
+        return OrderStatus::ACCEPTED;
+      else
+        return OrderStatus::WORKING;
+    case json::OrdStatus::DONE_FOR_DAY:
+      return OrderStatus::SUSPENDED;
+    case json::OrdStatus::PARTIALLY_FILLED:
+      return OrderStatus::WORKING;
+    case json::OrdStatus::STOPPED:
+      return OrderStatus::STOPPED;
     case json::OrdStatus::FILLED:
       return OrderStatus::COMPLETED;
+    case json::OrdStatus::EXPIRED:
+      return OrderStatus::EXPIRED;
     case json::OrdStatus::CANCELED:
       return OrderStatus::CANCELED;
+    case json::OrdStatus::REJECTED:
+      return OrderStatus::REJECTED;
+    case json::OrdStatus::PENDING_CANCEL:  // XXX HANS how to deal with?
+      break;
+    case json::OrdStatus::UNTRIGGERED:  // XXX HANS have no idea what this means...
+      log::warn("Unexpected: ord_status={}, working_status={}"_fmt, ord_status, working_status);
+      break;
   }
-  return OrderStatus::UNDEFINED;
+  return {};
 }
 
-auto compute_request_status(RequestType request_type, json::OrdStatus ord_status) {
+RequestStatus compute_request_status(RequestType request_type, json::OrdStatus ord_status) {
   switch (ord_status) {
     case json::OrdStatus::UNDEFINED:
     case json::OrdStatus::UNKNOWN:
@@ -50,9 +72,6 @@ auto compute_request_status(RequestType request_type, json::OrdStatus ord_status
       }
       break;
     }
-    case json::OrdStatus::FILLED: {
-      break;
-    }
     case json::OrdStatus::CANCELED: {
       switch (request_type) {
         case RequestType::UNDEFINED:
@@ -67,10 +86,31 @@ auto compute_request_status(RequestType request_type, json::OrdStatus ord_status
       }
       break;
     }
+    case json::OrdStatus::DONE_FOR_DAY:
+    case json::OrdStatus::EXPIRED:
+    case json::OrdStatus::FILLED:
+    case json::OrdStatus::PARTIALLY_FILLED:
+    case json::OrdStatus::PENDING_CANCEL:
+    case json::OrdStatus::PENDING_NEW:
+    case json::OrdStatus::REJECTED:
+    case json::OrdStatus::STOPPED:
+    case json::OrdStatus::TRIGGERED:
+    case json::OrdStatus::UNTRIGGERED:
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          log::warn("*** EXTERNAL ACTION ***"_sv);
+          break;
+        case RequestType::CANCEL_ORDER:
+        case RequestType::CREATE_ORDER:
+        case RequestType::MODIFY_ORDER:
+          log::warn(
+              "DEBUG: Unexpected: request_type={}, ord_status={}"_fmt, request_type, ord_status);
+          break;
+      }
+      break;
   }
-  return RequestStatus::UNDEFINED;
+  return {};
 }
-
 }  // namespace
 
 void OrderUpdate::operator()(
