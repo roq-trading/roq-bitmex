@@ -23,10 +23,12 @@ requirements:
     - roq-core
     - roq-oss-abseil-cpp
     - roq-oss-brotli
+    - roq-oss-cpptoml
     - roq-oss-date
     - roq-oss-http-parser
     - roq-oss-libevent
     - roq-oss-magic_enum
+    - roq-oss-tomlplusplus
     - roq-server
 
 about:
