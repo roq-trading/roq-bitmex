@@ -49,6 +49,10 @@ static auto compute_expires() {
 }
 }  // namespace
 
+namespace {
+struct TODO_REMOVE_WORKAROUND {};
+}  // namespace
+
 OrderEntry::OrderEntry(
     Handler &handler,
     core::io::Context &context,
@@ -130,6 +134,8 @@ uint16_t OrderEntry::operator()(
     } catch (NetworkError &e) {
       // XXX send ack failure
       log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
+    } catch (TODO_REMOVE_WORKAROUND &) {
+      // do nothing
     }
   });
   return stream_id_;
@@ -151,6 +157,8 @@ uint16_t OrderEntry::operator()(
     } catch (NetworkError &e) {
       // XXX send ack failure
       log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
+    } catch (TODO_REMOVE_WORKAROUND &) {
+      // do nothing
     }
   });
   return stream_id_;
@@ -172,6 +180,8 @@ uint16_t OrderEntry::operator()(
     } catch (NetworkError &e) {
       // XXX send ack failure
       log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
+    } catch (TODO_REMOVE_WORKAROUND &) {
+      // do nothing
     }
   });
   return stream_id_;
@@ -190,6 +200,8 @@ uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
     } catch (NetworkError &e) {
       // XXX send ack failure
       log::fatal(R"(Unexpected what="{}")"_fmt, e.what());
+    } catch (TODO_REMOVE_WORKAROUND &) {
+      // do nothing
     }
   });
   return stream_id_;
@@ -240,7 +252,7 @@ void OrderEntry::create_order(
   auto side = json::map(create_order.side).as_raw_text();
   auto ord_type = json::map(create_order.order_type).as_raw_text();
   auto time_in_force = json::map(create_order.time_in_force).as_raw_text();
-  auto exec_inst = create_order.execution_instruction == ExecutionInstruction::UNDEFINED
+  auto exec_inst = create_order.execution_instruction == ExecutionInstruction{}
                        ? std::string_view{}
                        : json::map(create_order.execution_instruction).as_raw_text();
   // XXX use encode buffer
@@ -279,13 +291,28 @@ void OrderEntry::create_order(
       [this, callback{std::move(callback)}](auto &response) {
         profile_.create_order([&]() {
           try {
-            response.expect(core::http::Status::OK);
-            auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            log::trace_1("order_item={}"_fmt, order_item);
-            core::Promise<json::OrderItem> promise(order_item);
-            callback(promise);
+            switch (response.raw_status()) {
+              case core::http::Status::OK: {
+                auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
+                log::trace_1("order_item={}"_fmt, order_item);
+                core::Promise<json::OrderItem> promise(order_item);
+                callback(promise);
+                break;
+              }
+              case core::http::Status::BAD_REQUEST: {
+                auto body = response.body();
+                log::warn(R"(Bad request: messsage="{}")"_fmt, body);
+                throw TODO_REMOVE_WORKAROUND();
+                break;
+              }
+              default:
+                response.expect(core::http::Status::OK);  // throws
+            }
           } catch (NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            core::Promise<json::OrderItem> promise(std::current_exception());
+            callback(promise);
+          } catch (TODO_REMOVE_WORKAROUND &e) {
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -327,13 +354,28 @@ void OrderEntry::modify_order(
       [this, callback{std::move(callback)}](auto &response) {
         profile_.modify_order([&]() {
           try {
-            response.expect(core::http::Status::OK);
-            auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-            log::trace_1("order_item={}"_fmt, order_item);
-            core::Promise<json::OrderItem> promise(order_item);
-            callback(promise);
+            switch (response.raw_status()) {
+              case core::http::Status::OK: {
+                auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
+                log::trace_1("order_item={}"_fmt, order_item);
+                core::Promise<json::OrderItem> promise(order_item);
+                callback(promise);
+                break;
+              }
+              case core::http::Status::BAD_REQUEST: {
+                auto body = response.body();
+                log::warn(R"(Bad request: messsage="{}")"_fmt, body);
+                throw TODO_REMOVE_WORKAROUND();
+                break;
+              }
+              default:
+                response.expect(core::http::Status::OK);  // throws
+            }
           } catch (NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            core::Promise<json::OrderItem> promise(std::current_exception());
+            callback(promise);
+          } catch (TODO_REMOVE_WORKAROUND &) {
             core::Promise<json::OrderItem> promise(std::current_exception());
             callback(promise);
           }
@@ -371,14 +413,29 @@ void OrderEntry::cancel_order(
       [this, callback{std::move(callback)}](auto &response) {
         profile_.cancel_order([&]() {
           try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-            log::trace_1("order={}"_fmt, order);
-            core::Promise<json::Order> promise(order);
-            callback(promise);
+            switch (response.raw_status()) {
+              case core::http::Status::OK: {
+                core::json::Buffer buffer(decode_buffer_);
+                auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
+                log::trace_1("order={}"_fmt, order);
+                core::Promise<json::Order> promise(order);
+                callback(promise);
+                break;
+              }
+              case core::http::Status::BAD_REQUEST: {
+                auto body = response.body();
+                log::warn(R"(Bad request: messsage="{}")"_fmt, body);
+                throw TODO_REMOVE_WORKAROUND();
+                break;
+              }
+              default:
+                response.expect(core::http::Status::OK);  // throws
+            }
           } catch (NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            core::Promise<json::Order> promise(std::current_exception());
+            callback(promise);
+          } catch (TODO_REMOVE_WORKAROUND &) {
             core::Promise<json::Order> promise(std::current_exception());
             callback(promise);
           }
@@ -410,14 +467,29 @@ void OrderEntry::cancel_all_orders(
       [this, callback{std::move(callback)}](auto &response) {
         profile_.cancel_all_orders([&]() {
           try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-            log::trace_1("order={}"_fmt, order);
-            core::Promise<json::Order> promise(order);
-            callback(promise);
+            switch (response.raw_status()) {
+              case core::http::Status::OK: {
+                core::json::Buffer buffer(decode_buffer_);
+                auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
+                log::trace_1("order={}"_fmt, order);
+                core::Promise<json::Order> promise(order);
+                callback(promise);
+                break;
+              }
+              case core::http::Status::BAD_REQUEST: {
+                auto body = response.body();
+                log::warn(R"(Bad request: messsage="{}")"_fmt, body);
+                throw TODO_REMOVE_WORKAROUND();
+                break;
+              }
+              default:
+                response.expect(core::http::Status::OK);  // throws
+            }
           } catch (NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+            core::Promise<json::Order> promise(std::current_exception());
+            callback(promise);
+          } catch (TODO_REMOVE_WORKAROUND &) {
             core::Promise<json::Order> promise(std::current_exception());
             callback(promise);
           }

@@ -58,7 +58,7 @@ RequestStatus compute_request_status(RequestType request_type, json::OrdStatus o
     case json::OrdStatus::UNDEFINED:
     case json::OrdStatus::UNKNOWN:
       break;
-    case json::OrdStatus::NEW: {
+    case json::OrdStatus::NEW:
       switch (request_type) {
         case RequestType::UNDEFINED:
           log::warn("*** EXTERNAL ACTION ***"_sv);
@@ -71,8 +71,7 @@ RequestStatus compute_request_status(RequestType request_type, json::OrdStatus o
           break;
       }
       break;
-    }
-    case json::OrdStatus::CANCELED: {
+    case json::OrdStatus::CANCELED:
       switch (request_type) {
         case RequestType::UNDEFINED:
           log::warn("*** EXTERNAL ACTION ***"_sv);
@@ -85,14 +84,23 @@ RequestStatus compute_request_status(RequestType request_type, json::OrdStatus o
           break;
       }
       break;
-    }
+    case json::OrdStatus::REJECTED:
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          log::warn("*** EXTERNAL ACTION ***"_sv);
+          break;
+        case RequestType::CANCEL_ORDER:
+        case RequestType::CREATE_ORDER:
+        case RequestType::MODIFY_ORDER:
+          return RequestStatus::REJECTED;
+      }
+      break;
     case json::OrdStatus::DONE_FOR_DAY:
     case json::OrdStatus::EXPIRED:
     case json::OrdStatus::FILLED:
     case json::OrdStatus::PARTIALLY_FILLED:
     case json::OrdStatus::PENDING_CANCEL:
     case json::OrdStatus::PENDING_NEW:
-    case json::OrdStatus::REJECTED:
     case json::OrdStatus::STOPPED:
     case json::OrdStatus::TRIGGERED:
     case json::OrdStatus::UNTRIGGERED:
@@ -161,11 +169,10 @@ void OrderUpdate::operator()(
       order_item.cl_ord_id,
       [&](const auto &order, auto &result) {
         result.request_status = compute_request_status(order.request_type, order_item.ord_status);
-
-        if (result.request_status != RequestStatus::UNDEFINED) {
+        if (result.request_status != RequestStatus{}) {
           result.origin = Origin::EXCHANGE;
           result.error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
-          result.text = order_item.ord_rej_reason;  // XXX text ???
+          result.text = order_item.text;
         }
       });
 

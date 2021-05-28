@@ -2,10 +2,11 @@
 "name": "ExecType",
 "type": "enum",
 "values": [
-	{ "name": "New" },
-	{ "name": "Replaced" },
 	{ "name": "Canceled" },
-	{ "name": "Trade" },
-	{ "name": "Funding" }
+	{ "name": "Funding" },
+	{ "name": "New" },
+	{ "name": "Rejected" },
+	{ "name": "Replaced" },
+	{ "name": "Trade" }
 ]
 }

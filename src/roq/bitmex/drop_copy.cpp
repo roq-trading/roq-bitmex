@@ -296,7 +296,7 @@ void DropCopy::operator()(const json::Subscribe &subscribe) {
 }
 
 namespace {
-auto compute_request_status(RequestType request_type, json::ExecType exec_type) {
+RequestStatus compute_request_status(RequestType request_type, json::ExecType exec_type) {
   switch (exec_type) {
     case json::ExecType::UNDEFINED:
     case json::ExecType::UNKNOWN:
@@ -343,12 +343,25 @@ auto compute_request_status(RequestType request_type, json::ExecType exec_type) 
       }
       break;
     }
+    case json::ExecType::REJECTED: {
+      switch (request_type) {
+        case RequestType::UNDEFINED:
+          log::warn("*** EXTERNAL ACTION ***"_sv);
+          break;
+        case RequestType::MODIFY_ORDER:
+        case RequestType::CREATE_ORDER:
+        case RequestType::CANCEL_ORDER:
+          return RequestStatus::REJECTED;
+          break;
+      }
+      break;
+    }
     case json::ExecType::TRADE:
       break;
     case json::ExecType::FUNDING:
       break;
   }
-  return RequestStatus::UNDEFINED;
+  return {};
 }
 }  // namespace
 
@@ -406,10 +419,10 @@ void DropCopy::operator()(
           item.cl_ord_id,
           [&](const auto &order, auto &result) {
             result.request_status = compute_request_status(order.request_type, item.exec_type);
-            if (result.request_status != RequestStatus::UNDEFINED) {
+            if (result.request_status != RequestStatus{}) {
               result.origin = Origin::EXCHANGE;
               result.error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
-              result.text = item.ord_rej_reason;
+              result.text = item.text;
             }
             if (item.exec_type == json::ExecType::TRADE) {
               fills.emplace_back([&](auto &result) {
