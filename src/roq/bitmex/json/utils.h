@@ -132,16 +132,16 @@ inline roq::TradingStatus map(json::State state) {
       break;
     case json::State::UNKNOWN:
       break;
-    case json::State::CLOSED:
-      return roq::TradingStatus::CLOSED;
     case json::State::OPEN:
       return roq::TradingStatus::OPEN;
+    case json::State::CLOSED:
+      return roq::TradingStatus::CLOSE;
     case json::State::SETTLED:
       break;
     case json::State::UNLISTED:
       break;
   }
-  return roq::TradingStatus::UNDEFINED;
+  return {};
 }
 
 inline roq::Side map(json::Side side) {
