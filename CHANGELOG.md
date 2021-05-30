@@ -4,9 +4,15 @@ All notable changes will be documented in this file.
 
 ## Head
 
+## 0.7.1 &ndash; 2021-05-30
+
 ### Added
 
 * New statistics fields
+
+### Fixed
+
+* Partially fixed 4xx HTTP response issues
 
 ## 0.7.0 &ndash; 2021-04-15
 
