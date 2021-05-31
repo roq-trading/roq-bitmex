@@ -11,6 +11,8 @@
 using namespace roq;
 using namespace roq::bitmex;
 
+// "{"error":{"message":"Invalid leavesQty","name":"HTTPError"}}"
+
 TEST(json_error_response, simple) {
   const auto message = R"(
   {"error":{"message":"Account has insufficient Available Balance, 5929700 XBt required","name":"CodedHTTPError","details":"19000"}}")"_sv;

@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+#include <magic_enum.hpp>
+
 #include "roq/core/binascii/hex.h"
 #include "roq/core/crypto/hmac.h"
 #include "roq/core/uri.h"
@@ -37,7 +39,7 @@ std::string Security::create_signature(
     const std::string_view &path,
     const std::string_view &body) {
   auto expires_ = create_timestamp_secs(expires);
-  auto method_ = core::http::EnumNameMethod(method);
+  auto method_ = magic_enum::enum_name(method);
   hmac_.clear();
   hmac_.update(method_);
   hmac_.update(path);

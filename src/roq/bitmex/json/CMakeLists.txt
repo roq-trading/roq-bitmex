@@ -1,6 +1,6 @@
 set(TARGET_NAME "${PROJECT_NAME}-json")
 
-set(SOURCES parser.cpp)
+set(SOURCES stream_parser.cpp)
 
 include(RoqAutogen)
 
@@ -8,6 +8,7 @@ set(AUTOGEN_SCHEMAS
     action.json
     cancel_all_after.json
     error.json
+    error_response.json
     exec_inst.json
     exec_type.json
     execution.json

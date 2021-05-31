@@ -4,6 +4,8 @@ cancel_all_after.h
 cancel_all_after.cpp
 error.h
 error.cpp
+error_response.h
+error_response.cpp
 exec_inst.h
 exec_inst.cpp
 exec_type.h

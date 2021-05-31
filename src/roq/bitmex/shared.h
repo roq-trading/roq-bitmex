@@ -35,6 +35,10 @@ struct Shared final {
     return dispatcher_.find_order(std::forward<Args>(args)...);
   }
 
+  void operator()(const server::Trace<OrderAck> &event, bool is_last, uint8_t user_id) {
+    dispatcher_(event, is_last, user_id);
+  }
+
  public:
   core::page_aligned_vector<Fill> fills;
   core::page_aligned_vector<MBPUpdate> bids, asks;

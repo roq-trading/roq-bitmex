@@ -256,7 +256,7 @@ void MarketData::parse(const std::string_view &message) {
 void MarketData::parse_helper(const std::string_view &message) {
   server::TraceInfo trace_info;
   core::json::Buffer buffer(decode_buffer_);
-  json::Parser::dispatch(*this, message, buffer, trace_info);
+  json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
 void MarketData::operator()(const json::CancelAllAfter &cancel_all_after) {

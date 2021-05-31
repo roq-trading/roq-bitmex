@@ -257,7 +257,7 @@ void DropCopy::parse(const std::string_view &message) {
 void DropCopy::parse_helper(const std::string_view &message) {
   server::TraceInfo trace_info;
   core::json::Buffer buffer(decode_buffer_);
-  json::Parser::dispatch(*this, message, buffer, trace_info);
+  json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
 void DropCopy::operator()(const json::CancelAllAfter &cancel_all_after) {

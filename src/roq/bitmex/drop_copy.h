@@ -21,12 +21,12 @@
 #include "roq/bitmex/security.h"
 #include "roq/bitmex/shared.h"
 
-#include "roq/bitmex/json/parser.h"
+#include "roq/bitmex/json/stream_parser.h"
 
 namespace roq {
 namespace bitmex {
 
-class DropCopy final : public core::web::Socket::Handler, public json::Parser::Handler {
+class DropCopy final : public core::web::Socket::Handler, public json::StreamParser::Handler {
  public:
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;

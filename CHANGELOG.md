@@ -4,6 +4,11 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* HTTP response body is now parsed for status={400,401,403,404} and error message
+  is propagated through OrderAck
+
 ## 0.7.1 &ndash; 2021-05-30
 
 ### Added

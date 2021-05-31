@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2021, Hans Erik Thrane */
 
-#include "roq/bitmex/json/parser.h"
+#include "roq/bitmex/json/stream_parser.h"
 
 #include "roq/compat.h"
 
@@ -36,12 +36,12 @@ void update(Type &result, const Type type) {
 }
 }  // namespace
 
-void Parser::dispatch(
-    Parser::Handler &handler,
+void StreamParser::dispatch(
+    StreamParser::Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
     const server::TraceInfo &trace_info) {
-  Parser result;
+  StreamParser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN;
   auto action = Action::UNKNOWN;

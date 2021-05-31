@@ -32,7 +32,7 @@ namespace roq {
 namespace bitmex {
 namespace json {
 
-struct Parser final {
+struct StreamParser final {
   struct Handler {
     virtual void operator()(const CancelAllAfter &) = 0;
     virtual void operator()(const Error &) = 0;
