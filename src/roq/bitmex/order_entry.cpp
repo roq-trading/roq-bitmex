@@ -191,6 +191,7 @@ uint16_t OrderEntry::operator()(
     auto path = "/api/v1/order"_sv;
     auto expires = compute_expires();
     // XXX use encode buffer
+    // XXX TODO clOrdID / origClOrdID
     auto body = roq::format(
         R"({{)"
         R"("orderID":"{}",)"
