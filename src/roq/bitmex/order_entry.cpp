@@ -183,8 +183,9 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &event,
+    const server::Order &order,
     const std::string_view &request_id,
-    const server::OMS_Order &order) {
+    [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::PUT;
@@ -230,8 +231,9 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &event,
+    const server::Order &order,
     const std::string_view &request_id,
-    const server::OMS_Order &order) {
+    [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::DELETE;

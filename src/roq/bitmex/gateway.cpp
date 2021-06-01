@@ -126,20 +126,22 @@ uint16_t Gateway::operator()(const Event<CreateOrder> &event, const std::string_
 
 uint16_t Gateway::operator()(
     const Event<ModifyOrder> &event,
+    const server::Order &order,
     const std::string_view &request_id,
-    const server::OMS_Order &order) {
+    const std::string_view &previous_request_id) {
   assert(!event.value.account.empty());
   assert(event.value.account == order.account);
-  return get_order_entry(event.value.account)(event, request_id, order);
+  return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(
     const Event<CancelOrder> &event,
+    const server::Order &order,
     const std::string_view &request_id,
-    const server::OMS_Order &order) {
+    const std::string_view &previous_request_id) {
   assert(!event.value.account.empty());
   assert(event.value.account == order.account);
-  return get_order_entry(event.value.account)(event, request_id, order);
+  return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(const Event<CancelAllOrders> &event) {

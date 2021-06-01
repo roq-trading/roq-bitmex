@@ -390,17 +390,17 @@ void DropCopy::operator()(
           .symbol = item.symbol,
           .side = side,
           .position_effect = {},
-          .quantity = NaN,
+          .quantity = item.order_qty,
           .max_show_quantity = NaN,
           .order_type = order_type,
           .time_in_force = time_in_force,
-          .execution_instruction = {},
+          .execution_instruction = {},  // XXX TODO(thraneh): exec_inst
           .order_template = {},
           .create_time_utc = {},
           .update_time_utc = item.timestamp,  // XXX transact_time?
           .external_account = external_account,
           .external_order_id = item.order_id,
-          .routing_id = {},
+          .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
           .status = status,
           .price = item.price,
           .stop_price = item.stop_px,
@@ -434,7 +434,7 @@ void DropCopy::operator()(
               TradeUpdate trade_update{
                   .stream_id = stream_id_,
                   .account = order.account,
-                  .order_id = order.user_order_id,
+                  .order_id = order.order_id,
                   .exchange = order.exchange,
                   .symbol = order.symbol,
                   .side = order.side,

@@ -48,9 +48,16 @@ class OrderEntry final : public core::web::Client::Handler {
 
   uint16_t operator()(const Event<CreateOrder> &, const std::string_view &request_id);
   uint16_t operator()(
-      const Event<ModifyOrder> &, const std::string_view &request_id, const server::OMS_Order &);
+      const Event<ModifyOrder> &,
+      const server::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
   uint16_t operator()(
-      const Event<CancelOrder> &, const std::string_view &request_id, const server::OMS_Order &);
+      const Event<CancelOrder> &,
+      const server::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
+
   uint16_t operator()(const Event<CancelAllOrders> &);
 
  protected:
