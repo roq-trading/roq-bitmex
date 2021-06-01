@@ -167,12 +167,15 @@ void OrderUpdate::operator()(
       order_update,
       order_item.order_id,
       order_item.cl_ord_id,
-      [&](const auto &order, auto &result) {
-        result.request_status = compute_request_status(order.request_type, order_item.ord_status);
-        if (result.request_status != RequestStatus{}) {
-          result.origin = Origin::EXCHANGE;
-          result.error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
-          result.text = order_item.text;
+      [&](const auto &order, auto callback) {
+        auto request_status = compute_request_status(order.request_type, order_item.ord_status);
+        if (request_status != RequestStatus{}) {
+          callback(server::Ack{
+              .request_status = request_status,
+              .origin = Origin::EXCHANGE,
+              .error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+              .text = order_item.text,
+          });
         }
       });
 

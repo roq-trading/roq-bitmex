@@ -417,12 +417,15 @@ void DropCopy::operator()(
           order_update,
           item.order_id,
           item.cl_ord_id,
-          [&](const auto &order, auto &result) {
-            result.request_status = compute_request_status(order.request_type, item.exec_type);
-            if (result.request_status != RequestStatus{}) {
-              result.origin = Origin::EXCHANGE;
-              result.error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
-              result.text = item.text;
+          [&](const auto &order, auto callback) {
+            auto request_status = compute_request_status(order.request_type, item.exec_type);
+            if (request_status != RequestStatus{}) {
+              callback(server::Ack{
+                  .request_status = request_status,
+                  .origin = Origin::EXCHANGE,
+                  .error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+                  .text = item.text,
+              });
             }
             if (item.exec_type == json::ExecType::TRADE) {
               fills.emplace_back([&](auto &result) {
