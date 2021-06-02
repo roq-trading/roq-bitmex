@@ -370,10 +370,11 @@ void OrderEntry::create_order_ack(
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
             .text = text,
+            .request_id = request_id,
+            .routing_id = routing_id,
+            .previous_routing_id = {},
             .external_account = {},
             .external_order_id = {},
-            .routing_id = routing_id,
-            .request_id = request_id,
         };
         create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
         break;
@@ -392,10 +393,11 @@ void OrderEntry::create_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),
+        .request_id = request_id,
+        .routing_id = routing_id,
+        .previous_routing_id = {},
         .external_account = {},
         .external_order_id = {},
-        .routing_id = routing_id,
-        .request_id = request_id,
     };
     create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
   }
@@ -438,10 +440,11 @@ void OrderEntry::modify_order_ack(
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
             .text = text,
+            .request_id = request_id,
+            .routing_id = routing_id,
+            .previous_routing_id = {},  // XXX TODO(thraneh): find previous
             .external_account = {},
             .external_order_id = {},
-            .routing_id = routing_id,
-            .request_id = request_id,
         };
         create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
         break;
@@ -460,10 +463,11 @@ void OrderEntry::modify_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),
+        .request_id = request_id,
+        .routing_id = routing_id,
+        .previous_routing_id = {},  // XXX TODO(thraneh): find previous
         .external_account = {},
         .external_order_id = {},
-        .routing_id = routing_id,
-        .request_id = request_id,
     };
     create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
   }
@@ -507,10 +511,11 @@ void OrderEntry::cancel_order_ack(
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
             .text = text,
+            .request_id = request_id,
+            .routing_id = routing_id,
+            .previous_routing_id = {},  // XXX TODO(thraneh): find previous
             .external_account = {},
             .external_order_id = {},
-            .routing_id = routing_id,
-            .request_id = request_id,
         };
         create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
         break;
@@ -529,10 +534,11 @@ void OrderEntry::cancel_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),
+        .request_id = request_id,
+        .routing_id = routing_id,
+        .previous_routing_id = {},  // XXX TODO(thraneh): find previous
         .external_account = {},
         .external_order_id = {},
-        .routing_id = routing_id,
-        .request_id = request_id,
     };
     create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
   }

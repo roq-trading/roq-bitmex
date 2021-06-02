@@ -171,10 +171,12 @@ void OrderUpdate::operator()(
         auto request_status = compute_request_status(order.request_type, order_item.ord_status);
         if (request_status != RequestStatus{}) {
           callback(server::Ack{
-              .request_status = request_status,
               .origin = Origin::EXCHANGE,
+              .request_status = request_status,
               .error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
               .text = order_item.text,
+              .request_id = {},
+              .previous_request_id = {},
           });
         }
       });
