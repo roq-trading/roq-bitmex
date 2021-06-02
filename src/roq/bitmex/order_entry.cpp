@@ -350,7 +350,7 @@ void OrderEntry::create_order_ack(
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 401
+      case core::http::Status::NOT_FOUND: {   // 404
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -361,15 +361,21 @@ void OrderEntry::create_order_ack(
           log::warn(R"(Unable to parse response="{}")"_fmt, body);
           text = "Unknown"_sv;
         }
-        dispatch_order_ack_rejected(
-            user_id,
-            order_id,
-            RequestType::CREATE_ORDER,
-            Origin::EXCHANGE,
-            text,
-            routing_id,
-            request_id,
-            trace_info);
+        OrderAck order_ack{
+            .stream_id = stream_id_,
+            .account = security_.get_account(),
+            .order_id = order_id,
+            .type = RequestType::CREATE_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .external_account = {},
+            .external_order_id = {},
+            .routing_id = routing_id,
+            .request_id = request_id,
+        };
+        create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
         break;
       }
       default:
@@ -377,15 +383,21 @@ void OrderEntry::create_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-    dispatch_order_ack_rejected(
-        user_id,
-        order_id,
-        RequestType::CREATE_ORDER,
-        Origin::GATEWAY,
-        e.what(),
-        routing_id,
-        request_id,
-        trace_info);
+    OrderAck order_ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::CREATE_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .external_account = {},
+        .external_order_id = {},
+        .routing_id = routing_id,
+        .request_id = request_id,
+    };
+    create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
   }
 }
 
@@ -406,7 +418,7 @@ void OrderEntry::modify_order_ack(
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 401
+      case core::http::Status::NOT_FOUND: {   // 404
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -417,15 +429,21 @@ void OrderEntry::modify_order_ack(
           log::warn(R"(Unable to parse response="{}")"_fmt, body);
           text = "Unknown"_sv;
         }
-        dispatch_order_ack_rejected(
-            user_id,
-            order_id,
-            RequestType::MODIFY_ORDER,
-            Origin::EXCHANGE,
-            text,
-            routing_id,
-            request_id,
-            trace_info);
+        OrderAck order_ack{
+            .stream_id = stream_id_,
+            .account = security_.get_account(),
+            .order_id = order_id,
+            .type = RequestType::MODIFY_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .external_account = {},
+            .external_order_id = {},
+            .routing_id = routing_id,
+            .request_id = request_id,
+        };
+        create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
         break;
       }
       default:
@@ -433,15 +451,21 @@ void OrderEntry::modify_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-    dispatch_order_ack_rejected(
-        user_id,
-        order_id,
-        RequestType::MODIFY_ORDER,
-        Origin::GATEWAY,
-        e.what(),
-        routing_id,
-        request_id,
-        trace_info);
+    OrderAck order_ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::MODIFY_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .external_account = {},
+        .external_order_id = {},
+        .routing_id = routing_id,
+        .request_id = request_id,
+    };
+    create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
   }
 }
 
@@ -463,7 +487,7 @@ void OrderEntry::cancel_order_ack(
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 401
+      case core::http::Status::NOT_FOUND: {   // 404
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -474,15 +498,21 @@ void OrderEntry::cancel_order_ack(
           log::warn(R"(Unable to parse response="{}")"_fmt, body);
           text = "Unknown"_sv;
         }
-        dispatch_order_ack_rejected(
-            user_id,
-            order_id,
-            RequestType::CANCEL_ORDER,
-            Origin::EXCHANGE,
-            text,
-            routing_id,
-            request_id,
-            trace_info);
+        OrderAck order_ack{
+            .stream_id = stream_id_,
+            .account = security_.get_account(),
+            .order_id = order_id,
+            .type = RequestType::CANCEL_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .external_account = {},
+            .external_order_id = {},
+            .routing_id = routing_id,
+            .request_id = request_id,
+        };
+        create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
         break;
       }
       default:
@@ -490,15 +520,21 @@ void OrderEntry::cancel_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-    dispatch_order_ack_rejected(
-        user_id,
-        order_id,
-        RequestType::CANCEL_ORDER,
-        Origin::GATEWAY,
-        e.what(),
-        routing_id,
-        request_id,
-        trace_info);
+    OrderAck order_ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::CANCEL_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .external_account = {},
+        .external_order_id = {},
+        .routing_id = routing_id,
+        .request_id = request_id,
+    };
+    create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
   }
 }
 
@@ -515,7 +551,7 @@ void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 401
+      case core::http::Status::NOT_FOUND: {   // 404
         auto body = response.body();
         if (json::ErrorParser::dispatch(
                 body, [&](auto &error) { log::warn("error={}"_fmt, error); })) {
@@ -542,32 +578,6 @@ void OrderEntry::operator()(const json::OrderItem &order_item) {
 void OrderEntry::operator()(const json::Order &order) {
   server::TraceInfo trace_info;
   OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
-}
-
-void OrderEntry::dispatch_order_ack_rejected(
-    uint8_t user_id,
-    uint32_t order_id,
-    RequestType type,
-    Origin origin,
-    const std::string_view &text,
-    const std::string_view &routing_id,
-    const std::string_view &request_id,
-    const server::TraceInfo &trace_info) {
-  OrderAck order_ack{
-      .stream_id = stream_id_,
-      .account = security_.get_account(),
-      .order_id = order_id,
-      .type = type,
-      .origin = origin,
-      .status = RequestStatus::REJECTED,
-      .error = Error::UNKNOWN,
-      .text = text,
-      .external_account = {},
-      .external_order_id = {},
-      .routing_id = routing_id,
-      .request_id = request_id,
-  };
-  create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
 }
 
 }  // namespace bitmex

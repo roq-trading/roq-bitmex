@@ -94,16 +94,6 @@ class OrderEntry final : public core::web::Client::Handler {
   void operator()(const json::OrderItem &);
   void operator()(const json::Order &);
 
-  void dispatch_order_ack_rejected(
-      uint8_t user_id,
-      uint32_t order_id,
-      RequestType,
-      Origin,
-      const std::string_view &text,
-      const std::string_view &routing_id,
-      const std::string_view &request_id,
-      const server::TraceInfo &);
-
  private:
   Handler &handler_;
   // config
