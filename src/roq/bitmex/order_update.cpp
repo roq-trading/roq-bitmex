@@ -5,6 +5,7 @@
 #include "roq/logging.h"
 
 #include "roq/bitmex/flags.h"
+#include "roq/bitmex/utils.h"
 
 #include "roq/bitmex/json/utils.h"
 
@@ -53,70 +54,9 @@ OrderStatus compute_order_status(json::OrdStatus ord_status, bool working_status
   return {};
 }
 
-RequestStatus compute_request_status(RequestType request_type, json::OrdStatus ord_status) {
-  switch (ord_status) {
-    case json::OrdStatus::UNDEFINED:
-    case json::OrdStatus::UNKNOWN:
-      break;
-    case json::OrdStatus::NEW:
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER:
-          return RequestStatus::ACCEPTED;
-        case RequestType::CANCEL_ORDER:
-          log::fatal("DEBUG: UNEXPECTED"_sv);
-          break;
-      }
-      break;
-    case json::OrdStatus::CANCELED:
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::CANCEL_ORDER:
-          return RequestStatus::ACCEPTED;
-        case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER:
-          log::fatal("DEBUG: UNEXPECTED"_sv);
-          break;
-      }
-      break;
-    case json::OrdStatus::REJECTED:
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::CANCEL_ORDER:
-        case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER:
-          return RequestStatus::REJECTED;
-      }
-      break;
-    case json::OrdStatus::DONE_FOR_DAY:
-    case json::OrdStatus::EXPIRED:
-    case json::OrdStatus::FILLED:
-    case json::OrdStatus::PARTIALLY_FILLED:
-    case json::OrdStatus::PENDING_CANCEL:
-    case json::OrdStatus::PENDING_NEW:
-    case json::OrdStatus::STOPPED:
-    case json::OrdStatus::TRIGGERED:
-    case json::OrdStatus::UNTRIGGERED:
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::CANCEL_ORDER:
-        case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER:
-          log::warn(
-              "DEBUG: Unexpected: request_type={}, ord_status={}"_fmt, request_type, ord_status);
-          break;
-      }
-      break;
-  }
+RequestStatus compute_request_status(json::OrdStatus ord_status) {
+  if (ord_status == json::OrdStatus::REJECTED)
+    return RequestStatus::REJECTED;
   return {};
 }
 }  // namespace
@@ -150,7 +90,6 @@ void OrderUpdate::operator()(
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .external_account = external_account,
       .external_order_id = order_item.order_id,
-      .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
       .status = status,
       .price = order_item.price,
       .stop_price = order_item.stop_px,
@@ -160,25 +99,29 @@ void OrderUpdate::operator()(
       .last_traded_price = NaN,
       .last_traded_quantity = NaN,
       .last_liquidity = {},
+      .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
   };
+  auto request_id = order_item.cl_ord_id;
   auto found = shared_.find_order(
-      stream_id_,
-      trace_info,
-      order_update,
-      order_item.order_id,
-      order_item.cl_ord_id,
-      [&](const auto &order, auto callback) {
-        auto request_status = compute_request_status(order.request_type, order_item.ord_status);
-        if (request_status != RequestStatus{}) {
-          callback(server::Ack{
-              .origin = Origin::EXCHANGE,
-              .request_status = request_status,
-              .error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
-              .text = order_item.text,
-              .request_id = {},
-              .previous_request_id = {},
-          });
-        }
+      stream_id_, trace_info, order_update, request_id, [&](const auto &order, auto callback) {
+        auto status = compute_request_status(order_item.ord_status);
+        server::Ack ack{
+            .stream_id = stream_id_,
+            .account = account_,
+            .order_id = order.order_id,
+            .type = {},
+            .origin = Origin::EXCHANGE,
+            .status = status,
+            .error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+            .text = order_item.text,
+            .version = {},
+            .request_id = request_id,
+        };
+        server::Trace event(trace_info, ack);
+        callback(event, true, order.user_id);
       });
 
   if (!found) {

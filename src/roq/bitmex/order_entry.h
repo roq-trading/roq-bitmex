@@ -69,25 +69,19 @@ class OrderEntry final : public core::web::Client::Handler {
   void operator()(ConnectionStatus);
 
   void create_order_ack(
-      const core::web::Response &,
-      const uint8_t user_id,
-      const uint32_t order_id,
-      const std::string_view &routing_id,
-      const std::string_view &request_id);
+      const core::web::Response &, const uint8_t user_id, const uint32_t order_id);
 
   void modify_order_ack(
       const core::web::Response &,
       const uint8_t user_id,
       const uint32_t order_id,
-      const std::string_view &routing_id,
-      const std::string_view &request_id);
+      const uint8_t version);
 
   void cancel_order_ack(
       const core::web::Response &,
       const uint8_t user_id,
       const uint32_t order_id,
-      const std::string_view &routing_id,
-      const std::string_view &request_id);
+      const uint8_t version);
 
   void cancel_all_orders_ack(const core::web::Response &);
 

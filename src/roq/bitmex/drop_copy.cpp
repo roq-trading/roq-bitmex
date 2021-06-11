@@ -11,6 +11,7 @@
 
 #include "roq/bitmex/flags.h"
 #include "roq/bitmex/order_update.h"
+#include "roq/bitmex/utils.h"
 
 #include "roq/bitmex/json/utils.h"
 
@@ -295,76 +296,6 @@ void DropCopy::operator()(const json::Subscribe &subscribe) {
   });
 }
 
-namespace {
-RequestStatus compute_request_status(RequestType request_type, json::ExecType exec_type) {
-  switch (exec_type) {
-    case json::ExecType::UNDEFINED:
-    case json::ExecType::UNKNOWN:
-      break;
-    case json::ExecType::NEW: {
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::CREATE_ORDER:
-          return RequestStatus::ACCEPTED;
-        case RequestType::MODIFY_ORDER:
-        case RequestType::CANCEL_ORDER:
-          log::fatal("DEBUG: UNEXPECTED"_sv);
-          break;
-      }
-      break;
-    }
-    case json::ExecType::REPLACED: {
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::MODIFY_ORDER:
-          return RequestStatus::ACCEPTED;
-        case RequestType::CREATE_ORDER:
-        case RequestType::CANCEL_ORDER:
-          log::fatal("DEBUG: UNEXPECTED"_sv);
-          break;
-      }
-      break;
-    }
-    case json::ExecType::CANCELED: {
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::CANCEL_ORDER:
-          return RequestStatus::ACCEPTED;
-        case RequestType::CREATE_ORDER:
-        case RequestType::MODIFY_ORDER:
-          log::fatal("DEBUG: UNEXPECTED"_sv);
-          break;
-      }
-      break;
-    }
-    case json::ExecType::REJECTED: {
-      switch (request_type) {
-        case RequestType::UNDEFINED:
-          log::warn("*** EXTERNAL ACTION ***"_sv);
-          break;
-        case RequestType::MODIFY_ORDER:
-        case RequestType::CREATE_ORDER:
-        case RequestType::CANCEL_ORDER:
-          return RequestStatus::REJECTED;
-          break;
-      }
-      break;
-    }
-    case json::ExecType::TRADE:
-      break;
-    case json::ExecType::FUNDING:
-      break;
-  }
-  return {};
-}
-}  // namespace
-
 void DropCopy::operator()(
     const json::Action action,
     const json::Execution &execution,
@@ -400,7 +331,6 @@ void DropCopy::operator()(
           .update_time_utc = item.timestamp,  // XXX transact_time?
           .external_account = external_account,
           .external_order_id = item.order_id,
-          .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
           .status = status,
           .price = item.price,
           .stop_price = item.stop_px,
@@ -410,24 +340,36 @@ void DropCopy::operator()(
           .last_traded_price = item.last_px,
           .last_traded_quantity = item.last_qty,
           .last_liquidity = last_liquidity,
+          .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
+          .max_request_version = {},
+          .max_response_version = {},
+          .max_accepted_version = {},
       };
       auto found = shared_.find_order(
           stream_id_,
           trace_info,
           order_update,
-          item.order_id,
           item.cl_ord_id,
           [&](const auto &order, auto callback) {
-            auto request_status = compute_request_status(order.request_type, item.exec_type);
-            if (request_status != RequestStatus{}) {
-              callback(server::Ack{
+            auto type = compute_request_type(item.exec_type);
+            auto status = compute_request_status(item.exec_type);
+            auto request_id =
+                type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
+            if (status != RequestStatus{}) {
+              server::Ack ack{
+                  .stream_id = stream_id_,
+                  .account = security_.get_account(),
+                  .order_id = order.order_id,
+                  .type = type,
                   .origin = Origin::EXCHANGE,
-                  .request_status = request_status,
+                  .status = status,
                   .error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
                   .text = item.text,
-                  .request_id = item.cl_ord_id,
-                  .previous_request_id = item.cl_ord_link_id,
-              });
+                  .version = {},
+                  .request_id = request_id,
+              };
+              server::Trace event(trace_info, ack);
+              callback(event, true, order.user_id);
             }
             if (item.exec_type == json::ExecType::TRADE) {
               fills.emplace_back([&](auto &result) {

@@ -169,13 +169,8 @@ uint16_t OrderEntry::operator()(
     };
     connection_(
         request,
-        [this,
-         user_id = message_info.source,
-         order_id = create_order.order_id,
-         routing_id = std::string{create_order.routing_id},
-         request_id = std::string{request_id}](auto &response) {
-          profile_.create_order_ack(
-              [&]() { create_order_ack(response, user_id, order_id, routing_id, request_id); });
+        [this, user_id = message_info.source, order_id = create_order.order_id](auto &response) {
+          profile_.create_order_ack([&]() { create_order_ack(response, user_id, order_id); });
         });
   });
   return stream_id_;
@@ -183,23 +178,24 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &event,
-    const server::Order &order,
+    const server::Order &,
     const std::string_view &request_id,
-    [[maybe_unused]] const std::string_view &previous_request_id) {
+    const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::PUT;
     auto path = "/api/v1/order"_sv;
     auto expires = compute_expires();
     // XXX use encode buffer
-    // XXX TODO clOrdID / origClOrdID
     auto body = roq::format(
         R"({{)"
-        R"("orderID":"{}",)"
+        R"("clOrdID":"{}",)"
+        R"("origClOrdID":"{}",)"
         R"("orderQty":{},)"
         R"("price":{})"
         R"(}})"_fmt,
-        order.external_order_id,
+        request_id,
+        previous_request_id,
         modify_order.quantity,
         modify_order.price);
     log::debug(R"(DEBUG: body="{}")"_fmt, body);
@@ -220,10 +216,9 @@ uint16_t OrderEntry::operator()(
         [this,
          user_id = message_info.source,
          order_id = modify_order.order_id,
-         routing_id = std::string{modify_order.routing_id},
-         request_id = std::string{request_id}](auto &response) {
+         version = modify_order.version](auto &response) {
           profile_.modify_order_ack(
-              [&]() { modify_order_ack(response, user_id, order_id, routing_id, request_id); });
+              [&]() { modify_order_ack(response, user_id, order_id, version); });
         });
   });
   return stream_id_;
@@ -232,7 +227,7 @@ uint16_t OrderEntry::operator()(
 uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &event,
     const server::Order &order,
-    const std::string_view &request_id,
+    [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
     auto &[message_info, cancel_order] = event;
@@ -263,10 +258,9 @@ uint16_t OrderEntry::operator()(
         [this,
          user_id = message_info.source,
          order_id = cancel_order.order_id,
-         routing_id = std::string{cancel_order.routing_id},
-         request_id = std::string{request_id}](auto &response) {
+         version = cancel_order.version](auto &response) {
           profile_.cancel_order_ack(
-              [&]() { cancel_order_ack(response, user_id, order_id, routing_id, request_id); });
+              [&]() { cancel_order_ack(response, user_id, order_id, version); });
         });
   });
   return stream_id_;
@@ -333,11 +327,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
 }
 
 void OrderEntry::create_order_ack(
-    const core::web::Response &response,
-    const uint8_t user_id,
-    const uint32_t order_id,
-    const std::string_view &routing_id,
-    const std::string_view &request_id) {
+    const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
   server::TraceInfo trace_info;
   try {
     switch (response.raw_status()) {
@@ -361,7 +351,7 @@ void OrderEntry::create_order_ack(
           log::warn(R"(Unable to parse response="{}")"_fmt, body);
           text = "Unknown"_sv;
         }
-        OrderAck order_ack{
+        server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
             .order_id = order_id,
@@ -370,13 +360,10 @@ void OrderEntry::create_order_ack(
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
             .text = text,
-            .request_id = request_id,
-            .external_account = {},
-            .external_order_id = {},
-            .routing_id = routing_id,
-            .previous_routing_id = {},
+            .version = {},
+            .request_id = {},
         };
-        create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
+        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
         break;
       }
       default:
@@ -384,7 +371,7 @@ void OrderEntry::create_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-    OrderAck order_ack{
+    server::Ack ack{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .order_id = order_id,
@@ -393,13 +380,10 @@ void OrderEntry::create_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),
-        .request_id = request_id,
-        .external_account = {},
-        .external_order_id = {},
-        .routing_id = routing_id,
-        .previous_routing_id = {},
+        .version = 1,  // XXX HANS allow 0
+        .request_id = {},
     };
-    create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
   }
 }
 
@@ -407,8 +391,7 @@ void OrderEntry::modify_order_ack(
     const core::web::Response &response,
     const uint8_t user_id,
     const uint32_t order_id,
-    const std::string_view &routing_id,
-    const std::string_view &request_id) {
+    const uint8_t version) {
   server::TraceInfo trace_info;
   try {
     switch (response.raw_status()) {
@@ -431,7 +414,7 @@ void OrderEntry::modify_order_ack(
           log::warn(R"(Unable to parse response="{}")"_fmt, body);
           text = "Unknown"_sv;
         }
-        OrderAck order_ack{
+        server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
             .order_id = order_id,
@@ -440,13 +423,10 @@ void OrderEntry::modify_order_ack(
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
             .text = text,
-            .request_id = request_id,
-            .external_account = {},
-            .external_order_id = {},
-            .routing_id = routing_id,
-            .previous_routing_id = {},  // XXX TODO(thraneh): find previous
+            .version = version,
+            .request_id = {},
         };
-        create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
+        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
         break;
       }
       default:
@@ -454,7 +434,7 @@ void OrderEntry::modify_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-    OrderAck order_ack{
+    server::Ack ack{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .order_id = order_id,
@@ -463,13 +443,10 @@ void OrderEntry::modify_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),
-        .request_id = request_id,
-        .external_account = {},
-        .external_order_id = {},
-        .routing_id = routing_id,
-        .previous_routing_id = {},  // XXX TODO(thraneh): find previous
+        .version = version,
+        .request_id = {},
     };
-    create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
   }
 }
 
@@ -477,8 +454,7 @@ void OrderEntry::cancel_order_ack(
     const core::web::Response &response,
     const uint8_t user_id,
     const uint32_t order_id,
-    const std::string_view &routing_id,
-    const std::string_view &request_id) {
+    const uint8_t version) {
   server::TraceInfo trace_info;
   try {
     switch (response.raw_status()) {
@@ -502,7 +478,7 @@ void OrderEntry::cancel_order_ack(
           log::warn(R"(Unable to parse response="{}")"_fmt, body);
           text = "Unknown"_sv;
         }
-        OrderAck order_ack{
+        server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
             .order_id = order_id,
@@ -511,13 +487,10 @@ void OrderEntry::cancel_order_ack(
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
             .text = text,
-            .request_id = request_id,
-            .external_account = {},
-            .external_order_id = {},
-            .routing_id = routing_id,
-            .previous_routing_id = {},  // XXX TODO(thraneh): find previous
+            .version = version,
+            .request_id = {},
         };
-        create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
+        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
         break;
       }
       default:
@@ -525,7 +498,7 @@ void OrderEntry::cancel_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-    OrderAck order_ack{
+    server::Ack ack{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .order_id = order_id,
@@ -534,13 +507,10 @@ void OrderEntry::cancel_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),
-        .request_id = request_id,
-        .external_account = {},
-        .external_order_id = {},
-        .routing_id = routing_id,
-        .previous_routing_id = {},  // XXX TODO(thraneh): find previous
+        .version = version,
+        .request_id = {},
     };
-    create_trace_and_dispatch(trace_info, order_ack, shared_, true, user_id);
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
   }
 }
 

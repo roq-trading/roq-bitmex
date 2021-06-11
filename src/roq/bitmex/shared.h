@@ -35,8 +35,9 @@ struct Shared final {
     return dispatcher_.find_order(std::forward<Args>(args)...);
   }
 
-  void operator()(const server::Trace<OrderAck> &event, bool is_last, uint8_t user_id) {
-    dispatcher_(event, is_last, user_id);
+  template <typename... Args>
+  auto operator()(Args &&...args) {
+    return dispatcher_(std::forward<Args>(args)...);
   }
 
  public:
