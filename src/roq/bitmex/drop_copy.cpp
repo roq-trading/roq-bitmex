@@ -192,7 +192,7 @@ void DropCopy::send_subscribe(const std::string_view &topic) {
       R"("args":"{}")"
       R"(}})"_fmt,
       topic);
-  log::debug(R"(DEBUG: message="{}")"_fmt, message);
+  log::debug(R"(message="{}")"_fmt, message);
   connection_.send_text(message);
 }
 
@@ -207,7 +207,7 @@ void DropCopy::send_subscribe(const roq::span<std::string_view> &topics) {
         R"("args":["{}"])"
         R"(}})"_fmt,
         roq::join(topics, R"(",")"_sv));
-    log::debug(R"(DEBUG: message="{}")"_fmt, message);
+    log::debug(R"(message="{}")"_fmt, message);
     connection_.send_text(message);
   }
 }

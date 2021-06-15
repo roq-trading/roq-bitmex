@@ -181,7 +181,7 @@ void MarketData::send_subscribe(const std::string_view &topic) {
       R"("args":"{}")"
       R"(}})"_fmt,
       topic);
-  log::debug(R"(DEBUG: message="{}")"_fmt, message);
+  log::debug(R"(message="{}")"_fmt, message);
   connection_.send_text(message);
 }
 
@@ -196,7 +196,7 @@ void MarketData::send_subscribe(const roq::span<std::string_view> &topics) {
         R"("args":["{}"])"
         R"(}})"_fmt,
         roq::join(topics, R"(",")"_sv));
-    log::debug(R"(DEBUG: message="{}")"_fmt, message);
+    log::debug(R"(message="{}")"_fmt, message);
     connection_.send_text(message);
   }
 }
@@ -325,7 +325,7 @@ void MarketData::operator()(
         break;
       case json::Action::PARTIAL:
         if (partial_received_.instrument) {
-          log::debug("DEBUG: action={}, instrument={})"_fmt, action, instrument);
+          log::debug("action={}, instrument={})"_fmt, action, instrument);
           assert(false);  // didn't expect this
         } else {
           partial_received_.instrument = true;
@@ -355,7 +355,7 @@ void MarketData::operator()(
         }
         break;
       case json::Action::INSERT:
-        log::debug("DEBUG: action={}, instrument={})"_fmt, action, instrument);
+        log::debug("action={}, instrument={})"_fmt, action, instrument);
         assert(false);  // XXX should we just drop these updates?
         break;
       case json::Action::UPDATE: {

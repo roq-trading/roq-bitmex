@@ -36,7 +36,7 @@ std::pair<double, double> PriceCache::operator()(
         }
       } else {
         // unexpected price or size ==> fail
-        log::fatal("DEBUG: action={} id={} price={} size={}"_fmt, action, id, price, size);
+        log::fatal("action={} id={} price={} size={}"_fmt, action, id, price, size);
       }
       break;
     case json::Action::UPDATE:

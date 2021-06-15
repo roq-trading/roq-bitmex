@@ -154,7 +154,7 @@ uint16_t OrderEntry::operator()(
         ord_type,
         time_in_force,
         exec_inst);
-    log::debug(R"(DEBUG: body="{}")"_fmt, body);
+    log::debug(R"(body="{}")"_fmt, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -198,7 +198,7 @@ uint16_t OrderEntry::operator()(
         previous_request_id,
         modify_order.quantity,
         modify_order.price);
-    log::debug(R"(DEBUG: body="{}")"_fmt, body);
+    log::debug(R"(body="{}")"_fmt, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -240,7 +240,7 @@ uint16_t OrderEntry::operator()(
         R"("orderID":"{}")"
         R"(}})"_fmt,
         order.external_order_id);
-    log::debug(R"(DEBUG: body="{}")"_fmt, body);
+    log::debug(R"(body="{}")"_fmt, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,

@@ -66,7 +66,7 @@ void OrderUpdate::operator()(
   if (!Flags::rest_allow_order_updates())
     return;
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug("DEBUG: status={}"_fmt, status);
+  log::debug("status={}"_fmt, status);
   auto side = json::map(order_item.side);
   auto external_account = roq::format("{}"_fmt, order_item.account);  // XXX alloc
   auto order_type = json::map(order_item.ord_type);
@@ -131,7 +131,7 @@ void OrderUpdate::operator()(
 }
 
 void OrderUpdate::operator()(const json::Order &order, const server::TraceInfo &trace_info) {
-  log::debug("DEBUG: order={}"_fmt, order);
+  log::debug("order={}"_fmt, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info);
 }
