@@ -39,11 +39,10 @@ struct create_metrics final : public core::metrics::Factory {
 template <typename T>
 void emplace(Fill &result, const T &value, uint32_t trade_id) {
   new (&result) Fill{
+      .external_trade_id = value.trd_match_id,
       .quantity = value.last_qty,
       .price = value.last_px,
-      .trade_id = trade_id,
-      .gateway_trade_id = trade_id,
-      .external_trade_id = value.trd_match_id,
+      .liquidity = {},
   };
 }
 }  // namespace
@@ -337,8 +336,8 @@ void DropCopy::operator()(
           .remaining_quantity = item.leaves_qty,
           .traded_quantity = item.cum_qty,
           .average_traded_price = item.avg_px,
-          .last_traded_price = item.last_px,
           .last_traded_quantity = item.last_qty,
+          .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
           .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
           .max_request_version = {},
@@ -390,8 +389,8 @@ void DropCopy::operator()(
                   .update_time_utc = item.timestamp,  // XXX transact_time?
                   .external_account = external_account,
                   .external_order_id = order.external_order_id,
-                  .routing_id = order.routing_id,
                   .fills = fills,
+                  .routing_id = order.routing_id,
               };
               server::create_trace_and_dispatch(
                   trace_info, trade_update, handler_, true, order.user_id);

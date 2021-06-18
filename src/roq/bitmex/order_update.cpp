@@ -96,8 +96,8 @@ void OrderUpdate::operator()(
       .remaining_quantity = order_item.leaves_qty,
       .traded_quantity = order_item.cum_qty,
       .average_traded_price = order_item.avg_px,
-      .last_traded_price = NaN,
       .last_traded_quantity = NaN,
+      .last_traded_price = NaN,
       .last_liquidity = {},
       .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
       .max_request_version = {},
