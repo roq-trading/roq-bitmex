@@ -39,6 +39,9 @@ void emplace(MBPUpdate &result, const T &value) {
   new (&result) MBPUpdate{
       .price = value.first,
       .quantity = value.second,
+      .implied_quantity = NaN,
+      .price_level = {},
+      .number_of_orders = {},
   };
 }
 
