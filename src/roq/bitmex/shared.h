@@ -24,8 +24,6 @@ struct Shared final {
 
   std::string_view next_request_id();
 
-  auto next_trade_id() { return dispatcher_.next_trade_id(); }
-
   auto discard_symbol(const std::string_view &name) const {
     return dispatcher_.discard_symbol(name);
   }

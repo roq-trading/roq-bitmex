@@ -37,7 +37,7 @@ struct create_metrics final : public core::metrics::Factory {
 };
 
 template <typename T>
-void emplace(Fill &result, const T &value, uint32_t trade_id) {
+void emplace(Fill &result, const T &value) {
   new (&result) Fill{
       .external_trade_id = value.trd_match_id,
       .quantity = value.last_qty,
@@ -371,10 +371,7 @@ void DropCopy::operator()(
               callback(event, true, order.user_id);
             }
             if (item.exec_type == json::ExecType::TRADE) {
-              fills.emplace_back([&](auto &result) {
-                auto trade_id = shared_.next_trade_id();
-                emplace(result, item, trade_id);
-              });
+              fills.emplace_back([&](auto &result) { emplace(result, item); });
             }
             if (last && !fills.empty()) {
               TradeUpdate trade_update{
