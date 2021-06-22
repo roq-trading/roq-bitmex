@@ -391,7 +391,7 @@ void OrderEntry::modify_order_ack(
     const core::web::Response &response,
     const uint8_t user_id,
     const uint32_t order_id,
-    const uint8_t version) {
+    const uint32_t version) {
   server::TraceInfo trace_info;
   try {
     switch (response.raw_status()) {
@@ -454,7 +454,7 @@ void OrderEntry::cancel_order_ack(
     const core::web::Response &response,
     const uint8_t user_id,
     const uint32_t order_id,
-    const uint8_t version) {
+    const uint32_t version) {
   server::TraceInfo trace_info;
   try {
     switch (response.raw_status()) {

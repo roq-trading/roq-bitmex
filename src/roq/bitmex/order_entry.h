@@ -75,13 +75,13 @@ class OrderEntry final : public core::web::Client::Handler {
       const core::web::Response &,
       const uint8_t user_id,
       const uint32_t order_id,
-      const uint8_t version);
+      const uint32_t version);
 
   void cancel_order_ack(
       const core::web::Response &,
       const uint8_t user_id,
       const uint32_t order_id,
-      const uint8_t version);
+      const uint32_t version);
 
   void cancel_all_orders_ack(const core::web::Response &);
 
