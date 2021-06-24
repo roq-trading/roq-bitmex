@@ -352,6 +352,7 @@ void DropCopy::operator()(
           [&](const auto &order, auto callback) {
             auto type = compute_request_type(item.exec_type);
             auto status = compute_request_status(item.exec_type);
+            // cancel order does not allow passing a custom id
             auto request_id =
                 type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
             if (status != RequestStatus{}) {
