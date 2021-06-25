@@ -12,9 +12,9 @@ namespace roq {
 namespace bitmex {
 
 int Application::main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
-  log::info(R"(Parse config_file="{}")"_fmt, Flags::config_file());
+  log::info(R"(Parse config_file="{}")"_sv, Flags::config_file());
   Config config(Flags::config_file());
-  log::trace_1("config={}"_fmt, config);
+  log::info<1>("config={}"_sv, config);
   log::info("Starting the gateway"_sv);
   roq::server::Trading<Gateway>(ROQ_PACKAGE_NAME, config, server::RequestIdType::SEQUENTIAL, config)
       .dispatch();

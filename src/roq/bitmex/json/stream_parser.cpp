@@ -56,7 +56,7 @@ void StreamParser::dispatch(
           log::fatal("Unexpected"_sv);
           break;
         case Field::UNKNOWN:
-          log::fatal(R"(Unknown key="{}")"_fmt, key);
+          log::fatal(R"(Unknown key="{}")"_sv, key);
           break;
         case Field::ACTION:
           update(result.action, value);
@@ -270,7 +270,7 @@ void StreamParser::dispatch(
         break;
     }
   }
-  log::warn(R"(message="{}")"_fmt, message);
+  log::warn(R"(message="{}")"_sv, message);
   log::fatal("Unexpected"_sv);
 }
 

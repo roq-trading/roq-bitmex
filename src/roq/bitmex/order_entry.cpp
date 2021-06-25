@@ -53,7 +53,7 @@ OrderEntry::OrderEntry(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_fmt, stream_id_, NAME, security.get_account())),
+      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
@@ -145,7 +145,7 @@ uint16_t OrderEntry::operator()(
         R"("ordType":"{}",)"
         R"("timeInForce":"{}",)"
         R"("execInst":"{}")"
-        R"(}})"_fmt,
+        R"(}})"_sv,
         request_id,
         create_order.symbol,
         side,
@@ -154,7 +154,7 @@ uint16_t OrderEntry::operator()(
         ord_type,
         time_in_force,
         exec_inst);
-    log::debug(R"(body="{}")"_fmt, body);
+    log::debug(R"(body="{}")"_sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -193,12 +193,12 @@ uint16_t OrderEntry::operator()(
         R"("origClOrdID":"{}",)"
         R"("orderQty":{},)"
         R"("price":{})"
-        R"(}})"_fmt,
+        R"(}})"_sv,
         request_id,
         previous_request_id,
         modify_order.quantity,
         modify_order.price);
-    log::debug(R"(body="{}")"_fmt, body);
+    log::debug(R"(body="{}")"_sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -238,9 +238,9 @@ uint16_t OrderEntry::operator()(
     auto body = roq::format(
         R"({{)"
         R"("orderID":"{}")"
-        R"(}})"_fmt,
+        R"(}})"_sv,
         order.external_order_id);
-    log::debug(R"(body="{}")"_fmt, body);
+    log::debug(R"(body="{}")"_sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -321,7 +321,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .type = StreamType::REST,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_fmt, stream_status);
+    log::info("stream_status={}"_sv, stream_status);
     server::create_trace_and_dispatch(trace_info, stream_status, handler_);
   }
 }
@@ -344,11 +344,11 @@ void OrderEntry::create_order_ack(
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
-              log::warn("error={}"_fmt, error);
+              log::warn("error={}"_sv, error);
               text = error.message;
             })) {
         } else {
-          log::warn(R"(Unable to parse response="{}")"_fmt, body);
+          log::warn(R"(Unable to parse response="{}")"_sv, body);
           text = "Unknown"_sv;
         }
         server::Ack ack{
@@ -370,7 +370,7 @@ void OrderEntry::create_order_ack(
         response.expect(core::http::Status::OK);  // throws
     }
   } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
     server::Ack ack{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -407,11 +407,11 @@ void OrderEntry::modify_order_ack(
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
-              log::warn("error={}"_fmt, error);
+              log::warn("error={}"_sv, error);
               text = error.message;
             })) {
         } else {
-          log::warn(R"(Unable to parse response="{}")"_fmt, body);
+          log::warn(R"(Unable to parse response="{}")"_sv, body);
           text = "Unknown"_sv;
         }
         server::Ack ack{
@@ -433,7 +433,7 @@ void OrderEntry::modify_order_ack(
         response.expect(core::http::Status::OK);  // throws
     }
   } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
     server::Ack ack{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -471,11 +471,11 @@ void OrderEntry::cancel_order_ack(
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
-              log::warn("error={}"_fmt, error);
+              log::warn("error={}"_sv, error);
               text = error.message;
             })) {
         } else {
-          log::warn(R"(Unable to parse response="{}")"_fmt, body);
+          log::warn(R"(Unable to parse response="{}")"_sv, body);
           text = "Unknown"_sv;
         }
         server::Ack ack{
@@ -497,7 +497,7 @@ void OrderEntry::cancel_order_ack(
         response.expect(core::http::Status::OK);  // throws
     }
   } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
     server::Ack ack{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -530,9 +530,9 @@ void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
       case core::http::Status::NOT_FOUND: {   // 404
         auto body = response.body();
         if (json::ErrorParser::dispatch(
-                body, [&](auto &error) { log::warn("error={}"_fmt, error); })) {
+                body, [&](auto &error) { log::warn("error={}"_sv, error); })) {
         } else {
-          log::warn(R"(Unable to parse response="{}")"_fmt, body);
+          log::warn(R"(Unable to parse response="{}")"_sv, body);
         }
         // note! this event does not require an ack
         break;
@@ -541,7 +541,7 @@ void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
         response.expect(core::http::Status::OK);  // throws
     }
   } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
     // note! this event does not require an ack
   }
 }

@@ -70,7 +70,7 @@ void Config::operator()(server::User &&user) {
 }
 
 void Config::operator()(const std::string_view &key, cpptoml::base &) {
-  log::warn(R"(UNKNOWN KEY="{}")"_fmt, key);
+  log::warn(R"(UNKNOWN KEY="{}")"_sv, key);
 }
 
 }  // namespace bitmex

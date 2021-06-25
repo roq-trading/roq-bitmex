@@ -48,7 +48,7 @@ OrderStatus compute_order_status(json::OrdStatus ord_status, bool working_status
     case json::OrdStatus::PENDING_CANCEL:  // XXX HANS how to deal with?
       break;
     case json::OrdStatus::UNTRIGGERED:  // XXX HANS have no idea what this means...
-      log::warn("Unexpected: ord_status={}, working_status={}"_fmt, ord_status, working_status);
+      log::warn("Unexpected: ord_status={}, working_status={}"_sv, ord_status, working_status);
       break;
   }
   return {};
@@ -66,9 +66,9 @@ void OrderUpdate::operator()(
   if (!Flags::rest_allow_order_updates())
     return;
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug("status={}"_fmt, status);
+  log::debug("status={}"_sv, status);
   auto side = json::map(order_item.side);
-  auto external_account = roq::format("{}"_fmt, order_item.account);  // XXX alloc
+  auto external_account = roq::format("{}"_sv, order_item.account);  // XXX alloc
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
   // XXX TODO(thraneh): execution_instruction
@@ -126,12 +126,12 @@ void OrderUpdate::operator()(
 
   if (!found) {
     log::warn("*** EXTERNAL ORDER ***"_sv);
-    log::warn("order_item={}"_fmt, order_item);
+    log::warn("order_item={}"_sv, order_item);
   }
 }
 
 void OrderUpdate::operator()(const json::Order &order, const server::TraceInfo &trace_info) {
-  log::debug("order={}"_fmt, order);
+  log::debug("order={}"_sv, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info);
 }

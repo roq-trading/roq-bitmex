@@ -95,7 +95,7 @@ void Gateway::operator()(const Event<Connected> &) {
 void Gateway::operator()(const Event<Disconnected> &event) {
   const auto &[message_info, disconnected] = event;
   log::warn(
-      R"(Disconnected: source="{}", cancel_policy={})"_fmt,
+      R"(Disconnected: source="{}", cancel_policy={})"_sv,
       message_info.source_name,
       disconnected.cancel_policy);
   switch (disconnected.cancel_policy) {
@@ -108,7 +108,7 @@ void Gateway::operator()(const Event<Disconnected> &event) {
       log::warn("*** CANCEL ALL ACCOUNT ORDERS ***"_sv);
       for (auto &[account, order_entry] : order_entry_) {
         if (dispatcher_.can_user_trade_account(account, message_info.source)) {
-          log::warn(R"(- account="{}")"_fmt, account);
+          log::warn(R"(- account="{}")"_sv, account);
           CancelAllOrders cancel_all_orders{
               .account = account,
           };
@@ -248,7 +248,7 @@ OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != order_entry_.end())
     return *(*iter).second;
-  throw RuntimeErrorException(R"(Unknown account="{}")"_fmt, account);
+  throw RuntimeErrorException(R"(Unknown account="{}")"_sv, account);
 }
 
 }  // namespace bitmex
