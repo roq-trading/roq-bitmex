@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Fixed
+
+* JSON PositionItem.posState was incorrectly configured as double
+
 ## 0.7.2 &ndash; 2021-06-20
 
 ### Changed

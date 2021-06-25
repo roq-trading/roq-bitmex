@@ -61,7 +61,7 @@
 	{ "name": "posLoss", "type": "double" },
 	{ "name": "posMaint", "type": "double" },
 	{ "name": "posMargin", "type": "double" },
-	{ "name": "posState", "type": "double" },
+	{ "name": "posState", "type": "std::string_view" },
 	{ "name": "prevClosePrice", "type": "double" },
 	{ "name": "prevRealisedPnl", "type": "double" },
 	{ "name": "prevUnrealisedPnl", "type": "double" },
