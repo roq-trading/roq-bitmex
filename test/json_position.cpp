@@ -23,4 +23,6 @@ TEST(json_position_item_item, unlisted) {
       R"("liquidationPrice":34750,"bankruptPrice":34532.5,"timestamp":"2021-06-24T17:16:55.376Z",)"
       R"("lastPrice":34734.8,"lastValue":-5182128,"currency":"XBt","currentQty":1800})";
   auto obj = core::json::Parser::create<json::PositionItem>(message);
+  EXPECT_EQ(obj.account, 359347);
+  EXPECT_EQ(obj.symbol, "XBTUSD"_sv);
 }
