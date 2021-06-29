@@ -32,6 +32,14 @@ Product::Product(const json::FundingItem &) {
   statistics_.reserve(magic_enum::enum_count<StatisticsType::type_t>());
 }
 
+namespace {
+template <typename T>
+static std::chrono::seconds strip_time_part(T timestamp) {
+  auto seconds = std::chrono::duration_cast<std::chrono::seconds>(timestamp);
+  return std::chrono::seconds{seconds.count() % 86400};
+}
+}  // namespace
+
 bool Product::update(const json::InstrumentItem &item) {
   // market status
   market_status_dirty_ |= item.state && utils::update(state_, item.state) != 0;
@@ -78,17 +86,33 @@ bool Product::update(const json::InstrumentItem &item) {
         .begin_time_utc = {},
         .end_time_utc = {},
     });
+  // funding rate
+  if (!std::isnan(item.funding_rate)) {
+    using begin_time_t = decltype(Statistics::begin_time_utc);
+    using end_time_t = decltype(Statistics::end_time_utc);
+    auto begin_time_utc = std::chrono::duration_cast<begin_time_t>(item.timestamp);
+    auto duration = strip_time_part(item.funding_interval);
+    auto end_time_utc = begin_time_utc.count()
+                            ? std::chrono::duration_cast<end_time_t>(begin_time_utc + duration)
+                            : end_time_t{};
+    auto update_funding_rate = false;
+    update_funding_rate |= utils::update(funding_rate_.value, item.funding_rate) != 0;
+    update_funding_rate |= utils::update(funding_rate_.begin_time_utc, begin_time_utc) != 0;
+    update_funding_rate |= utils::update(funding_rate_.end_time_utc, end_time_utc) != 0;
+    if (update_funding_rate) {
+      statistics_.emplace_back(Statistics{
+          .type = StatisticsType::FUNDING_RATE,
+          .value = funding_rate_.value,
+          .begin_time_utc = funding_rate_.begin_time_utc,
+          .end_time_utc = funding_rate_.end_time_utc,
+      });
+    }
+  }
   return market_status_dirty_ || !statistics_.empty();
 }
 
-namespace {
-template <typename T>
-static std::chrono::seconds strip_time_part(T timestamp) {
-  auto seconds = std::chrono::duration_cast<std::chrono::seconds>(timestamp);
-  return std::chrono::seconds{seconds.count() % 86400};
-}
-}  // namespace
-bool Product::update(const json::FundingItem &item) {
+bool Product::update(const json::FundingItem &) {
+  /*
   // statistics update
   using begin_time_t = decltype(Statistics::begin_time_utc);
   using end_time_t = decltype(Statistics::end_time_utc);
@@ -124,6 +148,8 @@ bool Product::update(const json::FundingItem &item) {
     });
   }
   return !statistics_.empty();
+  */
+  return false;
 }
 
 ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t stream_id) const {

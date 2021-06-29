@@ -8,6 +8,11 @@ All notable changes will be documented in this file.
 
 * JSON PositionItem.posState was incorrectly configured as double
 
+### Changed
+
+* `StatisticsType::FUNDING_RATE` is now populated from the `instrument` channel (was previously
+  sourced from the `funding` channel)
+
 ## 0.7.2 &ndash; 2021-06-20
 
 ### Changed
