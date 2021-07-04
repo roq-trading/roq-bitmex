@@ -71,7 +71,7 @@ void Config::operator()(server::User &&user) {
   users.emplace_back(std::move(user));
 }
 
-void Config::operator()(const std::string_view &key, cpptoml::base &) {
+void Config::operator()(const std::string_view &key, toml::node &) {
   log::warn(R"(UNKNOWN KEY="{}")"_sv, key);
 }
 
