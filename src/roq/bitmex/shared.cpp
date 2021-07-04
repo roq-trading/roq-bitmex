@@ -2,8 +2,6 @@
 
 #include "roq/bitmex/shared.h"
 
-#include <magic_enum.hpp>
-
 #include "roq/bitmex/flags.h"
 
 namespace roq {
