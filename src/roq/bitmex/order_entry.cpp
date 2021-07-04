@@ -124,6 +124,8 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 uint16_t OrderEntry::operator()(
     const Event<CreateOrder> &event, const std::string_view &request_id) {
   profile_.create_order([&]() {
+    if (!ready())
+      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY);
     auto &[message_info, create_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v1/order"_sv;
@@ -178,10 +180,12 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &event,
-    const server::Order &,
+    const server::Order &order,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
+    if (!ready())
+      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY, order);
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::PUT;
     auto path = "/api/v1/order"_sv;
@@ -230,6 +234,8 @@ uint16_t OrderEntry::operator()(
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
+    if (!ready())
+      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY, order);
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::DELETE;
     auto path = "/api/v1/order"_sv;
@@ -266,27 +272,34 @@ uint16_t OrderEntry::operator()(
   return stream_id_;
 }
 
-uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &) {
+uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
   profile_.cancel_order([&]() {
-    auto method = core::http::Method::DELETE;
-    auto path = "/api/v1/order/all"_sv;
-    auto expires = compute_expires();
-    auto body = "{}"_sv;
-    auto headers = security_.create_headers(expires, method, path, body);
-    core::web::Request request{
-        .method = method,
-        .path = path,
-        .query = {},
-        .accept = core::http::Accept::JSON,
-        .content_type = core::http::ContentType::JSON,
-        .headers = headers,
-        .body = body,
-        .quality_of_service = core::web::QualityOfService::IMMEDIATE,
-        .rate_limit_weight = 1,
-    };
-    connection_(request, [this](auto &response) {
-      profile_.cancel_all_orders_ack([&]() { cancel_all_orders_ack(response); });
-    });
+    if (ready()) {
+      auto method = core::http::Method::DELETE;
+      auto path = "/api/v1/order/all"_sv;
+      auto expires = compute_expires();
+      auto body = "{}"_sv;
+      auto headers = security_.create_headers(expires, method, path, body);
+      core::web::Request request{
+          .method = method,
+          .path = path,
+          .query = {},
+          .accept = core::http::Accept::JSON,
+          .content_type = core::http::ContentType::JSON,
+          .headers = headers,
+          .body = body,
+          .quality_of_service = core::web::QualityOfService::IMMEDIATE,
+          .rate_limit_weight = 1,
+      };
+      connection_(request, [this](auto &response) {
+        profile_.cancel_all_orders_ack([&]() { cancel_all_orders_ack(response); });
+      });
+    } else {
+      auto &[message_info, cancel_all_orders] = event;
+      log::warn(
+          R"(*** NOT CONNECTED! UNABLE TO CANCEL ALL ORDERS FOR ACCOUNT="{}")"_sv,
+          cancel_all_orders.account);
+    }
   });
   return stream_id_;
 }
