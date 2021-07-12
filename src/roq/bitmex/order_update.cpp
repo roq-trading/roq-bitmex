@@ -105,26 +105,25 @@ void OrderUpdate::operator()(
       .max_accepted_version = {},
   };
   auto request_id = order_item.cl_ord_id;
-  auto found = shared_.find_order(
-      stream_id_, trace_info, order_update, request_id, [&](const auto &order, auto callback) {
-        auto status = compute_request_status(order_item.ord_status);
-        server::Ack ack{
-            .stream_id = stream_id_,
-            .account = account_,
-            .order_id = order.order_id,
-            .type = {},
-            .origin = Origin::EXCHANGE,
-            .status = status,
-            .error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
-            .text = order_item.text,
-            .version = {},
-            .request_id = request_id,
-        };
-        server::Trace event(trace_info, ack);
-        callback(event, true, order.user_id);
-      });
-
-  if (!found) {
+  if (shared_.find_order(
+          stream_id_, trace_info, order_update, request_id, [&](const auto &order, auto callback) {
+            auto status = compute_request_status(order_item.ord_status);
+            server::Ack ack{
+                .stream_id = stream_id_,
+                .account = account_,
+                .order_id = order.order_id,
+                .type = {},
+                .origin = Origin::EXCHANGE,
+                .status = status,
+                .error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+                .text = order_item.text,
+                .version = {},
+                .request_id = request_id,
+            };
+            server::Trace event(trace_info, ack);
+            callback(event, true, order.user_id);
+          })) {
+  } else {
     log::warn("*** EXTERNAL ORDER ***"_sv);
     log::warn("order_item={}"_sv, order_item);
   }
