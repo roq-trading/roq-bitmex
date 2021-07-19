@@ -75,6 +75,12 @@
       "description": "allow inconsistent order updates? (bool)"
     },
     {
+      "name": "rest_allow_order_request_pipeline",
+      "type": "bool",
+      "default": false,
+      "description": "allow more than one in-flight order action? (bool)"
+    },
+    {
       "name": "ws_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",

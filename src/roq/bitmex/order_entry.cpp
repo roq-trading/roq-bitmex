@@ -44,6 +44,11 @@ static auto compute_expires() {
   auto result = core::get_realtime_clock() + Flags::rest_expires_timeout();
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
+
+static auto get_quality_of_service() {
+  return Flags::rest_allow_order_request_pipeline() ? core::web::QualityOfService::IMMEDIATE
+                                                    : core::web::QualityOfService::CRITICAL;
+}
 }  // namespace
 
 OrderEntry::OrderEntry(
@@ -166,7 +171,7 @@ uint16_t OrderEntry::operator()(
         .content_type = core::http::ContentType::JSON,
         .headers = headers,
         .body = body,
-        .quality_of_service = core::web::QualityOfService::IMMEDIATE,
+        .quality_of_service = get_quality_of_service(),
         .rate_limit_weight = 1,
     };
     connection_(
@@ -212,7 +217,7 @@ uint16_t OrderEntry::operator()(
         .content_type = core::http::ContentType::JSON,
         .headers = headers,
         .body = body,
-        .quality_of_service = core::web::QualityOfService::IMMEDIATE,
+        .quality_of_service = get_quality_of_service(),
         .rate_limit_weight = 1,
     };
     connection_(
@@ -256,7 +261,7 @@ uint16_t OrderEntry::operator()(
         .content_type = core::http::ContentType::JSON,
         .headers = headers,
         .body = body,
-        .quality_of_service = core::web::QualityOfService::IMMEDIATE,
+        .quality_of_service = get_quality_of_service(),
         .rate_limit_weight = 1,
     };
     connection_(
@@ -288,7 +293,7 @@ uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
           .content_type = core::http::ContentType::JSON,
           .headers = headers,
           .body = body,
-          .quality_of_service = core::web::QualityOfService::IMMEDIATE,
+          .quality_of_service = get_quality_of_service(),
           .rate_limit_weight = 1,
       };
       connection_(request, [this](auto &response) {
