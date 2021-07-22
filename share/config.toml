@@ -18,6 +18,26 @@ symbols = ".*"
   password = "secret"
   accounts = [ "A1" ]
   symbols = [ "XBTUSD" ]
-  monitor_period_secs = 60
-  ban_period_secs = 300
-  request_limit = 10
+
+[rate_limits]
+
+  [rate_limits.global]
+    type = "ORDER_ACTION"
+    aggregate = true
+    request_limit = 100
+    monitor_period = "10s"
+    ban_period = "5min"
+
+  [rate_limits.A1]
+    type = "CREATE_ORDER"
+    account = "A.*"
+    request_limit = 30
+    monitor_period = "1s"
+    ban_period = "5min"
+
+  [rate_limits.market_maker]
+    type = "CREATE_ORDER"
+    user = [ "trader" ]
+    request_limit = 20
+    monitor_period = "200ms"
+    ban_period = "5min"

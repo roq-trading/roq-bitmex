@@ -71,6 +71,10 @@ void Config::operator()(server::User &&user) {
   users.emplace_back(std::move(user));
 }
 
+void Config::operator()(server::RateLimit &&rate_limit) {
+  rate_limits.emplace(rate_limit.name, std::move(rate_limit));
+}
+
 void Config::operator()(const std::string_view &key, toml::node &) {
   log::warn(R"(UNKNOWN KEY="{}")"_sv, key);
 }
