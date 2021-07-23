@@ -26,18 +26,18 @@ symbols = ".*"
     aggregate = true
     request_limit = 100
     monitor_period = "10s"
-    ban_period = "5min"
+    ban_period = "5m"
 
   [rate_limits.A1]
     type = "CREATE_ORDER"
-    account = "A.*"
+    accounts = "A.*"
     request_limit = 30
     monitor_period = "1s"
-    ban_period = "5min"
+    ban_period = "5m"
 
   [rate_limits.market_maker]
     type = "CREATE_ORDER"
-    user = [ "trader" ]
+    users = [ "trader" ]
     request_limit = 20
     monitor_period = "200ms"
-    ban_period = "5min"
+    ban_period = "5m"
