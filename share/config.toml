@@ -22,22 +22,22 @@ symbols = ".*"
 [rate_limits]
 
   [rate_limits.global]
-    type = "ORDER_ACTION"
-    aggregate = true
-    request_limit = 100
-    monitor_period = "10s"
-    ban_period = "5m"
+  type = "ORDER_ACTION"
+  aggregate = true
+  request_limit = 100
+  monitor_period = "10s"
+  ban_period = "5m"
 
-  [rate_limits.A1]
-    type = "CREATE_ORDER"
-    accounts = "A.*"
-    request_limit = 30
-    monitor_period = "1s"
-    ban_period = "5m"
+  [rate_limits.A]
+  type = "CREATE_ORDER"
+  accounts = "A.*"
+  request_limit = 30
+  monitor_period = "1s"
+  ban_period = "5m"
 
   [rate_limits.market_maker]
-    type = "CREATE_ORDER"
-    users = [ "trader" ]
-    request_limit = 20
-    monitor_period = "200ms"
-    ban_period = "5m"
+  type = "CREATE_ORDER"
+  users = [ "trader" ]
+  request_limit = 20
+  monitor_period = "200ms"
+  ban_period = "5m"
