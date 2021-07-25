@@ -24,11 +24,10 @@
     },
     {
       "name": "rest_ping_freq",
-      "flag_name": "rest_ping_freq_secs",
-      "type": "std::chrono::seconds",
-      "validator": "roq::core::flags::Positive<uint32_t>",
-      "default": 5,
-      "description": "ping frequency (seconds)"
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "5s",
+      "description": "ping frequency"
     },
     {
       "name": "rest_ping_path",
@@ -39,19 +38,17 @@
     },
     {
       "name": "rest_request_timeout",
-      "flag_name": "rest_request_timeout_secs",
-      "type": "std::chrono::seconds",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 30,
-      "description": "request: timeout (seconds)"
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "30s",
+      "description": "request: timeout"
     },
     {
       "name": "rest_rate_limit_interval",
-      "flag_name": "rest_rate_limit_interval_secs",
-      "type": "std::chrono::seconds",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 60,
-      "description": "rate limit: monitor interval (seconds)"
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "60s",
+      "description": "rate limit: monitor interval"
     },
     {
       "name": "rest_rate_limit_max_requests",
@@ -62,11 +59,10 @@
     },
     {
       "name": "rest_expires_timeout",
-      "flag_name": "rest_expires_timeout_secs",
-      "type": "std::chrono::seconds",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 1,
-      "description": "expires time-out (seconds)"
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "1s",
+      "description": "expires time-out"
     },
     {
       "name": "rest_allow_order_updates",
@@ -89,19 +85,17 @@
     },
     {
       "name": "ws_ping_freq",
-      "flag_name": "ws_ping_freq_secs",
-      "type": "std::chrono::seconds",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 5,
-      "description": "ping frequency (seconds)"
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "5s",
+      "description": "ping frequency"
     },
     {
       "name": "ws_request_timeout",
-      "flag_name": "ws_request_timeout_secs",
-      "type": "std::chrono::seconds",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 15,
-      "description": "request time-out (seconds)"
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "15s",
+      "description": "request time-out"
     },
     {
       "name": "ws_cancel_on_disconnect",
@@ -111,11 +105,10 @@
     },
     {
       "name": "ws_cancel_all_after",
-      "flag_name": "ws_cancel_all_after_secs",
-      "type": "std::chrono::seconds",
-      "validator": "roq::core::flags::Positive<int32_t>",
-      "default": 15,
-      "description": "cancel all after (seconds), requires cancel-on-disconnect"
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "15s",
+      "description": "cancel all after, requires cancel-on-disconnect"
     },
     {
       "name": "encode_buffer_size",

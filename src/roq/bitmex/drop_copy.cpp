@@ -174,13 +174,13 @@ void DropCopy::operator()(ConnectionStatus status) {
   }
 }
 
-void DropCopy::send_cancel_all_after(std::chrono::seconds seconds) {
+void DropCopy::send_cancel_all_after(std::chrono::nanoseconds timeout) {
   auto message = roq::format(
       R"({{)"
       R"("op":"cancelAllAfter",)"
       R"("args":{})"
       R"(}})"_sv,
-      std::chrono::duration_cast<std::chrono::milliseconds>(seconds).count());
+      std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   connection_.send_text(message);
 }
 

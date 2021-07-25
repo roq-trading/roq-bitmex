@@ -57,7 +57,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::StreamPar
  private:
   void operator()(ConnectionStatus);
 
-  void send_cancel_all_after(std::chrono::seconds seconds);
+  void send_cancel_all_after(std::chrono::nanoseconds timeout);
 
   void send_subscribe(const std::string_view &topic);
   void send_subscribe(const roq::span<std::string_view> &topics);
