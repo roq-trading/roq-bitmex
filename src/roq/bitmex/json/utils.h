@@ -11,16 +11,12 @@
 #include "roq/core/charconv/datetime.h"
 
 #include "roq/bitmex/json/exec_inst.h"
-#include "roq/bitmex/json/exec_type.h"
 #include "roq/bitmex/json/liquidity_ind.h"
-#include "roq/bitmex/json/multi_leg_reporting_type.h"
 #include "roq/bitmex/json/ord_status.h"
 #include "roq/bitmex/json/ord_type.h"
-#include "roq/bitmex/json/settlement_type.h"
 #include "roq/bitmex/json/side.h"
 #include "roq/bitmex/json/state.h"
 #include "roq/bitmex/json/time_in_force.h"
-#include "roq/bitmex/json/typ.h"
 
 namespace roq {
 namespace bitmex {
@@ -53,76 +49,6 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
       },
       value);
 }
-
-// json
-
-template <>
-inline void update(ExecInst &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(ExecType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(LiquidityInd &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(MultiLegReportingType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(OrdStatus &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(OrdType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(SettlementType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(Side &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(State &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(TimeInForce &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(Typ &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-// utils
 
 // bitmex => roq
 
