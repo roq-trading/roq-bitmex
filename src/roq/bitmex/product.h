@@ -67,7 +67,7 @@ class Product final {
     std::chrono::seconds end_time_utc = {};
   };
   statistics_t funding_rate_ = {};
-  statistics_t funding_rate_daily_ = {};
+  statistics_t indicative_funding_rate_ = {};
   mutable std::vector<Statistics> statistics_;  // XXX mutable due to span
 };
 

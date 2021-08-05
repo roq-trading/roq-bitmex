@@ -106,6 +106,17 @@ bool Product::update(const json::InstrumentItem &item) {
       });
     }
   }
+  // indicative funding rate
+  if (!std::isnan(item.indicative_funding_rate)) {
+    if (utils::update(indicative_funding_rate_.value, item.indicative_funding_rate) != 0) {
+      statistics_.emplace_back(Statistics{
+          .type = StatisticsType::FUNDING_RATE_PREDICTION,
+          .value = indicative_funding_rate_.value,
+          .begin_time_utc = {},
+          .end_time_utc = {},
+      });
+    }
+  }
   return market_status_dirty_ || !statistics_.empty();
 }
 
