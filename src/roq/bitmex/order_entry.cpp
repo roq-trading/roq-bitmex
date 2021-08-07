@@ -58,7 +58,7 @@ OrderEntry::OrderEntry(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
+      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
@@ -142,7 +142,7 @@ uint16_t OrderEntry::operator()(
                          ? std::string_view{}
                          : json::map(create_order.execution_instruction).as_raw_text();
     // XXX use encode buffer
-    auto body = roq::format(
+    auto body = fmt::format(
         R"({{)"
         R"("clOrdID":"{}",)"
         R"("symbol":"{}",)"
@@ -196,7 +196,7 @@ uint16_t OrderEntry::operator()(
     auto path = "/api/v1/order"_sv;
     auto expires = compute_expires();
     // XXX use encode buffer
-    auto body = roq::format(
+    auto body = fmt::format(
         R"({{)"
         R"("clOrdID":"{}",)"
         R"("origClOrdID":"{}",)"
@@ -246,7 +246,7 @@ uint16_t OrderEntry::operator()(
     auto path = "/api/v1/order"_sv;
     auto expires = compute_expires();
     // XXX use encode buffer
-    auto body = roq::format(
+    auto body = fmt::format(
         R"({{)"
         R"("orderID":"{}")"
         R"(}})"_sv,

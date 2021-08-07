@@ -68,7 +68,7 @@ void OrderUpdate::operator()(
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"_sv, status);
   auto side = json::map(order_item.side);
-  auto external_account = roq::format("{}"_sv, order_item.account);  // XXX alloc
+  auto external_account = fmt::format("{}"_sv, order_item.account);  // XXX alloc
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
   // XXX TODO(thraneh): execution_instruction

@@ -58,7 +58,7 @@ void emplace(Trade &result, const T &value) {
 
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(roq::format("{}:{}"_sv, stream_id_, NAME)),
+    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"_sv, stream_id_, NAME)),
       connection_(
           *this,
           context,
@@ -178,7 +178,7 @@ void MarketData::operator()(ConnectionStatus status) {
 }
 
 void MarketData::send_subscribe(const std::string_view &topic) {
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("op":"subscribe",)"
       R"("args":"{}")"
@@ -193,12 +193,12 @@ void MarketData::send_subscribe(const roq::span<std::string_view> &topics) {
   if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
   } else {
-    auto message = roq::format(
+    auto message = fmt::format(
         R"({{)"
         R"("op":"subscribe",)"
         R"("args":["{}"])"
         R"(}})"_sv,
-        roq::join(topics, R"(",")"_sv));
+        fmt::join(topics, R"(",")"_sv));
     log::debug(R"(message="{}")"_sv, message);
     connection_.send_text(message);
   }

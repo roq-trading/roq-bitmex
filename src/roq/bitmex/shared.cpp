@@ -16,7 +16,7 @@ Shared::Shared(server::Dispatcher &dispatcher)
 std::string_view Shared::next_request_id() {
   auto request_id = ++request_id_;
   stack_buffer_.clear();
-  roq::format_to(std::back_inserter(stack_buffer_), "roq-{}"_sv, request_id);
+  fmt::format_to(std::back_inserter(stack_buffer_), "roq-{}"_sv, request_id);
   return std::string_view{stack_buffer_.data(), stack_buffer_.size()};
 }
 

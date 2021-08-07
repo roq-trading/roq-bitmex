@@ -69,11 +69,15 @@ class Config final : public server::Config, public server::ConfigReader::Handler
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::bitmex::Config> : public roq::formatter {
+struct fmt::formatter<roq::bitmex::Config> {
+  template <typename Context>
+  constexpr auto parse(Context &context) {
+    return context.begin();
+  }
   template <typename C>
   auto format(const roq::bitmex::Config &value, C &ctx) {
     using namespace roq::literals;
-    return roq::format_to(
+    return fmt::format_to(
         ctx.out(),
         R"({{)"
         R"(symbols={}, )"
@@ -83,9 +87,9 @@ struct fmt::formatter<roq::bitmex::Config> : public roq::formatter {
         R"(rate_limits=[{}])"
         R"(}})"_sv,
         value.symbols,
-        roq::join(value.accounts, ", "_sv),
+        fmt::join(value.accounts, ", "_sv),
         value.master_account_,
-        roq::join(value.users, ", "_sv),
-        roq::join(value.rate_limits, ", "_sv));
+        fmt::join(value.users, ", "_sv),
+        fmt::join(value.rate_limits, ", "_sv));
   }
 };

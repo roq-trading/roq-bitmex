@@ -54,7 +54,7 @@ DropCopy::DropCopy(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
+      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
@@ -175,7 +175,7 @@ void DropCopy::operator()(ConnectionStatus status) {
 }
 
 void DropCopy::send_cancel_all_after(std::chrono::nanoseconds timeout) {
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("op":"cancelAllAfter",)"
       R"("args":{})"
@@ -185,7 +185,7 @@ void DropCopy::send_cancel_all_after(std::chrono::nanoseconds timeout) {
 }
 
 void DropCopy::send_subscribe(const std::string_view &topic) {
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("op":"subscribe",)"
       R"("args":"{}")"
@@ -200,12 +200,12 @@ void DropCopy::send_subscribe(const roq::span<std::string_view> &topics) {
   if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
   } else {
-    auto message = roq::format(
+    auto message = fmt::format(
         R"({{)"
         R"("op":"subscribe",)"
         R"("args":["{}"])"
         R"(}})"_sv,
-        roq::join(topics, R"(",")"_sv));
+        fmt::join(topics, R"(",")"_sv));
     log::debug(R"(message="{}")"_sv, message);
     connection_.send_text(message);
   }
@@ -307,7 +307,7 @@ void DropCopy::operator()(
       auto last = execution.data.size() == ++index;
       auto status = json::map(item.ord_status);
       auto side = json::map(item.side);
-      auto external_account = roq::format("{}"_sv, item.account);  // XXX alloc
+      auto external_account = fmt::format("{}"_sv, item.account);  // XXX alloc
       auto order_type = json::map(item.ord_type);
       auto time_in_force = json::map(item.time_in_force);
       // XXX TODO(thraneh): execution_instruction
@@ -431,7 +431,7 @@ void DropCopy::operator()(
   profile_.position([&]() {
     log::info<2>("action={}, position={}"_sv, action, position);
     for (auto &item : position.data) {
-      auto external_account = roq::format("{}"_sv, item.account);  // XXX alloc
+      auto external_account = fmt::format("{}"_sv, item.account);  // XXX alloc
       PositionUpdate position_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),

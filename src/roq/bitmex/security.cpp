@@ -24,7 +24,7 @@ static auto create_base_path() {
 }
 
 static auto create_timestamp_secs(std::chrono::nanoseconds value) {
-  return roq::format("{}"_sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
+  return fmt::format("{}"_sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 }  // namespace
 
@@ -58,7 +58,7 @@ std::string Security::create_headers(
     const std::string_view &path,
     const std::string_view &body) {
   auto signature = create_signature(expires, method, path, body);
-  return roq::format(
+  return fmt::format(
       "api-signature: {}\r\n"
       "api-expires: {}\r\n"
       "api-key: {}\r\n"_sv,
