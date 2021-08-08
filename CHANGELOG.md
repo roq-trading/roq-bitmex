@@ -4,6 +4,8 @@ All notable changes will be documented in this file.
 
 ## Head
 
+## 0.7.5 &ndash; 2021-08-08
+
 ### Added
 
 * `StatisticsType::FUNDING_RATE_PREDICTION`
