@@ -9,6 +9,12 @@
       "description": "config file (path)"
     },
     {
+      "name": "secrets_file",
+      "type": "std::string",
+      "validator": "roq::core::flags::Path<std::string>",
+      "description": "secrets file (path, optional)"
+    },
+    {
       "name": "exchange",
       "type": "std::string",
       "validator": "roq::core::flags::NonEmpty<std::string>",
