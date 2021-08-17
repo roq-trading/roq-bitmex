@@ -115,7 +115,7 @@ void OrderUpdate::operator()(
                 .type = {},
                 .origin = Origin::EXCHANGE,
                 .status = status,
-                .error = order_item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+                .error = json::guess_error(order_item.ord_rej_reason),
                 .text = order_item.text,
                 .version = {},
                 .request_id = request_id,

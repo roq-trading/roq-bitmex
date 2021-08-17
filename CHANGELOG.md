@@ -6,6 +6,8 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* OrderAck.error is now **guessed** based on reject reason.
+  NOTE! This is **best effort** and preferably not to be relied upon.
 * OrderEntry will now parse response message for all HTTP status code 4xx.
   (BitMEX documentation only lists 400, 401, 403, 404, but have seen 409 as well.)
 

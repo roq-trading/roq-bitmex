@@ -250,6 +250,8 @@ inline json::ExecInst map(roq::ExecutionInstruction execution_instruction) {
   return json::ExecInst::UNDEFINED;
 }
 
+extern Error guess_error(const std::string_view &message);
+
 }  // namespace json
 }  // namespace bitmex
 }  // namespace roq
