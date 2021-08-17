@@ -4,6 +4,11 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* OrderEntry will now parse response message for all HTTP status code 4xx.
+  (BitMEX documentation only lists 400, 401, 403, 404, but have seen 409 as well.)
+
 ## 0.7.5 &ndash; 2021-08-08
 
 ### Added

@@ -348,17 +348,15 @@ void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
   server::TraceInfo trace_info;
   try {
-    switch (response.raw_status()) {
-      case core::http::Status::OK: {  // 200
+    auto category = core::http::to_category(response.raw_status());
+    switch (category) {
+      case core::http::Category::SUCCESS: {  // 2xx
         auto body = response.body();
         auto order_item = core::json::Parser::create<json::OrderItem>(body);
         OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info);
         break;
       }
-      case core::http::Status::BAD_REQUEST:   // 400
-      case core::http::Status::UNAUTHORIZED:  // 401
-      case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
+      case core::http::Category::CLIENT_ERROR: {
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -378,7 +376,7 @@ void OrderEntry::create_order_ack(
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
             .text = text,
-            .version = {},
+            .version = 1,
             .request_id = {},
         };
         server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
@@ -398,7 +396,7 @@ void OrderEntry::create_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),
-        .version = 1,  // XXX HANS allow 0
+        .version = 1,
         .request_id = {},
     };
     server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
@@ -412,16 +410,14 @@ void OrderEntry::modify_order_ack(
     const uint32_t version) {
   server::TraceInfo trace_info;
   try {
-    switch (response.raw_status()) {
-      case core::http::Status::OK: {  // 200
+    auto category = core::http::to_category(response.raw_status());
+    switch (category) {
+      case core::http::Category::SUCCESS: {  // 2xx
         auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
         OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info);
         break;
       }
-      case core::http::Status::BAD_REQUEST:   // 400
-      case core::http::Status::UNAUTHORIZED:  // 401
-      case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
+      case core::http::Category::CLIENT_ERROR: {  // 4xx
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -475,17 +471,15 @@ void OrderEntry::cancel_order_ack(
     const uint32_t version) {
   server::TraceInfo trace_info;
   try {
-    switch (response.raw_status()) {
-      case core::http::Status::OK: {  // 200
+    auto category = core::http::to_category(response.raw_status());
+    switch (category) {
+      case core::http::Category::SUCCESS: {  // 2xx
         core::json::Buffer buffer(decode_buffer_);
         auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
         OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
         break;
       }
-      case core::http::Status::BAD_REQUEST:   // 400
-      case core::http::Status::UNAUTHORIZED:  // 401
-      case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
+      case core::http::Category::CLIENT_ERROR: {  // 4xx
         std::string_view text;
         auto body = response.body();
         if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -535,17 +529,15 @@ void OrderEntry::cancel_order_ack(
 void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
   server::TraceInfo trace_info;
   try {
-    switch (response.raw_status()) {
-      case core::http::Status::OK: {  // 200
+    auto category = core::http::to_category(response.raw_status());
+    switch (category) {
+      case core::http::Category::SUCCESS: {  // 2xx
         core::json::Buffer buffer(decode_buffer_);
         auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
         OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
         break;
       }
-      case core::http::Status::BAD_REQUEST:   // 400
-      case core::http::Status::UNAUTHORIZED:  // 401
-      case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
+      case core::http::Category::CLIENT_ERROR: {  // 4xx
         auto body = response.body();
         if (json::ErrorParser::dispatch(
                 body, [&](auto &error) { log::warn("error={}"_sv, error); })) {
