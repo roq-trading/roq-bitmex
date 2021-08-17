@@ -4,6 +4,8 @@
 
 #include <absl/container/flat_hash_map.h>
 
+#include <fmt/ranges.h>
+
 #include <toml++/toml.h>
 
 #include <string>
