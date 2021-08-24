@@ -72,6 +72,19 @@ void OrderUpdate::operator()(
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
   // XXX TODO(thraneh): execution_instruction
+  auto request_status = compute_request_status(order_item.ord_status);
+  auto request_id = order_item.cl_ord_id;
+  server::OMS_Ack ack{
+      .type = {},
+      .origin = Origin::EXCHANGE,
+      .status = request_status,
+      .error = json::guess_error(order_item.ord_rej_reason),
+      .text = order_item.text,
+      .version = {},
+      .request_id = request_id,
+      .quantity = order_item.order_qty,
+      .price = order_item.price,
+  };
   roq::OrderUpdate order_update{
       .stream_id = stream_id_,
       .account = account_,
@@ -104,24 +117,8 @@ void OrderUpdate::operator()(
       .max_response_version = {},
       .max_accepted_version = {},
   };
-  auto request_id = order_item.cl_ord_id;
-  if (shared_.find_order(
-          stream_id_, trace_info, order_update, request_id, [&](const auto &order, auto callback) {
-            auto status = compute_request_status(order_item.ord_status);
-            server::Ack ack{
-                .stream_id = stream_id_,
-                .account = account_,
-                .order_id = order.order_id,
-                .type = {},
-                .origin = Origin::EXCHANGE,
-                .status = status,
-                .error = json::guess_error(order_item.ord_rej_reason),
-                .text = order_item.text,
-                .version = {},
-                .request_id = request_id,
-            };
-            server::Trace event(trace_info, ack);
-            callback(event, true, order.user_id);
+  if (shared_.update_order(
+          request_id, stream_id_, trace_info, ack, order_update, []([[maybe_unused]] auto &order) {
           })) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"_sv);

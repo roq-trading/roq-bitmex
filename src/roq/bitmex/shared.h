@@ -29,8 +29,8 @@ struct Shared final {
   }
 
   template <typename... Args>
-  auto find_order(Args &&...args) {
-    return dispatcher_.find_order(std::forward<Args>(args)...);
+  auto update_order(Args &&...args) {
+    return dispatcher_.update_order(std::forward<Args>(args)...);
   }
 
   template <typename... Args>

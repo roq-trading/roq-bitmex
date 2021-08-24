@@ -6,6 +6,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* New order management interface (#25)
 * OrderAck.error is now **guessed** based on reject reason.
   NOTE! This is **best effort** and preferably not to be relied upon.
 * OrderEntry will now parse response message for all HTTP status code 4xx.

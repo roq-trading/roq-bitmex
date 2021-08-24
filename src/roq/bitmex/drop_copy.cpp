@@ -305,13 +305,28 @@ void DropCopy::operator()(
     size_t index = {};
     for (auto &item : execution.data) {
       auto last = execution.data.size() == ++index;
-      auto status = json::map(item.ord_status);
+      auto order_status = json::map(item.ord_status);
       auto side = json::map(item.side);
       auto external_account = fmt::format("{}"_sv, item.account);  // XXX alloc
       auto order_type = json::map(item.ord_type);
       auto time_in_force = json::map(item.time_in_force);
       // XXX TODO(thraneh): execution_instruction
       auto last_liquidity = json::map(item.last_liquidity_ind);
+      auto type = compute_request_type(item.exec_type);
+      auto request_status = compute_request_status(item.exec_type);
+      // cancel order does not allow passing a custom id
+      auto request_id = type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
+      server::OMS_Ack ack{
+          .type = type,
+          .origin = Origin::EXCHANGE,
+          .status = request_status,
+          .error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+          .text = item.text,
+          .version = {},
+          .request_id = request_id,
+          .quantity = item.order_qty,
+          .price = item.price,
+      };
       roq::OrderUpdate order_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
@@ -329,7 +344,7 @@ void DropCopy::operator()(
           .update_time_utc = item.timestamp,  // XXX transact_time?
           .external_account = external_account,
           .external_order_id = item.order_id,
-          .status = status,
+          .status = order_status,
           .quantity = item.order_qty,
           .price = item.price,
           .stop_price = item.stop_px,
@@ -344,57 +359,32 @@ void DropCopy::operator()(
           .max_response_version = {},
           .max_accepted_version = {},
       };
-      auto found = shared_.find_order(
-          stream_id_,
-          trace_info,
-          order_update,
-          item.cl_ord_id,
-          [&](const auto &order, auto callback) {
-            auto type = compute_request_type(item.exec_type);
-            auto status = compute_request_status(item.exec_type);
-            // cancel order does not allow passing a custom id
-            auto request_id =
-                type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
-            if (status != RequestStatus{}) {
-              server::Ack ack{
-                  .stream_id = stream_id_,
-                  .account = security_.get_account(),
-                  .order_id = order.order_id,
-                  .type = type,
-                  .origin = Origin::EXCHANGE,
-                  .status = status,
-                  .error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
-                  .text = item.text,
-                  .version = {},
-                  .request_id = request_id,
-              };
-              server::Trace event(trace_info, ack);
-              callback(event, true, order.user_id);
-            }
-            if (item.exec_type == json::ExecType::TRADE) {
-              fills.emplace_back([&](auto &result) { emplace(result, item); });
-            }
-            if (last && !fills.empty()) {
-              TradeUpdate trade_update{
-                  .stream_id = stream_id_,
-                  .account = order.account,
-                  .order_id = order.order_id,
-                  .exchange = order.exchange,
-                  .symbol = order.symbol,
-                  .side = order.side,
-                  .position_effect = order.position_effect,
-                  .create_time_utc = item.timestamp,  // XXX transact_time?
-                  .update_time_utc = item.timestamp,  // XXX transact_time?
-                  .external_account = external_account,
-                  .external_order_id = order.external_order_id,
-                  .fills = fills,
-                  .routing_id = order.routing_id,
-              };
-              server::create_trace_and_dispatch(
-                  trace_info, trade_update, handler_, true, order.user_id);
-            }
-          });
-      if (!found) {
+      if (shared_.update_order(
+              item.cl_ord_id, stream_id_, trace_info, ack, order_update, [&](auto &order) {
+                if (item.exec_type == json::ExecType::TRADE) {
+                  fills.emplace_back([&](auto &result) { emplace(result, item); });
+                }
+                if (last && !fills.empty()) {
+                  TradeUpdate trade_update{
+                      .stream_id = stream_id_,
+                      .account = order.account,
+                      .order_id = order.order_id,
+                      .exchange = order.exchange,
+                      .symbol = order.symbol,
+                      .side = order.side,
+                      .position_effect = order.position_effect,
+                      .create_time_utc = item.timestamp,  // XXX transact_time?
+                      .update_time_utc = item.timestamp,  // XXX transact_time?
+                      .external_account = external_account,
+                      .external_order_id = order.external_order_id,
+                      .fills = fills,
+                      .routing_id = order.routing_id,
+                  };
+                  server::create_trace_and_dispatch(
+                      trace_info, trade_update, handler_, true, order.user_id);
+                }
+              })) {
+      } else {
         log::warn("*** EXTERNAL ORDER ***"_sv);
         log::warn("action={}, execution={}"_sv, action, execution);
       }

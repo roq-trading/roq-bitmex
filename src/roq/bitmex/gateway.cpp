@@ -126,7 +126,7 @@ uint16_t Gateway::operator()(const Event<CreateOrder> &event, const std::string_
 
 uint16_t Gateway::operator()(
     const Event<ModifyOrder> &event,
-    const server::Order &order,
+    const server::OMS_Order &order,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   assert(!event.value.account.empty());
@@ -136,7 +136,7 @@ uint16_t Gateway::operator()(
 
 uint16_t Gateway::operator()(
     const Event<CancelOrder> &event,
-    const server::Order &order,
+    const server::OMS_Order &order,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   assert(!event.value.account.empty());

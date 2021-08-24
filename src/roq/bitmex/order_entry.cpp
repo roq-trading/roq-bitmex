@@ -130,7 +130,8 @@ uint16_t OrderEntry::operator()(
     const Event<CreateOrder> &event, const std::string_view &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY);
+      throw server::OMS_ErrorException(
+          Origin::GATEWAY, RequestStatus::REJECTED, Error::GATEWAY_NOT_READY);
     auto &[message_info, create_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v1/order"_sv;
@@ -185,12 +186,13 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &event,
-    const server::Order &order,
+    const server::OMS_Order &,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY, order);
+      throw server::OMS_ErrorException(
+          Origin::GATEWAY, RequestStatus::REJECTED, Error::GATEWAY_NOT_READY);
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::PUT;
     auto path = "/api/v1/order"_sv;
@@ -235,12 +237,13 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &event,
-    const server::Order &order,
+    const server::OMS_Order &order,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY, order);
+      throw server::OMS_ErrorException(
+          Origin::GATEWAY, RequestStatus::REJECTED, Error::GATEWAY_NOT_READY);
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::DELETE;
     auto path = "/api/v1/order"_sv;
@@ -367,10 +370,7 @@ void OrderEntry::create_order_ack(
           log::warn(R"(Unable to parse response="{}")"_sv, body);
           text = "Unknown"_sv;
         }
-        server::Ack ack{
-            .stream_id = stream_id_,
-            .account = security_.get_account(),
-            .order_id = order_id,
+        server::OMS_Ack ack{
             .type = RequestType::CREATE_ORDER,
             .origin = Origin::EXCHANGE,
             .status = RequestStatus::REJECTED,
@@ -378,8 +378,11 @@ void OrderEntry::create_order_ack(
             .text = text,
             .version = 1,
             .request_id = {},
+            .quantity = NaN,
+            .price = NaN,
         };
-        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+        shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
         break;
       }
       default:
@@ -387,10 +390,7 @@ void OrderEntry::create_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
+    server::OMS_Ack ack{
         .type = RequestType::CREATE_ORDER,
         .origin = Origin::GATEWAY,
         .status = RequestStatus::REJECTED,
@@ -398,8 +398,11 @@ void OrderEntry::create_order_ack(
         .text = e.what(),
         .version = 1,
         .request_id = {},
+        .quantity = NaN,
+        .price = NaN,
     };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+    shared_.update_order(
+        user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
   }
 }
 
@@ -428,10 +431,7 @@ void OrderEntry::modify_order_ack(
           log::warn(R"(Unable to parse response="{}")"_sv, body);
           text = "Unknown"_sv;
         }
-        server::Ack ack{
-            .stream_id = stream_id_,
-            .account = security_.get_account(),
-            .order_id = order_id,
+        server::OMS_Ack ack{
             .type = RequestType::MODIFY_ORDER,
             .origin = Origin::EXCHANGE,
             .status = RequestStatus::REJECTED,
@@ -439,8 +439,11 @@ void OrderEntry::modify_order_ack(
             .text = text,
             .version = version,
             .request_id = {},
+            .quantity = NaN,
+            .price = NaN,
         };
-        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+        shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
         break;
       }
       default:
@@ -448,10 +451,7 @@ void OrderEntry::modify_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
+    server::OMS_Ack ack{
         .type = RequestType::MODIFY_ORDER,
         .origin = Origin::GATEWAY,
         .status = RequestStatus::REJECTED,
@@ -459,8 +459,11 @@ void OrderEntry::modify_order_ack(
         .text = e.what(),
         .version = version,
         .request_id = {},
+        .quantity = NaN,
+        .price = NaN,
     };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+    shared_.update_order(
+        user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
   }
 }
 
@@ -490,10 +493,7 @@ void OrderEntry::cancel_order_ack(
           log::warn(R"(Unable to parse response="{}")"_sv, body);
           text = "Unknown"_sv;
         }
-        server::Ack ack{
-            .stream_id = stream_id_,
-            .account = security_.get_account(),
-            .order_id = order_id,
+        server::OMS_Ack ack{
             .type = RequestType::CANCEL_ORDER,
             .origin = Origin::EXCHANGE,
             .status = RequestStatus::REJECTED,
@@ -501,8 +501,11 @@ void OrderEntry::cancel_order_ack(
             .text = text,
             .version = version,
             .request_id = {},
+            .quantity = NaN,
+            .price = NaN,
         };
-        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+        shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
         break;
       }
       default:
@@ -510,10 +513,7 @@ void OrderEntry::cancel_order_ack(
     }
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
+    server::OMS_Ack ack{
         .type = RequestType::CANCEL_ORDER,
         .origin = Origin::GATEWAY,
         .status = RequestStatus::REJECTED,
@@ -521,8 +521,11 @@ void OrderEntry::cancel_order_ack(
         .text = e.what(),
         .version = version,
         .request_id = {},
+        .quantity = NaN,
+        .price = NaN,
     };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+    shared_.update_order(
+        user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
   }
 }
 
