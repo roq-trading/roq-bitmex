@@ -24,7 +24,7 @@ symbols = ".*"
   [rate_limits.global]
     type = "ORDER_ACTION"
     aggregate = true
-    request_limit = 2
+    request_limit = 100
     monitor_period = "10s"
     ban_period = "5m"
 
