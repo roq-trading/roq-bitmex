@@ -6,6 +6,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Download orders (#39)
 * Parse error messages (#32)
 * New order management interface (#25)
 * OrderAck.error is now **guessed** based on reject reason.

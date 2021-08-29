@@ -400,13 +400,35 @@ void DropCopy::operator()(
   });
 }
 
+// download:
+// I0829 07:46:11.761970 453348 drop_copy.cpp:406] action=PARTIAL, order={data=[{account=273093,
+// avg_px=0, cl_ord_id="2AAC6QMAAQAAHn4qzuAS", cl_ord_link_id="", contingency_type="", cum_qty=0,
+// currency="USD", display_qty=0, ex_destination="XBME", exec_inst=UNDEFINED, leaves_qty=100,
+// multi_leg_reporting_type=SINGLE_SECURITY, order_id="e40953ca-8925-452d-b454-a8cac0727a5d",
+// order_qty=100, ord_rej_reason="", ord_status=NEW, ord_type=LIMIT, peg_offset_value=0,
+// peg_price_type="", price=48415.5, settl_currency="XBt", side=BUY, simple_cum_qty=0,
+// simple_leaves_qty=0, simple_order_qty=0, stop_px=0, symbol="XBTUSD", text="Submitted via API.",
+// time_in_force=GOOD_TILL_CANCEL, timestamp=1630215940903ms, transact_time=1630215940903ms,
+// triggered="", working_indicator=true}]}
+//
+// create:
+// I0829 07:50:11.848755 453635 drop_copy.cpp:406] action=INSERT, order={data=[{account=273093,
+// avg_px=0, cl_ord_id="iQAC6QMAAQAAMGtQ3uAS", cl_ord_link_id="", contingency_type="", cum_qty=0,
+// currency="USD", display_qty=0, ex_destination="XBME", exec_inst=UNDEFINED, leaves_qty=100,
+// multi_leg_reporting_type=SINGLE_SECURITY, order_id="37a5c911-0221-4635-9736-3e8bf7887cdf",
+// order_qty=100, ord_rej_reason="", ord_status=NEW, ord_type=LIMIT, peg_offset_value=0,
+// peg_price_type="", price=48349, settl_currency="XBt", side=BUY, simple_cum_qty=0,
+// simple_leaves_qty=0, simple_order_qty=0, stop_px=0, symbol="XBTUSD", text="Submitted via API.",
+// time_in_force=GOOD_TILL_CANCEL, timestamp=1630216211822ms, transact_time=1630216211822ms,
+// triggered="", working_indicator=true}]}
 void DropCopy::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
   profile_.order([&]() {
     log::info<1>("action={}, order={}"_sv, action, order);
-    OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
+    auto download = !partial_received_.order && action == json::Action::PARTIAL;
+    OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, download);
     // state management
-    if (!partial_received_.order && action == json::Action::PARTIAL) {
+    if (download) {
       partial_received_.order = true;
       // release download state
       download_.check_relaxed(DropCopyState::SUBSCRIBE);

@@ -62,8 +62,8 @@ RequestStatus compute_request_status(json::OrdStatus ord_status) {
 }  // namespace
 
 void OrderUpdate::operator()(
-    const json::OrderItem &order_item, const server::TraceInfo &trace_info) {
-  if (!Flags::rest_allow_order_updates())
+    const json::OrderItem &order_item, const server::TraceInfo &trace_info, bool download) {
+  if (!Flags::rest_allow_order_updates())  // XXX HANS do we still need this?
     return;
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"_sv, status);
@@ -117,19 +117,32 @@ void OrderUpdate::operator()(
       .max_response_version = {},
       .max_accepted_version = {},
   };
-  if (shared_.update_order(
-          request_id, stream_id_, trace_info, ack, order_update, []([[maybe_unused]] auto &order) {
-          })) {
+  if (download) {
+    if (shared_.create_order(request_id, stream_id_, trace_info, order_update)) {
+    } else {
+      log::warn("*** EXTERNAL ORDER ***"_sv);
+      log::warn("order_item={}"_sv, order_item);
+    }
   } else {
-    log::warn("*** EXTERNAL ORDER ***"_sv);
-    log::warn("order_item={}"_sv, order_item);
+    if (shared_.update_order(
+            request_id,
+            stream_id_,
+            trace_info,
+            ack,
+            order_update,
+            []([[maybe_unused]] auto &order) {})) {
+    } else {
+      log::warn("*** EXTERNAL ORDER ***"_sv);
+      log::warn("order_item={}"_sv, order_item);
+    }
   }
 }
 
-void OrderUpdate::operator()(const json::Order &order, const server::TraceInfo &trace_info) {
+void OrderUpdate::operator()(
+    const json::Order &order, const server::TraceInfo &trace_info, bool download) {
   log::debug("order={}"_sv, order);
   for (auto &iter : order.data)
-    (*this)(iter, trace_info);
+    (*this)(iter, trace_info, download);
 }
 
 }  // namespace bitmex

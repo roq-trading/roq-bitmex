@@ -20,8 +20,8 @@ class OrderUpdate final {
   OrderUpdate(OrderUpdate &&) = delete;
   OrderUpdate(const OrderUpdate &) = delete;
 
-  void operator()(const json::OrderItem &, const server::TraceInfo &);
-  void operator()(const json::Order &, const server::TraceInfo &);
+  void operator()(const json::OrderItem &, const server::TraceInfo &, bool download);
+  void operator()(const json::Order &, const server::TraceInfo &, bool download);
 
  private:
   Shared &shared_;
