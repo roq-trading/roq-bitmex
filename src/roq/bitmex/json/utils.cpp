@@ -109,11 +109,21 @@ Error guess_error(const std::string_view &message) {
   Invalid workingIndicator
   Market is not open
   Order had execInst of [Close|ReduceOnly] and side of [Buy|Sell] but current position is [100]
-  Order price is above the liquidation price of current short position
-  Order price is below the liquidation price of current long position
+  */
+  if (compare(message, "Order price is above the liquidation price of current short position"_sv) ==
+      0)
+    return Error::INVALID_PRICE;
+  if (compare(message, "Order price is below the liquidation price of current long position"_sv) ==
+      0)
+    return Error::INVALID_PRICE;
+  /*
   Position is in liquidation
-  Price greater than limitUpPrice
-  Price less than limitDownPrice
+  */
+  if (compare(message, "Price greater than limitUpPrice"_sv) == 0)
+    return Error::INVALID_PRICE;
+  if (compare(message, "Price less than limitDownPrice"_sv) == 0)
+    return Error::INVALID_PRICE;
+  /*
   Underlying leg instrument has no mark price
   Underlying leg market is not open
   Unsupported contingencyType
