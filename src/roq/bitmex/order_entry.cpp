@@ -349,6 +349,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
+  log::info("DEBUG: user_id={}, order_id={}"_sv, user_id, order_id);
   server::TraceInfo trace_info;
   try {
     auto category = core::http::to_category(response.raw_status());
@@ -411,6 +412,7 @@ void OrderEntry::modify_order_ack(
     const uint8_t user_id,
     const uint32_t order_id,
     const uint32_t version) {
+  log::info("DEBUG: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
   server::TraceInfo trace_info;
   try {
     auto category = core::http::to_category(response.raw_status());
@@ -472,6 +474,7 @@ void OrderEntry::cancel_order_ack(
     const uint8_t user_id,
     const uint32_t order_id,
     const uint32_t version) {
+  log::info("DEBUG: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
   server::TraceInfo trace_info;
   try {
     auto category = core::http::to_category(response.raw_status());
