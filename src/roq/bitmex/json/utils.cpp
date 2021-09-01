@@ -89,10 +89,13 @@ Error guess_error(const std::string_view &message) {
     return Error::INVALID_ORDER_TYPE;
   if (compare(message, "Unsupported timeInForce"_sv) == 0)
     return Error::INVALID_TIME_IN_FORCE;
+  if (compare(message, "Account has insufficient Available Balance"_sv) == 0)
+    return Error::INSUFFICIENT_FUNDS;
+  if (compare(message, "Account has no"_sv) == 0)
+    return Error::INSUFFICIENT_FUNDS;
+  if (compare(message, "Account is in margin call"_sv) == 0)
+    return Error::INSUFFICIENT_FUNDS;
   /*
-  Account has insufficient Available Balance, [100000 XBt] required
-  Account has no [XBt]
-  Account is in margin call
   Executing at order price would lead to immediate liquidation
   Executing at order price would push account deeper into margin call
   Executing at order price would put account into margin call
@@ -131,13 +134,18 @@ Error guess_error(const std::string_view &message) {
   Value of position and orders exceeds position Risk Limit
   Value of positions and orders exceeds account Risk Limit
   */
-  // undoc (fixed)
+
+  // undoc (fixed length)
   if (compare(message, "Invalid leavesQty for lotSize"_sv) == 0)
     return Error::INVALID_QUANTITY;
-  // undoc (variable)
+  if (compare(message, "orderID or origClOrdID must be sent."_sv) == 0)
+    return Error::INVALID_ORDER_ID;
+
+  // undoc (variable length)
   // Rate-limit has been reached: usage=60, limit=6
   if (compare(message, "Rate-limit has been reached"_sv) == 0)
     return Error::REQUEST_RATE_LIMIT_REACHED;
+
   log::warn<1>(R"(*** PLEASE REPORT (error="{}") ***)"_sv, message);
   return Error::UNKNOWN;
 }
