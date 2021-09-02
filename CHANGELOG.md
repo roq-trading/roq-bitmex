@@ -8,6 +8,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Two different order-updates based on order-entry or drop-copy (#25)
 * Use web-safe "base64" encoding for ClOrdID (#43)
 * Download orders (#39)
 * Parse error messages (#32)
@@ -16,6 +17,10 @@ All notable changes will be documented in this file.
   NOTE! This is **best effort** and preferably not to be relied upon.
 * OrderEntry will now parse response message for all HTTP status code 4xx.
   (BitMEX documentation only lists 400, 401, 403, 404, but have seen 409 as well.)
+
+### Removed
+
+* The `--rest_allow_order_updates` flag is no longer needed (#44)
 
 ## 0.7.5 &ndash; 2021-08-08
 

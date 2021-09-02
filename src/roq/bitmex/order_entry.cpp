@@ -349,15 +349,17 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
-  log::info("DEBUG: user_id={}, order_id={}"_sv, user_id, order_id);
+  log::debug("user_id={}, order_id={}"_sv, user_id, order_id);
   server::TraceInfo trace_info;
+  uint8_t version = 1;
   try {
     auto category = core::http::to_category(response.raw_status());
     switch (category) {
       case core::http::Category::SUCCESS: {  // 2xx
         auto body = response.body();
         auto order_item = core::json::Parser::create<json::OrderItem>(body);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info, false);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(
+            order_item, trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
         break;
       }
       case core::http::Category::CLIENT_ERROR: {
@@ -377,13 +379,17 @@ void OrderEntry::create_order_ack(
             .status = RequestStatus::REJECTED,
             .error = json::guess_error(text),
             .text = text,
-            .version = 1,
+            .version = version,
             .request_id = {},
             .quantity = NaN,
             .price = NaN,
         };
-        shared_.update_order(
-            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+        if (shared_.update_order(
+                user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {
+                })) {
+        } else {
+          log::warn("Did not find order: user_id={}, order_id={}"_sv, user_id, order_id);
+        }
         break;
       }
       default:
@@ -397,13 +403,16 @@ void OrderEntry::create_order_ack(
         .status = RequestStatus::REJECTED,
         .error = Error::NETWORK_ERROR,
         .text = e.what(),
-        .version = 1,
+        .version = version,
         .request_id = {},
         .quantity = NaN,
         .price = NaN,
     };
-    shared_.update_order(
-        user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+    if (shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {})) {
+    } else {
+      log::warn("Did not find order: user_id={}, order_id={}"_sv, user_id, order_id);
+    }
   }
 }
 
@@ -412,14 +421,15 @@ void OrderEntry::modify_order_ack(
     const uint8_t user_id,
     const uint32_t order_id,
     const uint32_t version) {
-  log::info("DEBUG: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
+  log::debug("user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
   server::TraceInfo trace_info;
   try {
     auto category = core::http::to_category(response.raw_status());
     switch (category) {
       case core::http::Category::SUCCESS: {  // 2xx
         auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info, false);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(
+            order_item, trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
         break;
       }
       case core::http::Category::CLIENT_ERROR: {  // 4xx
@@ -444,8 +454,16 @@ void OrderEntry::modify_order_ack(
             .quantity = NaN,
             .price = NaN,
         };
-        shared_.update_order(
-            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+        if (shared_.update_order(
+                user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {
+                })) {
+        } else {
+          log::warn(
+              "Did not find order: user_id={}, order_id={}, version={}"_sv,
+              user_id,
+              order_id,
+              version);
+        }
         break;
       }
       default:
@@ -464,8 +482,12 @@ void OrderEntry::modify_order_ack(
         .quantity = NaN,
         .price = NaN,
     };
-    shared_.update_order(
-        user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+    if (shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {})) {
+    } else {
+      log::warn(
+          "Did not find order: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
+    }
   }
 }
 
@@ -474,7 +496,7 @@ void OrderEntry::cancel_order_ack(
     const uint8_t user_id,
     const uint32_t order_id,
     const uint32_t version) {
-  log::info("DEBUG: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
+  log::debug("user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
   server::TraceInfo trace_info;
   try {
     auto category = core::http::to_category(response.raw_status());
@@ -482,7 +504,8 @@ void OrderEntry::cancel_order_ack(
       case core::http::Category::SUCCESS: {  // 2xx
         core::json::Buffer buffer(decode_buffer_);
         auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, false);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(
+            order, trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
         break;
       }
       case core::http::Category::CLIENT_ERROR: {  // 4xx
@@ -507,8 +530,16 @@ void OrderEntry::cancel_order_ack(
             .quantity = NaN,
             .price = NaN,
         };
-        shared_.update_order(
-            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+        if (shared_.update_order(
+                user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {
+                })) {
+        } else {
+          log::warn(
+              "Did not find order: user_id={}, order_id={}, version={}"_sv,
+              user_id,
+              order_id,
+              version);
+        }
         break;
       }
       default:
@@ -527,8 +558,12 @@ void OrderEntry::cancel_order_ack(
         .quantity = NaN,
         .price = NaN,
     };
-    shared_.update_order(
-        user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+    if (shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {})) {
+    } else {
+      log::warn(
+          "Did not find order: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
+    }
   }
 }
 

@@ -300,6 +300,7 @@ void DropCopy::operator()(
     const json::Execution &execution,
     const server::TraceInfo &trace_info) {
   profile_.execution([&]() {
+    log::debug("action={}, execution={}"_sv, action, execution);
     log::info<1>("action={}, execution={}"_sv, action, execution);
     core::back_emplacer fills(shared_.fills);
     size_t index = {};
@@ -310,17 +311,18 @@ void DropCopy::operator()(
       auto external_account = fmt::format("{}"_sv, item.account);  // XXX alloc
       auto order_type = json::map(item.ord_type);
       auto time_in_force = json::map(item.time_in_force);
-      // XXX TODO(thraneh): execution_instruction
       auto last_liquidity = json::map(item.last_liquidity_ind);
-      auto type = compute_request_type(item.exec_type);
+      auto request_type = compute_request_type(item.exec_type);
       auto request_status = compute_request_status(item.exec_type);
+      auto error = json::guess_error(item.ord_rej_reason);
       // cancel order does not allow passing a custom id
-      auto request_id = type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
+      auto request_id =
+          request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
       server::OMS_Ack ack{
-          .type = type,
+          .type = request_type,
           .origin = Origin::EXCHANGE,
           .status = request_status,
-          .error = item.ord_rej_reason.empty() ? Error::UNDEFINED : Error::UNKNOWN,
+          .error = error,
           .text = item.text,
           .version = {},
           .request_id = request_id,
@@ -338,7 +340,7 @@ void DropCopy::operator()(
           .max_show_quantity = NaN,
           .order_type = order_type,
           .time_in_force = time_in_force,
-          .execution_instruction = {},  // XXX TODO(thraneh): exec_inst
+          .execution_instruction = {},
           .order_template = {},
           .create_time_utc = {},
           .update_time_utc = item.timestamp,  // XXX transact_time?
@@ -354,7 +356,7 @@ void DropCopy::operator()(
           .last_traded_quantity = item.last_qty,
           .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
-          .routing_id = {},  // XXX TODO(thraneh): decode clOrdID ?
+          .routing_id = {},
           .max_request_version = {},
           .max_response_version = {},
           .max_accepted_version = {},
@@ -400,30 +402,10 @@ void DropCopy::operator()(
   });
 }
 
-// download:
-// I0829 07:46:11.761970 453348 drop_copy.cpp:406] action=PARTIAL, order={data=[{account=273093,
-// avg_px=0, cl_ord_id="2AAC6QMAAQAAHn4qzuAS", cl_ord_link_id="", contingency_type="", cum_qty=0,
-// currency="USD", display_qty=0, ex_destination="XBME", exec_inst=UNDEFINED, leaves_qty=100,
-// multi_leg_reporting_type=SINGLE_SECURITY, order_id="e40953ca-8925-452d-b454-a8cac0727a5d",
-// order_qty=100, ord_rej_reason="", ord_status=NEW, ord_type=LIMIT, peg_offset_value=0,
-// peg_price_type="", price=48415.5, settl_currency="XBt", side=BUY, simple_cum_qty=0,
-// simple_leaves_qty=0, simple_order_qty=0, stop_px=0, symbol="XBTUSD", text="Submitted via API.",
-// time_in_force=GOOD_TILL_CANCEL, timestamp=1630215940903ms, transact_time=1630215940903ms,
-// triggered="", working_indicator=true}]}
-//
-// create:
-// I0829 07:50:11.848755 453635 drop_copy.cpp:406] action=INSERT, order={data=[{account=273093,
-// avg_px=0, cl_ord_id="iQAC6QMAAQAAMGtQ3uAS", cl_ord_link_id="", contingency_type="", cum_qty=0,
-// currency="USD", display_qty=0, ex_destination="XBME", exec_inst=UNDEFINED, leaves_qty=100,
-// multi_leg_reporting_type=SINGLE_SECURITY, order_id="37a5c911-0221-4635-9736-3e8bf7887cdf",
-// order_qty=100, ord_rej_reason="", ord_status=NEW, ord_type=LIMIT, peg_offset_value=0,
-// peg_price_type="", price=48349, settl_currency="XBt", side=BUY, simple_cum_qty=0,
-// simple_leaves_qty=0, simple_order_qty=0, stop_px=0, symbol="XBTUSD", text="Submitted via API.",
-// time_in_force=GOOD_TILL_CANCEL, timestamp=1630216211822ms, transact_time=1630216211822ms,
-// triggered="", working_indicator=true}]}
 void DropCopy::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
   profile_.order([&]() {
+    log::debug("action={}, order={}"_sv, action, order);
     log::info<1>("action={}, order={}"_sv, action, order);
     auto download = !partial_received_.order && action == json::Action::PARTIAL;
     OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, download);

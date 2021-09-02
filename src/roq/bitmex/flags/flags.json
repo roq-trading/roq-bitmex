@@ -71,12 +71,6 @@
       "description": "expires time-out"
     },
     {
-      "name": "rest_allow_order_updates",
-      "type": "bool",
-      "default": false,
-      "description": "allow inconsistent order updates? (bool)"
-    },
-    {
       "name": "rest_allow_order_request_pipeline",
       "type": "bool",
       "default": false,
