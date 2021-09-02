@@ -8,6 +8,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Use web-safe "base64" encoding for ClOrdID (#43)
 * Download orders (#39)
 * Parse error messages (#32)
 * New order management interface (#25)
