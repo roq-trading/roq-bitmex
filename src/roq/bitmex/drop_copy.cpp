@@ -318,7 +318,7 @@ void DropCopy::operator()(
       // cancel order does not allow passing a custom id
       auto request_id =
           request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
-      server::OMS_Ack ack{
+      oms::Response response{
           .type = request_type,
           .origin = Origin::EXCHANGE,
           .status = request_status,
@@ -329,10 +329,8 @@ void DropCopy::operator()(
           .quantity = item.order_qty,
           .price = item.price,
       };
-      roq::OrderUpdate order_update{
-          .stream_id = stream_id_,
+      oms::OrderUpdate order_update{
           .account = security_.get_account(),
-          .order_id = {},
           .exchange = Flags::exchange(),
           .symbol = item.symbol,
           .side = side,
@@ -356,13 +354,9 @@ void DropCopy::operator()(
           .last_traded_quantity = item.last_qty,
           .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
-          .routing_id = {},
-          .max_request_version = {},
-          .max_response_version = {},
-          .max_accepted_version = {},
       };
       if (shared_.update_order(
-              item.cl_ord_id, stream_id_, trace_info, ack, order_update, [&](auto &order) {
+              item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
                 if (item.exec_type == json::ExecType::TRADE) {
                   fills.emplace_back([&](auto &result) { emplace(result, item); });
                 }

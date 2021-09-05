@@ -30,7 +30,7 @@ void OrderUpdate::operator()(
   auto request_status = order_item.ord_status == json::OrdStatus::REJECTED
                             ? RequestStatus::REJECTED
                             : RequestStatus::ACCEPTED;
-  server::OMS_Ack ack{
+  oms::Response response{
       .type = request_type,
       .origin = Origin::EXCHANGE,
       .status = request_status,
@@ -41,10 +41,8 @@ void OrderUpdate::operator()(
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
-  roq::OrderUpdate order_update{
-      .stream_id = stream_id_,
+  oms::OrderUpdate order_update{
       .account = account_,
-      .order_id = {},
       .exchange = Flags::exchange(),
       .symbol = order_item.symbol,
       .side = side,
@@ -68,10 +66,6 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
-      .routing_id = {},
-      .max_request_version = {},
-      .max_response_version = {},
-      .max_accepted_version = {},
   };
   if (download) {
     if (shared_.create_order(order_item.cl_ord_id, stream_id_, trace_info, order_update)) {
@@ -84,7 +78,7 @@ void OrderUpdate::operator()(
             order_item.cl_ord_id,
             stream_id_,
             trace_info,
-            ack,
+            response,
             order_update,
             []([[maybe_unused]] auto &order) {})) {
     } else {
@@ -121,7 +115,7 @@ void OrderUpdate::operator()(
   auto error = json::guess_error(order_item.ord_rej_reason);
   auto request_id =
       request_type != RequestType::CANCEL_ORDER ? order_item.cl_ord_id : std::string_view{};
-  server::OMS_Ack ack{
+  oms::Response response{
       .type = request_type,
       .origin = Origin::EXCHANGE,
       .status = request_status,
@@ -132,10 +126,8 @@ void OrderUpdate::operator()(
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
-  roq::OrderUpdate order_update{
-      .stream_id = stream_id_,
+  oms::OrderUpdate order_update{
       .account = account_,
-      .order_id = order_id,
       .exchange = Flags::exchange(),
       .symbol = order_item.symbol,
       .side = side,
@@ -159,16 +151,12 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
-      .routing_id = {},
-      .max_request_version = {},
-      .max_response_version = {},
-      .max_accepted_version = {},
   };
   if (shared_.update_order(
           order_item.cl_ord_id,
           stream_id_,
           trace_info,
-          ack,
+          response,
           order_update,
           []([[maybe_unused]] auto &order) {})) {
   } else {

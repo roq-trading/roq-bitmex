@@ -54,12 +54,12 @@ class Gateway final : public server::Handler,
   uint16_t operator()(const Event<CreateOrder> &, const std::string_view &request_id) override;
   uint16_t operator()(
       const Event<ModifyOrder> &,
-      const server::OMS_Order &,
+      const oms::Order &,
       const std::string_view &request_id,
       const std::string_view &previous_request_id) override;
   uint16_t operator()(
       const Event<CancelOrder> &,
-      const server::OMS_Order &,
+      const oms::Order &,
       const std::string_view &request_id,
       const std::string_view &previous_request_id) override;
   uint16_t operator()(const Event<CancelAllOrders> &) override;
