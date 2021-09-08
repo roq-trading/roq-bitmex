@@ -179,7 +179,12 @@ void Gateway::operator()(const server::Trace<TopOfBook> &event, bool is_last) {
 }
 
 void Gateway::operator()(const server::Trace<MarketByPriceUpdate> &event, bool is_last) {
-  dispatcher_(event, is_last);
+  dispatcher_(
+      event,
+      is_last,
+      shared_.final_bids,
+      shared_.final_asks,
+      []([[maybe_unused]] auto &market_by_price) {});
 }
 
 void Gateway::operator()(const server::Trace<TradeSummary> &event, bool is_last) {

@@ -45,7 +45,7 @@ struct Shared final {
 
  public:
   core::page_aligned_vector<Fill> fills;
-  core::page_aligned_vector<MBPUpdate> bids, asks;
+  core::page_aligned_vector<MBPUpdate> bids, asks, final_bids, final_asks;
   core::page_aligned_vector<Trade> trades;
 
   PriceCache price_cache;
