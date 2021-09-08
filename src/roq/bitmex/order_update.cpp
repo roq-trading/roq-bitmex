@@ -102,7 +102,7 @@ void OrderUpdate::operator()(
     const server::TraceInfo &trace_info,
     RequestType request_type,
     [[maybe_unused]] uint8_t user_id,
-    uint32_t order_id,
+    [[maybe_unused]] uint32_t order_id,
     uint32_t version) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"_sv, status);

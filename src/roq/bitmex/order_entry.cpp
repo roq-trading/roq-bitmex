@@ -175,8 +175,10 @@ uint16_t OrderEntry::operator()(
         .rate_limit_weight = 1,
     };
     connection_(
+        request_id,
         request,
-        [this, user_id = message_info.source, order_id = create_order.order_id](auto &response) {
+        [this, user_id = message_info.source, order_id = create_order.order_id](
+            [[maybe_unused]] auto &request_id, auto &response) {
           profile_.create_order_ack([&]() { create_order_ack(response, user_id, order_id); });
         });
   });
@@ -221,11 +223,12 @@ uint16_t OrderEntry::operator()(
         .rate_limit_weight = 1,
     };
     connection_(
+        request_id,
         request,
         [this,
          user_id = message_info.source,
          order_id = modify_order.order_id,
-         version = modify_order.version](auto &response) {
+         version = modify_order.version]([[maybe_unused]] auto &request_id, auto &response) {
           profile_.modify_order_ack(
               [&]() { modify_order_ack(response, user_id, order_id, version); });
         });
@@ -265,11 +268,12 @@ uint16_t OrderEntry::operator()(
         .rate_limit_weight = 1,
     };
     connection_(
+        request_id,
         request,
         [this,
          user_id = message_info.source,
          order_id = cancel_order.order_id,
-         version = cancel_order.version](auto &response) {
+         version = cancel_order.version]([[maybe_unused]] auto &request_id, auto &response) {
           profile_.cancel_order_ack(
               [&]() { cancel_order_ack(response, user_id, order_id, version); });
         });
@@ -277,7 +281,8 @@ uint16_t OrderEntry::operator()(
   return stream_id_;
 }
 
-uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
+uint16_t OrderEntry::operator()(
+    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
   profile_.cancel_order([&]() {
     if (ready()) {
       auto method = core::http::Method::DELETE;
@@ -296,7 +301,7 @@ uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
           .quality_of_service = get_quality_of_service(),
           .rate_limit_weight = 1,
       };
-      connection_(request, [this](auto &response) {
+      connection_(request_id, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
         profile_.cancel_all_orders_ack([&]() { cancel_all_orders_ack(response); });
       });
     } else {
