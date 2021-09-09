@@ -420,7 +420,7 @@ void MarketData::operator()(
         assert(!(bids.empty() && asks.empty()));
         if (ROQ_UNLIKELY(snapshot))
           log::info(R"(Received market data snapshot for symbol="{}")"_sv, previous);
-        MarketByPriceUpdate market_by_price_update{
+        const MarketByPriceUpdate market_by_price_update{
             .stream_id = stream_id_,
             .exchange = Flags::exchange(),
             .symbol = previous,
@@ -430,7 +430,11 @@ void MarketData::operator()(
             .exchange_time_utc = {},
         };
         log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-        server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
+        try {
+          server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
+        } catch (market::BadState &) {
+          log::fatal("*** RESUBSCRIBE REQUIRED HERE ***"_sv);
+        }
         previous = item.symbol;
         bids.clear();
         asks.clear();
@@ -463,7 +467,7 @@ void MarketData::operator()(
     assert(!(bids.empty() && asks.empty()));
     if (ROQ_UNLIKELY(snapshot))
       log::info(R"(Received market data snapshot for symbol="{}")"_sv, previous);
-    MarketByPriceUpdate market_by_price_update{
+    const MarketByPriceUpdate market_by_price_update{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = previous,
@@ -473,7 +477,11 @@ void MarketData::operator()(
         .exchange_time_utc = {},
     };
     log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
+    try {
+      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
+    } catch (market::BadState &) {
+      log::fatal("*** RESUBSCRIBE REQUIRED HERE ***"_sv);
+    }
     // state management
     if (snapshot) {
       partial_received_.order_book_l2 = true;
