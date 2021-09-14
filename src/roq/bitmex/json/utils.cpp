@@ -145,6 +145,8 @@ Error guess_error(const std::string_view &message) {
   // Rate-limit has been reached: usage=60, limit=6
   if (compare(message, "Rate-limit has been reached"_sv) == 0)
     return Error::REQUEST_RATE_LIMIT_REACHED;
+  if (compare(message, "Rate limit exceeded, retry in "_sv) == 0)
+    return Error::REQUEST_RATE_LIMIT_REACHED;
 
   log::warn<1>(R"(*** PLEASE REPORT (error="{}") ***)"_sv, message);
   return Error::UNKNOWN;

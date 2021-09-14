@@ -6,6 +6,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Added parsing of "Rate limit exceeded, retry in 1 seconds." (#64)
 * Added HTTP `request_id` (#55)
 * `NetworkError` now used to populate `OrderAck` fields (#59)
 
