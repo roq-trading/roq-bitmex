@@ -406,8 +406,8 @@ void OrderEntry::create_order_ack(
     oms::Response response{
         .type = RequestType::CREATE_ORDER,
         .origin = Origin::GATEWAY,
-        .status = RequestStatus::REJECTED,
-        .error = Error::NETWORK_ERROR,
+        .status = e.request_status(),
+        .error = e.error(),
         .text = e.what(),
         .version = version,
         .request_id = {},
@@ -485,8 +485,8 @@ void OrderEntry::modify_order_ack(
     oms::Response response{
         .type = RequestType::MODIFY_ORDER,
         .origin = Origin::GATEWAY,
-        .status = RequestStatus::REJECTED,
-        .error = Error::NETWORK_ERROR,
+        .status = e.request_status(),
+        .error = e.error(),
         .text = e.what(),
         .version = version,
         .request_id = {},
@@ -566,8 +566,8 @@ void OrderEntry::cancel_order_ack(
     oms::Response response{
         .type = RequestType::CANCEL_ORDER,
         .origin = Origin::GATEWAY,
-        .status = RequestStatus::REJECTED,
-        .error = Error::NETWORK_ERROR,
+        .status = e.request_status(),
+        .error = e.error(),
         .text = e.what(),
         .version = version,
         .request_id = {},

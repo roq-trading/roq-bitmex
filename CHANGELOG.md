@@ -7,6 +7,7 @@ All notable changes will be documented in this file.
 ### Changed
 
 * Added HTTP `request_id` (#55)
+* `NetworkError` now used to populate `OrderAck` fields (#59)
 
 ## 0.7.6 &ndash; 2021-09-02
 
