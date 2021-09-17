@@ -4,6 +4,8 @@ All notable changes will be documented in this file.
 
 ## Head
 
+## 0.7.7 &ndash; 2021-09-20
+
 ### Changed
 
 * Added parsing of "Rate limit exceeded, retry in 1 seconds." (#64)
