@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Fixed
+
+* Resubscription wasn't implemented (#80)
+
 ## 0.7.7 &ndash; 2021-09-20
 
 ### Changed

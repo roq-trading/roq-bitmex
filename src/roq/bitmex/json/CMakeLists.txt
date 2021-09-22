@@ -45,7 +45,8 @@ set(AUTOGEN_SCHEMAS
     time_in_force.json
     trade.json
     trade_item.json
-    typ.json)
+    typ.json
+    unsubscribe.json)
 
 roq_autogen(
   OUTPUT

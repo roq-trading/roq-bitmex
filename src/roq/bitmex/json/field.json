@@ -23,6 +23,7 @@
 	{ "name": "table" },
 	{ "name": "timestamp" },
 	{ "name": "types" },
+	{ "name": "unsubscribe" },
 	{ "name": "version" }
 ]
 }

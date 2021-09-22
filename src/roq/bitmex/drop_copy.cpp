@@ -78,6 +78,7 @@ DropCopy::DropCopy(
           .order = create_metrics(name_, "order"_sv),
           .position = create_metrics(name_, "position"_sv),
           .subscribe = create_metrics(name_, "subscribe"_sv),
+          .unsubscribe = create_metrics(name_, "unsubscribe"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -119,6 +120,7 @@ void DropCopy::operator()(metrics::Writer &writer) {
       .write(profile_.order, metrics::PROFILE)
       .write(profile_.position, metrics::PROFILE)
       .write(profile_.subscribe, metrics::PROFILE)
+      .write(profile_.unsubscribe, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY)
       .write(latency_.heartbeat, metrics::LATENCY);
@@ -261,7 +263,7 @@ void DropCopy::parse_helper(const std::string_view &message) {
 }
 
 void DropCopy::operator()(const json::CancelAllAfter &cancel_all_after) {
-  profile_.cancel_all_after([&]() { log::info<1>("cancel_all_after={}"_sv, cancel_all_after); });
+  profile_.cancel_all_after([&]() { log::info<2>("cancel_all_after={}"_sv, cancel_all_after); });
 }
 
 void DropCopy::operator()(const json::Error &error) {
@@ -271,7 +273,7 @@ void DropCopy::operator()(const json::Error &error) {
 
 void DropCopy::operator()(const json::Handshake &handshake) {
   profile_.handshake([&]() {
-    log::info<1>("handshake={}"_sv, handshake);
+    log::info<2>("handshake={}"_sv, handshake);
     (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
     if (!Flags::ws_cancel_on_disconnect() || Flags::ws_cancel_all_after().count() == 0)
@@ -281,7 +283,7 @@ void DropCopy::operator()(const json::Handshake &handshake) {
 
 void DropCopy::operator()(const json::Subscribe &subscribe) {
   profile_.subscribe([&]() {
-    log::info<1>("subscribe={}"_sv, subscribe);
+    log::info<2>("subscribe={}"_sv, subscribe);
     if (subscribe.success) {
       assert(!subscribe.failure);
       log::info(R"(Successfully subscribed to topic="{}")"_sv, subscribe.subscribe);
@@ -295,13 +297,28 @@ void DropCopy::operator()(const json::Subscribe &subscribe) {
   });
 }
 
+void DropCopy::operator()(const json::Unsubscribe &unsubscribe) {
+  profile_.unsubscribe([&]() {
+    log::info<2>("unsubscribe={}"_sv, unsubscribe);
+    if (unsubscribe.success) {
+      assert(!unsubscribe.failure);
+      log::info(R"(Successfully unsubscribed from topic="{}")"_sv, unsubscribe.unsubscribe);
+    } else if (unsubscribe.failure) {
+      assert(!unsubscribe.success);
+      log::warn(R"(Failed to unsubscribe topic="{}")"_sv, unsubscribe.unsubscribe);
+    } else {
+      log::fatal("Expected success or failure"_sv);
+    }
+    // TODO(thraneh): clear timeout
+  });
+}
+
 void DropCopy::operator()(
     const json::Action action,
     const json::Execution &execution,
     const server::TraceInfo &trace_info) {
   profile_.execution([&]() {
-    log::debug("action={}, execution={}"_sv, action, execution);
-    log::info<1>("action={}, execution={}"_sv, action, execution);
+    log::info<2>("event={{action={}, execution={}}}"_sv, action, execution);
     core::back_emplacer fills(shared_.fills);
     size_t index = {};
     for (auto &item : execution.data) {
@@ -381,8 +398,7 @@ void DropCopy::operator()(
                 }
               })) {
       } else {
-        log::warn("*** EXTERNAL ORDER ***"_sv);
-        log::warn("action={}, execution={}"_sv, action, execution);
+        log::warn<1>("*** EXTERNAL ORDER ***"_sv);
       }
     }
   });
@@ -391,7 +407,7 @@ void DropCopy::operator()(
 void DropCopy::operator()(
     const json::Action action, const json::Margin &margin, const server::TraceInfo &) {
   profile_.margin([&]() {
-    log::info<2>("action={}, margin={}"_sv, action, margin);
+    log::info<2>("event={{action={}, margin={}}}"_sv, action, margin);
     /// XXX not used
   });
 }
@@ -399,8 +415,7 @@ void DropCopy::operator()(
 void DropCopy::operator()(
     const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
   profile_.order([&]() {
-    log::debug("action={}, order={}"_sv, action, order);
-    log::info<1>("action={}, order={}"_sv, action, order);
+    log::info<2>("event={{action={}, order={}}}"_sv, action, order);
     auto download = !partial_received_.order && action == json::Action::PARTIAL;
     OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, download);
     // state management
@@ -417,7 +432,7 @@ void DropCopy::operator()(
     const json::Position &position,
     const server::TraceInfo &trace_info) {
   profile_.position([&]() {
-    log::info<2>("action={}, position={}"_sv, action, position);
+    log::info<2>("event={{action={}, position={}}}"_sv, action, position);
     for (auto &item : position.data) {
       auto external_account = fmt::format("{}"_sv, item.account);  // XXX alloc
       PositionUpdate position_update{

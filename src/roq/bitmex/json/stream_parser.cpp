@@ -23,6 +23,7 @@ enum class Type {
   ERROR,
   INFO,
   SUBSCRIBE,
+  UNSUBSCRIBE,
   TABLE,
 };
 
@@ -200,9 +201,12 @@ void StreamParser::dispatch(
           update(result.subscribe, value);
           update(type, Type::SUBSCRIBE);
           break;
+        case Field::UNSUBSCRIBE:
+          update(result.unsubscribe, value);
+          update(type, Type::UNSUBSCRIBE);
+          break;
         case Field::SUCCESS:
           update(result.success, value);
-          update(type, Type::SUBSCRIBE);
           break;
         case Field::TABLE:
           update(result.table, value);
@@ -260,6 +264,15 @@ void StreamParser::dispatch(
             .success = result.success,
         };
         handler(subscribe);
+        return;
+      }
+      case Type::UNSUBSCRIBE: {
+        Unsubscribe unsubscribe{
+            .failure = result.failure,
+            .unsubscribe = result.unsubscribe,
+            .success = result.success,
+        };
+        handler(unsubscribe);
         return;
       }
       case Type::TABLE:

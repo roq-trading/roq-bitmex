@@ -25,6 +25,7 @@
 #include "roq/bitmex/json/settlement.h"
 #include "roq/bitmex/json/subscribe.h"
 #include "roq/bitmex/json/trade.h"
+#include "roq/bitmex/json/unsubscribe.h"
 
 #undef VERSION
 
@@ -38,6 +39,7 @@ struct StreamParser final {
     virtual void operator()(const Error &) = 0;
     virtual void operator()(const Handshake &) = 0;
     virtual void operator()(const Subscribe &) = 0;
+    virtual void operator()(const Unsubscribe &) = 0;
     // table
     virtual void operator()(const Action, const Execution &, const server::TraceInfo &) = 0;
     virtual void operator()(const Action, const Funding &, const server::TraceInfo &) = 0;
@@ -59,6 +61,7 @@ struct StreamParser final {
   std::chrono::milliseconds now = {};
   int32_t status = 0;
   std::string_view subscribe;
+  std::string_view unsubscribe;
   bool success = false;
   std::string_view table;
   std::chrono::milliseconds timestamp = {};

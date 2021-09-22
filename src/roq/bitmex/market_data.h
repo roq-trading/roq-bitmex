@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <absl/container/flat_hash_map.h>
+
 #include <chrono>
 #include <string>
 #include <string_view>
@@ -63,7 +65,12 @@ class MarketData final : public core::web::Socket::Handler, public json::StreamP
   void operator()(ConnectionStatus);
 
   void send_subscribe(const std::string_view &topic);
+  void send_unsubscribe(const std::string_view &topic);
+
   void send_subscribe(const roq::span<std::string_view> &topics);
+
+  void send_subscribe(const std::string_view &topic, const std::string_view &symbol);
+  void send_unsubscribe(const std::string_view &topic, const std::string_view &symbol);
 
   uint32_t download(MarketDataState);
 
@@ -77,6 +84,7 @@ class MarketData final : public core::web::Socket::Handler, public json::StreamP
   void operator()(const json::Error &) override;
   void operator()(const json::Handshake &) override;
   void operator()(const json::Subscribe &) override;
+  void operator()(const json::Unsubscribe &) override;
 
   void operator()(const json::Action, const json::Funding &, const server::TraceInfo &) override;
   void operator()(const json::Action, const json::Instrument &, const server::TraceInfo &) override;
@@ -98,6 +106,17 @@ class MarketData final : public core::web::Socket::Handler, public json::StreamP
   Product &find_product(const json::InstrumentItem &);
   Product &find_product(const json::FundingItem &);
 
+  // experimental
+
+  void publish_market_by_price(
+      const server::TraceInfo &,
+      bool is_last,
+      const std::string_view &symbol,
+      const roq::span<MBPUpdate> &bids,
+      const roq::span<MBPUpdate> &asks,
+      bool snapshot);
+  void resubscribe_order_book_l2(const std::string_view &symbol);
+
  private:
   Handler &handler_;
   // config
@@ -113,7 +132,7 @@ class MarketData final : public core::web::Socket::Handler, public json::StreamP
   } counter_;
   struct {
     core::metrics::Profile parse, cancel_all_after, error, funding, handshake, instrument,
-        liquidation, order_book_l2, quote, settlement, subscribe, trade;
+        liquidation, order_book_l2, quote, settlement, subscribe, unsubscribe, trade;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

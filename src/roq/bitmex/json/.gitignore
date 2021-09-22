@@ -80,3 +80,5 @@ trade_item.h
 trade_item.cpp
 typ.h
 typ.cpp
+unsubscribe.h
+unsubscribe.cpp

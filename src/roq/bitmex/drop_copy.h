@@ -73,6 +73,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::StreamPar
   void operator()(const json::Error &) override;
   void operator()(const json::Handshake &) override;
   void operator()(const json::Subscribe &) override;
+  void operator()(const json::Unsubscribe &) override;
 
   void operator()(const json::Action, const json::Execution &, const server::TraceInfo &) override;
   void operator()(const json::Action, const json::Margin &, const server::TraceInfo &) override;
@@ -108,7 +109,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::StreamPar
   } counter_;
   struct {
     core::metrics::Profile parse, cancel_all_after, error, execution, handshake, margin, order,
-        position, subscribe;
+        position, subscribe, unsubscribe;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
