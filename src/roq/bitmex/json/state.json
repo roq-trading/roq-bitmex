@@ -5,6 +5,7 @@
 	{ "name": "Closed" },
 	{ "name": "Open" },
 	{ "name": "Settled" },
-	{ "name": "Unlisted" }
+	{ "name": "Unlisted" },
+	{ "name": "Expired" }
 ]
 }

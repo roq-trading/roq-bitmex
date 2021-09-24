@@ -66,6 +66,8 @@ inline roq::TradingStatus map(json::State state) {
       break;
     case json::State::UNLISTED:
       break;
+    case json::State::EXPIRED:
+      break;
   }
   return {};
 }
