@@ -435,18 +435,18 @@ void DropCopy::operator()(
     log::info<2>("event={{action={}, position={}}}"_sv, action, position);
     for (auto &item : position.data) {
       auto external_account = fmt::format("{}"_sv, item.account);  // XXX alloc
+      auto long_quantity = std::max(0.0, item.current_qty);
+      auto short_quantity = std::max(0.0, -item.current_qty);
       PositionUpdate position_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
           .exchange = Flags::exchange(),
           .symbol = item.symbol,
-          .side = {},
-          .position = item.current_qty,
-          .last_trade_id = {},
-          .position_cost = 0.0,
-          .position_yesterday = 0.0,
-          .position_cost_yesterday = 0.0,
           .external_account = external_account,
+          .long_quantity = long_quantity,
+          .short_quantity = short_quantity,
+          .long_quantity_begin = NaN,
+          .short_quantity_begin = NaN,
       };
       server::create_trace_and_dispatch(trace_info, position_update, handler_, false);
     }
