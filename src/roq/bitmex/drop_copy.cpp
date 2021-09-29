@@ -2,6 +2,8 @@
 
 #include "roq/bitmex/drop_copy.h"
 
+#include <algorithm>
+
 #include "roq/utils/mask.h"
 #include "roq/utils/update.h"
 
