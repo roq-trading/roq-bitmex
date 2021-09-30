@@ -651,7 +651,7 @@ void MarketData::publish_market_by_price(
   };
   log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
   try {
-    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, is_last);
+    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, is_last, false);
   } catch (market::BadState &) {
     resubscribe_order_book_l2(symbol);
   }
