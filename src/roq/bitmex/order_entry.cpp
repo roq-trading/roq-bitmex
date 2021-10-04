@@ -283,7 +283,7 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<CancelAllOrders> &event, const std::string_view &request_id) {
-  profile_.cancel_order([&]() {
+  profile_.cancel_all_orders([&]() {
     if (ready()) {
       auto method = core::http::Method::DELETE;
       auto path = "/api/v1/order/all"_sv;
