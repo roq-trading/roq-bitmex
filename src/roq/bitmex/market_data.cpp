@@ -526,7 +526,7 @@ void MarketData::operator()(
               .ask_price = item.ask_price,
               .ask_quantity = item.ask_size,
           },
-          .snapshot = false,  // XXX ???
+          .update_type = UpdateType::INCREMENTAL,  // XXX ???
           .exchange_time_utc = item.timestamp,
       };
       server::create_trace_and_dispatch(trace_info, top_of_book, handler_, true);
@@ -646,7 +646,7 @@ void MarketData::publish_market_by_price(
       .symbol = symbol,
       .bids = bids,
       .asks = asks,
-      .snapshot = snapshot,
+      .update_type = snapshot ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL,
       .exchange_time_utc = {},
   };
   log::info<3>("market_by_price_update={}"_sv, market_by_price_update);

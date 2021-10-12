@@ -10,6 +10,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Replace "snapshot" (bool) with "update_type" (UpdateType) (#97)
 * Moved signature handling to tools library (chore)
 * Allow "market data"-only operation (#96)
 

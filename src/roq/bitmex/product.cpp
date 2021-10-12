@@ -206,7 +206,7 @@ StatisticsUpdate Product::statistics_update(
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .statistics = {statistics_.data(), statistics_.size()},
-      .snapshot = false,
+      .update_type = UpdateType::INCREMENTAL,
       .exchange_time_utc = {},
   };
 }
@@ -219,7 +219,7 @@ StatisticsUpdate Product::statistics_update(
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .statistics = {statistics_.data(), statistics_.size()},
-      .snapshot = false,
+      .update_type = UpdateType::INCREMENTAL,
       .exchange_time_utc = {},
   };
 }
