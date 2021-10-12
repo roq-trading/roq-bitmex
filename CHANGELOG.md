@@ -10,6 +10,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Moved signature handling to tools library (chore)
 * Allow "market data"-only operation (#96)
 
 ## 0.7.7 &ndash; 2021-09-20

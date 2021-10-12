@@ -6,23 +6,20 @@
 #include <string>
 #include <string_view>
 
+#include "roq/core/crypto/hmac.h"
+
 #include "roq/core/http/method.h"
-
-#include "roq/bitmex/config.h"
-
-#include "roq/bitmex/tools/hasher.h"
 
 namespace roq {
 namespace bitmex {
+namespace tools {
 
-class Security final {
+class Hasher final {
  public:
-  Security(const Config &, const std::string_view &account);
+  Hasher(const std::string_view &key, const std::string_view &secret);
 
-  Security(Security &&) = delete;
-  Security(const Security &) = delete;
-
-  std::string_view get_account() const { return account_; }
+  Hasher(Hasher &&) = delete;
+  Hasher(const Hasher &) = delete;
 
   std::string create_signature(
       std::chrono::nanoseconds expires,
@@ -37,10 +34,10 @@ class Security final {
       const std::string_view &body);
 
  private:
-  const std::string account_;
-  const std::string base_path;
-  tools::Hasher hasher_;
+  const std::string key_;
+  core::crypto::HMAC_SHA256 hmac_;
 };
 
+}  // namespace tools
 }  // namespace bitmex
 }  // namespace roq

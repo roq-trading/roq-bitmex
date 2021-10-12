@@ -18,6 +18,7 @@ set(SOURCES
     main.cpp)
 
 add_subdirectory("json")
+add_subdirectory("tools")
 
 include(RoqAutogen)
 
@@ -57,6 +58,7 @@ target_link_libraries(
   "${TARGET_NAME}"
   "${PROJECT_NAME}-json"
   "${PROJECT_NAME}-flags"
+  "${PROJECT_NAME}-tools"
   roq-server::roq-server
   roq-core::roq-core
   roq-api::roq-api

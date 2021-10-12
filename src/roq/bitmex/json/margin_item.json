@@ -42,6 +42,8 @@
 	{ "name": "unrealisedProfit", "type": "double" },
 	{ "name": "varMargin", "type": "double" },
 	{ "name": "walletBalance", "type": "double" },
-	{ "name": "withdrawableMargin", "type": "double" }
+	{ "name": "withdrawableMargin", "type": "double" },
+	{ "name": "makerFeeDiscount", "comment": "undoc" },
+	{ "name": "takerFeeDiscount", "comment": "undoc" }
 ]
 }
