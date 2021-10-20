@@ -168,9 +168,9 @@ ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
       .description = {},
-      .security_type = {},          // XXX typ?
-      .currency = quote_currency_,  // XXX or position_currency?
-      .settlement_currency = settl_currency_,
+      .security_type = {},  // XXX typ?
+      .base_currency = settl_currency_,
+      .quote_currency = quote_currency_,
       .commission_currency = {},
       .tick_size = tick_size_,
       .multiplier = multiplier_,
