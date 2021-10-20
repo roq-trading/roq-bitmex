@@ -175,7 +175,9 @@ ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t
       .tick_size = tick_size_,
       .multiplier = multiplier_,
       .min_trade_vol = lot_size_,  // XXX correct?
-      .option_type = {},           // XXX typ?
+      .max_trade_vol = NaN,
+      .trade_vol_step_size = lot_size_,  // XXX correct?
+      .option_type = {},                 // XXX typ?
       .strike_currency = {},
       .strike_price = option_strike_price_,
       .underlying = underlying_symbol_,
