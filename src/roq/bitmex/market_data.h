@@ -81,26 +81,24 @@ class MarketData final : public core::web::Socket::Handler, public json::StreamP
   void parse(const std::string_view &message);
   void parse_helper(const std::string_view &message);
 
-  void operator()(const json::CancelAllAfter &) override;
-  void operator()(const json::Error &) override;
-  void operator()(const json::Handshake &) override;
-  void operator()(const json::Subscribe &) override;
-  void operator()(const json::Unsubscribe &) override;
+  void operator()(const server::Trace<json::CancelAllAfter> &) override;
+  void operator()(const server::Trace<json::Error> &) override;
+  void operator()(const server::Trace<json::Handshake> &) override;
+  void operator()(const server::Trace<json::Subscribe> &) override;
+  void operator()(const server::Trace<json::Unsubscribe> &) override;
 
-  void operator()(const json::Action, const json::Funding &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Instrument &, const server::TraceInfo &) override;
-  void operator()(
-      const json::Action, const json::Liquidation &, const server::TraceInfo &) override;
-  void operator()(
-      const json::Action, const json::OrderBookL2 &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Quote &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Settlement &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Trade &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Funding> &, json::Action) override;
+  void operator()(const server::Trace<json::Instrument> &, json::Action) override;
+  void operator()(const server::Trace<json::Liquidation> &, json::Action) override;
+  void operator()(const server::Trace<json::OrderBookL2> &, json::Action) override;
+  void operator()(const server::Trace<json::Quote> &, json::Action) override;
+  void operator()(const server::Trace<json::Settlement> &, json::Action) override;
+  void operator()(const server::Trace<json::Trade> &, json::Action) override;
   // ... unexpected
-  void operator()(const json::Action, const json::Execution &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Margin &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Order &, const server::TraceInfo &) override;
-  void operator()(const json::Action, const json::Position &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Execution> &, json::Action) override;
+  void operator()(const server::Trace<json::Margin> &, json::Action) override;
+  void operator()(const server::Trace<json::Order> &, json::Action) override;
+  void operator()(const server::Trace<json::Position> &, json::Action) override;
 
   // utilities
 

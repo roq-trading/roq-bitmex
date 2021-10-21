@@ -264,17 +264,24 @@ void DropCopy::parse_helper(const std::string_view &message) {
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
-void DropCopy::operator()(const json::CancelAllAfter &cancel_all_after) {
-  profile_.cancel_all_after([&]() { log::info<2>("cancel_all_after={}"_sv, cancel_all_after); });
+void DropCopy::operator()(const server::Trace<json::CancelAllAfter> &event) {
+  profile_.cancel_all_after([&]() {
+    auto &[trace_info, cancel_all_after] = event;
+    log::info<2>("cancel_all_after={}"_sv, cancel_all_after);
+  });
 }
 
-void DropCopy::operator()(const json::Error &error) {
-  profile_.error([&]() { log::warn("error={}"_sv, error); });
+void DropCopy::operator()(const server::Trace<json::Error> &event) {
+  profile_.error([&]() {
+    auto &[trace_info, error] = event;
+    log::warn("error={}"_sv, error);
+  });
   connection_.close();
 }
 
-void DropCopy::operator()(const json::Handshake &handshake) {
+void DropCopy::operator()(const server::Trace<json::Handshake> &event) {
   profile_.handshake([&]() {
+    auto &[trace_info, handshake] = event;
     log::info<2>("handshake={}"_sv, handshake);
     (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
@@ -283,8 +290,9 @@ void DropCopy::operator()(const json::Handshake &handshake) {
   });
 }
 
-void DropCopy::operator()(const json::Subscribe &subscribe) {
+void DropCopy::operator()(const server::Trace<json::Subscribe> &event) {
   profile_.subscribe([&]() {
+    auto &[trace_info, subscribe] = event;
     log::info<2>("subscribe={}"_sv, subscribe);
     if (subscribe.success) {
       assert(!subscribe.failure);
@@ -299,8 +307,9 @@ void DropCopy::operator()(const json::Subscribe &subscribe) {
   });
 }
 
-void DropCopy::operator()(const json::Unsubscribe &unsubscribe) {
+void DropCopy::operator()(const server::Trace<json::Unsubscribe> &event) {
   profile_.unsubscribe([&]() {
+    auto &[trace_info, unsubscribe] = event;
     log::info<2>("unsubscribe={}"_sv, unsubscribe);
     if (unsubscribe.success) {
       assert(!unsubscribe.failure);
@@ -315,11 +324,11 @@ void DropCopy::operator()(const json::Unsubscribe &unsubscribe) {
   });
 }
 
-void DropCopy::operator()(
-    const json::Action action,
-    const json::Execution &execution,
-    const server::TraceInfo &trace_info) {
+void DropCopy::operator()(const server::Trace<json::Execution> &event, json::Action action) {
   profile_.execution([&]() {
+    // auto &[trace_info, execution] = event;
+    auto &trace_info = event.trace_info;
+    auto &execution = event.value;
     log::info<2>("event={{action={}, execution={}}}"_sv, action, execution);
     core::back_emplacer fills(shared_.fills);
     size_t index = {};
@@ -406,17 +415,17 @@ void DropCopy::operator()(
   });
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Margin &margin, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::Margin> &event, json::Action action) {
   profile_.margin([&]() {
+    auto &[trace_info, margin] = event;
     log::info<2>("event={{action={}, margin={}}}"_sv, action, margin);
     /// XXX not used
   });
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Order &order, const server::TraceInfo &trace_info) {
+void DropCopy::operator()(const server::Trace<json::Order> &event, json::Action action) {
   profile_.order([&]() {
+    auto &[trace_info, order] = event;
     log::info<2>("event={{action={}, order={}}}"_sv, action, order);
     auto download = !partial_received_.order && action == json::Action::PARTIAL;
     OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, download);
@@ -429,11 +438,9 @@ void DropCopy::operator()(
   });
 }
 
-void DropCopy::operator()(
-    const json::Action action,
-    const json::Position &position,
-    const server::TraceInfo &trace_info) {
+void DropCopy::operator()(const server::Trace<json::Position> &event, json::Action action) {
   profile_.position([&]() {
+    auto &[trace_info, position] = event;
     log::info<2>("event={{action={}, position={}}}"_sv, action, position);
     for (auto &item : position.data) {
       auto external_account = fmt::format("{}"_sv, item.account);  // XXX alloc
@@ -455,38 +462,38 @@ void DropCopy::operator()(
   });
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Funding &funding, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::Funding> &event, json::Action action) {
+  auto &[trace_info, funding] = event;
   log::fatal("Unexpected: action={}, funding={}"_sv, action, funding);
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Instrument &instrument, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::Instrument> &event, json::Action action) {
+  auto &[trace_info, instrument] = event;
   log::fatal("Unexpected: action={}, instrument={}"_sv, action, instrument);
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Liquidation &liquidation, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::Liquidation> &event, json::Action action) {
+  auto &[trace_info, liquidation] = event;
   log::fatal("Unexpected: action={}, liquidation={}"_sv, action, liquidation);
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::OrderBookL2 &order_book_l2, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::OrderBookL2> &event, json::Action action) {
+  auto &[trace_info, order_book_l2] = event;
   log::fatal("Unexpected: action={}, order_book_l2={}"_sv, action, order_book_l2);
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Quote &quote, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::Quote> &event, json::Action action) {
+  auto &[trace_info, quote] = event;
   log::fatal("Unexpected: action={}, quote={}"_sv, action, quote);
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Settlement &settlement, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::Settlement> &event, json::Action action) {
+  auto &[trace_info, settlement] = event;
   log::fatal("Unexpected: action={}, settlement={}"_sv, action, settlement);
 }
 
-void DropCopy::operator()(
-    const json::Action action, const json::Trade &trade, const server::TraceInfo &) {
+void DropCopy::operator()(const server::Trace<json::Trade> &event, json::Action action) {
+  auto &[trace_info, trade] = event;
   log::fatal("Unexpected: action={}, trade={}"_sv, action, trade);
 }
 

@@ -35,23 +35,23 @@ namespace json {
 
 struct StreamParser final {
   struct Handler {
-    virtual void operator()(const CancelAllAfter &) = 0;
-    virtual void operator()(const Error &) = 0;
-    virtual void operator()(const Handshake &) = 0;
-    virtual void operator()(const Subscribe &) = 0;
-    virtual void operator()(const Unsubscribe &) = 0;
+    virtual void operator()(const server::Trace<CancelAllAfter> &) = 0;
+    virtual void operator()(const server::Trace<Error> &) = 0;
+    virtual void operator()(const server::Trace<Handshake> &) = 0;
+    virtual void operator()(const server::Trace<Subscribe> &) = 0;
+    virtual void operator()(const server::Trace<Unsubscribe> &) = 0;
     // table
-    virtual void operator()(const Action, const Execution &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Funding &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Instrument &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Liquidation &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Margin &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Order &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const OrderBookL2 &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Position &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Quote &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Settlement &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Action, const Trade &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<Execution> &, Action) = 0;
+    virtual void operator()(const server::Trace<Funding> &, Action) = 0;
+    virtual void operator()(const server::Trace<Instrument> &, Action) = 0;
+    virtual void operator()(const server::Trace<Liquidation> &, Action) = 0;
+    virtual void operator()(const server::Trace<Margin> &, Action) = 0;
+    virtual void operator()(const server::Trace<Order> &, Action) = 0;
+    virtual void operator()(const server::Trace<OrderBookL2> &, Action) = 0;
+    virtual void operator()(const server::Trace<Position> &, Action) = 0;
+    virtual void operator()(const server::Trace<Quote> &, Action) = 0;
+    virtual void operator()(const server::Trace<Settlement> &, Action) = 0;
+    virtual void operator()(const server::Trace<Trade> &, Action) = 0;
   };
 
   std::string_view action;

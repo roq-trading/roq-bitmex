@@ -83,67 +83,78 @@ void StreamParser::dispatch(
               case Table::EXECUTION: {
                 Execution execution(value, buffer);
                 dispatched = true;
-                handler(action, execution, trace_info);
+                server::Trace event(trace_info, execution);
+                handler(event, action);
                 break;
               }
               case Table::FUNDING: {
                 Funding funding(value, buffer);
                 dispatched = true;
-                handler(action, funding, trace_info);
+                server::Trace event(trace_info, funding);
+                handler(event, action);
                 break;
               }
               case Table::INSTRUMENT: {
                 Instrument instrument(value, buffer);
                 dispatched = true;
-                handler(action, instrument, trace_info);
+                server::Trace event(trace_info, instrument);
+                handler(event, action);
                 break;
               }
               case Table::LIQUIDATION: {
                 Liquidation liquidation(value, buffer);
                 dispatched = true;
-                handler(action, liquidation, trace_info);
+                server::Trace event(trace_info, liquidation);
+                handler(event, action);
                 break;
               }
               case Table::MARGIN: {
                 Margin margin(value, buffer);
                 dispatched = true;
-                handler(action, margin, trace_info);
+                server::Trace event(trace_info, margin);
+                handler(event, action);
                 break;
               }
               case Table::ORDER: {
                 Order order(value, buffer);
                 dispatched = true;
-                handler(action, order, trace_info);
+                server::Trace event(trace_info, order);
+                handler(event, action);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
                 OrderBookL2 order_book_l2(value, buffer);
                 dispatched = true;
-                handler(action, order_book_l2, trace_info);
+                server::Trace event(trace_info, order_book_l2);
+                handler(event, action);
                 break;
               }
               case Table::POSITION: {
                 Position position(value, buffer);
                 dispatched = true;
-                handler(action, position, trace_info);
+                server::Trace event(trace_info, position);
+                handler(event, action);
                 break;
               }
               case Table::QUOTE: {
                 Quote quote(value, buffer);
                 dispatched = true;
-                handler(action, quote, trace_info);
+                server::Trace event(trace_info, quote);
+                handler(event, action);
                 break;
               }
               case Table::SETTLEMENT: {
                 Settlement settlement(value, buffer);
                 dispatched = true;
-                handler(action, settlement, trace_info);
+                server::Trace event(trace_info, settlement);
+                handler(event, action);
                 break;
               }
               case Table::TRADE: {
                 Trade trade(value, buffer);
                 dispatched = true;
-                handler(action, trade, trace_info);
+                server::Trace event(trace_info, trade);
+                handler(event, action);
                 break;
               }
             }
@@ -232,19 +243,21 @@ void StreamParser::dispatch(
       case Type::UNKNOWN:
         throw RuntimeErrorException("Can't detect message type"_sv);
       case Type::CANCEL_ALL_AFTER: {
-        CancelAllAfter cancel_all_after = {
+        CancelAllAfter cancel_all_after{
             .cancel_time = result.cancel_time,
             .now = result.now,
         };
-        handler(cancel_all_after);
+        server::Trace event(trace_info, cancel_all_after);
+        handler(event);
         return;
       }
       case Type::ERROR: {
-        Error error = {
+        Error error{
             .error = result.error,
             .status = result.status,
         };
-        handler(error);
+        server::Trace event(trace_info, error);
+        handler(event);
         return;
       }
       case Type::INFO: {
@@ -254,7 +267,8 @@ void StreamParser::dispatch(
             .timestamp = result.timestamp,
             .version = result.version,
         };
-        handler(handshake);
+        server::Trace event(trace_info, handshake);
+        handler(event);
         return;
       }
       case Type::SUBSCRIBE: {
@@ -263,7 +277,8 @@ void StreamParser::dispatch(
             .subscribe = result.subscribe,
             .success = result.success,
         };
-        handler(subscribe);
+        server::Trace event(trace_info, subscribe);
+        handler(event);
         return;
       }
       case Type::UNSUBSCRIBE: {
@@ -272,7 +287,8 @@ void StreamParser::dispatch(
             .unsubscribe = result.unsubscribe,
             .success = result.success,
         };
-        handler(unsubscribe);
+        server::Trace event(trace_info, unsubscribe);
+        handler(event);
         return;
       }
       case Type::TABLE:
