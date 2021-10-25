@@ -162,6 +162,10 @@ void DropCopy::operator()(const core::web::Socket::Text &text) {
   parse(text.payload);
 }
 
+void DropCopy::operator()(const core::web::Socket::Binary &) {
+  log::fatal("Unexpected"_sv);
+}
+
 void DropCopy::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;

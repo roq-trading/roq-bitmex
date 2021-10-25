@@ -162,6 +162,10 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
   parse(text.payload);
 }
 
+void MarketData::operator()(const core::web::Socket::Binary &) {
+  log::fatal("Unexpected"_sv);
+}
+
 void MarketData::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
