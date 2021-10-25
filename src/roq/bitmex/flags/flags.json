@@ -80,7 +80,7 @@
       "name": "ws_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",
-      "default": "wss://testnet.bitmex.com/realtime",
+      "default": "wss://ws.testnet.bitmex.com/realtime",
       "description": "WebSocket end-point (URI)"
     },
     {

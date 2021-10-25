@@ -12,10 +12,10 @@ NAME="bitmex-prod"
 
 CONFIG_FILE="$CWD/config/$NAME.toml"
 
-URI="www.bitmex.com"
+URI="bitmex.com"
 
-REST_URI="https://$URI"
-WS_URI="wss://$URI/realtime"
+REST_URI="https://www.$URI"
+WS_URI="wss://ws.$URI/realtime"
 
 $PREFIX ./roq-bitmex \
 	--name "bitmex" \
