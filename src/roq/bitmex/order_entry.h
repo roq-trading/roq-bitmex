@@ -5,8 +5,6 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/promise.h"
-
 #include "roq/core/buffer.h"
 
 #include "roq/core/metrics/counter.h"
