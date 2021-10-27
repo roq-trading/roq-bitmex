@@ -206,53 +206,6 @@ void Gateway::operator()(const server::Trace<PositionUpdate> &event, bool is_las
   dispatcher_(event, is_last);
 }
 
-/*
-void Gateway::operator()(const MarketData &) {
-  if (market_data_.connection.ready()) {
-    market_data_.download.begin();
-  } else {
-    market_data_.download.reset();
-    symbols_.clear();
-    snapshot_ = {};
-  }
-}
-*/
-
-/*
-int32_t Gateway::download(MarketDataDownload::State state) {
-  if (!order_entry_.connection.ready())
-    return -1;
-  switch (state) {
-    case MarketDataDownload::State::UNDEFINED:
-      break;
-    case MarketDataDownload::State::ACCOUNTS: {
-      return 0;
-    }
-    case MarketDataDownload::State::INSTRUMENT: {
-      subscribe_instrument();
-      return 1;
-    }
-    case MarketDataDownload::State::ORDER_BOOK_L2: {
-      subscribe_order_book_l2();
-      return 1;
-    }
-    case MarketDataDownload::State::DONE:
-      update_order_manager(ConnectionStatus::READY);
-      update_market_data(ConnectionStatus::READY);
-      return 0;
-  }
-  assert(false);
-  return 0;
-}
-*/
-
-/*
-void Gateway::operator()(const OrderEntry &) {
-  if (order_entry_.connection.ready())
-    market_data_.download.bump();
-}
-*/
-
 OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != order_entry_.end())
