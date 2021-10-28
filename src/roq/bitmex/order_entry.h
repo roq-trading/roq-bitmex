@@ -69,22 +69,38 @@ class OrderEntry final : public core::web::Client::Handler {
  private:
   void operator()(ConnectionStatus);
 
+  void create_order(
+      const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
   void create_order_ack(
-      const core::web::Response &, const uint8_t user_id, const uint32_t order_id);
+      const server::Trace<core::web::Response> &,
+      uint8_t user_id,
+      uint32_t order_id,
+      uint32_t version);
 
+  void modify_order(
+      const Event<ModifyOrder> &,
+      const oms::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
   void modify_order_ack(
-      const core::web::Response &,
-      const uint8_t user_id,
-      const uint32_t order_id,
-      const uint32_t version);
+      const server::Trace<core::web::Response> &,
+      uint8_t user_id,
+      uint32_t order_id,
+      uint32_t version);
 
+  void cancel_order(
+      const Event<CancelOrder> &,
+      const oms::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
   void cancel_order_ack(
-      const core::web::Response &,
-      const uint8_t user_id,
-      const uint32_t order_id,
-      const uint32_t version);
+      const server::Trace<core::web::Response> &,
+      uint8_t user_id,
+      uint32_t order_id,
+      uint32_t version);
 
-  void cancel_all_orders_ack(const core::web::Response &);
+  void cancel_all_orders(const Event<CancelAllOrders> &, const std::string_view &request_id);
+  void cancel_all_orders_ack(const server::Trace<core::web::Response> &);
 
   void operator()(const json::OrderItem &);
   void operator()(const json::Order &);
@@ -103,8 +119,10 @@ class OrderEntry final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile products, accounts, create_order, create_order_ack, modify_order,
-        modify_order_ack, cancel_order, cancel_order_ack, cancel_all_orders, cancel_all_orders_ack;
+    core::metrics::Profile create_order, create_order_ack,  //
+        modify_order, modify_order_ack,                     //
+        cancel_order, cancel_order_ack,                     //
+        cancel_all_orders, cancel_all_orders_ack;
   } profile_;
   struct {
     core::metrics::Latency ping;
