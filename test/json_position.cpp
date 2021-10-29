@@ -11,6 +11,8 @@
 using namespace roq;
 using namespace roq::bitmex;
 
+using namespace std::literals;
+
 TEST(json_position_item_item, unlisted) {
   const auto message =
       R"({)"
@@ -24,5 +26,5 @@ TEST(json_position_item_item, unlisted) {
       R"("lastPrice":34734.8,"lastValue":-5182128,"currency":"XBt","currentQty":1800})";
   auto obj = core::json::Parser::create<json::PositionItem>(message);
   EXPECT_EQ(obj.account, 359347);
-  EXPECT_EQ(obj.symbol, "XBTUSD"_sv);
+  EXPECT_EQ(obj.symbol, "XBTUSD"sv);
 }

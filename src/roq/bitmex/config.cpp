@@ -10,7 +10,7 @@
 
 #include "roq/bitmex/flags.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
@@ -80,7 +80,7 @@ void Config::operator()(server::RateLimit &&rate_limit) {
 }
 
 void Config::operator()(const std::string_view &key, toml::node &) {
-  log::warn(R"(Unexpected: key="{}")"_sv, key);
+  log::warn(R"(Unexpected: key="{}")"sv, key);
 }
 
 }  // namespace bitmex

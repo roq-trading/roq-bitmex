@@ -6,7 +6,7 @@
 
 #include "roq/utils/compare.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
@@ -18,7 +18,7 @@ std::pair<double, double> PriceCache::operator()(
   switch (action) {
     case json::Action::UNDEFINED:
     case json::Action::UNKNOWN:
-      log::fatal("Unexpected"_sv);
+      log::fatal("Unexpected"sv);
       break;
     case json::Action::PARTIAL:
     case json::Action::INSERT:
@@ -36,7 +36,7 @@ std::pair<double, double> PriceCache::operator()(
         }
       } else {
         // unexpected price or size ==> fail
-        log::fatal("action={} id={} price={} size={}"_sv, action, id, price, size);
+        log::fatal("action={} id={} price={} size={}"sv, action, id, price, size);
       }
       break;
     case json::Action::UPDATE:

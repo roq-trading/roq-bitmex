@@ -10,7 +10,7 @@
 
 #include "roq/logging.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
@@ -32,7 +32,7 @@ void update(Type &result, const Type type) {
   if (result == Type::UNKNOWN) {
     result = type;
   } else if (result != type) {
-    throw RuntimeErrorException("wrong type"_sv);
+    throw RuntimeErrorException("wrong type"sv);
   }
 }
 }  // namespace
@@ -54,10 +54,10 @@ void StreamParser::dispatch(
       auto field = Field(key);
       switch (field) {
         case Field::UNDEFINED:
-          log::fatal("Unexpected"_sv);
+          log::fatal("Unexpected"sv);
           break;
         case Field::UNKNOWN:
-          log::fatal(R"(Unknown key="{}")"_sv, key);
+          log::fatal(R"(Unknown key="{}")"sv, key);
           break;
         case Field::ACTION:
           update(result.action, value);
@@ -241,7 +241,7 @@ void StreamParser::dispatch(
     }
     switch (type) {
       case Type::UNKNOWN:
-        throw RuntimeErrorException("Can't detect message type"_sv);
+        throw RuntimeErrorException("Can't detect message type"sv);
       case Type::CANCEL_ALL_AFTER: {
         CancelAllAfter cancel_all_after{
             .cancel_time = result.cancel_time,
@@ -299,8 +299,8 @@ void StreamParser::dispatch(
         break;
     }
   }
-  log::warn(R"(message="{}")"_sv, message);
-  log::fatal("Unexpected"_sv);
+  log::warn(R"(message="{}")"sv, message);
+  log::fatal("Unexpected"sv);
 }
 
 }  // namespace json

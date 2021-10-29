@@ -9,7 +9,7 @@
 #include "roq/core/binascii/hex.h"
 #include "roq/core/crypto/hmac.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
@@ -17,7 +17,7 @@ namespace tools {
 
 namespace {
 static auto create_timestamp_secs(std::chrono::nanoseconds value) {
-  return fmt::format("{}"_sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
+  return fmt::format("{}"sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 }  // namespace
 
@@ -53,7 +53,7 @@ std::string Hasher::create_headers(
   return fmt::format(
       "api-signature: {}\r\n"
       "api-expires: {}\r\n"
-      "api-key: {}\r\n"_sv,
+      "api-key: {}\r\n"sv,
       signature,
       std::chrono::duration_cast<std::chrono::seconds>(expires).count(),
       key_);

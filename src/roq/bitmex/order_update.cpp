@@ -9,7 +9,7 @@
 
 #include "roq/bitmex/json/utils.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
@@ -19,9 +19,9 @@ namespace bitmex {
 void OrderUpdate::operator()(
     const json::OrderItem &order_item, const server::TraceInfo &trace_info, bool download) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug("status={}"_sv, status);
+  log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
-  auto external_account = fmt::format("{}"_sv, order_item.account);  // XXX alloc
+  auto external_account = fmt::format("{}"sv, order_item.account);  // XXX alloc
   auto external_order_id = order_item.order_id;
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
@@ -70,8 +70,8 @@ void OrderUpdate::operator()(
   if (download) {
     if (shared_.create_order(order_item.cl_ord_id, stream_id_, trace_info, order_update)) {
     } else {
-      log::warn("*** EXTERNAL ORDER ***"_sv);
-      log::warn("order_item={}"_sv, order_item);
+      log::warn("*** EXTERNAL ORDER ***"sv);
+      log::warn("order_item={}"sv, order_item);
     }
   } else {
     if (shared_.update_order(
@@ -82,15 +82,15 @@ void OrderUpdate::operator()(
             order_update,
             []([[maybe_unused]] auto &order) {})) {
     } else {
-      log::warn("*** EXTERNAL ORDER ***"_sv);
-      log::warn("order_item={}"_sv, order_item);
+      log::warn("*** EXTERNAL ORDER ***"sv);
+      log::warn("order_item={}"sv, order_item);
     }
   }
 }
 
 void OrderUpdate::operator()(
     const json::Order &order, const server::TraceInfo &trace_info, bool download) {
-  log::debug("order={}"_sv, order);
+  log::debug("order={}"sv, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info, download);
 }
@@ -105,9 +105,9 @@ void OrderUpdate::operator()(
     [[maybe_unused]] uint32_t order_id,
     uint32_t version) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug("status={}"_sv, status);
+  log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
-  auto external_account = fmt::format("{}"_sv, order_item.account);  // XXX alloc
+  auto external_account = fmt::format("{}"sv, order_item.account);  // XXX alloc
   auto external_order_id = order_item.order_id;
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
@@ -160,8 +160,8 @@ void OrderUpdate::operator()(
           order_update,
           []([[maybe_unused]] auto &order) {})) {
   } else {
-    log::warn("*** EXTERNAL ORDER ***"_sv);
-    log::warn("order_item={}"_sv, order_item);
+    log::warn("*** EXTERNAL ORDER ***"sv);
+    log::warn("order_item={}"sv, order_item);
   }
 }
 
@@ -172,7 +172,7 @@ void OrderUpdate::operator()(
     uint8_t user_id,
     uint32_t order_id,
     uint32_t version) {
-  log::debug("order={}"_sv, order);
+  log::debug("order={}"sv, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info, request_type, user_id, order_id, version);
 }

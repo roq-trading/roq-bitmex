@@ -15,6 +15,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Remove custom literals (#110)
 * Interface to support binary data from web::socket
 * Change default WS end-point (#106)
 * ReferenceData currencies should follow FX conventions (#99)

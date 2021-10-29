@@ -11,6 +11,8 @@
 using namespace roq;
 using namespace roq::bitmex;
 
+using namespace std::literals;
+
 constexpr double TOLERANCE = 1.0e-10;
 
 TEST(json_instrument_item, unlisted) {
@@ -118,7 +120,7 @@ TEST(json_instrument_item, unlisted) {
                        R"("optionUnderlyingPrice":null,)"
                        R"("settledPrice":null,)"
                        R"("timestamp":"2020-01-23T04:50:00.000Z")"
-                       R"(})"_sv;
+                       R"(})"sv;
   auto obj = core::json::Parser::create<json::InstrumentItem>(message);
   EXPECT_EQ(obj.symbol, ".EVOL7D");
   EXPECT_EQ(obj.root_symbol, "EVOL");
@@ -251,7 +253,7 @@ TEST(json_instrument_item, open) {
                        R"("optionUnderlyingPrice":null,)"
                        R"("settledPrice":null,)"
                        R"("timestamp":"2020-01-22T19:09:30.000Z")"
-                       R"(})"_sv;
+                       R"(})"sv;
   auto obj = core::json::Parser::create<json::InstrumentItem>(message);
   EXPECT_EQ(obj.symbol, "XRPH20");
   EXPECT_EQ(obj.root_symbol, "XRP");
@@ -330,7 +332,7 @@ TEST(json_instrument_item, open) {
 }
 
 TEST(json_instrument, empty) {
-  const auto message = "[]"_sv;
+  const auto message = "[]"sv;
   core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
@@ -548,7 +550,7 @@ TEST(json_instrument, simple) {
                        R"("settledPrice":null,)"
                        R"("timestamp":"2020-01-22T19:09:30.000Z")"
                        R"(})"
-                       R"(])"_sv;
+                       R"(])"sv;
   core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
