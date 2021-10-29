@@ -50,20 +50,6 @@
       "description": "request: timeout"
     },
     {
-      "name": "rest_rate_limit_interval",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "60s",
-      "description": "rate limit: monitor interval"
-    },
-    {
-      "name": "rest_rate_limit_max_requests",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 60,
-      "description": "rate limit: max requests (per interval)"
-    },
-    {
       "name": "rest_expires_timeout",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::core::flags::TimePeriod",
