@@ -15,6 +15,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Move cache utilities to API (#111)
 * Interface to support binary data from web::socket
 * Change default WS end-point (#106)
 * ReferenceData currencies should follow FX conventions (#99)
