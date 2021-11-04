@@ -1,0 +1,8 @@
+{
+"name": "WebSocketState",
+"type": "enum",
+"values": [
+	{ "name": "authenticate" },
+	{ "name": "done" }
+]
+}

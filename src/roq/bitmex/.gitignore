@@ -8,3 +8,5 @@ drop_copy_state.cpp
 drop_copy_state.h
 market_data_state.cpp
 market_data_state.h
+web_socket_state.cpp
+web_socket_state.h

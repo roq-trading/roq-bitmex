@@ -37,6 +37,22 @@ static auto create_order_entry(
 }
 
 template <typename T>
+static auto create_web_socket(
+    Gateway &gateway,
+    core::io::Context &context,
+    uint16_t &stream_id,
+    T &security,
+    Shared &shared) {
+  absl::flat_hash_map<std::string, std::unique_ptr<WebSocket>> result;
+  for (auto &iter : security) {
+    result.try_emplace(
+        iter.first,
+        std::make_unique<WebSocket>(gateway, context, ++stream_id, *iter.second, shared));
+  }
+  return result;
+}
+
+template <typename T>
 static auto create_drop_copy(
     Gateway &gateway,
     core::io::Context &context,
@@ -66,6 +82,8 @@ void Gateway::operator()(const Event<Start> &event) {
   log::info("Starting the gateway..."sv);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
+  for (auto &[_, web_socket] : web_socket_)
+    (*web_socket)(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);
   market_data_(event);
@@ -76,6 +94,8 @@ void Gateway::operator()(const Event<Stop> &event) {
   market_data_(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);
+  for (auto &[_, web_socket] : web_socket_)
+    (*web_socket)(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
 }
@@ -83,6 +103,8 @@ void Gateway::operator()(const Event<Stop> &event) {
 void Gateway::operator()(const Event<Timer> &event) {
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
+  for (auto &[_, web_socket] : web_socket_)
+    (*web_socket)(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);
   market_data_(event);
@@ -106,14 +128,27 @@ void Gateway::operator()(const Event<Disconnected> &event) {
       break;
     case OrderCancelPolicy::BY_ACCOUNT:
       log::warn("*** CANCEL ALL ACCOUNT ORDERS ***"sv);
-      for (auto &[account, order_entry] : order_entry_) {
-        if (dispatcher_.can_user_trade_account(account, message_info.source)) {
-          log::warn(R"(- account="{}")"sv, account);
-          CancelAllOrders cancel_all_orders{
-              .account = account,
-          };
-          Event event(message_info, cancel_all_orders);
-          (*order_entry)(event, {});
+      if (Flags::oms_using_web_socket()) {
+        for (auto &[account, web_socket] : web_socket_) {
+          if (dispatcher_.can_user_trade_account(account, message_info.source)) {
+            log::warn(R"(- account="{}")"sv, account);
+            CancelAllOrders cancel_all_orders{
+                .account = account,
+            };
+            Event event(message_info, cancel_all_orders);
+            (*web_socket)(event, {});
+          }
+        }
+      } else {
+        for (auto &[account, order_entry] : order_entry_) {
+          if (dispatcher_.can_user_trade_account(account, message_info.source)) {
+            log::warn(R"(- account="{}")"sv, account);
+            CancelAllOrders cancel_all_orders{
+                .account = account,
+            };
+            Event event(message_info, cancel_all_orders);
+            (*order_entry)(event, {});
+          }
         }
       }
   }
@@ -122,6 +157,8 @@ void Gateway::operator()(const Event<Disconnected> &event) {
 uint16_t Gateway::operator()(
     const Event<CreateOrder> &event, const oms::Order &order, const std::string_view &request_id) {
   assert(!event.value.account.empty());
+  if (Flags::oms_using_web_socket())
+    return get_web_socket(event.value.account)(event, order, request_id);
   return get_order_entry(event.value.account)(event, order, request_id);
 }
 
@@ -132,6 +169,8 @@ uint16_t Gateway::operator()(
     const std::string_view &previous_request_id) {
   assert(!event.value.account.empty());
   assert(event.value.account == order.account);
+  if (Flags::oms_using_web_socket())
+    return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
@@ -142,18 +181,24 @@ uint16_t Gateway::operator()(
     const std::string_view &previous_request_id) {
   assert(!event.value.account.empty());
   assert(event.value.account == order.account);
+  if (Flags::oms_using_web_socket())
+    return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(
     const Event<CancelAllOrders> &event, const std::string_view &request_id) {
   assert(!event.value.account.empty());
+  if (Flags::oms_using_web_socket())
+    return get_web_socket(event.value.account)(event, request_id);
   return get_order_entry(event.value.account)(event, request_id);
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(writer);
+  for (auto &[_, web_socket] : web_socket_)
+    (*web_socket)(writer);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(writer);
   market_data_(writer);
@@ -209,6 +254,13 @@ void Gateway::operator()(const server::Trace<PositionUpdate> &event, bool is_las
 OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != order_entry_.end())
+    return *(*iter).second;
+  throw RuntimeErrorException(R"(Unknown account="{}")"sv, account);
+}
+
+WebSocket &Gateway::get_web_socket(const std::string_view &account) {
+  auto iter = web_socket_.find(account);
+  if (iter != web_socket_.end())
     return *(*iter).second;
   throw RuntimeErrorException(R"(Unknown account="{}")"sv, account);
 }

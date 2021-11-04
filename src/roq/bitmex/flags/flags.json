@@ -115,6 +115,12 @@
       "type": "bool",
       "default": false,
       "description": "allow price inversion?"
+    },
+    {
+      "name": "oms_using_web_socket",
+      "type": "bool",
+      "default": false,
+      "description": "use web-socket for order management?"
     }
   ]
 }

@@ -18,6 +18,7 @@
 #include "roq/bitmex/drop_copy.h"
 #include "roq/bitmex/market_data.h"
 #include "roq/bitmex/order_entry.h"
+#include "roq/bitmex/web_socket.h"
 
 namespace roq {
 namespace bitmex {
@@ -26,6 +27,7 @@ class MarketData;
 
 class Gateway final : public server::Handler,
                       public OrderEntry::Handler,
+                      public WebSocket::Handler,
                       public DropCopy::Handler,
                       public MarketData::Handler {
  public:
@@ -69,6 +71,7 @@ class Gateway final : public server::Handler,
 
  private:
   OrderEntry &get_order_entry(const std::string_view &account);
+  WebSocket &get_web_socket(const std::string_view &account);
 
  private:
   server::Dispatcher &dispatcher_;
@@ -83,6 +86,7 @@ class Gateway final : public server::Handler,
   uint16_t stream_id_ = {};
   // streams
   absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
+  absl::flat_hash_map<std::string, std::unique_ptr<WebSocket>> web_socket_;
   absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   MarketData market_data_;
 };
