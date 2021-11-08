@@ -658,6 +658,8 @@ void MarketData::publish_market_by_price(
       .update_type = snapshot ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL,
       .exchange_time_utc = {},
       .exchange_sequence = {},
+      .price_decimals = {},
+      .quantity_decimals = {},
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
   try {
