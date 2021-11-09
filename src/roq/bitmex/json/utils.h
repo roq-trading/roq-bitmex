@@ -29,7 +29,7 @@ inline void update(T &result, const core::json::value_t &value) {
 
 template <>
 inline void update(std::chrono::milliseconds &result, const core::json::value_t &value) {
-  return std::visit(
+  std::visit(
       overloaded{
           [&](const core::json::null_t &) { result = std::chrono::milliseconds{}; },
           [](bool) { throw std::bad_cast(); },
