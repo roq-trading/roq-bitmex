@@ -660,6 +660,7 @@ void MarketData::publish_market_by_price(
       .exchange_sequence = {},
       .price_decimals = {},
       .quantity_decimals = {},
+      .checksum = {},
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
   try {
