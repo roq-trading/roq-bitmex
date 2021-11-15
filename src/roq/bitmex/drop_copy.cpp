@@ -128,11 +128,11 @@ void DropCopy::operator()(metrics::Writer &writer) {
       .write(latency_.heartbeat, metrics::LATENCY);
 }
 
-void DropCopy::operator()(const core::web::Socket::Connected &) {
+void DropCopy::operator()(const core::web::ClientSocket::Connected &) {
   // note! don't notify gateway: wait for ready
 }
 
-void DropCopy::operator()(const core::web::Socket::Disconnected &) {
+void DropCopy::operator()(const core::web::ClientSocket::Disconnected &) {
   ready_ = false;
   next_cancel_all_after_ = {};
   partial_received_ = {};
@@ -140,15 +140,15 @@ void DropCopy::operator()(const core::web::Socket::Disconnected &) {
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void DropCopy::operator()(const core::web::Socket::Ready &) {
+void DropCopy::operator()(const core::web::ClientSocket::Ready &) {
   // note! don't notify gateway: wait for handshake
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
-void DropCopy::operator()(const core::web::Socket::Close &) {
+void DropCopy::operator()(const core::web::ClientSocket::Close &) {
 }
 
-void DropCopy::operator()(const core::web::Socket::Latency &latency) {
+void DropCopy::operator()(const core::web::ClientSocket::Latency &latency) {
   auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -158,11 +158,11 @@ void DropCopy::operator()(const core::web::Socket::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void DropCopy::operator()(const core::web::Socket::Text &text) {
+void DropCopy::operator()(const core::web::ClientSocket::Text &text) {
   parse(text.payload);
 }
 
-void DropCopy::operator()(const core::web::Socket::Binary &) {
+void DropCopy::operator()(const core::web::ClientSocket::Binary &) {
   log::fatal("Unexpected"sv);
 }
 

@@ -129,26 +129,26 @@ void MarketData::operator()(metrics::Writer &writer) {
       .write(latency_.heartbeat, metrics::LATENCY);
 }
 
-void MarketData::operator()(const core::web::Socket::Connected &) {
+void MarketData::operator()(const core::web::ClientSocket::Connected &) {
   // note! don't notify gateway: wait for ready
 }
 
-void MarketData::operator()(const core::web::Socket::Disconnected &) {
+void MarketData::operator()(const core::web::ClientSocket::Disconnected &) {
   ready_ = false;
   partial_received_ = {};
   download_.reset();
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void MarketData::operator()(const core::web::Socket::Ready &) {
+void MarketData::operator()(const core::web::ClientSocket::Ready &) {
   // note! don't notify gateway: wait for handshake
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
-void MarketData::operator()(const core::web::Socket::Close &) {
+void MarketData::operator()(const core::web::ClientSocket::Close &) {
 }
 
-void MarketData::operator()(const core::web::Socket::Latency &latency) {
+void MarketData::operator()(const core::web::ClientSocket::Latency &latency) {
   auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -158,11 +158,11 @@ void MarketData::operator()(const core::web::Socket::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void MarketData::operator()(const core::web::Socket::Text &text) {
+void MarketData::operator()(const core::web::ClientSocket::Text &text) {
   parse(text.payload);
 }
 
-void MarketData::operator()(const core::web::Socket::Binary &) {
+void MarketData::operator()(const core::web::ClientSocket::Binary &) {
   log::fatal("Unexpected"sv);
 }
 

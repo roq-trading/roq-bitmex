@@ -162,11 +162,11 @@ uint16_t WebSocket::operator()(
   return stream_id_;
 }
 
-void WebSocket::operator()(const core::web::Socket::Connected &) {
+void WebSocket::operator()(const core::web::ClientSocket::Connected &) {
   // note! don't notify gateway: wait for ready
 }
 
-void WebSocket::operator()(const core::web::Socket::Disconnected &) {
+void WebSocket::operator()(const core::web::ClientSocket::Disconnected &) {
   ready_ = false;
   next_cancel_all_after_ = {};
   partial_received_ = {};
@@ -174,15 +174,15 @@ void WebSocket::operator()(const core::web::Socket::Disconnected &) {
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void WebSocket::operator()(const core::web::Socket::Ready &) {
+void WebSocket::operator()(const core::web::ClientSocket::Ready &) {
   // note! don't notify gateway: wait for handshake
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
-void WebSocket::operator()(const core::web::Socket::Close &) {
+void WebSocket::operator()(const core::web::ClientSocket::Close &) {
 }
 
-void WebSocket::operator()(const core::web::Socket::Latency &latency) {
+void WebSocket::operator()(const core::web::ClientSocket::Latency &latency) {
   auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -192,11 +192,11 @@ void WebSocket::operator()(const core::web::Socket::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void WebSocket::operator()(const core::web::Socket::Text &text) {
+void WebSocket::operator()(const core::web::ClientSocket::Text &text) {
   parse(text.payload);
 }
 
-void WebSocket::operator()(const core::web::Socket::Binary &) {
+void WebSocket::operator()(const core::web::ClientSocket::Binary &) {
   log::fatal("Unexpected"sv);
 }
 
