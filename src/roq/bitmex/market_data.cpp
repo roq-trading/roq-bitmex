@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/market_data.h"
 
@@ -205,7 +205,7 @@ void MarketData::send_unsubscribe(const std::string_view &topic) {
 }
 
 void MarketData::send_subscribe(const roq::span<std::string_view> &topics) {
-  assert(!topics.empty());
+  assert(!std::empty(topics));
   if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
   } else {
@@ -415,7 +415,7 @@ void MarketData::operator()(const server::Trace<json::Instrument> &event, json::
             }
             product.clear();
           }
-          log::info<2>("- securities: {} (/{})"sv, security_count, instrument.data.size());
+          log::info<2>("- securities: {} (/{})"sv, security_count, std::size(instrument.data));
           // release download state
           download_.check_relaxed(MarketDataState::INSTRUMENT);
         }
@@ -475,7 +475,7 @@ void MarketData::operator()(const server::Trace<json::OrderBookL2> &event, json:
     std::string_view previous;
     core::back_emplacer bids(shared_.bids), asks(shared_.asks);
     for (auto &item : order_book_l2.data) {
-      if (previous.empty()) {
+      if (std::empty(previous)) {
         previous = item.symbol;
       } else if (previous.compare(item.symbol) != 0) {
         publish_market_by_price(trace_info, false, previous, bids, asks, snapshot);
@@ -509,7 +509,7 @@ void MarketData::operator()(const server::Trace<json::OrderBookL2> &event, json:
         return;
       }
     }
-    assert(!previous.empty());
+    assert(!std::empty(previous));
     publish_market_by_price(trace_info, false, previous, bids, asks, snapshot);
     // state management
     if (snapshot) {
@@ -567,7 +567,7 @@ void MarketData::operator()(const server::Trace<json::Trade> &event, json::Actio
         assert(timestamp == item.timestamp);
       }
       if (item.symbol.compare(previous) != 0) {
-        if (!previous.empty() && !trades.empty()) {
+        if (!std::empty(previous) && !std::empty(trades)) {
           TradeSummary trade_summary{
               .stream_id = stream_id_,
               .exchange = Flags::exchange(),
@@ -582,7 +582,7 @@ void MarketData::operator()(const server::Trace<json::Trade> &event, json::Actio
       }
       trades.emplace_back([&item](auto &result) { emplace(result, item); });
     }
-    if (!previous.empty() && !trades.empty()) {
+    if (!std::empty(previous) && !std::empty(trades)) {
       TradeSummary trade_summary{
           .stream_id = stream_id_,
           .exchange = Flags::exchange(),
@@ -617,24 +617,24 @@ void MarketData::operator()(const server::Trace<json::Position> &event, json::Ac
 
 Product &MarketData::find_product(const json::InstrumentItem &item) {
   auto iter = product_cache_.find(item.symbol);
-  if (iter == product_cache_.end()) {
+  if (iter == std::end(product_cache_)) {
     iter = product_cache_.emplace(item.symbol, item).first;
   } else {
     (*iter).second.update(item);
   }
-  assert(iter != product_cache_.end());
+  assert(iter != std::end(product_cache_));
   return (*iter).second;
 }
 
 Product &MarketData::find_product(const json::FundingItem &item) {
   auto iter = product_cache_.find(item.symbol);
-  if (iter == product_cache_.end()) {
+  if (iter == std::end(product_cache_)) {
     log::warn<1>(R"(Create product symbol="{}" from funding (no reference data))"sv, item.symbol);
     iter = product_cache_.emplace(item.symbol, item).first;
   } else {
     (*iter).second.update(item);
   }
-  assert(iter != product_cache_.end());
+  assert(iter != std::end(product_cache_));
   return (*iter).second;
 }
 
@@ -645,7 +645,7 @@ void MarketData::publish_market_by_price(
     const roq::span<MBPUpdate> &bids,
     const roq::span<MBPUpdate> &asks,
     bool snapshot) {
-  assert(!(bids.empty() && asks.empty()));
+  assert(!(std::empty(bids) && std::empty(asks)));
   if (ROQ_UNLIKELY(snapshot)) {
     log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
   }

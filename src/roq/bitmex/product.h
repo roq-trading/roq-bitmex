@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #pragma once
 
@@ -32,7 +32,7 @@ class Product final {
   StatisticsUpdate statistics_update(const json::FundingItem &, uint16_t stream_id) const;
 
   bool is_market_status_dirty() const { return market_status_dirty_; }
-  bool is_statistics_dirty() const { return !statistics_.empty(); }
+  bool is_statistics_dirty() const { return !std::empty(statistics_); }
 
   void clear() {
     market_status_dirty_ = false;

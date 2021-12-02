@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/price_cache.h"
 
@@ -23,7 +23,7 @@ std::pair<double, double> PriceCache::operator()(
     case json::Action::PARTIAL:
     case json::Action::INSERT:
       if (!std::isnan(price) && !std::isnan(size)) {
-        if (iter == price_lookup_.end()) {
+        if (iter == std::end(price_lookup_)) {
           iter = price_lookup_.emplace(id, price).first;
           result = (*iter).second;
         } else {
@@ -41,7 +41,7 @@ std::pair<double, double> PriceCache::operator()(
       break;
     case json::Action::UPDATE:
       if (std::isnan(price) && !std::isnan(size) && utils::compare(size, 0.0) > 0) {
-        if (iter != price_lookup_.end()) {
+        if (iter != std::end(price_lookup_)) {
           result = (*iter).second;
         } else {
           // unable to find the cached price ==> fail
@@ -52,7 +52,7 @@ std::pair<double, double> PriceCache::operator()(
       break;
     case json::Action::DELETE:
       if (std::isnan(price) && (std::isnan(size) || utils::compare(size, 0.0) == 0)) {
-        if (iter != price_lookup_.end()) {
+        if (iter != std::end(price_lookup_)) {
           result = (*iter).second;
           price_lookup_.erase(iter);
         } else {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/drop_copy.h"
 
@@ -18,6 +18,7 @@
 #include "roq/bitmex/json/utils.h"
 
 using namespace std::literals;
+using namespace std::chrono_literals;  // NOLINT
 
 namespace roq {
 namespace bitmex {
@@ -31,7 +32,7 @@ static const auto SUPPORTS = utils::Mask{
     SupportType::POSITION,
 };
 
-static const auto REQUEST_EXPIRES = std::chrono::seconds{5};
+static const auto REQUEST_EXPIRES = 5s;
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
@@ -204,7 +205,7 @@ void DropCopy::send_subscribe(const std::string_view &topic) {
 }
 
 void DropCopy::send_subscribe(const roq::span<std::string_view> &topics) {
-  assert(!topics.empty());
+  assert(!std::empty(topics));
   if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
   } else {
@@ -337,7 +338,7 @@ void DropCopy::operator()(const server::Trace<json::Execution> &event, json::Act
     core::back_emplacer fills(shared_.fills);
     size_t index = {};
     for (auto &item : execution.data) {
-      auto last = execution.data.size() == ++index;
+      auto last = std::size(execution.data) == ++index;
       auto order_status = json::map(item.ord_status);
       auto side = json::map(item.side);
       auto external_account = fmt::format("{}"sv, item.account);  // XXX alloc
@@ -392,7 +393,7 @@ void DropCopy::operator()(const server::Trace<json::Execution> &event, json::Act
                 if (item.exec_type == json::ExecType::TRADE) {
                   fills.emplace_back([&](auto &result) { emplace(result, item); });
                 }
-                if (last && !fills.empty()) {
+                if (last && !std::empty(fills)) {
                   TradeUpdate trade_update{
                       .stream_id = stream_id_,
                       .account = order.account,

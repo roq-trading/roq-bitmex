@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/json/utils.h"
 
@@ -22,7 +22,7 @@ static auto compare(const std::string_view &lhs, const std::string_view &rhs) {
 }  // namespace
 
 Error guess_error(const std::string_view &message) {
-  if (message.empty())
+  if (std::empty(message))
     return Error::UNDEFINED;
   // POST /order, PUT /order, POST /order/closePosition
   if (compare(message, "Account is suspended"sv) == 0)

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/tools/hasher.h"
 
@@ -36,11 +36,11 @@ std::string Hasher::create_signature(
   hmac_.update(method_);
   hmac_.update(path);
   hmac_.update(expires_);
-  if (!body.empty())
+  if (!std::empty(body))
     hmac_.update(body);
   std::array<char, 32> buffer;
   auto length = hmac_.digest(buffer);
-  assert(length == buffer.size());
+  assert(length == std::size(buffer));
   return core::binascii::Hex::encode(buffer);
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/shared.h"
 
@@ -20,7 +20,7 @@ std::string_view Shared::next_request_id() {
   auto request_id = ++request_id_;
   stack_buffer_.clear();
   fmt::format_to(std::back_inserter(stack_buffer_), "roq-{}"sv, request_id);
-  return std::string_view{stack_buffer_.data(), stack_buffer_.size()};
+  return std::string_view{std::data(stack_buffer_), std::size(stack_buffer_)};
 }
 
 }  // namespace bitmex

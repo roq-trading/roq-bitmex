@@ -1,6 +1,6 @@
 # Roq BitMEX
 
-Copyright (c) 2017-2021, Hans Erik Thrane
+Copyright (c) 2017-2022, Hans Erik Thrane
 All rights reserved.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"

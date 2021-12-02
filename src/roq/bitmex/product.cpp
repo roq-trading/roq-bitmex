@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/product.h"
 
@@ -117,7 +117,7 @@ bool Product::update(const json::InstrumentItem &item) {
       });
     }
   }
-  return market_status_dirty_ || !statistics_.empty();
+  return market_status_dirty_ || !std::empty(statistics_);
 }
 
 bool Product::update(const json::FundingItem &) {
@@ -156,13 +156,13 @@ bool Product::update(const json::FundingItem &) {
         .end_time_utc = funding_rate_daily_.end_time_utc,
     });
   }
-  return !statistics_.empty();
+  return !std::empty(statistics_);
   */
   return false;
 }
 
 ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t stream_id) const {
-  assert(!item.symbol.empty());
+  assert(!std::empty(item.symbol));
   return ReferenceData{
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
@@ -190,7 +190,7 @@ ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t
 }
 
 MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t stream_id) const {
-  assert(!item.symbol.empty());
+  assert(!std::empty(item.symbol));
   auto trading_status = json::map(state_);
   return MarketStatus{
       .stream_id = stream_id,
@@ -202,12 +202,12 @@ MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t s
 
 StatisticsUpdate Product::statistics_update(
     const json::InstrumentItem &item, uint16_t stream_id) const {
-  assert(!item.symbol.empty());
+  assert(!std::empty(item.symbol));
   return StatisticsUpdate{
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
-      .statistics = {statistics_.data(), statistics_.size()},
+      .statistics = {std::data(statistics_), std::size(statistics_)},
       .update_type = UpdateType::INCREMENTAL,
       .exchange_time_utc = {},
   };
@@ -215,12 +215,12 @@ StatisticsUpdate Product::statistics_update(
 
 StatisticsUpdate Product::statistics_update(
     const json::FundingItem &item, uint16_t stream_id) const {
-  assert(!item.symbol.empty());
+  assert(!std::empty(item.symbol));
   return StatisticsUpdate{
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
-      .statistics = {statistics_.data(), statistics_.size()},
+      .statistics = {std::data(statistics_), std::size(statistics_)},
       .update_type = UpdateType::INCREMENTAL,
       .exchange_time_utc = {},
   };

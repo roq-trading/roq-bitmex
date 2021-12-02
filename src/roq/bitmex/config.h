@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #pragma once
 
@@ -26,15 +26,15 @@ class Config final : public server::Config, public server::ConfigReader::Handler
 
   auto get_api_key() const {
     using namespace std::literals;
-    if (accounts.size() != 1)
+    if (std::size(accounts) != 1)
       throw RuntimeErrorException("More accounts not yet supported"sv);
-    return (*accounts.begin()).second.login;
+    return (*std::begin(accounts)).second.login;
   }
   auto get_secret() const {
     using namespace std::literals;
-    if (accounts.size() != 1)
+    if (std::size(accounts) != 1)
       throw RuntimeErrorException("More accounts not yet supported"sv);
-    return (*accounts.begin()).second.secret;
+    return (*std::begin(accounts)).second.secret;
   }
 
  protected:
@@ -73,11 +73,11 @@ class Config final : public server::Config, public server::ConfigReader::Handler
 template <>
 struct fmt::formatter<roq::bitmex::Config> {
   template <typename Context>
-  constexpr auto parse(Context &context) {
-    return context.begin();
+  constexpr auto parse(Context &ctx) {
+    return std::begin(ctx);
   }
-  template <typename C>
-  auto format(const roq::bitmex::Config &value, C &ctx) {
+  template <typename Context>
+  auto format(const roq::bitmex::Config &value, Context &ctx) {
     using namespace std::literals;
     return fmt::format_to(
         ctx.out(),

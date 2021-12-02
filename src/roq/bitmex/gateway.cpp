@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/bitmex/gateway.h"
 
@@ -156,7 +156,7 @@ void Gateway::operator()(const Event<Disconnected> &event) {
 
 uint16_t Gateway::operator()(
     const Event<CreateOrder> &event, const oms::Order &order, const std::string_view &request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   if (Flags::oms_using_web_socket())
     return get_web_socket(event.value.account)(event, order, request_id);
   return get_order_entry(event.value.account)(event, order, request_id);
@@ -167,7 +167,7 @@ uint16_t Gateway::operator()(
     const oms::Order &order,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   if (Flags::oms_using_web_socket())
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
@@ -179,7 +179,7 @@ uint16_t Gateway::operator()(
     const oms::Order &order,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   if (Flags::oms_using_web_socket())
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
@@ -188,7 +188,7 @@ uint16_t Gateway::operator()(
 
 uint16_t Gateway::operator()(
     const Event<CancelAllOrders> &event, const std::string_view &request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   if (Flags::oms_using_web_socket())
     return get_web_socket(event.value.account)(event, request_id);
   return get_order_entry(event.value.account)(event, request_id);
@@ -253,14 +253,14 @@ void Gateway::operator()(const server::Trace<PositionUpdate> &event, bool is_las
 
 OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
-  if (iter != order_entry_.end())
+  if (iter != std::end(order_entry_))
     return *(*iter).second;
   throw RuntimeErrorException(R"(Unknown account="{}")"sv, account);
 }
 
 WebSocket &Gateway::get_web_socket(const std::string_view &account) {
   auto iter = web_socket_.find(account);
-  if (iter != web_socket_.end())
+  if (iter != std::end(web_socket_))
     return *(*iter).second;
   throw RuntimeErrorException(R"(Unknown account="{}")"sv, account);
 }
