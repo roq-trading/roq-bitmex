@@ -4,6 +4,8 @@ All notable changes will be documented in this file.
 
 ## Head
 
+## 0.7.9 &ndash; 2021-12-08
+
 ### Added
 
 * New flag to toggle use of WebSocket for order management (#112)
