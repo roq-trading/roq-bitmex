@@ -171,6 +171,7 @@ ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t
       .security_type = {},  // XXX typ?
       .base_currency = settl_currency_,
       .quote_currency = quote_currency_,
+      .margin_currency = {},
       .commission_currency = {},
       .tick_size = tick_size_,
       .multiplier = multiplier_,
