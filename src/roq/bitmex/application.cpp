@@ -16,7 +16,7 @@ int Application::main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   Config config(Flags::config_file(), Flags::secrets_file());
   log::info<1>("config={}"sv, config);
   log::info("Starting the gateway"sv);
-  roq::server::Trading<Gateway>(ROQ_PACKAGE_NAME, config).dispatch();
+  roq::server::Trading<Gateway>(ROQ_PACKAGE_NAME, ROQ_BUILD_NUMBER, {}, config).dispatch();
   return EXIT_SUCCESS;
 }
 
