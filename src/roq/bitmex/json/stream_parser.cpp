@@ -32,7 +32,7 @@ void update(Type &result, const Type type) {
   if (result == Type::UNKNOWN) {
     result = type;
   } else if (result != type) {
-    throw RuntimeErrorException("wrong type"sv);
+    throw RuntimeError("wrong type"sv);
   }
 }
 }  // namespace
@@ -241,7 +241,7 @@ void StreamParser::dispatch(
     }
     switch (type) {
       case Type::UNKNOWN:
-        throw RuntimeErrorException("Can't detect message type"sv);
+        throw RuntimeError("Can't detect message type"sv);
       case Type::CANCEL_ALL_AFTER: {
         CancelAllAfter cancel_all_after{
             .cancel_time = result.cancel_time,

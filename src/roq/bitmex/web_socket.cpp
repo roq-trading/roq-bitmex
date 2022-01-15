@@ -225,7 +225,7 @@ void WebSocket::create_order(
     [[maybe_unused]] const std::string_view &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
   });
 }
 
@@ -238,7 +238,7 @@ void WebSocket::modify_order(
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
   });
 }
 
@@ -251,7 +251,7 @@ void WebSocket::cancel_order(
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
   });
 }
 

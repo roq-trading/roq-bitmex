@@ -70,7 +70,7 @@ target_link_libraries(
   ${UUID_LIBRARIES}
   ${RT_LIBRARIES})
 
-target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_17)
+target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_20)
 
 set_target_properties("${TARGET_NAME}" PROPERTIES LINK_FLAGS_RELEASE -s)
 

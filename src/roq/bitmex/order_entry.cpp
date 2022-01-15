@@ -191,7 +191,7 @@ void OrderEntry::create_order(
     const Event<CreateOrder> &event, const oms::Order &, const std::string_view &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
     auto &[message_info, create_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v1/order"sv;
@@ -336,7 +336,7 @@ void OrderEntry::modify_order(
     const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::PUT;
     auto path = "/api/v1/order"sv;
@@ -477,7 +477,7 @@ void OrderEntry::cancel_order(
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::DELETE;
     auto path = "/api/v1/order"sv;
