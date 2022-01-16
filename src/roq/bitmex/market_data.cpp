@@ -204,7 +204,7 @@ void MarketData::send_unsubscribe(const std::string_view &topic) {
   connection_.send_text(message);
 }
 
-void MarketData::send_subscribe(const roq::span<std::string_view> &topics) {
+void MarketData::send_subscribe(const std::span<std::string_view> &topics) {
   assert(!std::empty(topics));
   if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
@@ -642,8 +642,8 @@ void MarketData::publish_market_by_price(
     const server::TraceInfo &trace_info,
     bool is_last,
     const std::string_view &symbol,
-    const roq::span<MBPUpdate> &bids,
-    const roq::span<MBPUpdate> &asks,
+    const std::span<MBPUpdate> &bids,
+    const std::span<MBPUpdate> &asks,
     bool snapshot) {
   assert(!(std::empty(bids) && std::empty(asks)));
   if (snapshot) [[unlikely]] {

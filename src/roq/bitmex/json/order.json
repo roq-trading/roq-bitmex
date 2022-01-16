@@ -2,6 +2,6 @@
 "name": "Order",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<OrderItem>" }
+	{ "name": "data", "type": "std::span<OrderItem>" }
 ]
 }

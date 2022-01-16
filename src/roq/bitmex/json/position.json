@@ -2,6 +2,6 @@
 "name": "Position",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<PositionItem>" }
+	{ "name": "data", "type": "std::span<PositionItem>" }
 ]
 }

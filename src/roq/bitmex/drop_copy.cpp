@@ -204,7 +204,7 @@ void DropCopy::send_subscribe(const std::string_view &topic) {
   connection_.send_text(message);
 }
 
-void DropCopy::send_subscribe(const roq::span<std::string_view> &topics) {
+void DropCopy::send_subscribe(const std::span<std::string_view> &topics) {
   assert(!std::empty(topics));
   if (std::size(topics) == 1) {
     send_subscribe(topics[0]);

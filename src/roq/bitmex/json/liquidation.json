@@ -2,6 +2,6 @@
 "name": "Liquidation",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<LiquidationItem>" }
+	{ "name": "data", "type": "std::span<LiquidationItem>" }
 ]
 }

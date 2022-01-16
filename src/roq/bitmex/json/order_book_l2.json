@@ -2,6 +2,6 @@
 "name": "OrderBookL2",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<OrderBookL2Item>" }
+	{ "name": "data", "type": "std::span<OrderBookL2Item>" }
 ]
 }

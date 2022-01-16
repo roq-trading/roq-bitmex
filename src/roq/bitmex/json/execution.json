@@ -2,6 +2,6 @@
 "name": "Execution",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<ExecutionItem>" }
+	{ "name": "data", "type": "std::span<ExecutionItem>" }
 ]
 }

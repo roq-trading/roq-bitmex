@@ -2,6 +2,6 @@
 "name": "Settlement",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<SettlementItem>" }
+	{ "name": "data", "type": "std::span<SettlementItem>" }
 ]
 }

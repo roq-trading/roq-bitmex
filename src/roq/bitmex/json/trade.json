@@ -2,6 +2,6 @@
 "name": "Trade",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<TradeItem>" }
+	{ "name": "data", "type": "std::span<TradeItem>" }
 ]
 }

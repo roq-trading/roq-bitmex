@@ -69,7 +69,7 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::S
   void send_subscribe(const std::string_view &topic);
   void send_unsubscribe(const std::string_view &topic);
 
-  void send_subscribe(const roq::span<std::string_view> &topics);
+  void send_subscribe(const std::span<std::string_view> &topics);
 
   void send_subscribe(const std::string_view &topic, const std::string_view &symbol);
   void send_unsubscribe(const std::string_view &topic, const std::string_view &symbol);
@@ -112,8 +112,8 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::S
       const server::TraceInfo &,
       bool is_last,
       const std::string_view &symbol,
-      const roq::span<MBPUpdate> &bids,
-      const roq::span<MBPUpdate> &asks,
+      const std::span<MBPUpdate> &bids,
+      const std::span<MBPUpdate> &asks,
       bool snapshot);
   void resubscribe_order_book_l2(const std::string_view &symbol);
 

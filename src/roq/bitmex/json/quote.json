@@ -2,6 +2,6 @@
 "name": "Quote",
 "type": "array",
 "values": [
-	{ "name": "data", "type": "roq::span<QuoteItem>" }
+	{ "name": "data", "type": "std::span<QuoteItem>" }
 ]
 }

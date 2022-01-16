@@ -61,7 +61,7 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
   void send_cancel_all_after(std::chrono::nanoseconds timeout);
 
   void send_subscribe(const std::string_view &topic);
-  void send_subscribe(const roq::span<std::string_view> &topics);
+  void send_subscribe(const std::span<std::string_view> &topics);
 
   uint32_t download(DropCopyState);
 
