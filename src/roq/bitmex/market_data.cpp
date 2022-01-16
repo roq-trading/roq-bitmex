@@ -646,7 +646,7 @@ void MarketData::publish_market_by_price(
     const roq::span<MBPUpdate> &asks,
     bool snapshot) {
   assert(!(std::empty(bids) && std::empty(asks)));
-  if (ROQ_UNLIKELY(snapshot)) {
+  if (snapshot) [[unlikely]] {
     log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
   }
   const MarketByPriceUpdate market_by_price_update{

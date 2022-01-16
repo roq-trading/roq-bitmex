@@ -74,7 +74,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
       order_entry_(create_order_entry(*this, context_, stream_id_, security_, shared_)),
       drop_copy_(create_drop_copy(*this, context_, stream_id_, security_, shared_)),
       market_data_(*this, context_, ++stream_id_, shared_) {
-  if (ROQ_UNLIKELY(!Flags::ws_cancel_on_disconnect()))
+  if (!Flags::ws_cancel_on_disconnect()) [[unlikely]]
     log::warn("Orders will *NOT* be cancelled on disconnect"sv);
 }
 
