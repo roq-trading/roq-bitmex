@@ -16,7 +16,7 @@ namespace bitmex {
 namespace tools {
 
 namespace {
-static auto create_timestamp_secs(std::chrono::nanoseconds value) {
+auto create_timestamp_secs(std::chrono::nanoseconds value) {
   return fmt::format("{}"sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 }  // namespace

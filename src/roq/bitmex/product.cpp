@@ -32,7 +32,7 @@ Product::Product(const json::FundingItem &) {
 
 namespace {
 template <typename T>
-static std::chrono::seconds strip_time_part(T timestamp) {
+std::chrono::seconds strip_time_part(T timestamp) {
   auto seconds = std::chrono::duration_cast<std::chrono::seconds>(timestamp);
   return std::chrono::seconds{seconds.count() % 86400};
 }

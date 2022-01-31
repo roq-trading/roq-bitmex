@@ -15,7 +15,7 @@ namespace bitmex {
 namespace json {
 
 namespace {
-static auto compare(const std::string_view &lhs, const std::string_view &rhs) {
+auto compare(const std::string_view &lhs, const std::string_view &rhs) {
   auto rhs_adj = rhs.substr(0, std::min(std::size(lhs), std::size(rhs)));
   return utils::case_insensitive_compare(lhs, rhs_adj);
 }

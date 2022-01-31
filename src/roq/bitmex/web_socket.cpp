@@ -24,15 +24,15 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-static const auto NAME = "ex"sv;
-static const auto SUPPORTS = utils::Mask{
+const auto NAME = "ex"sv;
+const auto SUPPORTS = utils::Mask{
     SupportType::ORDER_ACK,
     SupportType::ORDER,
     SupportType::TRADE,
     SupportType::POSITION,
 };
 
-static const auto REQUEST_EXPIRES = 5s;
+const auto REQUEST_EXPIRES = 5s;
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)

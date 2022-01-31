@@ -10,7 +10,7 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-static auto create_base_path() {
+auto create_base_path() {
   core::URI uri(Flags::rest_uri());
   return uri.path;
 }

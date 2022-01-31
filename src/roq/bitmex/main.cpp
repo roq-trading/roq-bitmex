@@ -5,7 +5,7 @@
 using namespace std::literals;
 
 namespace {
-static const auto DESCRIPTION = "Roq BitMEX Gateway"sv;
+const auto DESCRIPTION = "Roq BitMEX Gateway"sv;
 }  // namespace
 
 int main(int argc, char **argv) {
