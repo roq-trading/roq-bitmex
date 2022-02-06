@@ -51,6 +51,8 @@ roq_autogen(
   SOURCES
   ${AUTOGEN_SCHEMAS})
 
+roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}" ${AUTOGEN_HEADERS} ${AUTOGEN_SOURCES})
+
 add_executable("${TARGET_NAME}" ${SOURCES} ${AUTOGEN_SOURCES})
 
 add_dependencies("${TARGET_NAME}" autogen-headers autogen-json-headers)

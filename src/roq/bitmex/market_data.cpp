@@ -152,6 +152,7 @@ void MarketData::operator()(const core::web::ClientSocket::Latency &latency) {
   auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
+      .account = {},
       .latency = latency.sample,
   };
   server::create_trace_and_dispatch(handler_, trace_info, external_latency);

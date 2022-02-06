@@ -2,6 +2,8 @@ set(TARGET_NAME "${PROJECT_NAME}-test")
 
 set(SOURCES json_error_response.cpp json_instrument.cpp json_position.cpp main.cpp)
 
+roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}")
+
 add_executable("${TARGET_NAME}" ${SOURCES})
 
 target_link_libraries("${TARGET_NAME}" "${PROJECT_NAME}-json" roq-core::roq-core
