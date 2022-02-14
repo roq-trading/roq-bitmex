@@ -6,6 +6,7 @@
 	{ "name": "price", "type": "double" },
 	{ "name": "side", "type": "Side" },
 	{ "name": "size", "type": "double" },
-	{ "name": "symbol", "type": "std::string_view" }
+	{ "name": "symbol", "type": "std::string_view" },
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" }
 ]
 }
