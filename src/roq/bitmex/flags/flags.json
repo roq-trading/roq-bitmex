@@ -29,6 +29,12 @@
       "description": "REST end-point (URI)"
     },
     {
+      "name": "rest_proxy",
+      "type": "roq::core::URI",
+      "validator": "roq::core::flags::URI<std::string>",
+      "description": "proxy end-point (URI)"
+    },
+    {
       "name": "rest_ping_freq",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::core::flags::TimePeriod",

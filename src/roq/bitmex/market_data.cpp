@@ -34,6 +34,18 @@ struct create_metrics final : public core::metrics::Factory {
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
+auto create_connection(auto &handler, auto &context) {
+  core::web::ClientSocket::Config config{
+      .validate_certificate = server::Flags::tls_validate_certificate(),
+      .uri = Flags::ws_uri(),
+      .query = {},
+      .ping_frequency = Flags::ws_ping_freq(),
+      .read_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
+      .encode_buffer_size = Flags::encode_buffer_size(),
+  };
+  return core::web::ClientSocket{handler, context, config, []() { return std::string(); }};
+}
+
 void emplace(MBPUpdate &result, double price, double size) {
   new (&result) MBPUpdate{
       .price = price,
@@ -58,16 +70,7 @@ void emplace(Trade &result, const T &value) {
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"sv, stream_id_, NAME)),
-      connection_(
-          *this,
-          context,
-          core::URI(Flags::ws_uri()),
-          {},  // query
-          Flags::ws_ping_freq(),
-          Flags::decode_buffer_size(),  // XXX need read buffer size
-          Flags::encode_buffer_size(),
-          []() { return std::string(); }),
-      decode_buffer_(Flags::decode_buffer_size()),
+      connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
       },
