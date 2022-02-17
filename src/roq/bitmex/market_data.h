@@ -29,7 +29,8 @@
 namespace roq {
 namespace bitmex {
 
-class MarketData final : public core::web::ClientSocket::Handler, public json::StreamParser::Handler {
+class MarketData final : public core::web::ClientSocket::Handler,
+                         public json::StreamParser::Handler {
  public:
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;

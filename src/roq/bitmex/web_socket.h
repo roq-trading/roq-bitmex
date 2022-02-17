@@ -26,7 +26,8 @@
 namespace roq {
 namespace bitmex {
 
-class WebSocket final : public core::web::ClientSocket::Handler, public json::StreamParser::Handler {
+class WebSocket final : public core::web::ClientSocket::Handler,
+                        public json::StreamParser::Handler {
  public:
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
