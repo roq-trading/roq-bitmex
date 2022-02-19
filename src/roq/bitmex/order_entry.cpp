@@ -56,7 +56,8 @@ auto create_connection(auto &handler, auto &context) {
 }
 
 auto compute_expires() {
-  auto result = core::get_realtime_clock() + Flags::rest_expires_timeout();
+  auto now = core::clock::GetRealTime();
+  auto result = now + Flags::rest_expires_timeout();
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
 
@@ -278,11 +279,12 @@ void OrderEntry::create_order_ack(
             log::warn(R"(Unable to parse response="{}")"sv, body);
             text = "Unknown"sv;
           }
+          auto error = json::guess_error(text);
           oms::Response response{
               .type = RequestType::CREATE_ORDER,
               .origin = Origin::EXCHANGE,
               .status = RequestStatus::REJECTED,
-              .error = json::guess_error(text),
+              .error = error,
               .text = text,
               .version = version,
               .request_id = {},
@@ -411,11 +413,12 @@ void OrderEntry::modify_order_ack(
             log::warn(R"(Unable to parse response="{}")"sv, body);
             text = "Unknown"sv;
           }
+          auto error = json::guess_error(text);
           oms::Response response{
               .type = RequestType::MODIFY_ORDER,
               .origin = Origin::EXCHANGE,
               .status = RequestStatus::REJECTED,
-              .error = json::guess_error(text),
+              .error = error,
               .text = text,
               .version = version,
               .request_id = {},
@@ -547,11 +550,12 @@ void OrderEntry::cancel_order_ack(
             log::warn(R"(Unable to parse response="{}")"sv, body);
             text = "Unknown"sv;
           }
+          auto error = json::guess_error(text);
           oms::Response response{
               .type = RequestType::CANCEL_ORDER,
               .origin = Origin::EXCHANGE,
               .status = RequestStatus::REJECTED,
-              .error = json::guess_error(text),
+              .error = error,
               .text = text,
               .version = version,
               .request_id = {},

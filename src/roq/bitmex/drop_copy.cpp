@@ -46,7 +46,7 @@ auto create_connection(auto &handler, auto &context, auto &&create_upgrade_heade
       .uri = Flags::ws_uri(),
       .query = {},
       .ping_frequency = Flags::ws_ping_freq(),
-      .read_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
+      .read_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
   return core::web::ClientSocket{handler, context, config, std::move(create_upgrade_headers)};
@@ -337,7 +337,7 @@ void DropCopy::operator()(const server::Trace<json::Unsubscribe> &event) {
 
 void DropCopy::operator()(const server::Trace<json::Execution> &event, json::Action action) {
   profile_.execution([&]() {
-    // auto &[trace_info, execution] = event;
+    // auto &[trace_info, execution] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
     log::info<2>("event={{action={}, execution={}}}"sv, action, execution);
@@ -347,7 +347,7 @@ void DropCopy::operator()(const server::Trace<json::Execution> &event, json::Act
       auto last = std::size(execution.data) == ++index;
       auto order_status = json::map(item.ord_status);
       auto side = json::map(item.side);
-      auto external_account = fmt::format("{}"sv, item.account);  // XXX alloc
+      auto external_account = fmt::format("{}"sv, item.account);
       auto order_type = json::map(item.ord_type);
       auto time_in_force = json::map(item.time_in_force);
       auto last_liquidity = json::map(item.last_liquidity_ind);
@@ -380,7 +380,7 @@ void DropCopy::operator()(const server::Trace<json::Execution> &event, json::Act
           .execution_instruction = {},
           .order_template = {},
           .create_time_utc = {},
-          .update_time_utc = item.timestamp,  // XXX transact_time?
+          .update_time_utc = item.timestamp,
           .external_account = external_account,
           .external_order_id = item.order_id,
           .status = order_status,
@@ -408,8 +408,8 @@ void DropCopy::operator()(const server::Trace<json::Execution> &event, json::Act
                       .symbol = order.symbol,
                       .side = order.side,
                       .position_effect = order.position_effect,
-                      .create_time_utc = item.timestamp,  // XXX transact_time?
-                      .update_time_utc = item.timestamp,  // XXX transact_time?
+                      .create_time_utc = item.timestamp,
+                      .update_time_utc = item.timestamp,
                       .external_account = external_account,
                       .external_order_id = order.external_order_id,
                       .fills = fills,
@@ -430,7 +430,7 @@ void DropCopy::operator()(const server::Trace<json::Margin> &event, json::Action
   profile_.margin([&]() {
     auto &[trace_info, margin] = event;
     log::info<2>("event={{action={}, margin={}}}"sv, action, margin);
-    /// XXX not used
+    // not used
   });
 }
 
@@ -454,7 +454,7 @@ void DropCopy::operator()(const server::Trace<json::Position> &event, json::Acti
     auto &[trace_info, position] = event;
     log::info<2>("event={{action={}, position={}}}"sv, action, position);
     for (auto &item : position.data) {
-      auto external_account = fmt::format("{}"sv, item.account);  // XXX alloc
+      auto external_account = fmt::format("{}"sv, item.account);
       auto long_quantity = std::max(0.0, item.current_qty);
       auto short_quantity = std::max(0.0, -item.current_qty);
       PositionUpdate position_update{
@@ -508,11 +508,17 @@ void DropCopy::operator()(const server::Trace<json::Trade> &event, json::Action 
   log::fatal("Unexpected: action={}, trade={}"sv, action, trade);
 }
 
+namespace {
+auto compute_expires() {
+  auto now = core::clock::GetRealTime();
+  auto expires = now + REQUEST_EXPIRES;
+  return std::chrono::ceil<std::chrono::seconds>(expires);
+}
+}  // namespace
+
 std::string DropCopy::create_upgrade_headers() {
-  auto expires = std::chrono::duration_cast<std::chrono::seconds>(
-      core::get_realtime_clock() + REQUEST_EXPIRES);
-  return security_.create_headers(
-      expires, core::http::Method::GET, "/realtime"sv, std::string_view{});
+  auto expires = compute_expires();
+  return security_.create_headers(expires, core::http::Method::GET, "/realtime"sv, {});
 }
 
 }  // namespace bitmex

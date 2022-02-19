@@ -40,7 +40,7 @@ auto create_connection(auto &handler, auto &context) {
       .uri = Flags::ws_uri(),
       .query = {},
       .ping_frequency = Flags::ws_ping_freq(),
-      .read_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
+      .read_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
   return core::web::ClientSocket{handler, context, config, []() { return std::string(); }};
@@ -59,7 +59,7 @@ void emplace(MBPUpdate &result, double price, double size) {
 template <typename T>
 void emplace(Trade &result, const T &value) {
   new (&result) Trade{
-      .side = json::map(value.side),  // XXX check
+      .side = json::map(value.side),
       .price = value.price,
       .quantity = value.size,
       .trade_id = value.trd_match_id,
@@ -487,7 +487,7 @@ void MarketData::operator()(const server::Trace<json::OrderBookL2> &event, json:
         bids.clear();
         asks.clear();
       }
-      auto price_size = shared_.price_cache(action, item.id, item.price, item.size);
+      auto price_size = shared_.price_cache(action, item.id, item.price, item.size);  // XXX clang13
       auto price = price_size.first;
       auto size = price_size.second;
       if (std::isfinite(price)) {
@@ -539,7 +539,7 @@ void MarketData::operator()(const server::Trace<json::Quote> &event, json::Actio
               .ask_price = item.ask_price,
               .ask_quantity = item.ask_size,
           },
-          .update_type = UpdateType::INCREMENTAL,  // XXX ???
+          .update_type = UpdateType::INCREMENTAL,
           .exchange_time_utc = item.timestamp,
       };
       server::create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
@@ -650,9 +650,7 @@ void MarketData::publish_market_by_price(
     const std::span<MBPUpdate> &asks,
     bool snapshot) {
   assert(!(std::empty(bids) && std::empty(asks)));
-  if (snapshot) [[unlikely]] {
-    log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
-  }
+  log::info<1>::when(snapshot, R"(Received market data snapshot for symbol="{}")"sv, symbol);
   const MarketByPriceUpdate market_by_price_update{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
