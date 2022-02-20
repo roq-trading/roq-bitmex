@@ -8,6 +8,8 @@
 #include <string>
 #include <string_view>
 
+#include "roq/core/download.h"
+
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
 #include "roq/core/metrics/profile.h"
@@ -16,7 +18,6 @@
 
 #include "roq/core/web/client_socket.h"
 
-#include "roq/download.h"
 #include "roq/server.h"
 
 #include "roq/bitmex/market_data_state.h"
@@ -144,7 +145,7 @@ class MarketData final : public core::web::ClientSocket::Handler,
   // state
   bool ready_ = false;
   ConnectionStatus status_ = {};
-  server::Download<MarketDataState> download_;
+  core::Download<MarketDataState> download_;
   struct {
     bool instrument = false;
     bool order_book_l2 = false;

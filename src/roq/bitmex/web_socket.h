@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include "roq/core/download.h"
+
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
 #include "roq/core/metrics/profile.h"
@@ -14,7 +16,6 @@
 
 #include "roq/core/web/client_socket.h"
 
-#include "roq/download.h"
 #include "roq/server.h"
 
 #include "roq/bitmex/security.h"
@@ -152,7 +153,7 @@ class WebSocket final : public core::web::ClientSocket::Handler,
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
   ConnectionStatus status_ = {};
-  server::Download<WebSocketState> download_;
+  core::Download<WebSocketState> download_;
   struct {
     bool order = false;
     // XXX maybe everything else too?

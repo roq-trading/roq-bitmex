@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include "roq/core/download.h"
+
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
 #include "roq/core/metrics/profile.h"
@@ -14,7 +16,6 @@
 
 #include "roq/core/web/client_socket.h"
 
-#include "roq/download.h"
 #include "roq/server.h"
 
 #include "roq/bitmex/drop_copy_state.h"
@@ -121,7 +122,7 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
   ConnectionStatus status_ = {};
-  server::Download<DropCopyState> download_;
+  core::Download<DropCopyState> download_;
   struct {
     bool order = false;
     // XXX maybe everything else too?
