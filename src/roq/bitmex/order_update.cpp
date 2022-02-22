@@ -30,6 +30,7 @@ void OrderUpdate::operator()(
   auto request_status = order_item.ord_status == json::OrdStatus::REJECTED
                             ? RequestStatus::REJECTED
                             : RequestStatus::ACCEPTED;
+  auto update_type = download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   oms::Response response{
       .type = request_type,
       .origin = Origin::EXCHANGE,
@@ -66,25 +67,18 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
+      .update_type = update_type,
   };
-  if (download) {
-    if (shared_.create_order(order_item.cl_ord_id, stream_id_, trace_info, order_update)) {
-    } else {
-      log::warn("*** EXTERNAL ORDER ***"sv);
-      log::warn("order_item={}"sv, order_item);
-    }
+  if (shared_.update_order(
+          order_item.cl_ord_id,
+          stream_id_,
+          trace_info,
+          response,
+          order_update,
+          []([[maybe_unused]] auto &order) {})) {
   } else {
-    if (shared_.update_order(
-            order_item.cl_ord_id,
-            stream_id_,
-            trace_info,
-            response,
-            order_update,
-            []([[maybe_unused]] auto &order) {})) {
-    } else {
-      log::warn("*** EXTERNAL ORDER ***"sv);
-      log::warn("order_item={}"sv, order_item);
-    }
+    log::warn("*** EXTERNAL ORDER ***"sv);
+    log::warn("order_item={}"sv, order_item);
   }
 }
 
@@ -151,6 +145,7 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
+      .update_type = {},
   };
   if (shared_.update_order(
           order_item.cl_ord_id,

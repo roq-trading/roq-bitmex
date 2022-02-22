@@ -405,6 +405,7 @@ void WebSocket::operator()(const server::Trace<json::Execution> &event, json::Ac
           .last_traded_quantity = item.last_qty,
           .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
+          .update_type = {},
       };
       if (shared_.update_order(
               item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {

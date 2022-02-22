@@ -34,11 +34,6 @@ struct Shared final {
   }
 
   template <typename... Args>
-  auto create_order(Args &&...args) {
-    return dispatcher_.create_order(std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
   auto operator()(Args &&...args) {
     return dispatcher_(std::forward<Args>(args)...);
   }
