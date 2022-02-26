@@ -145,7 +145,7 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
-      .update_type = UpdateType::INCREMENTAL,  // XXX HANS check
+      .update_type = UpdateType::INCREMENTAL,
   };
   if (shared_.update_order(
           order_item.cl_ord_id,
