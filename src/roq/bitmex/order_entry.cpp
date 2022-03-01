@@ -39,11 +39,12 @@ struct create_metrics final : public core::metrics::Factory {
 };
 
 auto create_connection(auto &handler, auto &context) {
+  auto uri = Flags::rest_uri();
   core::web::Client::Config config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::tls_validate_certificate(),
-      .uri = Flags::rest_uri(),
+      .uris = {&uri, 1},
       .proxy = Flags::rest_proxy(),
       .user_agent = ROQ_PACKAGE_NAME,
       .connection = core::http::Connection::KEEP_ALIVE,
