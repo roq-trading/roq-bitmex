@@ -1,8 +1,8 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
-
 #include <cmath>
+
+#include <catch2/catch.hpp>
 
 #include "roq/core/datetime.h"
 
@@ -16,18 +16,18 @@ using namespace std::literals;
 
 // "{"error":{"message":"Invalid leavesQty","name":"HTTPError"}}"
 
-TEST(json_error_response, simple_1) {
+TEST_CASE("json_error_response_simple_1", "json_error_response") {
   const auto message = R"(
   {"error":{"message":"Account has insufficient Available Balance, 5929700 XBt required","name":"CodedHTTPError","details":"19000"}}")"sv;
   auto res = json::ErrorParser::dispatch(message, [](auto &error) {
-    EXPECT_EQ(error.message, "Account has insufficient Available Balance, 5929700 XBt required"sv);
+    CHECK(error.message == "Account has insufficient Available Balance, 5929700 XBt required"sv);
   });
-  EXPECT_TRUE(res);
+  CHECK(res == true);
 }
 
-TEST(json_error_response, simple_2) {
+TEST_CASE("json_error_response_simple_2", "json_error_response") {
   const auto message = R"({"error":{"message":"Invalid leavesQty","name":"HTTPError"}})"sv;
   auto res = json::ErrorParser::dispatch(
-      message, [](auto &error) { EXPECT_EQ(error.message, "Invalid leavesQty"sv); });
-  EXPECT_TRUE(res);
+      message, [](auto &error) { CHECK(error.message == "Invalid leavesQty"sv); });
+  CHECK(res == true);
 }

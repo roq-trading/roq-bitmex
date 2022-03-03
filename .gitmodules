@@ -1,7 +1,3 @@
-[submodule "googletest"]
-	path = third_party/googletest
-	url = https://github.com/google/googletest.git
-	ignore = dirty
 [submodule "roq-autogen"]
 	path = autogen
 	url = http://localhost:8080/gogs/roq-trading/roq-autogen.git

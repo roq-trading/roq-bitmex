@@ -1,8 +1,8 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
-
 #include <cmath>
+
+#include <catch2/catch.hpp>
 
 #include "roq/core/datetime.h"
 
@@ -13,9 +13,9 @@ using namespace roq::bitmex;
 
 using namespace std::literals;
 
-constexpr double TOLERANCE = 1.0e-10;
+using namespace Catch::literals;
 
-TEST(json_instrument_item, unlisted) {
+TEST_CASE("json_instrument_item_unlisted", "json_instrument_item") {
   const auto message = R"({)"
                        R"("symbol":".EVOL7D",)"
                        R"("rootSymbol":"EVOL",)"
@@ -122,33 +122,33 @@ TEST(json_instrument_item, unlisted) {
                        R"("timestamp":"2020-01-23T04:50:00.000Z")"
                        R"(})"sv;
   auto obj = core::json::Parser::create<json::InstrumentItem>(message);
-  EXPECT_EQ(obj.symbol, ".EVOL7D");
-  EXPECT_EQ(obj.root_symbol, "EVOL");
-  EXPECT_EQ(obj.state, json::State::UNLISTED);
-  EXPECT_EQ(obj.typ, json::Typ::MRIXXX);
-  EXPECT_EQ(obj.underlying, "ETH");
-  EXPECT_EQ(obj.quote_currency, "XXX");
-  EXPECT_EQ(obj.reference, "BMEX");
-  EXPECT_EQ(obj.reference_symbol, ".BETHXBT");
-  EXPECT_EQ(obj.calc_interval, core::datetime(2000, 1u, 8u, 0u, 0u, 0u));
-  EXPECT_EQ(obj.publish_interval, core::datetime(2000, 1u, 1u, 0u, 5u, 0u));
-  EXPECT_NEAR(obj.tick_size, 0.01, TOLERANCE);
-  EXPECT_EQ(obj.is_quanto, false);
-  EXPECT_EQ(obj.is_inverse, false);
-  EXPECT_EQ(obj.capped, false);
-  EXPECT_EQ(obj.taxed, false);
-  EXPECT_EQ(obj.deleverage, false);
-  EXPECT_NEAR(obj.prev_price24h, 7.34, TOLERANCE);
-  EXPECT_NEAR(obj.last_price, 6.93, TOLERANCE);
-  EXPECT_EQ(obj.last_tick_direction, "ZeroMinusTick");
-  EXPECT_NEAR(obj.last_change_pcnt, -0.0559, TOLERANCE);
-  EXPECT_EQ(obj.has_liquidity, false);
-  EXPECT_NEAR(obj.open_value, 0.0, TOLERANCE);
-  EXPECT_NEAR(obj.mark_price, 6.93, TOLERANCE);
-  EXPECT_EQ(obj.timestamp, core::datetime(2020, 1u, 23u, 4u, 50u, 0u));
+  CHECK(obj.symbol == ".EVOL7D");
+  CHECK(obj.root_symbol == "EVOL");
+  CHECK(obj.state == json::State::UNLISTED);
+  CHECK(obj.typ == json::Typ::MRIXXX);
+  CHECK(obj.underlying == "ETH");
+  CHECK(obj.quote_currency == "XXX");
+  CHECK(obj.reference == "BMEX");
+  CHECK(obj.reference_symbol == ".BETHXBT");
+  CHECK(obj.calc_interval == core::datetime(2000, 1u, 8u, 0u, 0u, 0u));
+  CHECK(obj.publish_interval == core::datetime(2000, 1u, 1u, 0u, 5u, 0u));
+  CHECK(obj.tick_size == 0.01_a);
+  CHECK(obj.is_quanto == false);
+  CHECK(obj.is_inverse == false);
+  CHECK(obj.capped == false);
+  CHECK(obj.taxed == false);
+  CHECK(obj.deleverage == false);
+  CHECK(obj.prev_price24h == 7.34_a);
+  CHECK(obj.last_price == 6.93_a);
+  CHECK(obj.last_tick_direction == "ZeroMinusTick");
+  CHECK(obj.last_change_pcnt == -0.0559_a);
+  CHECK(obj.has_liquidity == false);
+  CHECK(obj.open_value == 0.0_a);
+  CHECK(obj.mark_price == 6.93_a);
+  CHECK(obj.timestamp == core::datetime(2020, 1u, 23u, 4u, 50u, 0u));
 }
 
-TEST(json_instrument_item, open) {
+TEST_CASE("json_instrument_item_open", "json_instrument_item") {
   const auto message = R"({)"
                        R"("symbol":"XRPH20",)"
                        R"("rootSymbol":"XRP",)"
@@ -255,91 +255,91 @@ TEST(json_instrument_item, open) {
                        R"("timestamp":"2020-01-22T19:09:30.000Z")"
                        R"(})"sv;
   auto obj = core::json::Parser::create<json::InstrumentItem>(message);
-  EXPECT_EQ(obj.symbol, "XRPH20");
-  EXPECT_EQ(obj.root_symbol, "XRP");
-  EXPECT_EQ(obj.state, json::State::OPEN);
-  EXPECT_EQ(obj.typ, json::Typ::FFCCSX);
-  EXPECT_EQ(obj.listing, core::datetime(2019, 12u, 6u, 4u, 0u, 0u));
-  EXPECT_EQ(obj.front, core::datetime(2020, 2u, 28u, 12u, 0u, 0u));
-  EXPECT_EQ(obj.expiry, core::datetime(2020, 3u, 27u, 12u, 0u, 0u));
-  EXPECT_EQ(obj.settle, core::datetime(2020, 3u, 27u, 12u, 0u, 0u));
-  EXPECT_EQ(obj.position_currency, "XRP");
-  EXPECT_EQ(obj.underlying, "XRP");
-  EXPECT_EQ(obj.quote_currency, "XBT");
-  EXPECT_EQ(obj.underlying_symbol, "XRPXBT=");
-  EXPECT_EQ(obj.reference, "BMEX");
-  EXPECT_EQ(obj.reference_symbol, ".BXRPXBT30M");
-  EXPECT_NEAR(obj.max_order_qty, 100000000.0, TOLERANCE);
-  EXPECT_NEAR(obj.max_price, 1.0, TOLERANCE);
-  EXPECT_NEAR(obj.lot_size, 1.0, TOLERANCE);
-  EXPECT_NEAR(obj.tick_size, 1.0e-8, TOLERANCE);
-  EXPECT_NEAR(obj.multiplier, 100000000.0, TOLERANCE);
-  EXPECT_EQ(obj.settl_currency, "XBt");
-  EXPECT_NEAR(obj.underlying_to_position_multiplier, 1.0, TOLERANCE);
-  EXPECT_NEAR(obj.quote_to_settle_multiplier, 100000000.0, TOLERANCE);
-  EXPECT_EQ(obj.is_quanto, false);
-  EXPECT_EQ(obj.is_inverse, false);
-  EXPECT_NEAR(obj.init_margin, 0.05, TOLERANCE);
-  EXPECT_NEAR(obj.maint_margin, 0.025, TOLERANCE);
-  EXPECT_NEAR(obj.risk_limit, 5000000000.0, TOLERANCE);
-  EXPECT_NEAR(obj.risk_step, 5000000000.0, TOLERANCE);
-  EXPECT_EQ(obj.capped, false);
-  EXPECT_EQ(obj.taxed, true);
-  EXPECT_EQ(obj.deleverage, true);
-  EXPECT_NEAR(obj.maker_fee, -0.0005, TOLERANCE);
-  EXPECT_NEAR(obj.taker_fee, 0.0025, TOLERANCE);
-  EXPECT_NEAR(obj.settlement_fee, 0.0, TOLERANCE);
-  EXPECT_NEAR(obj.insurance_fee, 0.0, TOLERANCE);
-  EXPECT_EQ(obj.opening_timestamp, core::datetime(2020, 1u, 22u, 19u, 0u, 0u));
-  EXPECT_EQ(obj.closing_timestamp, core::datetime(2020, 1u, 22u, 20u, 0u, 0u));
-  EXPECT_EQ(obj.session_interval, core::datetime(2000, 1u, 1u, 1u, 0u, 0u));
-  EXPECT_NEAR(obj.prev_close_price, 0.00002701, TOLERANCE);
-  EXPECT_NEAR(obj.prev_total_volume, 26517101.0, TOLERANCE);
-  EXPECT_NEAR(obj.total_volume, 26517103.0, TOLERANCE);
-  EXPECT_NEAR(obj.volume, 2.0, TOLERANCE);
-  EXPECT_NEAR(obj.volume24h, 84425.0, TOLERANCE);
-  EXPECT_NEAR(obj.prev_total_turnover, 72134564731.0, TOLERANCE);
-  EXPECT_NEAR(obj.total_turnover, 72134570075.0, TOLERANCE);
-  EXPECT_NEAR(obj.turnover, 5344.0, TOLERANCE);
-  EXPECT_NEAR(obj.turnover24h, 228958667.0, TOLERANCE);
-  EXPECT_NEAR(obj.home_notional24h, 84425.0, TOLERANCE);
-  EXPECT_NEAR(obj.foreign_notional24h, 2.28958667, TOLERANCE);
-  EXPECT_NEAR(obj.prev_price24h, 0.00002725, TOLERANCE);
-  EXPECT_NEAR(obj.vwap, 0.00002712, TOLERANCE);
-  EXPECT_NEAR(obj.high_price, 0.00002775, TOLERANCE);
-  EXPECT_NEAR(obj.low_price, 0.00002672, TOLERANCE);
-  EXPECT_NEAR(obj.last_price, 0.00002672, TOLERANCE);
-  EXPECT_NEAR(obj.last_price_protected, 0.00002672, TOLERANCE);
-  EXPECT_EQ(obj.last_tick_direction, "ZeroMinusTick");
-  EXPECT_NEAR(obj.last_change_pcnt, -0.0194, TOLERANCE);
-  EXPECT_NEAR(obj.bid_price, 0.00002672, TOLERANCE);
-  EXPECT_NEAR(obj.mid_price, 0.00002685, TOLERANCE);
-  EXPECT_NEAR(obj.ask_price, 0.00002698, TOLERANCE);
-  EXPECT_NEAR(obj.impact_bid_price, 0.00002661, TOLERANCE);
-  EXPECT_NEAR(obj.impact_mid_price, 0.00002681, TOLERANCE);
-  EXPECT_NEAR(obj.impact_ask_price, 0.00002701, TOLERANCE);
-  EXPECT_EQ(obj.has_liquidity, true);
-  EXPECT_NEAR(obj.open_interest, 17614667.0, TOLERANCE);
-  EXPECT_NEAR(obj.open_value, 47207307560.0, TOLERANCE);
-  EXPECT_EQ(obj.fair_method, "ImpactMidPrice");
-  EXPECT_NEAR(obj.fair_basis_rate, -0.09, TOLERANCE);
-  EXPECT_NEAR(obj.fair_basis, -4.3e-7, TOLERANCE);
-  EXPECT_NEAR(obj.fair_price, 0.0000268, TOLERANCE);
-  EXPECT_EQ(obj.mark_method, "FairPrice");
-  EXPECT_NEAR(obj.mark_price, 0.0000268, TOLERANCE);
-  EXPECT_NEAR(obj.indicative_settle_price, 0.00002723, TOLERANCE);
-  EXPECT_EQ(obj.timestamp, core::datetime(2020, 1u, 22u, 19u, 9u, 30u));
+  CHECK(obj.symbol == "XRPH20");
+  CHECK(obj.root_symbol == "XRP");
+  CHECK(obj.state == json::State::OPEN);
+  CHECK(obj.typ == json::Typ::FFCCSX);
+  CHECK(obj.listing == core::datetime(2019, 12u, 6u, 4u, 0u, 0u));
+  CHECK(obj.front == core::datetime(2020, 2u, 28u, 12u, 0u, 0u));
+  CHECK(obj.expiry == core::datetime(2020, 3u, 27u, 12u, 0u, 0u));
+  CHECK(obj.settle == core::datetime(2020, 3u, 27u, 12u, 0u, 0u));
+  CHECK(obj.position_currency == "XRP");
+  CHECK(obj.underlying == "XRP");
+  CHECK(obj.quote_currency == "XBT");
+  CHECK(obj.underlying_symbol == "XRPXBT=");
+  CHECK(obj.reference == "BMEX");
+  CHECK(obj.reference_symbol == ".BXRPXBT30M");
+  CHECK(obj.max_order_qty == 100000000.0_a);
+  CHECK(obj.max_price == 1.0_a);
+  CHECK(obj.lot_size == 1.0_a);
+  CHECK(obj.tick_size == 1.0e-8_a);
+  CHECK(obj.multiplier == 100000000.0_a);
+  CHECK(obj.settl_currency == "XBt");
+  CHECK(obj.underlying_to_position_multiplier == 1.0_a);
+  CHECK(obj.quote_to_settle_multiplier == 100000000.0_a);
+  CHECK(obj.is_quanto == false);
+  CHECK(obj.is_inverse == false);
+  CHECK(obj.init_margin == 0.05_a);
+  CHECK(obj.maint_margin == 0.025_a);
+  CHECK(obj.risk_limit == 5000000000.0_a);
+  CHECK(obj.risk_step == 5000000000.0_a);
+  CHECK(obj.capped == false);
+  CHECK(obj.taxed == true);
+  CHECK(obj.deleverage == true);
+  CHECK(obj.maker_fee == -0.0005_a);
+  CHECK(obj.taker_fee == 0.0025_a);
+  CHECK(obj.settlement_fee == 0.0_a);
+  CHECK(obj.insurance_fee == 0.0_a);
+  CHECK(obj.opening_timestamp == core::datetime(2020, 1u, 22u, 19u, 0u, 0u));
+  CHECK(obj.closing_timestamp == core::datetime(2020, 1u, 22u, 20u, 0u, 0u));
+  CHECK(obj.session_interval == core::datetime(2000, 1u, 1u, 1u, 0u, 0u));
+  CHECK(obj.prev_close_price == 0.00002701_a);
+  CHECK(obj.prev_total_volume == 26517101.0_a);
+  CHECK(obj.total_volume == 26517103.0_a);
+  CHECK(obj.volume == 2.0_a);
+  CHECK(obj.volume24h == 84425.0_a);
+  CHECK(obj.prev_total_turnover == 72134564731.0_a);
+  CHECK(obj.total_turnover == 72134570075.0_a);
+  CHECK(obj.turnover == 5344.0_a);
+  CHECK(obj.turnover24h == 228958667.0_a);
+  CHECK(obj.home_notional24h == 84425.0_a);
+  CHECK(obj.foreign_notional24h == 2.28958667_a);
+  CHECK(obj.prev_price24h == 0.00002725_a);
+  CHECK(obj.vwap == 0.00002712_a);
+  CHECK(obj.high_price == 0.00002775_a);
+  CHECK(obj.low_price == 0.00002672_a);
+  CHECK(obj.last_price == 0.00002672_a);
+  CHECK(obj.last_price_protected == 0.00002672_a);
+  CHECK(obj.last_tick_direction == "ZeroMinusTick");
+  CHECK(obj.last_change_pcnt == -0.0194_a);
+  CHECK(obj.bid_price == 0.00002672_a);
+  CHECK(obj.mid_price == 0.00002685_a);
+  CHECK(obj.ask_price == 0.00002698_a);
+  CHECK(obj.impact_bid_price == 0.00002661_a);
+  CHECK(obj.impact_mid_price == 0.00002681_a);
+  CHECK(obj.impact_ask_price == 0.00002701_a);
+  CHECK(obj.has_liquidity == true);
+  CHECK(obj.open_interest == 17614667.0_a);
+  CHECK(obj.open_value == 47207307560.0_a);
+  CHECK(obj.fair_method == "ImpactMidPrice");
+  CHECK(obj.fair_basis_rate == -0.09_a);
+  CHECK(obj.fair_basis == -4.3e-7_a);
+  CHECK(obj.fair_price == 0.0000268_a);
+  CHECK(obj.mark_method == "FairPrice");
+  CHECK(obj.mark_price == 0.0000268_a);
+  CHECK(obj.indicative_settle_price == 0.00002723_a);
+  CHECK(obj.timestamp == core::datetime(2020, 1u, 22u, 19u, 9u, 30u));
 }
 
-TEST(json_instrument, empty) {
+TEST_CASE("json_instrument_empty", "json_instrument") {
   const auto message = "[]"sv;
   core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
-  EXPECT_EQ(std::size(obj.data), size_t{0});
+  CHECK(std::size(obj.data) == size_t{0});
 }
 
-TEST(json_instrument, simple) {
+TEST_CASE("json_instrument_simple", "json_instrument") {
   const auto message = R"([)"
                        R"({)"
                        R"("symbol":".EVOL7D",)"
@@ -554,9 +554,9 @@ TEST(json_instrument, simple) {
   core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
-  EXPECT_EQ(std::size(obj.data), size_t{2});
+  CHECK(std::size(obj.data) == size_t{2});
   // item #0
-  EXPECT_EQ(obj.data[0].symbol, ".EVOL7D");
+  CHECK(obj.data[0].symbol == ".EVOL7D");
   // item #1
-  EXPECT_EQ(obj.data[1].symbol, "XRPH20");
+  CHECK(obj.data[1].symbol == "XRPH20");
 }

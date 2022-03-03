@@ -7,7 +7,7 @@ roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}")
 add_executable("${TARGET_NAME}" ${SOURCES})
 
 target_link_libraries("${TARGET_NAME}" "${PROJECT_NAME}-json" roq-core::roq-core
-                      roq-logging::roq-logging gtest_main ${RT_LIBRARIES})
+  roq-logging::roq-logging Catch2::Catch2 ${RT_LIBRARIES})
 
 target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_20)
 

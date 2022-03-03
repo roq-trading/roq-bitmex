@@ -1,8 +1,8 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
-
 #include <cmath>
+
+#include <catch2/catch.hpp>
 
 #include "roq/core/datetime.h"
 
@@ -13,7 +13,7 @@ using namespace roq::bitmex;
 
 using namespace std::literals;
 
-TEST(json_position_item_item, unlisted) {
+TEST_CASE("json_position_item_item_unlisted", "json_position_item_item") {
   const auto message =
       R"({)"
       R"("account":359347,"symbol":"XBTUSD","openOrderBuyPremium":0,"openOrderSellPremium":0,)"
@@ -25,6 +25,6 @@ TEST(json_position_item_item, unlisted) {
       R"("liquidationPrice":34750,"bankruptPrice":34532.5,"timestamp":"2021-06-24T17:16:55.376Z",)"
       R"("lastPrice":34734.8,"lastValue":-5182128,"currency":"XBt","currentQty":1800})";
   auto obj = core::json::Parser::create<json::PositionItem>(message);
-  EXPECT_EQ(obj.account, 359347);
-  EXPECT_EQ(obj.symbol, "XBTUSD"sv);
+  CHECK(obj.account == 359347);
+  CHECK(obj.symbol == "XBTUSD"sv);
 }
