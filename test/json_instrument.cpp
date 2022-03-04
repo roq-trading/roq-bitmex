@@ -15,7 +15,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_instrument_item_unlisted", "json_instrument_item") {
+TEST_CASE("json_instrument_item_unlisted", "[json_instrument_item]") {
   const auto message = R"({)"
                        R"("symbol":".EVOL7D",)"
                        R"("rootSymbol":"EVOL",)"
@@ -148,7 +148,7 @@ TEST_CASE("json_instrument_item_unlisted", "json_instrument_item") {
   CHECK(obj.timestamp == core::datetime(2020, 1u, 23u, 4u, 50u, 0u));
 }
 
-TEST_CASE("json_instrument_item_open", "json_instrument_item") {
+TEST_CASE("json_instrument_item_open", "[json_instrument_item]") {
   const auto message = R"({)"
                        R"("symbol":"XRPH20",)"
                        R"("rootSymbol":"XRP",)"
@@ -331,7 +331,7 @@ TEST_CASE("json_instrument_item_open", "json_instrument_item") {
   CHECK(obj.timestamp == core::datetime(2020, 1u, 22u, 19u, 9u, 30u));
 }
 
-TEST_CASE("json_instrument_empty", "json_instrument") {
+TEST_CASE("json_instrument_empty", "[json_instrument]") {
   const auto message = "[]"sv;
   core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
@@ -339,7 +339,7 @@ TEST_CASE("json_instrument_empty", "json_instrument") {
   CHECK(std::size(obj.data) == size_t{0});
 }
 
-TEST_CASE("json_instrument_simple", "json_instrument") {
+TEST_CASE("json_instrument_simple", "[json_instrument]") {
   const auto message = R"([)"
                        R"({)"
                        R"("symbol":".EVOL7D",)"

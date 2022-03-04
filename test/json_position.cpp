@@ -13,7 +13,7 @@ using namespace roq::bitmex;
 
 using namespace std::literals;
 
-TEST_CASE("json_position_item_item_unlisted", "json_position_item_item") {
+TEST_CASE("json_position_item_item_unlisted", "[json_position_item_item]") {
   const auto message =
       R"({)"
       R"("account":359347,"symbol":"XBTUSD","openOrderBuyPremium":0,"openOrderSellPremium":0,)"
