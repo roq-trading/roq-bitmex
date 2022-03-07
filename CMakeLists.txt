@@ -45,10 +45,11 @@ include(GNUInstallDirs)
 
 # dependencies
 
-find_package(Libevent REQUIRED)
-find_package(OpenSSL REQUIRED)
 find_package(absl REQUIRED)
 find_package(fmt REQUIRED)
+find_package(Libevent REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(re2 REQUIRED)
 find_package(roq-api REQUIRED)
 find_package(roq-core REQUIRED)
 find_package(roq-logging REQUIRED)
