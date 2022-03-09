@@ -8,24 +8,24 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/download.h"
+#include "roq/core/download.hpp"
 
-#include "roq/core/metrics/counter.h"
-#include "roq/core/metrics/latency.h"
-#include "roq/core/metrics/profile.h"
+#include "roq/core/metrics/counter.hpp"
+#include "roq/core/metrics/latency.hpp"
+#include "roq/core/metrics/profile.hpp"
 
-#include "roq/core/io/context.h"
+#include "roq/core/io/context.hpp"
 
-#include "roq/core/web/client_socket.h"
+#include "roq/core/web/client_socket.hpp"
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/bitmex/market_data_state.h"
-#include "roq/bitmex/product.h"
-#include "roq/bitmex/security.h"
-#include "roq/bitmex/shared.h"
+#include "roq/bitmex/market_data_state.hpp"
+#include "roq/bitmex/product.hpp"
+#include "roq/bitmex/security.hpp"
+#include "roq/bitmex/shared.hpp"
 
-#include "roq/bitmex/json/stream_parser.h"
+#include "roq/bitmex/json/stream_parser.hpp"
 
 namespace roq {
 namespace bitmex {

@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "roq/api.h"
+#include "roq/api.hpp"
 
-#include "roq/bitmex/json/funding_item.h"
-#include "roq/bitmex/json/instrument_item.h"
+#include "roq/bitmex/json/funding_item.hpp"
+#include "roq/bitmex/json/instrument_item.hpp"
 
 namespace roq {
 namespace bitmex {

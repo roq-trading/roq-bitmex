@@ -6,29 +6,28 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/download.h"
+#include "roq/core/download.hpp"
 
-#include "roq/core/metrics/counter.h"
-#include "roq/core/metrics/latency.h"
-#include "roq/core/metrics/profile.h"
+#include "roq/core/metrics/counter.hpp"
+#include "roq/core/metrics/latency.hpp"
+#include "roq/core/metrics/profile.hpp"
 
-#include "roq/core/io/context.h"
+#include "roq/core/io/context.hpp"
 
-#include "roq/core/web/client_socket.h"
+#include "roq/core/web/client_socket.hpp"
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/bitmex/security.h"
-#include "roq/bitmex/shared.h"
-#include "roq/bitmex/web_socket_state.h"
+#include "roq/bitmex/drop_copy_state.hpp"
+#include "roq/bitmex/security.hpp"
+#include "roq/bitmex/shared.hpp"
 
-#include "roq/bitmex/json/stream_parser.h"
+#include "roq/bitmex/json/stream_parser.hpp"
 
 namespace roq {
 namespace bitmex {
 
-class WebSocket final : public core::web::ClientSocket::Handler,
-                        public json::StreamParser::Handler {
+class DropCopy final : public core::web::ClientSocket::Handler, public json::StreamParser::Handler {
  public:
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
@@ -37,33 +36,16 @@ class WebSocket final : public core::web::ClientSocket::Handler,
     virtual void operator()(const server::Trace<PositionUpdate> &, bool is_last) = 0;
   };
 
-  WebSocket(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
+  DropCopy(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
 
-  WebSocket(WebSocket &&) = delete;
-  WebSocket(const WebSocket &) = delete;
-
-  bool ready() const { return ready_; }
+  DropCopy(DropCopy &&) = delete;
+  DropCopy(const DropCopy &) = delete;
 
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
   void operator()(metrics::Writer &);
-
-  uint16_t operator()(
-      const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
-  uint16_t operator()(
-      const Event<ModifyOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
-  uint16_t operator()(
-      const Event<CancelOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
-
-  uint16_t operator()(const Event<CancelAllOrders> &, const std::string_view &request_id);
 
  protected:
   void operator()(const core::web::ClientSocket::Connected &) override;
@@ -77,26 +59,14 @@ class WebSocket final : public core::web::ClientSocket::Handler,
  private:
   void operator()(ConnectionStatus);
 
-  void create_order(
-      const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
-
-  void modify_order(
-      const Event<ModifyOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
-
-  void cancel_order(
-      const Event<CancelOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
-
-  void cancel_all_orders(const Event<CancelAllOrders> &, const std::string_view &request_id);
-
   void send_cancel_all_after(std::chrono::nanoseconds timeout);
 
-  uint32_t download(WebSocketState);
+  void send_subscribe(const std::string_view &topic);
+  void send_subscribe(const std::span<std::string_view> &topics);
+
+  uint32_t download(DropCopyState);
+
+  void subscribe();
 
   void parse(const std::string_view &message);
   void parse_helper(const std::string_view &message);
@@ -138,9 +108,8 @@ class WebSocket final : public core::web::ClientSocket::Handler,
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse,  //
-        create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error,
-        execution, handshake, margin, order, position;
+    core::metrics::Profile parse, cancel_all_after, error, execution, handshake, margin, order,
+        position, subscribe, unsubscribe;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
@@ -153,7 +122,7 @@ class WebSocket final : public core::web::ClientSocket::Handler,
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
   ConnectionStatus status_ = {};
-  core::Download<WebSocketState> download_;
+  core::Download<DropCopyState> download_;
   struct {
     bool order = false;
     // XXX maybe everything else too?

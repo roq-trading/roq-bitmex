@@ -12,8 +12,8 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/logging.h"
-#include "roq/server.h"
+#include "roq/logging.hpp"
+#include "roq/server.hpp"
 
 namespace roq {
 namespace bitmex {

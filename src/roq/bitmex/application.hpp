@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "roq/service.h"
+#include "roq/service.hpp"
 
 namespace roq {
 namespace bitmex {

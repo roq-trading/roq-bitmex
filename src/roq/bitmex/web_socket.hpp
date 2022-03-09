@@ -6,28 +6,29 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/download.h"
+#include "roq/core/download.hpp"
 
-#include "roq/core/metrics/counter.h"
-#include "roq/core/metrics/latency.h"
-#include "roq/core/metrics/profile.h"
+#include "roq/core/metrics/counter.hpp"
+#include "roq/core/metrics/latency.hpp"
+#include "roq/core/metrics/profile.hpp"
 
-#include "roq/core/io/context.h"
+#include "roq/core/io/context.hpp"
 
-#include "roq/core/web/client_socket.h"
+#include "roq/core/web/client_socket.hpp"
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/bitmex/drop_copy_state.h"
-#include "roq/bitmex/security.h"
-#include "roq/bitmex/shared.h"
+#include "roq/bitmex/security.hpp"
+#include "roq/bitmex/shared.hpp"
+#include "roq/bitmex/web_socket_state.hpp"
 
-#include "roq/bitmex/json/stream_parser.h"
+#include "roq/bitmex/json/stream_parser.hpp"
 
 namespace roq {
 namespace bitmex {
 
-class DropCopy final : public core::web::ClientSocket::Handler, public json::StreamParser::Handler {
+class WebSocket final : public core::web::ClientSocket::Handler,
+                        public json::StreamParser::Handler {
  public:
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
@@ -36,16 +37,33 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
     virtual void operator()(const server::Trace<PositionUpdate> &, bool is_last) = 0;
   };
 
-  DropCopy(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
+  WebSocket(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
 
-  DropCopy(DropCopy &&) = delete;
-  DropCopy(const DropCopy &) = delete;
+  WebSocket(WebSocket &&) = delete;
+  WebSocket(const WebSocket &) = delete;
+
+  bool ready() const { return ready_; }
 
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
   void operator()(metrics::Writer &);
+
+  uint16_t operator()(
+      const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
+  uint16_t operator()(
+      const Event<ModifyOrder> &,
+      const oms::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
+  uint16_t operator()(
+      const Event<CancelOrder> &,
+      const oms::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
+
+  uint16_t operator()(const Event<CancelAllOrders> &, const std::string_view &request_id);
 
  protected:
   void operator()(const core::web::ClientSocket::Connected &) override;
@@ -59,14 +77,26 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
  private:
   void operator()(ConnectionStatus);
 
+  void create_order(
+      const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
+
+  void modify_order(
+      const Event<ModifyOrder> &,
+      const oms::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
+
+  void cancel_order(
+      const Event<CancelOrder> &,
+      const oms::Order &,
+      const std::string_view &request_id,
+      const std::string_view &previous_request_id);
+
+  void cancel_all_orders(const Event<CancelAllOrders> &, const std::string_view &request_id);
+
   void send_cancel_all_after(std::chrono::nanoseconds timeout);
 
-  void send_subscribe(const std::string_view &topic);
-  void send_subscribe(const std::span<std::string_view> &topics);
-
-  uint32_t download(DropCopyState);
-
-  void subscribe();
+  uint32_t download(WebSocketState);
 
   void parse(const std::string_view &message);
   void parse_helper(const std::string_view &message);
@@ -108,8 +138,9 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, cancel_all_after, error, execution, handshake, margin, order,
-        position, subscribe, unsubscribe;
+    core::metrics::Profile parse,  //
+        create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error,
+        execution, handshake, margin, order, position;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
@@ -122,7 +153,7 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
   ConnectionStatus status_ = {};
-  core::Download<DropCopyState> download_;
+  core::Download<WebSocketState> download_;
   struct {
     bool order = false;
     // XXX maybe everything else too?

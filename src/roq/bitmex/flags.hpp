@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "roq/bitmex/flags/flags.h"
+#include "roq/bitmex/flags/flags.hpp"
 
 namespace roq {
 namespace bitmex {

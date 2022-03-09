@@ -1,17 +1,17 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/market_data.h"
+#include "roq/bitmex/market_data.hpp"
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/back_emplacer.h"
+#include "roq/core/back_emplacer.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/bitmex/flags.h"
+#include "roq/bitmex/flags.hpp"
 
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
 

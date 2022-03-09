@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "roq/bitmex/json/error_response.h"
+#include "roq/bitmex/json/error_response.hpp"
 
 namespace roq {
 namespace bitmex {

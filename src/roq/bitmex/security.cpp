@@ -1,10 +1,10 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/security.h"
+#include "roq/bitmex/security.hpp"
 
-#include "roq/core/uri.h"
+#include "roq/core/uri.hpp"
 
-#include "roq/bitmex/flags.h"
+#include "roq/bitmex/flags.hpp"
 
 namespace roq {
 namespace bitmex {

@@ -1,10 +1,10 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/price_cache.h"
+#include "roq/bitmex/price_cache.hpp"
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/utils/compare.h"
+#include "roq/utils/compare.hpp"
 
 using namespace std::literals;
 

@@ -4,10 +4,10 @@
 
 #include <string_view>
 
-#include "roq/bitmex/shared.h"
+#include "roq/bitmex/shared.hpp"
 
-#include "roq/bitmex/json/order.h"
-#include "roq/bitmex/json/order_item.h"
+#include "roq/bitmex/json/order.hpp"
+#include "roq/bitmex/json/order_item.hpp"
 
 namespace roq {
 namespace bitmex {

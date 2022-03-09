@@ -4,9 +4,9 @@
 
 #include <catch2/catch.hpp>
 
-#include "roq/core/datetime.h"
+#include "roq/core/datetime.hpp"
 
-#include "roq/bitmex/json/position.h"
+#include "roq/bitmex/json/position.hpp"
 
 using namespace roq;
 using namespace roq::bitmex;

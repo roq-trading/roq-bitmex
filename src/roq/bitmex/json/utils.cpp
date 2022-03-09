@@ -1,12 +1,12 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/utils.hpp"
 
 #include <algorithm>
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/utils/compare.h"
+#include "roq/utils/compare.hpp"
 
 using namespace std::literals;
 

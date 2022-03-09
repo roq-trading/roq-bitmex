@@ -1,13 +1,13 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/order_update.h"
+#include "roq/bitmex/order_update.hpp"
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/bitmex/flags.h"
-#include "roq/bitmex/utils.h"
+#include "roq/bitmex/flags.hpp"
+#include "roq/bitmex/utils.hpp"
 
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
 

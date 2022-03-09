@@ -5,27 +5,27 @@
 #include <chrono>
 #include <string_view>
 
-#include "roq/core/json/buffer.h"
+#include "roq/core/json/buffer.hpp"
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/bitmex/json/action.h"
-#include "roq/bitmex/json/cancel_all_after.h"
-#include "roq/bitmex/json/error.h"
-#include "roq/bitmex/json/execution.h"
-#include "roq/bitmex/json/funding.h"
-#include "roq/bitmex/json/handshake.h"
-#include "roq/bitmex/json/instrument.h"
-#include "roq/bitmex/json/liquidation.h"
-#include "roq/bitmex/json/margin.h"
-#include "roq/bitmex/json/order.h"
-#include "roq/bitmex/json/order_book_l2.h"
-#include "roq/bitmex/json/position.h"
-#include "roq/bitmex/json/quote.h"
-#include "roq/bitmex/json/settlement.h"
-#include "roq/bitmex/json/subscribe.h"
-#include "roq/bitmex/json/trade.h"
-#include "roq/bitmex/json/unsubscribe.h"
+#include "roq/bitmex/json/action.hpp"
+#include "roq/bitmex/json/cancel_all_after.hpp"
+#include "roq/bitmex/json/error.hpp"
+#include "roq/bitmex/json/execution.hpp"
+#include "roq/bitmex/json/funding.hpp"
+#include "roq/bitmex/json/handshake.hpp"
+#include "roq/bitmex/json/instrument.hpp"
+#include "roq/bitmex/json/liquidation.hpp"
+#include "roq/bitmex/json/margin.hpp"
+#include "roq/bitmex/json/order.hpp"
+#include "roq/bitmex/json/order_book_l2.hpp"
+#include "roq/bitmex/json/position.hpp"
+#include "roq/bitmex/json/quote.hpp"
+#include "roq/bitmex/json/settlement.hpp"
+#include "roq/bitmex/json/subscribe.hpp"
+#include "roq/bitmex/json/trade.hpp"
+#include "roq/bitmex/json/unsubscribe.hpp"
 
 #undef VERSION
 

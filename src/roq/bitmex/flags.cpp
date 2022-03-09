@@ -1,3 +1,3 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/flags.h"
+#include "roq/bitmex/flags.hpp"

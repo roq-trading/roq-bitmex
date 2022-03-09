@@ -7,18 +7,18 @@
 #include <memory>
 #include <string>
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/core/io/context.h"
+#include "roq/core/io/context.hpp"
 
-#include "roq/bitmex/config.h"
-#include "roq/bitmex/security.h"
-#include "roq/bitmex/shared.h"
+#include "roq/bitmex/config.hpp"
+#include "roq/bitmex/security.hpp"
+#include "roq/bitmex/shared.hpp"
 
-#include "roq/bitmex/drop_copy.h"
-#include "roq/bitmex/market_data.h"
-#include "roq/bitmex/order_entry.h"
-#include "roq/bitmex/web_socket.h"
+#include "roq/bitmex/drop_copy.hpp"
+#include "roq/bitmex/market_data.hpp"
+#include "roq/bitmex/order_entry.hpp"
+#include "roq/bitmex/web_socket.hpp"
 
 namespace roq {
 namespace bitmex {

@@ -1,14 +1,14 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/config.h"
+#include "roq/bitmex/config.hpp"
 
 #include <utility>
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/utils/mask.h"
+#include "roq/utils/mask.hpp"
 
-#include "roq/bitmex/flags.h"
+#include "roq/bitmex/flags.hpp"
 
 using namespace std::literals;
 

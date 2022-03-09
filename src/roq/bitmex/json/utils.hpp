@@ -4,19 +4,19 @@
 
 #include <chrono>
 
-#include "roq/core/utility.h"
+#include "roq/core/utility.hpp"
 
-#include "roq/core/json/parser.h"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/core/charconv/datetime.h"
+#include "roq/core/charconv/datetime.hpp"
 
-#include "roq/bitmex/json/exec_inst.h"
-#include "roq/bitmex/json/liquidity_ind.h"
-#include "roq/bitmex/json/ord_status.h"
-#include "roq/bitmex/json/ord_type.h"
-#include "roq/bitmex/json/side.h"
-#include "roq/bitmex/json/state.h"
-#include "roq/bitmex/json/time_in_force.h"
+#include "roq/bitmex/json/exec_inst.hpp"
+#include "roq/bitmex/json/liquidity_ind.hpp"
+#include "roq/bitmex/json/ord_status.hpp"
+#include "roq/bitmex/json/ord_type.hpp"
+#include "roq/bitmex/json/side.hpp"
+#include "roq/bitmex/json/state.hpp"
+#include "roq/bitmex/json/time_in_force.hpp"
 
 namespace roq {
 namespace bitmex {

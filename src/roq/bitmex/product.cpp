@@ -1,15 +1,15 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/product.h"
+#include "roq/bitmex/product.hpp"
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/utils/safe_cast.h"
-#include "roq/utils/update.h"
+#include "roq/utils/safe_cast.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/bitmex/flags.h"
+#include "roq/bitmex/flags.hpp"
 
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/utils.hpp"
 
 namespace roq {
 namespace bitmex {

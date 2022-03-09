@@ -6,11 +6,11 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/http/method.h"
+#include "roq/core/http/method.hpp"
 
-#include "roq/bitmex/config.h"
+#include "roq/bitmex/config.hpp"
 
-#include "roq/bitmex/tools/hasher.h"
+#include "roq/bitmex/tools/hasher.hpp"
 
 namespace roq {
 namespace bitmex {

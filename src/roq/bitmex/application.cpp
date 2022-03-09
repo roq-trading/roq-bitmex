@@ -1,10 +1,10 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/application.h"
+#include "roq/bitmex/application.hpp"
 
-#include "roq/bitmex/config.h"
-#include "roq/bitmex/flags.h"
-#include "roq/bitmex/gateway.h"
+#include "roq/bitmex/config.hpp"
+#include "roq/bitmex/flags.hpp"
+#include "roq/bitmex/gateway.hpp"
 
 using namespace std::literals;
 

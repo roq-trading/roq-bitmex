@@ -1,22 +1,22 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/drop_copy.h"
+#include "roq/bitmex/drop_copy.hpp"
 
 #include <algorithm>
 #include <utility>
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/back_emplacer.h"
+#include "roq/core/back_emplacer.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/bitmex/flags.h"
-#include "roq/bitmex/order_update.h"
-#include "roq/bitmex/utils.h"
+#include "roq/bitmex/flags.hpp"
+#include "roq/bitmex/order_update.hpp"
+#include "roq/bitmex/utils.hpp"
 
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
 using namespace std::chrono_literals;  // NOLINT

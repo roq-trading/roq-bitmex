@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "roq/api.h"
+#include "roq/api.hpp"
 
-#include "roq/bitmex/json/exec_type.h"
-#include "roq/bitmex/json/ord_status.h"
+#include "roq/bitmex/json/exec_type.hpp"
+#include "roq/bitmex/json/ord_status.hpp"
 
 namespace roq {
 namespace bitmex {

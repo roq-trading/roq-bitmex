@@ -1,22 +1,22 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/order_entry.h"
+#include "roq/bitmex/order_entry.hpp"
 
 #include <fmt/chrono.h>
 
 #include <chrono>
 #include <utility>
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/bitmex/flags.h"
-#include "roq/bitmex/order_update.h"
+#include "roq/bitmex/flags.hpp"
+#include "roq/bitmex/order_update.hpp"
 
-#include "roq/bitmex/json/error_parser.h"
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/error_parser.hpp"
+#include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
 

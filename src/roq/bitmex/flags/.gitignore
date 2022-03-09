@@ -1,4 +1,4 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bitmex-flags
-flags.h
+flags.hpp
 flags.cpp

@@ -4,10 +4,10 @@
 
 #include <catch2/catch.hpp>
 
-#include "roq/core/datetime.h"
+#include "roq/core/datetime.hpp"
 
-#include "roq/bitmex/json/error_parser.h"
-#include "roq/bitmex/json/error_response.h"
+#include "roq/bitmex/json/error_parser.hpp"
+#include "roq/bitmex/json/error_response.hpp"
 
 using namespace roq;
 using namespace roq::bitmex;

@@ -1,13 +1,13 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/tools/hasher.h"
+#include "roq/bitmex/tools/hasher.hpp"
 
 #include <cassert>
 
 #include <magic_enum.hpp>
 
-#include "roq/core/binascii/hex.h"
-#include "roq/core/crypto/hmac.h"
+#include "roq/core/binascii/hex.hpp"
+#include "roq/core/crypto/hmac.hpp"
 
 using namespace std::literals;
 

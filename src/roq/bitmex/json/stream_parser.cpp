@@ -1,14 +1,14 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/json/stream_parser.h"
+#include "roq/bitmex/json/stream_parser.hpp"
 
-#include "roq/compat.h"
+#include "roq/compat.hpp"
 
-#include "roq/bitmex/json/field.h"
-#include "roq/bitmex/json/table.h"
-#include "roq/bitmex/json/utils.h"
+#include "roq/bitmex/json/field.hpp"
+#include "roq/bitmex/json/table.hpp"
+#include "roq/bitmex/json/utils.hpp"
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
 using namespace std::literals;
 

@@ -33,7 +33,7 @@ roq_autogen(
   OUTPUT_TYPE
   "state"
   FILE_TYPE
-  "h"
+  "hpp"
   SOURCES
   ${AUTOGEN_SCHEMAS})
 

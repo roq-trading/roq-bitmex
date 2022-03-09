@@ -1,8 +1,8 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/bitmex/shared.h"
+#include "roq/bitmex/shared.hpp"
 
-#include "roq/bitmex/flags.h"
+#include "roq/bitmex/flags.hpp"
 
 using namespace std::literals;
 
