@@ -2,7 +2,7 @@
 
 #include "roq/bitmex/market_data.hpp"
 
-#include "roq/utils/mask.hpp"
+#include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/core/back_emplacer.hpp"
@@ -20,7 +20,7 @@ namespace bitmex {
 
 namespace {
 const auto NAME = "md"sv;
-const auto SUPPORTS = utils::Mask{
+const auto SUPPORTS = Mask{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,

@@ -6,7 +6,7 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/utils/mask.hpp"
+#include "roq/mask.hpp"
 
 #include "roq/bitmex/flags.hpp"
 
