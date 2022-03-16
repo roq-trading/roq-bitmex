@@ -73,14 +73,14 @@ class Config final : public server::Config, public server::ConfigReader::Handler
 template <>
 struct fmt::formatter<roq::bitmex::Config> {
   template <typename Context>
-  constexpr auto parse(Context &ctx) {
-    return std::begin(ctx);
+  constexpr auto parse(Context &context) {
+    return std::begin(context);
   }
   template <typename Context>
-  auto format(const roq::bitmex::Config &value, Context &ctx) {
+  auto format(const roq::bitmex::Config &value, Context &context) {
     using namespace std::literals;
     return fmt::format_to(
-        ctx.out(),
+        context.out(),
         R"({{)"
         R"(symbols={}, )"
         R"(accounts=[{}], )"
