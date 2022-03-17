@@ -4,8 +4,8 @@ symbols = ".*"
 
   [accounts.A1]
   master = true
-  login = "GwbEeMsXE4gHEmw4l0MoP4Xb"
-  secret = "C8mgDnyw6gVjqRmCDzKQl8sxz5I6zUqiiA14s5U4kJulXRDC"
+  login = "YMadKbapYi5RWCGRipiESBp3"
+  secret = "nsbVJFzdlqwlFXRWvzi9zeZUbbKm-ZAxfHpwq0ENdJ82E7ju"
   symbols = ".*"
 
 [users]
