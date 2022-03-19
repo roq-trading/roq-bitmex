@@ -19,7 +19,7 @@ Config::Config(const std::string_view &config_path, const std::string_view &secr
   server::ConfigReader::parse_file(*this, config_path, secrets_path);
 }
 
-std::string Config::get_master_account() const {
+const Account &Config::get_master_account() const {
   return master_account_;
 }
 

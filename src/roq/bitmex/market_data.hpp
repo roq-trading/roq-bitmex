@@ -141,7 +141,7 @@ class MarketData final : public core::web::ClientSocket::Handler,
   } latency_;
   // cache
   Shared &shared_;
-  absl::flat_hash_map<std::string, Product> product_cache_;
+  absl::flat_hash_map<Symbol, Product> product_cache_;
   // state
   bool ready_ = false;
   ConnectionStatus status_ = {};

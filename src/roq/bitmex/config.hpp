@@ -22,15 +22,15 @@ class Config final : public server::Config, public server::ConfigReader::Handler
  public:
   Config(const std::string_view &config_path, const std::string_view &secrets_path);
 
-  std::string get_master_account() const;
+  const Account &get_master_account() const;
 
-  auto get_api_key() const {
+  const auto &get_api_key() const {
     using namespace std::literals;
     if (std::size(accounts) != 1)
       throw RuntimeError("More accounts not yet supported"sv);
     return (*std::begin(accounts)).second.login;
   }
-  auto get_secret() const {
+  const auto &get_secret() const {
     using namespace std::literals;
     if (std::size(accounts) != 1)
       throw RuntimeError("More accounts not yet supported"sv);
@@ -49,11 +49,11 @@ class Config final : public server::Config, public server::ConfigReader::Handler
   void operator()(const std::string_view &key, toml::node &) override;
 
  public:
-  std::vector<server::User> users;
+  server::Users users;
   server::Symbols symbols;
-  absl::flat_hash_map<std::string, server::Account> accounts;
-  std::string master_account_;
-  absl::flat_hash_map<std::string, server::RateLimit> rate_limits;
+  server::Accounts accounts;
+  Account master_account_;
+  server::RateLimits rate_limits;
 };
 
 /*
