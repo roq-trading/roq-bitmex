@@ -82,8 +82,7 @@ void OrderUpdate::operator()(
   }
 }
 
-void OrderUpdate::operator()(
-    const json::Order &order, const TraceInfo &trace_info, bool download) {
+void OrderUpdate::operator()(const json::Order &order, const TraceInfo &trace_info, bool download) {
   log::debug("order={}"sv, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info, download);
