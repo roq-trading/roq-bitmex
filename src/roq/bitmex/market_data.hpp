@@ -34,15 +34,15 @@ class MarketData final : public core::web::ClientSocket::Handler,
                          public json::StreamParser::Handler {
  public:
   struct Handler {
-    virtual void operator()(const server::Trace<StreamStatus> &) = 0;
-    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
-    virtual void operator()(const server::Trace<ReferenceData> &, bool is_last) = 0;
-    virtual void operator()(const server::Trace<MarketStatus> &, bool is_last) = 0;
-    virtual void operator()(const server::Trace<TopOfBook> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StreamStatus> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const Trace<ReferenceData> &, bool is_last) = 0;
+    virtual void operator()(const Trace<MarketStatus> &, bool is_last) = 0;
+    virtual void operator()(const Trace<TopOfBook> &, bool is_last) = 0;
     virtual void operator()(
-        const server::Trace<MarketByPriceUpdate> &, bool is_last, bool refresh) = 0;
-    virtual void operator()(const server::Trace<TradeSummary> &, bool is_last) = 0;
-    virtual void operator()(const server::Trace<StatisticsUpdate> &, bool is_last) = 0;
+        const Trace<MarketByPriceUpdate> &, bool is_last, bool refresh) = 0;
+    virtual void operator()(const Trace<TradeSummary> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StatisticsUpdate> &, bool is_last) = 0;
   };
 
   MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &);
@@ -84,24 +84,24 @@ class MarketData final : public core::web::ClientSocket::Handler,
   void parse(const std::string_view &message);
   void parse_helper(const std::string_view &message);
 
-  void operator()(const server::Trace<json::CancelAllAfter> &) override;
-  void operator()(const server::Trace<json::Error> &) override;
-  void operator()(const server::Trace<json::Handshake> &) override;
-  void operator()(const server::Trace<json::Subscribe> &) override;
-  void operator()(const server::Trace<json::Unsubscribe> &) override;
+  void operator()(const Trace<json::CancelAllAfter> &) override;
+  void operator()(const Trace<json::Error> &) override;
+  void operator()(const Trace<json::Handshake> &) override;
+  void operator()(const Trace<json::Subscribe> &) override;
+  void operator()(const Trace<json::Unsubscribe> &) override;
 
-  void operator()(const server::Trace<json::Funding> &, json::Action) override;
-  void operator()(const server::Trace<json::Instrument> &, json::Action) override;
-  void operator()(const server::Trace<json::Liquidation> &, json::Action) override;
-  void operator()(const server::Trace<json::OrderBookL2> &, json::Action) override;
-  void operator()(const server::Trace<json::Quote> &, json::Action) override;
-  void operator()(const server::Trace<json::Settlement> &, json::Action) override;
-  void operator()(const server::Trace<json::Trade> &, json::Action) override;
+  void operator()(const Trace<json::Funding> &, json::Action) override;
+  void operator()(const Trace<json::Instrument> &, json::Action) override;
+  void operator()(const Trace<json::Liquidation> &, json::Action) override;
+  void operator()(const Trace<json::OrderBookL2> &, json::Action) override;
+  void operator()(const Trace<json::Quote> &, json::Action) override;
+  void operator()(const Trace<json::Settlement> &, json::Action) override;
+  void operator()(const Trace<json::Trade> &, json::Action) override;
   // ... unexpected
-  void operator()(const server::Trace<json::Execution> &, json::Action) override;
-  void operator()(const server::Trace<json::Margin> &, json::Action) override;
-  void operator()(const server::Trace<json::Order> &, json::Action) override;
-  void operator()(const server::Trace<json::Position> &, json::Action) override;
+  void operator()(const Trace<json::Execution> &, json::Action) override;
+  void operator()(const Trace<json::Margin> &, json::Action) override;
+  void operator()(const Trace<json::Order> &, json::Action) override;
+  void operator()(const Trace<json::Position> &, json::Action) override;
 
   // utilities
 
@@ -111,7 +111,7 @@ class MarketData final : public core::web::ClientSocket::Handler,
   // experimental
 
   void publish_market_by_price(
-      const server::TraceInfo &,
+      const TraceInfo &,
       bool is_last,
       const std::string_view &symbol,
       const std::span<MBPUpdate> &bids,

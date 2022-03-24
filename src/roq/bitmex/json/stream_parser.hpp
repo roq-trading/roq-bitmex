@@ -35,23 +35,23 @@ namespace json {
 
 struct StreamParser final {
   struct Handler {
-    virtual void operator()(const server::Trace<CancelAllAfter> &) = 0;
-    virtual void operator()(const server::Trace<Error> &) = 0;
-    virtual void operator()(const server::Trace<Handshake> &) = 0;
-    virtual void operator()(const server::Trace<Subscribe> &) = 0;
-    virtual void operator()(const server::Trace<Unsubscribe> &) = 0;
+    virtual void operator()(const Trace<CancelAllAfter> &) = 0;
+    virtual void operator()(const Trace<Error> &) = 0;
+    virtual void operator()(const Trace<Handshake> &) = 0;
+    virtual void operator()(const Trace<Subscribe> &) = 0;
+    virtual void operator()(const Trace<Unsubscribe> &) = 0;
     // table
-    virtual void operator()(const server::Trace<Execution> &, Action) = 0;
-    virtual void operator()(const server::Trace<Funding> &, Action) = 0;
-    virtual void operator()(const server::Trace<Instrument> &, Action) = 0;
-    virtual void operator()(const server::Trace<Liquidation> &, Action) = 0;
-    virtual void operator()(const server::Trace<Margin> &, Action) = 0;
-    virtual void operator()(const server::Trace<Order> &, Action) = 0;
-    virtual void operator()(const server::Trace<OrderBookL2> &, Action) = 0;
-    virtual void operator()(const server::Trace<Position> &, Action) = 0;
-    virtual void operator()(const server::Trace<Quote> &, Action) = 0;
-    virtual void operator()(const server::Trace<Settlement> &, Action) = 0;
-    virtual void operator()(const server::Trace<Trade> &, Action) = 0;
+    virtual void operator()(const Trace<Execution> &, Action) = 0;
+    virtual void operator()(const Trace<Funding> &, Action) = 0;
+    virtual void operator()(const Trace<Instrument> &, Action) = 0;
+    virtual void operator()(const Trace<Liquidation> &, Action) = 0;
+    virtual void operator()(const Trace<Margin> &, Action) = 0;
+    virtual void operator()(const Trace<Order> &, Action) = 0;
+    virtual void operator()(const Trace<OrderBookL2> &, Action) = 0;
+    virtual void operator()(const Trace<Position> &, Action) = 0;
+    virtual void operator()(const Trace<Quote> &, Action) = 0;
+    virtual void operator()(const Trace<Settlement> &, Action) = 0;
+    virtual void operator()(const Trace<Trade> &, Action) = 0;
   };
 
   std::string_view action;
@@ -71,7 +71,7 @@ struct StreamParser final {
       Handler &handler,
       const std::string_view &message,
       core::json::Buffer &buffer,
-      const server::TraceInfo &trace);
+      const TraceInfo &trace);
 };
 
 }  // namespace json

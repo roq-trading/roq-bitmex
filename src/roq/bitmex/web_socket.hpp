@@ -31,10 +31,10 @@ class WebSocket final : public core::web::ClientSocket::Handler,
                         public json::StreamParser::Handler {
  public:
   struct Handler {
-    virtual void operator()(const server::Trace<StreamStatus> &) = 0;
-    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
-    virtual void operator()(const server::Trace<TradeUpdate> &, bool is_last, uint8_t user_id) = 0;
-    virtual void operator()(const server::Trace<PositionUpdate> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StreamStatus> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const Trace<TradeUpdate> &, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(const Trace<PositionUpdate> &, bool is_last) = 0;
   };
 
   WebSocket(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
@@ -101,24 +101,24 @@ class WebSocket final : public core::web::ClientSocket::Handler,
   void parse(const std::string_view &message);
   void parse_helper(const std::string_view &message);
 
-  void operator()(const server::Trace<json::CancelAllAfter> &) override;
-  void operator()(const server::Trace<json::Error> &) override;
-  void operator()(const server::Trace<json::Handshake> &) override;
-  void operator()(const server::Trace<json::Subscribe> &) override;
-  void operator()(const server::Trace<json::Unsubscribe> &) override;
+  void operator()(const Trace<json::CancelAllAfter> &) override;
+  void operator()(const Trace<json::Error> &) override;
+  void operator()(const Trace<json::Handshake> &) override;
+  void operator()(const Trace<json::Subscribe> &) override;
+  void operator()(const Trace<json::Unsubscribe> &) override;
 
-  void operator()(const server::Trace<json::Execution> &, json::Action) override;
-  void operator()(const server::Trace<json::Margin> &, json::Action) override;
-  void operator()(const server::Trace<json::Order> &, json::Action) override;
-  void operator()(const server::Trace<json::Position> &, json::Action) override;
+  void operator()(const Trace<json::Execution> &, json::Action) override;
+  void operator()(const Trace<json::Margin> &, json::Action) override;
+  void operator()(const Trace<json::Order> &, json::Action) override;
+  void operator()(const Trace<json::Position> &, json::Action) override;
   // ... unexpected
-  void operator()(const server::Trace<json::Funding> &, json::Action) override;
-  void operator()(const server::Trace<json::Instrument> &, json::Action) override;
-  void operator()(const server::Trace<json::Liquidation> &, json::Action) override;
-  void operator()(const server::Trace<json::OrderBookL2> &, json::Action) override;
-  void operator()(const server::Trace<json::Quote> &, json::Action) override;
-  void operator()(const server::Trace<json::Settlement> &, json::Action) override;
-  void operator()(const server::Trace<json::Trade> &, json::Action) override;
+  void operator()(const Trace<json::Funding> &, json::Action) override;
+  void operator()(const Trace<json::Instrument> &, json::Action) override;
+  void operator()(const Trace<json::Liquidation> &, json::Action) override;
+  void operator()(const Trace<json::OrderBookL2> &, json::Action) override;
+  void operator()(const Trace<json::Quote> &, json::Action) override;
+  void operator()(const Trace<json::Settlement> &, json::Action) override;
+  void operator()(const Trace<json::Trade> &, json::Action) override;
 
   // utilities
 

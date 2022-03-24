@@ -41,7 +41,7 @@ void StreamParser::dispatch(
     StreamParser::Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN;
@@ -83,77 +83,77 @@ void StreamParser::dispatch(
               case Table::EXECUTION: {
                 Execution execution(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, execution);
+                Trace event(trace_info, execution);
                 handler(event, action);
                 break;
               }
               case Table::FUNDING: {
                 Funding funding(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, funding);
+                Trace event(trace_info, funding);
                 handler(event, action);
                 break;
               }
               case Table::INSTRUMENT: {
                 Instrument instrument(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, instrument);
+                Trace event(trace_info, instrument);
                 handler(event, action);
                 break;
               }
               case Table::LIQUIDATION: {
                 Liquidation liquidation(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, liquidation);
+                Trace event(trace_info, liquidation);
                 handler(event, action);
                 break;
               }
               case Table::MARGIN: {
                 Margin margin(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, margin);
+                Trace event(trace_info, margin);
                 handler(event, action);
                 break;
               }
               case Table::ORDER: {
                 Order order(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, order);
+                Trace event(trace_info, order);
                 handler(event, action);
                 break;
               }
               case Table::ORDER_BOOK_L2: {
                 OrderBookL2 order_book_l2(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, order_book_l2);
+                Trace event(trace_info, order_book_l2);
                 handler(event, action);
                 break;
               }
               case Table::POSITION: {
                 Position position(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, position);
+                Trace event(trace_info, position);
                 handler(event, action);
                 break;
               }
               case Table::QUOTE: {
                 Quote quote(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, quote);
+                Trace event(trace_info, quote);
                 handler(event, action);
                 break;
               }
               case Table::SETTLEMENT: {
                 Settlement settlement(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, settlement);
+                Trace event(trace_info, settlement);
                 handler(event, action);
                 break;
               }
               case Table::TRADE: {
                 Trade trade(value, buffer);
                 dispatched = true;
-                server::Trace event(trace_info, trade);
+                Trace event(trace_info, trade);
                 handler(event, action);
                 break;
               }
@@ -247,7 +247,7 @@ void StreamParser::dispatch(
             .cancel_time = result.cancel_time,
             .now = result.now,
         };
-        server::Trace event(trace_info, cancel_all_after);
+        Trace event(trace_info, cancel_all_after);
         handler(event);
         return;
       }
@@ -256,7 +256,7 @@ void StreamParser::dispatch(
             .error = result.error,
             .status = result.status,
         };
-        server::Trace event(trace_info, error);
+        Trace event(trace_info, error);
         handler(event);
         return;
       }
@@ -267,7 +267,7 @@ void StreamParser::dispatch(
             .timestamp = result.timestamp,
             .version = result.version,
         };
-        server::Trace event(trace_info, handshake);
+        Trace event(trace_info, handshake);
         handler(event);
         return;
       }
@@ -277,7 +277,7 @@ void StreamParser::dispatch(
             .subscribe = result.subscribe,
             .success = result.success,
         };
-        server::Trace event(trace_info, subscribe);
+        Trace event(trace_info, subscribe);
         handler(event);
         return;
       }
@@ -287,7 +287,7 @@ void StreamParser::dispatch(
             .unsubscribe = result.unsubscribe,
             .success = result.success,
         };
-        server::Trace event(trace_info, unsubscribe);
+        Trace event(trace_info, unsubscribe);
         handler(event);
         return;
       }

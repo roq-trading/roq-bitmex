@@ -21,20 +21,20 @@ class OrderUpdate final {
   OrderUpdate(const OrderUpdate &) = delete;
 
   // drop copy
-  void operator()(const json::OrderItem &, const server::TraceInfo &, bool download);
-  void operator()(const json::Order &, const server::TraceInfo &, bool download);
+  void operator()(const json::OrderItem &, const TraceInfo &, bool download);
+  void operator()(const json::Order &, const TraceInfo &, bool download);
 
   // order entry
   void operator()(
       const json::OrderItem &,
-      const server::TraceInfo &,
+      const TraceInfo &,
       RequestType,
       uint8_t user_id,
       uint32_t order_id,
       uint32_t version);
   void operator()(
       const json::Order &,
-      const server::TraceInfo &,
+      const TraceInfo &,
       RequestType,
       uint8_t user_id,
       uint32_t order_id,
