@@ -1,15 +1,42 @@
 {
-"name": "SettlementItem",
-"type": "item",
-"values": [
-	{ "name": "bankrupt", "type": "double" },
-	{ "name": "optionStrikePrice", "type": "double" },
-	{ "name": "optionUnderlyingPrice", "type": "double" },
-	{ "name": "settledPrice", "type": "double" },
-	{ "name": "settlementType", "type": "SettlementType" },
-	{ "name": "symbol", "type": "std::string_view" },
-	{ "name": "taxBase", "type": "double" },
-	{ "name": "taxRate", "type": "double" },
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" }
-]
+  "name": "SettlementItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "bankrupt",
+      "type": "double"
+    },
+    {
+      "name": "optionStrikePrice",
+      "type": "double"
+    },
+    {
+      "name": "optionUnderlyingPrice",
+      "type": "double"
+    },
+    {
+      "name": "settledPrice",
+      "type": "double"
+    },
+    {
+      "name": "settlementType",
+      "type": "SettlementType"
+    },
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "taxBase",
+      "type": "double"
+    },
+    {
+      "name": "taxRate",
+      "type": "double"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

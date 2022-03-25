@@ -1,11 +1,21 @@
 {
-"name": "TimeInForce",
-"type": "enum",
-"values": [
-	{ "name": "AtTheClose" },
-	{ "name": "Day" },
-	{ "name": "FillOrKill" },
-	{ "name": "GoodTillCancel" },
-	{ "name": "ImmediateOrCancel" }
-]
+  "name": "TimeInForce",
+  "type": "enum",
+  "values": [
+    {
+      "name": "AtTheClose"
+    },
+    {
+      "name": "Day"
+    },
+    {
+      "name": "FillOrKill"
+    },
+    {
+      "name": "GoodTillCancel"
+    },
+    {
+      "name": "ImmediateOrCancel"
+    }
+  ]
 }

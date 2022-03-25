@@ -1,12 +1,30 @@
 {
-"name": "QuoteItem",
-"type": "item",
-"values": [
-	{ "name": "askPrice", "type": "double" },
-	{ "name": "askSize", "type": "double" },
-	{ "name": "bidPrice", "type": "double" },
-	{ "name": "bidSize", "type": "double" },
-	{ "name": "symbol", "type": "std::string_view" },
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" }
-]
+  "name": "QuoteItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "askPrice",
+      "type": "double"
+    },
+    {
+      "name": "askSize",
+      "type": "double"
+    },
+    {
+      "name": "bidPrice",
+      "type": "double"
+    },
+    {
+      "name": "bidSize",
+      "type": "double"
+    },
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

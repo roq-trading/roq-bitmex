@@ -1,8 +1,12 @@
 {
-"name": "LiquidityInd",
-"type": "enum",
-"values": [
-	{ "name": "AddedLiquidity" },
-	{ "name": "RemovedLiquidity" }
-]
+  "name": "LiquidityInd",
+  "type": "enum",
+  "values": [
+    {
+      "name": "AddedLiquidity"
+    },
+    {
+      "name": "RemovedLiquidity"
+    }
+  ]
 }

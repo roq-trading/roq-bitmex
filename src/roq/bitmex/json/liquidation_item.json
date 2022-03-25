@@ -1,11 +1,26 @@
 {
-"name": "LiquidationItem",
-"type": "item",
-"values": [
-	{ "name": "leavesQty", "type": "double" },
-	{ "name": "orderID", "type": "std::string_view" },
-	{ "name": "price", "type": "double" },
-	{ "name": "side", "type": "Side" },
-	{ "name": "symbol", "type": "std::string_view" }
-]
+  "name": "LiquidationItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "leavesQty",
+      "type": "double"
+    },
+    {
+      "name": "orderID",
+      "type": "std::string_view"
+    },
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    }
+  ]
 }

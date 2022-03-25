@@ -1,7 +1,10 @@
 {
-"name": "Position",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<PositionItem>" }
-]
+  "name": "Position",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<PositionItem>"
+    }
+  ]
 }

@@ -1,10 +1,21 @@
 {
-"name": "Unsubscribe",
-"type": "struct",
-"values": [
-	{ "name": "failure", "type": "bool" },
-	{ "name": "request" },
-	{ "name": "unsubscribe", "type": "std::string_view" },
-	{ "name": "success", "type": "bool" }
-]
+  "name": "Unsubscribe",
+  "type": "struct",
+  "values": [
+    {
+      "name": "failure",
+      "type": "bool"
+    },
+    {
+      "name": "request"
+    },
+    {
+      "name": "unsubscribe",
+      "type": "std::string_view"
+    },
+    {
+      "name": "success",
+      "type": "bool"
+    }
+  ]
 }

@@ -1,7 +1,9 @@
 {
-"name": "MultiLegReportingType",
-"type": "enum",
-"values": [
-	{ "name": "SingleSecurity" }
-]
+  "name": "MultiLegReportingType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "SingleSecurity"
+    }
+  ]
 }

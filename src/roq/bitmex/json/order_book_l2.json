@@ -1,7 +1,10 @@
 {
-"name": "OrderBookL2",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<OrderBookL2Item>" }
-]
+  "name": "OrderBookL2",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<OrderBookL2Item>"
+    }
+  ]
 }

@@ -1,7 +1,10 @@
 {
-"name": "Trade",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<TradeItem>" }
-]
+  "name": "Trade",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<TradeItem>"
+    }
+  ]
 }

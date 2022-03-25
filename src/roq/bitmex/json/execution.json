@@ -1,7 +1,10 @@
 {
-"name": "Execution",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<ExecutionItem>" }
-]
+  "name": "Execution",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<ExecutionItem>"
+    }
+  ]
 }

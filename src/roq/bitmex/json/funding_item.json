@@ -1,11 +1,26 @@
 {
-"name": "FundingItem",
-"type": "item",
-"values": [
-	{ "name": "fundingInterval", "type": "std::chrono::milliseconds" },
-	{ "name": "fundingRateDaily", "type": "double" },
-	{ "name": "fundingRate", "type": "double" },
-	{ "name": "symbol", "type": "std::string_view" },
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" }
-]
+  "name": "FundingItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "fundingInterval",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "fundingRateDaily",
+      "type": "double"
+    },
+    {
+      "name": "fundingRate",
+      "type": "double"
+    },
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

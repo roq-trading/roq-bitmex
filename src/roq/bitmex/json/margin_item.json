@@ -1,49 +1,178 @@
 {
-"name": "MarginItem",
-"type": "item",
-"values": [
-	{ "name": "account", "type": "uint64_t" },
-	{ "name": "action", "type": "std::string_view" },
-	{ "name": "amount", "type": "double" },
-	{ "name": "availableMargin", "type": "double" },
-	{ "name": "commission", "type": "double" },
-	{ "name": "confirmedDebit", "type": "double" },
-	{ "name": "currency", "type": "std::string_view" },
-	{ "name": "excessMarginPcnt", "type": "double" },
-	{ "name": "excessMargin", "type": "double" },
-	{ "name": "grossComm", "type": "double" },
-	{ "name": "grossExecCost", "type": "double" },
-	{ "name": "grossLastValue", "type": "double" },
-	{ "name": "grossMarkValue", "type": "double" },
-	{ "name": "grossOpenCost", "type": "double" },
-	{ "name": "grossOpenPremium", "type": "double" },
-	{ "name": "indicativeTax", "type": "double" },
-	{ "name": "initMargin", "type": "double" },
-	{ "name": "maintMargin", "type": "double" },
-	{ "name": "marginBalancePcnt", "type": "double" },
-	{ "name": "marginBalance", "type": "double" },
-	{ "name": "marginLeverage", "type": "double" },
-	{ "name": "marginUsedPcnt", "type": "double" },
-	{ "name": "pendingCredit", "type": "double" },
-	{ "name": "pendingDebit", "type": "double" },
-	{ "name": "prevRealisedPnl", "type": "double" },
-	{ "name": "prevState", "type": "std::string_view" },
-	{ "name": "prevUnrealisedPnl", "type": "double" },
-	{ "name": "realisedPnl", "type": "double" },
-	{ "name": "riskLimit", "type": "double" },
-	{ "name": "riskValue", "type": "double" },
-	{ "name": "sessionMargin", "type": "double" },
-	{ "name": "state", "type": "std::string_view" },
-	{ "name": "syntheticMargin", "type": "double" },
-	{ "name": "targetExcessMargin", "type": "double" },
-	{ "name": "taxableMargin", "type": "double" },
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
-	{ "name": "unrealisedPnl", "type": "double" },
-	{ "name": "unrealisedProfit", "type": "double" },
-	{ "name": "varMargin", "type": "double" },
-	{ "name": "walletBalance", "type": "double" },
-	{ "name": "withdrawableMargin", "type": "double" },
-	{ "name": "makerFeeDiscount", "comment": "undoc" },
-	{ "name": "takerFeeDiscount", "comment": "undoc" }
-]
+  "name": "MarginItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "account",
+      "type": "uint64_t"
+    },
+    {
+      "name": "action",
+      "type": "std::string_view"
+    },
+    {
+      "name": "amount",
+      "type": "double"
+    },
+    {
+      "name": "availableMargin",
+      "type": "double"
+    },
+    {
+      "name": "commission",
+      "type": "double"
+    },
+    {
+      "name": "confirmedDebit",
+      "type": "double"
+    },
+    {
+      "name": "currency",
+      "type": "std::string_view"
+    },
+    {
+      "name": "excessMarginPcnt",
+      "type": "double"
+    },
+    {
+      "name": "excessMargin",
+      "type": "double"
+    },
+    {
+      "name": "grossComm",
+      "type": "double"
+    },
+    {
+      "name": "grossExecCost",
+      "type": "double"
+    },
+    {
+      "name": "grossLastValue",
+      "type": "double"
+    },
+    {
+      "name": "grossMarkValue",
+      "type": "double"
+    },
+    {
+      "name": "grossOpenCost",
+      "type": "double"
+    },
+    {
+      "name": "grossOpenPremium",
+      "type": "double"
+    },
+    {
+      "name": "indicativeTax",
+      "type": "double"
+    },
+    {
+      "name": "initMargin",
+      "type": "double"
+    },
+    {
+      "name": "maintMargin",
+      "type": "double"
+    },
+    {
+      "name": "marginBalancePcnt",
+      "type": "double"
+    },
+    {
+      "name": "marginBalance",
+      "type": "double"
+    },
+    {
+      "name": "marginLeverage",
+      "type": "double"
+    },
+    {
+      "name": "marginUsedPcnt",
+      "type": "double"
+    },
+    {
+      "name": "pendingCredit",
+      "type": "double"
+    },
+    {
+      "name": "pendingDebit",
+      "type": "double"
+    },
+    {
+      "name": "prevRealisedPnl",
+      "type": "double"
+    },
+    {
+      "name": "prevState",
+      "type": "std::string_view"
+    },
+    {
+      "name": "prevUnrealisedPnl",
+      "type": "double"
+    },
+    {
+      "name": "realisedPnl",
+      "type": "double"
+    },
+    {
+      "name": "riskLimit",
+      "type": "double"
+    },
+    {
+      "name": "riskValue",
+      "type": "double"
+    },
+    {
+      "name": "sessionMargin",
+      "type": "double"
+    },
+    {
+      "name": "state",
+      "type": "std::string_view"
+    },
+    {
+      "name": "syntheticMargin",
+      "type": "double"
+    },
+    {
+      "name": "targetExcessMargin",
+      "type": "double"
+    },
+    {
+      "name": "taxableMargin",
+      "type": "double"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "unrealisedPnl",
+      "type": "double"
+    },
+    {
+      "name": "unrealisedProfit",
+      "type": "double"
+    },
+    {
+      "name": "varMargin",
+      "type": "double"
+    },
+    {
+      "name": "walletBalance",
+      "type": "double"
+    },
+    {
+      "name": "withdrawableMargin",
+      "type": "double"
+    },
+    {
+      "name": "makerFeeDiscount",
+      "comment": "undoc"
+    },
+    {
+      "name": "takerFeeDiscount",
+      "comment": "undoc"
+    }
+  ]
 }

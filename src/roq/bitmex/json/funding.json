@@ -1,7 +1,10 @@
 {
-"name": "Funding",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<FundingItem>" }
-]
+  "name": "Funding",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<FundingItem>"
+    }
+  ]
 }

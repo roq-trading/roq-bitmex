@@ -1,18 +1,42 @@
 {
-"name": "OrdStatus",
-"type": "enum",
-"values": [
-	{ "name": "Canceled" },
-	{ "name": "DoneForDay" },
-	{ "name": "Expired" },
-	{ "name": "Filled" },
-	{ "name": "New" },
-	{ "name": "PartiallyFilled" },
-	{ "name": "PendingCancel" },
-	{ "name": "PendingNew" },
-	{ "name": "Rejected" },
-	{ "name": "Stopped" },
-	{ "name": "Triggered" },
-	{ "name": "Untriggered" }
-]
+  "name": "OrdStatus",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Canceled"
+    },
+    {
+      "name": "DoneForDay"
+    },
+    {
+      "name": "Expired"
+    },
+    {
+      "name": "Filled"
+    },
+    {
+      "name": "New"
+    },
+    {
+      "name": "PartiallyFilled"
+    },
+    {
+      "name": "PendingCancel"
+    },
+    {
+      "name": "PendingNew"
+    },
+    {
+      "name": "Rejected"
+    },
+    {
+      "name": "Stopped"
+    },
+    {
+      "name": "Triggered"
+    },
+    {
+      "name": "Untriggered"
+    }
+  ]
 }

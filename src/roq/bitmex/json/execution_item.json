@@ -1,53 +1,194 @@
 {
-"name": "ExecutionItem",
-"type": "item",
-"values": [
-	{ "name": "account", "type": "uint64_t" },
-	{ "name": "avgPx", "type": "double" },
-	{ "name": "clOrdID", "type": "std::string_view" },
-	{ "name": "clOrdLinkID", "type": "std::string_view" },
-	{ "name": "commission", "type": "double" },
-	{ "name": "contingencyType", "type": "std::string_view" },
-	{ "name": "cumQty", "type": "double" },
-	{ "name": "currency", "type": "std::string_view" },
-	{ "name": "displayQty", "type": "double" },
-	{ "name": "exDestination", "type": "std::string_view" },
-	{ "name": "execComm", "type": "double" },
-	{ "name": "execCost", "type": "double" },
-	{ "name": "execID", "type": "std::string_view" },
-	{ "name": "execInst", "type": "std::string_view" },
-	{ "name": "execType", "type": "ExecType" },
-	{ "name": "foreignNotional", "type": "double" },
-	{ "name": "homeNotional", "type": "double" },
-	{ "name": "lastLiquidityInd", "type": "LiquidityInd" },
-	{ "name": "lastMkt", "type": "std::string_view" },
-	{ "name": "lastPx", "type": "double" },
-	{ "name": "lastQty", "type": "double" },
-	{ "name": "leavesQty", "type": "double" },
-	{ "name": "multiLegReportingType", "type": "MultiLegReportingType" },
-	{ "name": "orderID", "type": "std::string_view" },
-	{ "name": "orderQty", "type": "double" },
-	{ "name": "ordRejReason", "type": "std::string_view" },
-	{ "name": "ordStatus", "type": "OrdStatus" },
-	{ "name": "ordType", "type": "OrdType" },
-	{ "name": "pegOffsetValue", "type": "double" },
-	{ "name": "pegPriceType", "type": "std::string_view" },
-	{ "name": "price", "type": "double" },
-	{ "name": "settlCurrency", "type": "std::string_view" },
-	{ "name": "side", "type": "Side" },
-	{ "name": "simpleCumQty", "type": "double" },
-	{ "name": "simpleLeavesQty", "type": "double" },
-	{ "name": "simpleOrderQty", "type": "double" },
-	{ "name": "stopPx", "type": "double" },
-	{ "name": "symbol", "type": "std::string_view" },
-	{ "name": "text", "type": "std::string_view" },
-	{ "name": "timeInForce", "type": "TimeInForce" },
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
-	{ "name": "tradePublishIndicator", "type": "std::string_view" },
-	{ "name": "transactTime", "type": "std::chrono::milliseconds" },
-	{ "name": "trdMatchID", "type": "std::string_view" },
-	{ "name": "triggered", "type": "std::string_view" },
-	{ "name": "underlyingLastPx", "type": "double" },
-	{ "name": "workingIndicator", "type": "bool" }
-]
+  "name": "ExecutionItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "account",
+      "type": "uint64_t"
+    },
+    {
+      "name": "avgPx",
+      "type": "double"
+    },
+    {
+      "name": "clOrdID",
+      "type": "std::string_view"
+    },
+    {
+      "name": "clOrdLinkID",
+      "type": "std::string_view"
+    },
+    {
+      "name": "commission",
+      "type": "double"
+    },
+    {
+      "name": "contingencyType",
+      "type": "std::string_view"
+    },
+    {
+      "name": "cumQty",
+      "type": "double"
+    },
+    {
+      "name": "currency",
+      "type": "std::string_view"
+    },
+    {
+      "name": "displayQty",
+      "type": "double"
+    },
+    {
+      "name": "exDestination",
+      "type": "std::string_view"
+    },
+    {
+      "name": "execComm",
+      "type": "double"
+    },
+    {
+      "name": "execCost",
+      "type": "double"
+    },
+    {
+      "name": "execID",
+      "type": "std::string_view"
+    },
+    {
+      "name": "execInst",
+      "type": "std::string_view"
+    },
+    {
+      "name": "execType",
+      "type": "ExecType"
+    },
+    {
+      "name": "foreignNotional",
+      "type": "double"
+    },
+    {
+      "name": "homeNotional",
+      "type": "double"
+    },
+    {
+      "name": "lastLiquidityInd",
+      "type": "LiquidityInd"
+    },
+    {
+      "name": "lastMkt",
+      "type": "std::string_view"
+    },
+    {
+      "name": "lastPx",
+      "type": "double"
+    },
+    {
+      "name": "lastQty",
+      "type": "double"
+    },
+    {
+      "name": "leavesQty",
+      "type": "double"
+    },
+    {
+      "name": "multiLegReportingType",
+      "type": "MultiLegReportingType"
+    },
+    {
+      "name": "orderID",
+      "type": "std::string_view"
+    },
+    {
+      "name": "orderQty",
+      "type": "double"
+    },
+    {
+      "name": "ordRejReason",
+      "type": "std::string_view"
+    },
+    {
+      "name": "ordStatus",
+      "type": "OrdStatus"
+    },
+    {
+      "name": "ordType",
+      "type": "OrdType"
+    },
+    {
+      "name": "pegOffsetValue",
+      "type": "double"
+    },
+    {
+      "name": "pegPriceType",
+      "type": "std::string_view"
+    },
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "settlCurrency",
+      "type": "std::string_view"
+    },
+    {
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "name": "simpleCumQty",
+      "type": "double"
+    },
+    {
+      "name": "simpleLeavesQty",
+      "type": "double"
+    },
+    {
+      "name": "simpleOrderQty",
+      "type": "double"
+    },
+    {
+      "name": "stopPx",
+      "type": "double"
+    },
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "text",
+      "type": "std::string_view"
+    },
+    {
+      "name": "timeInForce",
+      "type": "TimeInForce"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "tradePublishIndicator",
+      "type": "std::string_view"
+    },
+    {
+      "name": "transactTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "trdMatchID",
+      "type": "std::string_view"
+    },
+    {
+      "name": "triggered",
+      "type": "std::string_view"
+    },
+    {
+      "name": "underlyingLastPx",
+      "type": "double"
+    },
+    {
+      "name": "workingIndicator",
+      "type": "bool"
+    }
+  ]
 }

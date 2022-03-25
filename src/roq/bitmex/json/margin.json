@@ -1,7 +1,10 @@
 {
-"name": "Margin",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<MarginItem>" }
-]
+  "name": "Margin",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<MarginItem>"
+    }
+  ]
 }

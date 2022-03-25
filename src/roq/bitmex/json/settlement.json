@@ -1,7 +1,10 @@
 {
-"name": "Settlement",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<SettlementItem>" }
-]
+  "name": "Settlement",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<SettlementItem>"
+    }
+  ]
 }

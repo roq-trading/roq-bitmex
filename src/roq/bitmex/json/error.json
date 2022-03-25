@@ -1,10 +1,20 @@
 {
-"name": "Error",
-"type": "struct",
-"values": [
-	{ "name": "error", "type": "std::string_view" },
-	{ "name": "meta" },
-	{ "name": "request" },
-	{ "name": "status", "type": "int32_t" }
-]
+  "name": "Error",
+  "type": "struct",
+  "values": [
+    {
+      "name": "error",
+      "type": "std::string_view"
+    },
+    {
+      "name": "meta"
+    },
+    {
+      "name": "request"
+    },
+    {
+      "name": "status",
+      "type": "int32_t"
+    }
+  ]
 }

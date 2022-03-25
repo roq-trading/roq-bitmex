@@ -1,12 +1,24 @@
 {
-"name": "ExecInst",
-"type": "enum",
-"values": [
-	{ "name": "ParticipateDoNotInitiate" },
-	{ "name": "MarkPrice" },
-	{ "name": "LastPrice" },
-	{ "name": "IndexPrice" },
-	{ "name": "ReduceOnly" },
-	{ "name": "Close" }
-]
+  "name": "ExecInst",
+  "type": "enum",
+  "values": [
+    {
+      "name": "ParticipateDoNotInitiate"
+    },
+    {
+      "name": "MarkPrice"
+    },
+    {
+      "name": "LastPrice"
+    },
+    {
+      "name": "IndexPrice"
+    },
+    {
+      "name": "ReduceOnly"
+    },
+    {
+      "name": "Close"
+    }
+  ]
 }

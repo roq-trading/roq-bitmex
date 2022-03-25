@@ -1,12 +1,24 @@
 {
-"name": "OrdType",
-"type": "enum",
-"values": [
-	{ "name": "Limit" },
-	{ "name": "Market" },
-	{ "name": "Stop" },
-	{ "name": "StopLimit" },
-	{ "name": "MarketIfTouched" },
-	{ "name": "LimitIfTouched" }
-]
+  "name": "OrdType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Limit"
+    },
+    {
+      "name": "Market"
+    },
+    {
+      "name": "Stop"
+    },
+    {
+      "name": "StopLimit"
+    },
+    {
+      "name": "MarketIfTouched"
+    },
+    {
+      "name": "LimitIfTouched"
+    }
+  ]
 }

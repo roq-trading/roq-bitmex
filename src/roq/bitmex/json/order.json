@@ -1,7 +1,10 @@
 {
-"name": "Order",
-"type": "array",
-"values": [
-	{ "name": "data", "type": "std::span<OrderItem>" }
-]
+  "name": "Order",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "std::span<OrderItem>"
+    }
+  ]
 }
