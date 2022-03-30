@@ -26,7 +26,7 @@ namespace bitmex {
 
 namespace {
 const auto NAME = "ex"sv;
-const auto SUPPORTS = Mask{
+const Mask<SupportType> SUPPORTS{
     SupportType::ORDER_ACK,
     SupportType::ORDER,
     SupportType::TRADE,
@@ -180,7 +180,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
-        .supports = SUPPORTS.get(),
+        .supports = SUPPORTS,
         .status = status_,
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,
@@ -378,7 +378,7 @@ void DropCopy::operator()(const Trace<json::Execution> &event, json::Action acti
           .max_show_quantity = NaN,
           .order_type = order_type,
           .time_in_force = time_in_force,
-          .execution_instruction = {},
+          .execution_instructions = {},
           .order_template = {},
           .create_time_utc = {},
           .update_time_utc = item.timestamp,
@@ -416,6 +416,7 @@ void DropCopy::operator()(const Trace<json::Execution> &event, json::Action acti
                       .external_order_id = order.external_order_id,
                       .fills = fills,
                       .routing_id = order.routing_id,
+                      .update_type = {},
                   };
                   create_trace_and_dispatch(
                       handler_, trace_info, trade_update, true, order.user_id);

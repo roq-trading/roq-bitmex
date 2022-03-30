@@ -236,19 +236,12 @@ inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   return json::TimeInForce::UNDEFINED;
 }
 
-inline json::ExecInst map(roq::ExecutionInstruction execution_instruction) {
-  switch (execution_instruction) {
-    case roq::ExecutionInstruction::UNDEFINED:
-      break;
-    case roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE:
-      return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
-    case roq::ExecutionInstruction::CANCEL_IF_NOT_BEST:
-      break;
-    case roq::ExecutionInstruction::DO_NOT_INCREASE:
-      return json::ExecInst::REDUCE_ONLY;
-    case roq::ExecutionInstruction::DO_NOT_REDUCE:
-      break;
-  }
+inline json::ExecInst map(const Mask<roq::ExecutionInstruction> &execution_instructions) {
+  // XXX support multiple?
+  if (execution_instructions.has(roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE))
+    return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
+  if (execution_instructions.has(roq::ExecutionInstruction::DO_NOT_INCREASE))
+    return json::ExecInst::REDUCE_ONLY;
   return json::ExecInst::UNDEFINED;
 }
 

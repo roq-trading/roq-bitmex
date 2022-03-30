@@ -51,7 +51,7 @@ void OrderUpdate::operator()(
       .max_show_quantity = NaN,
       .order_type = order_type,
       .time_in_force = time_in_force,
-      .execution_instruction = {},
+      .execution_instructions = {},
       .order_template = {},
       .create_time_utc = {},
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
@@ -128,7 +128,7 @@ void OrderUpdate::operator()(
       .max_show_quantity = NaN,
       .order_type = order_type,
       .time_in_force = time_in_force,
-      .execution_instruction = {},
+      .execution_instructions = {},
       .order_template = {},
       .create_time_utc = {},
       .update_time_utc = order_item.timestamp,  // XXX transact_time?

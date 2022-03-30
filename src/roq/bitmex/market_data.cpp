@@ -20,7 +20,7 @@ namespace bitmex {
 
 namespace {
 const auto NAME = "md"sv;
-const auto SUPPORTS = Mask{
+const Mask<SupportType> SUPPORTS{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,
@@ -177,7 +177,7 @@ void MarketData::operator()(ConnectionStatus status) {
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
-        .supports = SUPPORTS.get(),
+        .supports = SUPPORTS,
         .status = status_,
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,

@@ -26,7 +26,7 @@ namespace bitmex {
 namespace {
 const auto NAME = "om"sv;
 
-const auto SUPPORTS = Mask{
+const Mask<SupportType> SUPPORTS{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
@@ -181,7 +181,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
-        .supports = SUPPORTS.get(),
+        .supports = SUPPORTS,
         .status = status_,
         .type = StreamType::REST,
         .priority = Priority::PRIMARY,
@@ -205,9 +205,9 @@ void OrderEntry::create_order(
     auto side = json::map(create_order.side).as_raw_text();
     auto ord_type = json::map(create_order.order_type).as_raw_text();
     auto time_in_force = json::map(create_order.time_in_force).as_raw_text();
-    auto exec_inst = create_order.execution_instruction == ExecutionInstruction{}
+    auto exec_inst = std::empty(create_order.execution_instructions)
                          ? std::string_view{}
-                         : json::map(create_order.execution_instruction).as_raw_text();
+                         : json::map(create_order.execution_instructions).as_raw_text();
     auto body = fmt::format(
         R"({{)"
         R"("clOrdID":"{}",)"
