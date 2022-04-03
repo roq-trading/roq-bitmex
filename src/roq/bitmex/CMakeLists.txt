@@ -39,21 +39,9 @@ roq_autogen(
 
 add_custom_target(autogen-headers ALL DEPENDS ${AUTOGEN_HEADERS})
 
-roq_autogen(
-  OUTPUT
-  AUTOGEN_SOURCES
-  NAMESPACE
-  "roq/bitmex"
-  OUTPUT_TYPE
-  "state"
-  FILE_TYPE
-  "cpp"
-  SOURCES
-  ${AUTOGEN_SCHEMAS})
+roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}" ${AUTOGEN_HEADERS})
 
-roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}" ${AUTOGEN_HEADERS} ${AUTOGEN_SOURCES})
-
-add_executable("${TARGET_NAME}" ${SOURCES} ${AUTOGEN_SOURCES})
+add_executable("${TARGET_NAME}" ${SOURCES})
 
 add_dependencies("${TARGET_NAME}" autogen-headers autogen-json-headers)
 

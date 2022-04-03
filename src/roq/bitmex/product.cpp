@@ -22,12 +22,12 @@ Product::Product(const json::InstrumentItem &item)
       tick_size_(item.tick_size), multiplier_(item.multiplier), lot_size_(item.lot_size),
       option_strike_price_(item.option_strike_price), underlying_symbol_(item.underlying_symbol),
       expiry_(item.expiry), settle_(item.settle) {
-  statistics_.reserve(StatisticsType::count());
+  statistics_.reserve(magic_enum::enum_count<StatisticsType>());
   update(item);
 }
 
 Product::Product(const json::FundingItem &) {
-  statistics_.reserve(StatisticsType::count());
+  statistics_.reserve(magic_enum::enum_count<StatisticsType>());
 }
 
 namespace {
