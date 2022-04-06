@@ -167,7 +167,7 @@ uint16_t Gateway::operator()(
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   assert(!std::empty(event.value.account));
-  assert(utils::compare(event.value.account, order.account) == 0);
+  assert(event.value.account == order.account);
   if (Flags::oms_using_web_socket())
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
@@ -179,7 +179,7 @@ uint16_t Gateway::operator()(
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   assert(!std::empty(event.value.account));
-  assert(utils::compare(event.value.account, order.account) == 0);
+  assert(event.value.account == order.account);
   if (Flags::oms_using_web_socket())
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
