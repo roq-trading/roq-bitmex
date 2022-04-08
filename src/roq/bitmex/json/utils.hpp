@@ -54,19 +54,20 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
 
 inline roq::TradingStatus map(json::State state) {
   switch (state) {
-    case json::State::UNDEFINED:
+    using enum json::State::type_t;
+    case UNDEFINED:
       break;
-    case json::State::UNKNOWN:
+    case UNKNOWN:
       break;
-    case json::State::OPEN:
+    case OPEN:
       return roq::TradingStatus::OPEN;
-    case json::State::CLOSED:
+    case CLOSED:
       return roq::TradingStatus::CLOSE;
-    case json::State::SETTLED:
+    case SETTLED:
       break;
-    case json::State::UNLISTED:
+    case UNLISTED:
       break;
-    case json::State::EXPIRED:
+    case EXPIRED:
       break;
   }
   return {};
@@ -74,13 +75,14 @@ inline roq::TradingStatus map(json::State state) {
 
 inline roq::Side map(json::Side side) {
   switch (side) {
-    case json::Side::UNDEFINED:
+    using enum json::Side::type_t;
+    case UNDEFINED:
       break;
-    case json::Side::UNKNOWN:
+    case UNKNOWN:
       break;
-    case json::Side::BUY:
+    case BUY:
       return roq::Side::BUY;
-    case json::Side::SELL:
+    case SELL:
       return roq::Side::SELL;
   }
   return roq::Side::UNDEFINED;
@@ -88,33 +90,34 @@ inline roq::Side map(json::Side side) {
 
 inline roq::OrderStatus map(json::OrdStatus state) {
   switch (state) {
-    case OrdStatus::UNDEFINED:
+    using enum OrdStatus::type_t;
+    case UNDEFINED:
       break;
-    case OrdStatus::UNKNOWN:
+    case UNKNOWN:
       break;
-    case OrdStatus::CANCELED:
+    case CANCELED:
       return roq::OrderStatus::CANCELED;
-    case OrdStatus::DONE_FOR_DAY:
+    case DONE_FOR_DAY:
       return roq::OrderStatus::SUSPENDED;
-    case OrdStatus::EXPIRED:
+    case EXPIRED:
       return roq::OrderStatus::EXPIRED;
-    case OrdStatus::FILLED:
+    case FILLED:
       return roq::OrderStatus::COMPLETED;
-    case OrdStatus::NEW:
+    case NEW:
       return roq::OrderStatus::WORKING;
-    case OrdStatus::PARTIALLY_FILLED:
+    case PARTIALLY_FILLED:
       return roq::OrderStatus::WORKING;
-    case OrdStatus::PENDING_CANCEL:  // XXX HANS what to do?
+    case PENDING_CANCEL:  // XXX HANS what to do?
       break;
-    case OrdStatus::PENDING_NEW:
+    case PENDING_NEW:
       return roq::OrderStatus::SENT;
-    case OrdStatus::REJECTED:
+    case REJECTED:
       return roq::OrderStatus::REJECTED;
-    case OrdStatus::STOPPED:
+    case STOPPED:
       return roq::OrderStatus::STOPPED;
-    case OrdStatus::UNTRIGGERED:
+    case UNTRIGGERED:
       return roq::OrderStatus::ACCEPTED;
-    case OrdStatus::TRIGGERED:
+    case TRIGGERED:
       return roq::OrderStatus::WORKING;
   }
   return roq::OrderStatus::UNDEFINED;
@@ -122,21 +125,22 @@ inline roq::OrderStatus map(json::OrdStatus state) {
 
 inline roq::OrderType map(json::OrdType state) {
   switch (state) {
-    case OrdType::UNDEFINED:
+    using enum OrdType::type_t;
+    case UNDEFINED:
       break;
-    case OrdType::UNKNOWN:
+    case UNKNOWN:
       break;
-    case OrdType::LIMIT:
+    case LIMIT:
       return roq::OrderType::LIMIT;
-    case OrdType::MARKET:
+    case MARKET:
       return roq::OrderType::MARKET;
-    case OrdType::STOP:
+    case STOP:
       return roq::OrderType::MARKET;
-    case OrdType::STOP_LIMIT:
+    case STOP_LIMIT:
       return roq::OrderType::LIMIT;
-    case OrdType::MARKET_IF_TOUCHED:
+    case MARKET_IF_TOUCHED:
       return roq::OrderType::MARKET;
-    case OrdType::LIMIT_IF_TOUCHED:
+    case LIMIT_IF_TOUCHED:
       return roq::OrderType::LIMIT;
   }
   return roq::OrderType{};
@@ -144,19 +148,20 @@ inline roq::OrderType map(json::OrdType state) {
 
 inline roq::TimeInForce map(json::TimeInForce state) {
   switch (state) {
-    case TimeInForce::UNDEFINED:
+    using enum TimeInForce::type_t;
+    case UNDEFINED:
       break;
-    case TimeInForce::UNKNOWN:
+    case UNKNOWN:
       break;
-    case TimeInForce::AT_THE_CLOSE:
+    case AT_THE_CLOSE:
       return roq::TimeInForce::AT_THE_CLOSE;
-    case TimeInForce::DAY:
+    case DAY:
       return roq::TimeInForce::GFD;
-    case TimeInForce::FILL_OR_KILL:
+    case FILL_OR_KILL:
       return roq::TimeInForce::FOK;
-    case TimeInForce::GOOD_TILL_CANCEL:
+    case GOOD_TILL_CANCEL:
       return roq::TimeInForce::GTC;
-    case TimeInForce::IMMEDIATE_OR_CANCEL:
+    case IMMEDIATE_OR_CANCEL:
       return roq::TimeInForce::IOC;
   }
   return roq::TimeInForce{};
@@ -164,13 +169,14 @@ inline roq::TimeInForce map(json::TimeInForce state) {
 
 inline roq::Liquidity map(json::LiquidityInd state) {
   switch (state) {
-    case LiquidityInd::UNDEFINED:
+    using enum LiquidityInd::type_t;
+    case UNDEFINED:
       break;
-    case LiquidityInd::UNKNOWN:
+    case UNKNOWN:
       break;
-    case LiquidityInd::ADDED_LIQUIDITY:
+    case ADDED_LIQUIDITY:
       return roq::Liquidity::MAKER;
-    case LiquidityInd::REMOVED_LIQUIDITY:
+    case REMOVED_LIQUIDITY:
       return roq::Liquidity::TAKER;
   }
   return roq::Liquidity{};
@@ -180,11 +186,12 @@ inline roq::Liquidity map(json::LiquidityInd state) {
 
 inline json::Side map(roq::Side side) {
   switch (side) {
-    case roq::Side::UNDEFINED:
+    using enum roq::Side;
+    case UNDEFINED:
       break;
-    case roq::Side::BUY:
+    case BUY:
       return json::Side::BUY;
-    case roq::Side::SELL:
+    case SELL:
       return json::Side::SELL;
   }
   return json::Side::UNDEFINED;
@@ -192,11 +199,12 @@ inline json::Side map(roq::Side side) {
 
 inline json::OrdType map(roq::OrderType order_type) {
   switch (order_type) {
-    case roq::OrderType::UNDEFINED:
+    using enum roq::OrderType;
+    case UNDEFINED:
       break;
-    case roq::OrderType::MARKET:
+    case MARKET:
       return json::OrdType::MARKET;
-    case roq::OrderType::LIMIT:
+    case LIMIT:
       return json::OrdType::LIMIT;
   }
   return json::OrdType::UNDEFINED;
@@ -204,33 +212,34 @@ inline json::OrdType map(roq::OrderType order_type) {
 
 inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   switch (time_in_force) {
-    case roq::TimeInForce::UNDEFINED:
+    using enum roq::TimeInForce;
+    case UNDEFINED:
       break;
-    case roq::TimeInForce::GFD:
+    case GFD:
       return json::TimeInForce::DAY;
-    case roq::TimeInForce::GTC:
+    case GTC:
       return json::TimeInForce::GOOD_TILL_CANCEL;
-    case roq::TimeInForce::OPG:
+    case OPG:
       break;
-    case roq::TimeInForce::IOC:
+    case IOC:
       return json::TimeInForce::IMMEDIATE_OR_CANCEL;
-    case roq::TimeInForce::FOK:
+    case FOK:
       return json::TimeInForce::FILL_OR_KILL;
-    case roq::TimeInForce::GTD:
+    case GTD:
       break;
-    case roq::TimeInForce::GTX:
+    case GTX:
       break;
-    case roq::TimeInForce::AT_THE_CLOSE:
+    case AT_THE_CLOSE:
       return json::TimeInForce::AT_THE_CLOSE;
-    case roq::TimeInForce::GOOD_THROUGH_CROSSING:
+    case GOOD_THROUGH_CROSSING:
       break;
-    case roq::TimeInForce::AT_CROSSING:
+    case AT_CROSSING:
       break;
-    case roq::TimeInForce::GOOD_FOR_TIME:
+    case GOOD_FOR_TIME:
       break;
-    case roq::TimeInForce::GFA:
+    case GFA:
       break;
-    case roq::TimeInForce::GFM:
+    case GFM:
       break;
   }
   return json::TimeInForce::UNDEFINED;

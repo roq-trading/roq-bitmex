@@ -229,13 +229,14 @@ void DropCopy::send_subscribe(const std::span<std::string_view> &topics) {
 
 uint32_t DropCopy::download(DropCopyState state) {
   switch (state) {
-    case DropCopyState::UNDEFINED:
+    using enum DropCopyState;
+    case UNDEFINED:
       assert(false);
       break;
-    case DropCopyState::SUBSCRIBE:
+    case SUBSCRIBE:
       subscribe();
       return 1;
-    case DropCopyState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;

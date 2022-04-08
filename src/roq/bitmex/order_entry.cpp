@@ -261,13 +261,14 @@ void OrderEntry::create_order_ack(
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        case core::http::Category::SUCCESS: {  // 2xx
+        using enum core::http::Category;
+        case SUCCESS: {  // 2xx
           auto order_item = core::json::Parser::create<json::OrderItem>(body);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(
               order_item, trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
           break;
         }
-        case core::http::Category::CLIENT_ERROR: {
+        case CLIENT_ERROR: {
           std::string_view text;
           if (json::ErrorParser::dispatch(body, [&](auto &error) {
                 log::warn("error={}"sv, error);
@@ -391,13 +392,14 @@ void OrderEntry::modify_order_ack(
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        case core::http::Category::SUCCESS: {  // 2xx
+        using enum core::http::Category;
+        case SUCCESS: {  // 2xx
           auto order_item = core::json::Parser::create<json::OrderItem>(body);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(
               order_item, trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
           break;
         }
-        case core::http::Category::CLIENT_ERROR: {  // 4xx
+        case CLIENT_ERROR: {  // 4xx
           std::string_view text;
           auto body = response.body();
           if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -524,14 +526,15 @@ void OrderEntry::cancel_order_ack(
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        case core::http::Category::SUCCESS: {  // 2xx
+        using enum core::http::Category;
+        case SUCCESS: {  // 2xx
           core::json::Buffer buffer(decode_buffer_);
           auto order = core::json::Parser::create<json::Order>(body, buffer);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(
               order, trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
           break;
         }
-        case core::http::Category::CLIENT_ERROR: {  // 4xx
+        case CLIENT_ERROR: {  // 4xx
           std::string_view text;
           auto body = response.body();
           if (json::ErrorParser::dispatch(body, [&](auto &error) {
@@ -646,13 +649,14 @@ void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response> &event) 
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        case core::http::Category::SUCCESS: {  // 2xx
+        using enum core::http::Category;
+        case SUCCESS: {  // 2xx
           core::json::Buffer buffer(decode_buffer_);
           auto order = core::json::Parser::create<json::Order>(body, buffer);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, false);
           break;
         }
-        case core::http::Category::CLIENT_ERROR: {  // 4xx
+        case CLIENT_ERROR: {  // 4xx
           if (json::ErrorParser::dispatch(
                   body, [&](auto &error) { log::warn("error={}"sv, error); })) {
           } else {

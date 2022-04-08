@@ -16,12 +16,13 @@ std::pair<double, double> PriceCache::operator()(
   auto result = NaN;
   auto iter = price_lookup_.find(id);
   switch (action) {
-    case json::Action::UNDEFINED:
-    case json::Action::UNKNOWN:
+    using enum json::Action::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       log::fatal("Unexpected"sv);
       break;
-    case json::Action::PARTIAL:
-    case json::Action::INSERT:
+    case PARTIAL:
+    case INSERT:
       if (!std::isnan(price) && !std::isnan(size)) {
         if (iter == std::end(price_lookup_)) {
           iter = price_lookup_.emplace(id, price).first;
@@ -39,7 +40,7 @@ std::pair<double, double> PriceCache::operator()(
         log::fatal("action={} id={} price={} size={}"sv, action, id, price, size);
       }
       break;
-    case json::Action::UPDATE:
+    case UPDATE:
       if (std::isnan(price) && !std::isnan(size) && utils::is_greater(size, 0.0)) {
         if (iter != std::end(price_lookup_)) {
           result = (*iter).second;
@@ -50,7 +51,7 @@ std::pair<double, double> PriceCache::operator()(
         // unexpected price or size ==> fail
       }
       break;
-    case json::Action::DELETE:
+    case DELETE:
       if (std::isnan(price) && (std::isnan(size) || utils::is_zero(size))) {
         if (iter != std::end(price_lookup_)) {
           result = (*iter).second;

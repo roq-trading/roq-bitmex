@@ -12,20 +12,21 @@ namespace bitmex {
 
 inline RequestType compute_request_type(json::ExecType exec_type) {
   switch (exec_type) {
-    case json::ExecType::UNDEFINED:
-    case json::ExecType::UNKNOWN:
+    using enum json::ExecType::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       break;
-    case json::ExecType::NEW:
+    case NEW:
       return RequestType::CREATE_ORDER;
-    case json::ExecType::REPLACED:
+    case REPLACED:
       return RequestType::MODIFY_ORDER;
-    case json::ExecType::CANCELED:
+    case CANCELED:
       return RequestType::CANCEL_ORDER;
-    case json::ExecType::REJECTED:
+    case REJECTED:
       return {};  // or unknown?
-    case json::ExecType::TRADE:
+    case TRADE:
       break;
-    case json::ExecType::FUNDING:
+    case FUNDING:
       break;
   }
   return {};
@@ -33,18 +34,19 @@ inline RequestType compute_request_type(json::ExecType exec_type) {
 
 inline RequestStatus compute_request_status(json::ExecType exec_type) {
   switch (exec_type) {
-    case json::ExecType::UNDEFINED:
-    case json::ExecType::UNKNOWN:
+    using enum json::ExecType::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       break;
-    case json::ExecType::NEW:
-    case json::ExecType::REPLACED:
-    case json::ExecType::CANCELED:
+    case NEW:
+    case REPLACED:
+    case CANCELED:
       return RequestStatus::ACCEPTED;
-    case json::ExecType::REJECTED:
+    case REJECTED:
       return RequestStatus::REJECTED;
-    case json::ExecType::TRADE:
+    case TRADE:
       break;
-    case json::ExecType::FUNDING:
+    case FUNDING:
       break;
   }
   return {};
@@ -52,37 +54,38 @@ inline RequestStatus compute_request_status(json::ExecType exec_type) {
 
 inline OrderStatus compute_order_status(json::OrdStatus ord_status, bool working_status) {
   switch (ord_status) {
-    case json::OrdStatus::UNDEFINED:
-    case json::OrdStatus::UNKNOWN:
+    using enum json::OrdStatus::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       // note! back-stop in case we didn't parse OrdStatus
       if (working_status)
         return OrderStatus::WORKING;
       break;
-    case json::OrdStatus::PENDING_NEW:
+    case PENDING_NEW:
       return OrderStatus::SENT;
-    case json::OrdStatus::NEW:
-    case json::OrdStatus::TRIGGERED:
+    case NEW:
+    case TRIGGERED:
       if (!working_status)
         return OrderStatus::ACCEPTED;
       else
         return OrderStatus::WORKING;
-    case json::OrdStatus::DONE_FOR_DAY:
+    case DONE_FOR_DAY:
       return OrderStatus::SUSPENDED;
-    case json::OrdStatus::PARTIALLY_FILLED:
+    case PARTIALLY_FILLED:
       return OrderStatus::WORKING;
-    case json::OrdStatus::STOPPED:
+    case STOPPED:
       return OrderStatus::STOPPED;
-    case json::OrdStatus::FILLED:
+    case FILLED:
       return OrderStatus::COMPLETED;
-    case json::OrdStatus::EXPIRED:
+    case EXPIRED:
       return OrderStatus::EXPIRED;
-    case json::OrdStatus::CANCELED:
+    case CANCELED:
       return OrderStatus::CANCELED;
-    case json::OrdStatus::REJECTED:
+    case REJECTED:
       return OrderStatus::REJECTED;
-    case json::OrdStatus::PENDING_CANCEL:  // XXX HANS how to deal with?
+    case PENDING_CANCEL:  // XXX HANS how to deal with?
       break;
-    case json::OrdStatus::UNTRIGGERED:  // XXX HANS have no idea what this means...
+    case UNTRIGGERED:  // XXX HANS have no idea what this means...
       break;
   }
   return {};
@@ -90,32 +93,33 @@ inline OrderStatus compute_order_status(json::OrdStatus ord_status, bool working
 
 inline RequestStatus compute_request_status(json::OrdStatus ord_status) {
   switch (ord_status) {
-    case json::OrdStatus::UNDEFINED:
-    case json::OrdStatus::UNKNOWN:
+    using enum json::OrdStatus::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       break;
-    case json::OrdStatus::PENDING_NEW:
+    case PENDING_NEW:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::NEW:
+    case NEW:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::TRIGGERED:
+    case TRIGGERED:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::DONE_FOR_DAY:
+    case DONE_FOR_DAY:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::PARTIALLY_FILLED:
+    case PARTIALLY_FILLED:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::STOPPED:
+    case STOPPED:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::FILLED:
+    case FILLED:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::EXPIRED:
+    case EXPIRED:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::CANCELED:
+    case CANCELED:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::REJECTED:
+    case REJECTED:
       return RequestStatus::REJECTED;  // note!
-    case json::OrdStatus::PENDING_CANCEL:
+    case PENDING_CANCEL:
       return RequestStatus::ACCEPTED;
-    case json::OrdStatus::UNTRIGGERED:  // XXX HANS have no idea what this means...
+    case UNTRIGGERED:  // XXX HANS have no idea what this means...
       return RequestStatus::ACCEPTED;
   }
   return {};

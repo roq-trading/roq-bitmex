@@ -251,18 +251,19 @@ void MarketData::send_unsubscribe(const std::string_view &topic, const std::stri
 
 uint32_t MarketData::download(MarketDataState state) {
   switch (state) {
-    case MarketDataState::UNDEFINED:
+    using enum MarketDataState;
+    case UNDEFINED:
       assert(false);
       break;
-    case MarketDataState::ACCOUNTS:
+    case ACCOUNTS:
       return {};
-    case MarketDataState::INSTRUMENT:
+    case INSTRUMENT:
       subscribe_instrument();
       return 1;
-    case MarketDataState::ORDER_BOOK_L2:
+    case ORDER_BOOK_L2:
       subscribe_order_book_l2();
       return 1;
-    case MarketDataState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;
@@ -390,11 +391,12 @@ void MarketData::operator()(const Trace<json::Instrument> &event, json::Action a
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
     switch (action) {
-      case json::Action::UNDEFINED:
-      case json::Action::UNKNOWN:
+      using enum json::Action::type_t;
+      case UNDEFINED:
+      case UNKNOWN:
         log::fatal("Unexpected"sv);
         break;
-      case json::Action::PARTIAL:
+      case PARTIAL:
         if (partial_received_.instrument) {
           log::debug("event={{action={}, instrument={}}}"sv, action, instrument);
           assert(false);  // didn't expect this
@@ -425,11 +427,11 @@ void MarketData::operator()(const Trace<json::Instrument> &event, json::Action a
           download_.check_relaxed(MarketDataState::INSTRUMENT);
         }
         break;
-      case json::Action::INSERT:
+      case INSERT:
         log::debug("event={{action={}, instrument={}}}"sv, action, instrument);
         assert(false);  // XXX should we just drop these updates?
         break;
-      case json::Action::UPDATE: {
+      case UPDATE: {
         // only process after "partial" (as per bitmex documentation)
         if (partial_received_.instrument) {
           for (auto &item : instrument.data) {
@@ -451,7 +453,7 @@ void MarketData::operator()(const Trace<json::Instrument> &event, json::Action a
         }
         break;
       }
-      case json::Action::DELETE:
+      case DELETE:
         // don't do anything
         break;
     }
@@ -493,10 +495,11 @@ void MarketData::operator()(const Trace<json::OrderBookL2> &event, json::Action 
       auto size = price_size.second;
       if (std::isfinite(price)) {
         switch (item.side) {
-          case json::Side::BUY:
+          using enum json::Side::type_t;
+          case BUY:
             bids.emplace_back([&](auto &result) { emplace(result, price, size); });
             break;
-          case json::Side::SELL:
+          case SELL:
             asks.emplace_back([&](auto &result) { emplace(result, price, size); });
             break;
           default:

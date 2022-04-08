@@ -283,12 +283,13 @@ void WebSocket::send_cancel_all_after(std::chrono::nanoseconds timeout) {
 
 uint32_t WebSocket::download(WebSocketState state) {
   switch (state) {
-    case WebSocketState::UNDEFINED:
+    using enum WebSocketState;
+    case UNDEFINED:
       assert(false);
       break;
-    case WebSocketState::AUTHENTICATE:
+    case AUTHENTICATE:
       return {};
-    case WebSocketState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;

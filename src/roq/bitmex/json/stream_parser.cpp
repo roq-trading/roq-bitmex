@@ -53,104 +53,106 @@ void StreamParser::dispatch(
     for (auto [key, value] : std::get<core::json::object_t>(root)) {
       auto field = Field(key);
       switch (field) {
-        case Field::UNDEFINED:
+        using enum Field::type_t;
+        case UNDEFINED:
           log::fatal("Unexpected"sv);
           break;
-        case Field::UNKNOWN:
+        case UNKNOWN:
           log::fatal(R"(Unknown key="{}")"sv, key);
           break;
-        case Field::ACTION:
+        case ACTION:
           update(result.action, value);
           update(type, Type::TABLE);
           action = Action(result.action);
           break;
-        case Field::ATTRIBUTES:
+        case ATTRIBUTES:
           // not used
           update(type, Type::TABLE);
           break;
-        case Field::CANCEL_TIME:
+        case CANCEL_TIME:
           update(result.cancel_time, value);
           update(type, Type::CANCEL_ALL_AFTER);
           break;
-        case Field::DATA:
+        case DATA:
           if (action == Action::UNKNOWN) {
             // not ready -- finish and try again
           } else {
             switch (table) {
-              case Table::UNDEFINED:
-              case Table::UNKNOWN:
+              using enum Table::type_t;
+              case UNDEFINED:
+              case UNKNOWN:
                 break;
-              case Table::EXECUTION: {
+              case EXECUTION: {
                 Execution execution(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, execution);
                 handler(event, action);
                 break;
               }
-              case Table::FUNDING: {
+              case FUNDING: {
                 Funding funding(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, funding);
                 handler(event, action);
                 break;
               }
-              case Table::INSTRUMENT: {
+              case INSTRUMENT: {
                 Instrument instrument(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, instrument);
                 handler(event, action);
                 break;
               }
-              case Table::LIQUIDATION: {
+              case LIQUIDATION: {
                 Liquidation liquidation(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, liquidation);
                 handler(event, action);
                 break;
               }
-              case Table::MARGIN: {
+              case MARGIN: {
                 Margin margin(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, margin);
                 handler(event, action);
                 break;
               }
-              case Table::ORDER: {
+              case ORDER: {
                 Order order(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, order);
                 handler(event, action);
                 break;
               }
-              case Table::ORDER_BOOK_L2: {
+              case ORDER_BOOK_L2: {
                 OrderBookL2 order_book_l2(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, order_book_l2);
                 handler(event, action);
                 break;
               }
-              case Table::POSITION: {
+              case POSITION: {
                 Position position(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, position);
                 handler(event, action);
                 break;
               }
-              case Table::QUOTE: {
+              case QUOTE: {
                 Quote quote(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, quote);
                 handler(event, action);
                 break;
               }
-              case Table::SETTLEMENT: {
+              case SETTLEMENT: {
                 Settlement settlement(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, settlement);
                 handler(event, action);
                 break;
               }
-              case Table::TRADE: {
+              case TRADE: {
                 Trade trade(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, trade);
@@ -160,89 +162,90 @@ void StreamParser::dispatch(
             }
           }
           break;
-        case Field::DOCS:
+        case DOCS:
           // not used
           update(type, Type::INFO);
           break;
-        case Field::ERROR:
+        case ERROR:
           update(result.error, value);
           update(type, Type::ERROR);
           break;
-        case Field::FAILURE:
+        case FAILURE:
           update(result.failure, value);
           update(type, Type::SUBSCRIBE);
           break;
-        case Field::FILTER:
+        case FILTER:
           // not used
           update(type, Type::TABLE);
           break;
-        case Field::FOREIGN_KEYS:
+        case FOREIGN_KEYS:
           // not used
           update(type, Type::TABLE);
           break;
-        case Field::INFO:
+        case INFO:
           // not used
           update(type, Type::INFO);
           break;
-        case Field::KEYS:
+        case KEYS:
           // not used
           update(type, Type::TABLE);
           break;
-        case Field::LIMIT:
+        case LIMIT:
           // XXX should parse! "limit":{"remaining":37}
           update(type, Type::INFO);
           break;
-        case Field::META:
+        case META:
           // not used
           update(type, Type::ERROR);
           break;
-        case Field::NOW:
+        case NOW:
           update(result.now, value);
           update(type, Type::CANCEL_ALL_AFTER);
           break;
-        case Field::REQUEST:
+        case REQUEST:
           // not used
           // => subscribe + error
           break;
-        case Field::STATUS:
+        case STATUS:
           update(result.status, value);
           update(type, Type::ERROR);
           break;
-        case Field::SUBSCRIBE:
+        case SUBSCRIBE:
           update(result.subscribe, value);
           update(type, Type::SUBSCRIBE);
           break;
-        case Field::UNSUBSCRIBE:
+        case UNSUBSCRIBE:
           update(result.unsubscribe, value);
           update(type, Type::UNSUBSCRIBE);
           break;
-        case Field::SUCCESS:
+        case SUCCESS:
           update(result.success, value);
           break;
-        case Field::TABLE:
+        case TABLE:
           update(result.table, value);
           update(type, Type::TABLE);
           assert(table == Table::UNKNOWN);
           table = Table(result.table);
           break;
-        case Field::TIMESTAMP:
+        case TIMESTAMP:
           update(result.timestamp, value);
           update(type, Type::INFO);
           break;
-        case Field::TYPES:
+        case TYPES:
           // not used
           update(type, Type::TABLE);
           break;
-        case Field::VERSION:
+        case VERSION:
           update(result.version, value);
           update(type, Type::INFO);
           break;
       }
     }
     switch (type) {
-      case Type::UNKNOWN:
+      using enum Type;
+      case UNKNOWN:
         throw RuntimeError("Can't detect message type"sv);
-      case Type::CANCEL_ALL_AFTER: {
+      case CANCEL_ALL_AFTER: {
         CancelAllAfter cancel_all_after{
             .cancel_time = result.cancel_time,
             .now = result.now,
@@ -251,7 +254,7 @@ void StreamParser::dispatch(
         handler(event);
         return;
       }
-      case Type::ERROR: {
+      case ERROR: {
         Error error{
             .error = result.error,
             .status = result.status,
@@ -260,7 +263,7 @@ void StreamParser::dispatch(
         handler(event);
         return;
       }
-      case Type::INFO: {
+      case INFO: {
         Handshake handshake{
             .docs = {},
             .info = {},
@@ -271,7 +274,7 @@ void StreamParser::dispatch(
         handler(event);
         return;
       }
-      case Type::SUBSCRIBE: {
+      case SUBSCRIBE: {
         Subscribe subscribe{
             .failure = result.failure,
             .subscribe = result.subscribe,
@@ -281,7 +284,7 @@ void StreamParser::dispatch(
         handler(event);
         return;
       }
-      case Type::UNSUBSCRIBE: {
+      case UNSUBSCRIBE: {
         Unsubscribe unsubscribe{
             .failure = result.failure,
             .unsubscribe = result.unsubscribe,
@@ -291,7 +294,7 @@ void StreamParser::dispatch(
         handler(event);
         return;
       }
-      case Type::TABLE:
+      case TABLE:
         if (dispatched)
           return;
         // perhaps we were just unlucky with the ordering of keys
