@@ -7,7 +7,6 @@
 #include <magic_enum.hpp>
 
 #include "roq/core/binascii/hex.hpp"
-#include "roq/core/crypto/hmac.hpp"
 
 using namespace std::literals;
 
