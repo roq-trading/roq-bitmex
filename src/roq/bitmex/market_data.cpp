@@ -654,7 +654,8 @@ void MarketData::publish_market_by_price(
     const std::span<MBPUpdate> &asks,
     bool snapshot) {
   assert(!(std::empty(bids) && std::empty(asks)));
-  log::info<1>::when(snapshot, R"(Received market data snapshot for symbol="{}")"sv, symbol);
+  if (snapshot)
+    log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
   const MarketByPriceUpdate market_by_price_update{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
