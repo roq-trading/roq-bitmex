@@ -183,7 +183,7 @@ void DropCopy::operator()(ConnectionStatus status) {
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
-        .encoding = Encoding::JSON,
+        .encoding = {Encoding::JSON},
         .priority = Priority::PRIMARY,
         .connection_status = status_,
     };
