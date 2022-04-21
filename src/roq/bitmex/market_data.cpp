@@ -547,6 +547,7 @@ void MarketData::operator()(const Trace<json::Quote> &event, json::Action action
           },
           .update_type = UpdateType::INCREMENTAL,
           .exchange_time_utc = item.timestamp,
+          .exchange_sequence = {},
       };
       create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
     }
