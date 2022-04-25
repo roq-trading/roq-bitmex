@@ -166,7 +166,7 @@ void OrderEntry::operator()(const core::web::Client::Disconnected &) {
 
 void OrderEntry::operator()(const core::web::Client::Latency &latency) {
   auto trace_info = server::create_trace_info();
-  ExternalLatency external_latency{
+  const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -178,7 +178,7 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    StreamStatus stream_status{
+    const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -255,7 +255,10 @@ void OrderEntry::create_order(
 }
 
 void OrderEntry::create_order_ack(
-    const Trace<core::web::Response> &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    const Trace<core::web::Response const> &event,
+    uint8_t user_id,
+    uint32_t order_id,
+    uint32_t version) {
   profile_.create_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::debug("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -386,7 +389,10 @@ void OrderEntry::modify_order(
 }
 
 void OrderEntry::modify_order_ack(
-    const Trace<core::web::Response> &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    const Trace<core::web::Response const> &event,
+    uint8_t user_id,
+    uint32_t order_id,
+    uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::debug("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -520,7 +526,10 @@ void OrderEntry::cancel_order(
 }
 
 void OrderEntry::cancel_order_ack(
-    const Trace<core::web::Response> &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    const Trace<core::web::Response const> &event,
+    uint8_t user_id,
+    uint32_t order_id,
+    uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::debug("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -644,7 +653,7 @@ void OrderEntry::cancel_all_orders(
   });
 }
 
-void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response> &event) {
+void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response const> &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto &[trace_info, response] = event;
     try {

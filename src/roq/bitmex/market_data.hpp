@@ -34,14 +34,15 @@ class MarketData final : public core::web::ClientSocket::Handler,
                          public json::StreamParser::Handler {
  public:
   struct Handler {
-    virtual void operator()(const Trace<StreamStatus> &) = 0;
-    virtual void operator()(const Trace<ExternalLatency> &) = 0;
-    virtual void operator()(const Trace<ReferenceData> &, bool is_last) = 0;
-    virtual void operator()(const Trace<MarketStatus> &, bool is_last) = 0;
-    virtual void operator()(const Trace<TopOfBook> &, bool is_last) = 0;
-    virtual void operator()(const Trace<MarketByPriceUpdate> &, bool is_last, bool refresh) = 0;
-    virtual void operator()(const Trace<TradeSummary> &, bool is_last) = 0;
-    virtual void operator()(const Trace<StatisticsUpdate> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StreamStatus const> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency const> &) = 0;
+    virtual void operator()(const Trace<ReferenceData const> &, bool is_last) = 0;
+    virtual void operator()(const Trace<MarketStatus const> &, bool is_last) = 0;
+    virtual void operator()(const Trace<TopOfBook const> &, bool is_last) = 0;
+    virtual void operator()(
+        const Trace<MarketByPriceUpdate const> &, bool is_last, bool refresh) = 0;
+    virtual void operator()(const Trace<TradeSummary const> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StatisticsUpdate const> &, bool is_last) = 0;
   };
 
   MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &);
@@ -83,24 +84,24 @@ class MarketData final : public core::web::ClientSocket::Handler,
   void parse(const std::string_view &message);
   void parse_helper(const std::string_view &message);
 
-  void operator()(const Trace<json::CancelAllAfter> &) override;
-  void operator()(const Trace<json::Error> &) override;
-  void operator()(const Trace<json::Handshake> &) override;
-  void operator()(const Trace<json::Subscribe> &) override;
-  void operator()(const Trace<json::Unsubscribe> &) override;
+  void operator()(const Trace<json::CancelAllAfter const> &) override;
+  void operator()(const Trace<json::Error const> &) override;
+  void operator()(const Trace<json::Handshake const> &) override;
+  void operator()(const Trace<json::Subscribe const> &) override;
+  void operator()(const Trace<json::Unsubscribe const> &) override;
 
-  void operator()(const Trace<json::Funding> &, json::Action) override;
-  void operator()(const Trace<json::Instrument> &, json::Action) override;
-  void operator()(const Trace<json::Liquidation> &, json::Action) override;
-  void operator()(const Trace<json::OrderBookL2> &, json::Action) override;
-  void operator()(const Trace<json::Quote> &, json::Action) override;
-  void operator()(const Trace<json::Settlement> &, json::Action) override;
-  void operator()(const Trace<json::Trade> &, json::Action) override;
+  void operator()(const Trace<json::Funding const> &, json::Action) override;
+  void operator()(const Trace<json::Instrument const> &, json::Action) override;
+  void operator()(const Trace<json::Liquidation const> &, json::Action) override;
+  void operator()(const Trace<json::OrderBookL2 const> &, json::Action) override;
+  void operator()(const Trace<json::Quote const> &, json::Action) override;
+  void operator()(const Trace<json::Settlement const> &, json::Action) override;
+  void operator()(const Trace<json::Trade const> &, json::Action) override;
   // ... unexpected
-  void operator()(const Trace<json::Execution> &, json::Action) override;
-  void operator()(const Trace<json::Margin> &, json::Action) override;
-  void operator()(const Trace<json::Order> &, json::Action) override;
-  void operator()(const Trace<json::Position> &, json::Action) override;
+  void operator()(const Trace<json::Execution const> &, json::Action) override;
+  void operator()(const Trace<json::Margin const> &, json::Action) override;
+  void operator()(const Trace<json::Order const> &, json::Action) override;
+  void operator()(const Trace<json::Position const> &, json::Action) override;
 
   // utilities
 

@@ -35,23 +35,23 @@ namespace json {
 
 struct StreamParser final {
   struct Handler {
-    virtual void operator()(const Trace<CancelAllAfter> &) = 0;
-    virtual void operator()(const Trace<Error> &) = 0;
-    virtual void operator()(const Trace<Handshake> &) = 0;
-    virtual void operator()(const Trace<Subscribe> &) = 0;
-    virtual void operator()(const Trace<Unsubscribe> &) = 0;
+    virtual void operator()(const Trace<CancelAllAfter const> &) = 0;
+    virtual void operator()(const Trace<Error const> &) = 0;
+    virtual void operator()(const Trace<Handshake const> &) = 0;
+    virtual void operator()(const Trace<Subscribe const> &) = 0;
+    virtual void operator()(const Trace<Unsubscribe const> &) = 0;
     // table
-    virtual void operator()(const Trace<Execution> &, Action) = 0;
-    virtual void operator()(const Trace<Funding> &, Action) = 0;
-    virtual void operator()(const Trace<Instrument> &, Action) = 0;
-    virtual void operator()(const Trace<Liquidation> &, Action) = 0;
-    virtual void operator()(const Trace<Margin> &, Action) = 0;
-    virtual void operator()(const Trace<Order> &, Action) = 0;
-    virtual void operator()(const Trace<OrderBookL2> &, Action) = 0;
-    virtual void operator()(const Trace<Position> &, Action) = 0;
-    virtual void operator()(const Trace<Quote> &, Action) = 0;
-    virtual void operator()(const Trace<Settlement> &, Action) = 0;
-    virtual void operator()(const Trace<Trade> &, Action) = 0;
+    virtual void operator()(const Trace<Execution const> &, Action) = 0;
+    virtual void operator()(const Trace<Funding const> &, Action) = 0;
+    virtual void operator()(const Trace<Instrument const> &, Action) = 0;
+    virtual void operator()(const Trace<Liquidation const> &, Action) = 0;
+    virtual void operator()(const Trace<Margin const> &, Action) = 0;
+    virtual void operator()(const Trace<Order const> &, Action) = 0;
+    virtual void operator()(const Trace<OrderBookL2 const> &, Action) = 0;
+    virtual void operator()(const Trace<Position const> &, Action) = 0;
+    virtual void operator()(const Trace<Quote const> &, Action) = 0;
+    virtual void operator()(const Trace<Settlement const> &, Action) = 0;
+    virtual void operator()(const Trace<Trade const> &, Action) = 0;
   };
 
   std::string_view action;

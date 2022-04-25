@@ -83,77 +83,77 @@ void StreamParser::dispatch(
               case UNKNOWN:
                 break;
               case EXECUTION: {
-                Execution execution(value, buffer);
+                const Execution execution(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, execution);
                 handler(event, action);
                 break;
               }
               case FUNDING: {
-                Funding funding(value, buffer);
+                const Funding funding(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, funding);
                 handler(event, action);
                 break;
               }
               case INSTRUMENT: {
-                Instrument instrument(value, buffer);
+                const Instrument instrument(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, instrument);
                 handler(event, action);
                 break;
               }
               case LIQUIDATION: {
-                Liquidation liquidation(value, buffer);
+                const Liquidation liquidation(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, liquidation);
                 handler(event, action);
                 break;
               }
               case MARGIN: {
-                Margin margin(value, buffer);
+                const Margin margin(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, margin);
                 handler(event, action);
                 break;
               }
               case ORDER: {
-                Order order(value, buffer);
+                const Order order(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, order);
                 handler(event, action);
                 break;
               }
               case ORDER_BOOK_L2: {
-                OrderBookL2 order_book_l2(value, buffer);
+                const OrderBookL2 order_book_l2(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, order_book_l2);
                 handler(event, action);
                 break;
               }
               case POSITION: {
-                Position position(value, buffer);
+                const Position position(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, position);
                 handler(event, action);
                 break;
               }
               case QUOTE: {
-                Quote quote(value, buffer);
+                const Quote quote(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, quote);
                 handler(event, action);
                 break;
               }
               case SETTLEMENT: {
-                Settlement settlement(value, buffer);
+                const Settlement settlement(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, settlement);
                 handler(event, action);
                 break;
               }
               case TRADE: {
-                Trade trade(value, buffer);
+                const Trade trade(value, buffer);
                 dispatched = true;
                 Trace event(trace_info, trade);
                 handler(event, action);
@@ -246,7 +246,7 @@ void StreamParser::dispatch(
       case UNKNOWN:
         throw RuntimeError("Can't detect message type"sv);
       case CANCEL_ALL_AFTER: {
-        CancelAllAfter cancel_all_after{
+        const CancelAllAfter cancel_all_after{
             .cancel_time = result.cancel_time,
             .now = result.now,
         };
@@ -255,7 +255,7 @@ void StreamParser::dispatch(
         return;
       }
       case ERROR: {
-        Error error{
+        const Error error{
             .error = result.error,
             .status = result.status,
         };
@@ -264,7 +264,7 @@ void StreamParser::dispatch(
         return;
       }
       case INFO: {
-        Handshake handshake{
+        const Handshake handshake{
             .docs = {},
             .info = {},
             .timestamp = result.timestamp,
@@ -275,7 +275,7 @@ void StreamParser::dispatch(
         return;
       }
       case SUBSCRIBE: {
-        Subscribe subscribe{
+        const Subscribe subscribe{
             .failure = result.failure,
             .subscribe = result.subscribe,
             .success = result.success,
@@ -285,7 +285,7 @@ void StreamParser::dispatch(
         return;
       }
       case UNSUBSCRIBE: {
-        Unsubscribe unsubscribe{
+        const Unsubscribe unsubscribe{
             .failure = result.failure,
             .unsubscribe = result.unsubscribe,
             .success = result.success,
