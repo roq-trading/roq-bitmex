@@ -50,7 +50,7 @@ void StreamParser::dispatch(
   for (int i = 0; i < 2; ++i) {
     core::json::Parser parser(message);
     auto root = parser.root();
-    for (auto [key, value] : std::get<core::json::object_t>(root)) {
+    for (auto [key, value] : std::get<core::json::Object>(root)) {
       auto field = Field(key);
       switch (field) {
         using enum Field::type_t;

@@ -14,7 +14,7 @@ struct ErrorParser final {
     using namespace std::literals;
     core::json::Parser parser(message);
     auto root = parser.root();
-    for (auto [key, value] : std::get<core::json::object_t>(root)) {
+    for (auto [key, value] : std::get<core::json::Object>(root)) {
       if (key.compare("error"sv) == 0) {
         ErrorResponse error(value);
         callback(error);
