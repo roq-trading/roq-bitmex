@@ -229,7 +229,7 @@ void OrderEntry::create_order(
         ord_type,
         time_in_force,
         exec_inst);
-    log::debug(R"(body="{}")"sv, body);
+    log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -261,10 +261,10 @@ void OrderEntry::create_order_ack(
     uint32_t version) {
   profile_.create_order_ack([&]() {
     auto &[trace_info, response] = event;
-    log::debug("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
+    log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
+      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
         using enum core::http::Category;
         case SUCCESS: {  // 2xx
@@ -362,7 +362,7 @@ void OrderEntry::modify_order(
         previous_request_id,
         modify_order.quantity,
         modify_order.price);
-    log::debug(R"(body="{}")"sv, body);
+    log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -395,10 +395,10 @@ void OrderEntry::modify_order_ack(
     uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto &[trace_info, response] = event;
-    log::debug("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
+    log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
+      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
         using enum core::http::Category;
         case SUCCESS: {  // 2xx
@@ -499,7 +499,7 @@ void OrderEntry::cancel_order(
         R"("orderID":"{}")"
         R"(}})"sv,
         order.external_order_id);
-    log::debug(R"(body="{}")"sv, body);
+    log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
     core::web::Request request{
         .method = method,
@@ -532,10 +532,10 @@ void OrderEntry::cancel_order_ack(
     uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto &[trace_info, response] = event;
-    log::debug("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
+    log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
+      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
         using enum core::http::Category;
         case SUCCESS: {  // 2xx
@@ -658,7 +658,7 @@ void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response const> &e
     auto &[trace_info, response] = event;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
+      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
         using enum core::http::Category;
         case SUCCESS: {  // 2xx
