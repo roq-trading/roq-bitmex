@@ -2,6 +2,8 @@
 
 #include "roq/bitmex/market_data.hpp"
 
+#include <algorithm>
+
 #include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
@@ -572,11 +574,8 @@ void MarketData::operator()(const Trace<json::Trade const> &event, json::Action 
     core::back_emplacer trades(shared_.trades);
     std::chrono::nanoseconds timestamp = {};
     for (auto &item : trade.data) {
-      if (timestamp == timestamp.zero()) {
-        timestamp = item.timestamp;
-      } else {
-        assert(timestamp == item.timestamp);
-      }
+      timestamp =
+          std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));
       if (item.symbol.compare(previous) != 0) {
         if (!std::empty(previous) && !std::empty(trades)) {
           const TradeSummary trade_summary{
@@ -590,6 +589,7 @@ void MarketData::operator()(const Trace<json::Trade const> &event, json::Action 
         }
         previous = item.symbol;
         trades.clear();
+        timestamp = {};
       }
       trades.emplace_back([&item](auto &result) { emplace(result, item); });
     }

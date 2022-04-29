@@ -363,7 +363,7 @@ void WebSocket::operator()(const Trace<json::Execution const> &event, json::Acti
       auto last = std::size(execution.data) == ++index;
       auto order_status = json::map(item.ord_status);
       auto side = json::map(item.side);
-      auto external_account = fmt::format("{}"sv, item.account);
+      auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto order_type = json::map(item.ord_type);
       auto time_in_force = json::map(item.time_in_force);
       auto last_liquidity = json::map(item.last_liquidity_ind);
@@ -472,7 +472,7 @@ void WebSocket::operator()(const Trace<json::Position const> &event, json::Actio
     auto &[trace_info, position] = event;
     log::info<2>("event={{action={}, position={}}}"sv, action, position);
     for (auto &item : position.data) {
-      auto external_account = fmt::format("{}"sv, item.account);
+      auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto long_quantity = std::max(0.0, item.current_qty);
       auto short_quantity = std::max(0.0, -item.current_qty);
       const PositionUpdate position_update{

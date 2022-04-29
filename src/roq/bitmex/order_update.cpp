@@ -2,6 +2,8 @@
 
 #include "roq/bitmex/order_update.hpp"
 
+#include <string>
+
 #include "roq/logging.hpp"
 
 #include "roq/bitmex/flags.hpp"
@@ -21,7 +23,8 @@ void OrderUpdate::operator()(
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
-  auto external_account = fmt::format("{}"sv, order_item.account);  // XXX alloc
+  auto external_account =
+      order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
@@ -100,7 +103,8 @@ void OrderUpdate::operator()(
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
-  auto external_account = fmt::format("{}"sv, order_item.account);  // XXX alloc
+  auto external_account =
+      order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
