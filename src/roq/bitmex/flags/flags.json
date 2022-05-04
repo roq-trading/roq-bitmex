@@ -45,7 +45,7 @@
       "name": "rest_ping_path",
       "type": "std::string",
       "validator": "roq::core::flags::Path<std::string>",
-      "default": "/",
+      "default": "/api/v1/announcement/urgent",
       "description": "URI path used for REST connection keep-alive messages"
     },
     {
