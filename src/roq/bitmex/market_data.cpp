@@ -484,16 +484,19 @@ void MarketData::operator()(const Trace<json::OrderBookL2 const> &event, json::A
     if (!snapshot && !partial_received_.order_book_l2)
       return;
     std::string_view previous;
+    std::chrono::nanoseconds timestamp = {};
     core::back_emplacer bids(shared_.bids), asks(shared_.asks);
     for (auto &item : order_book_l2.data) {
       if (std::empty(previous)) {
         previous = item.symbol;
       } else if (previous.compare(item.symbol) != 0) {
-        publish_market_by_price(trace_info, false, previous, bids, asks, snapshot);
+        publish_market_by_price(trace_info, false, previous, bids, asks, snapshot, timestamp);
         previous = item.symbol;
+        timestamp = {};
         bids.clear();
         asks.clear();
       }
+      utils::update_max(timestamp, item.timestamp);
       auto price_size = shared_.price_cache(action, item.id, item.price, item.size);  // XXX clang13
       auto price = price_size.first;
       auto size = price_size.second;
@@ -522,7 +525,7 @@ void MarketData::operator()(const Trace<json::OrderBookL2 const> &event, json::A
       }
     }
     assert(!std::empty(previous));
-    publish_market_by_price(trace_info, false, previous, bids, asks, snapshot);
+    publish_market_by_price(trace_info, false, previous, bids, asks, snapshot, timestamp);
     // state management
     if (snapshot) {
       partial_received_.order_book_l2 = true;
@@ -655,7 +658,8 @@ void MarketData::publish_market_by_price(
     const std::string_view &symbol,
     const std::span<MBPUpdate> &bids,
     const std::span<MBPUpdate> &asks,
-    bool snapshot) {
+    bool snapshot,
+    const std::chrono::nanoseconds exchange_time_utc) {
   assert(!(std::empty(bids) && std::empty(asks)));
   if (snapshot)
     log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
@@ -666,7 +670,7 @@ void MarketData::publish_market_by_price(
       .bids = bids,
       .asks = asks,
       .update_type = snapshot ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL,
-      .exchange_time_utc = {},
+      .exchange_time_utc = exchange_time_utc,
       .exchange_sequence = {},
       .price_decimals = {},
       .quantity_decimals = {},

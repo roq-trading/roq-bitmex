@@ -116,7 +116,8 @@ class MarketData final : public core::web::ClientSocket::Handler,
       const std::string_view &symbol,
       const std::span<MBPUpdate> &bids,
       const std::span<MBPUpdate> &asks,
-      bool snapshot);
+      bool snapshot,
+      const std::chrono::nanoseconds exchange_time_utc);
   void resubscribe_order_book_l2(const std::string_view &symbol);
 
  private:
