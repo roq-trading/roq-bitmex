@@ -15,13 +15,13 @@ namespace bitmex {
 namespace json {
 
 namespace {
-auto compare(const std::string_view &lhs, const std::string_view &rhs) {
+auto compare(std::string_view const &lhs, std::string_view const &rhs) {
   auto rhs_adj = rhs.substr(0, std::min(std::size(lhs), std::size(rhs)));
   return utils::case_insensitive_compare(lhs, rhs_adj);
 }
 }  // namespace
 
-Error guess_error(const std::string_view &message) {
+Error guess_error(std::string_view const &message) {
   if (std::empty(message))
     return Error::UNDEFINED;
   // POST /order, PUT /order, POST /order/closePosition
@@ -115,11 +115,9 @@ Error guess_error(const std::string_view &message) {
   Market is not open
   Order had execInst of [Close|ReduceOnly] and side of [Buy|Sell] but current position is [100]
   */
-  if (compare(message, "Order price is above the liquidation price of current short position"sv) ==
-      0)
+  if (compare(message, "Order price is above the liquidation price of current short position"sv) == 0)
     return Error::INVALID_PRICE;
-  if (compare(message, "Order price is below the liquidation price of current long position"sv) ==
-      0)
+  if (compare(message, "Order price is below the liquidation price of current long position"sv) == 0)
     return Error::INVALID_PRICE;
   /*
   Position is in liquidation

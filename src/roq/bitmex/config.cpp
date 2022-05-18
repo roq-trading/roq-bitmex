@@ -15,11 +15,11 @@ using namespace std::literals;
 namespace roq {
 namespace bitmex {
 
-Config::Config(const std::string_view &config_path, const std::string_view &secrets_path) {
+Config::Config(std::string_view const &config_path, std::string_view const &secrets_path) {
   server::ConfigReader::parse_file(*this, config_path, secrets_path);
 }
 
-const Account &Config::get_master_account() const {
+Account const &Config::get_master_account() const {
   return master_account_;
 }
 
@@ -79,7 +79,7 @@ void Config::operator()(server::RateLimit &&rate_limit) {
   rate_limits.emplace(rate_limit.name, std::move(rate_limit));
 }
 
-void Config::operator()(const std::string_view &key, toml::node &) {
+void Config::operator()(std::string_view const &key, toml::node &) {
   log::warn(R"(Unexpected: key="{}")"sv, key);
 }
 

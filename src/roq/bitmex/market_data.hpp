@@ -30,95 +30,93 @@
 namespace roq {
 namespace bitmex {
 
-class MarketData final : public core::web::ClientSocket::Handler,
-                         public json::StreamParser::Handler {
+class MarketData final : public core::web::ClientSocket::Handler, public json::StreamParser::Handler {
  public:
   struct Handler {
-    virtual void operator()(const Trace<StreamStatus const> &) = 0;
-    virtual void operator()(const Trace<ExternalLatency const> &) = 0;
-    virtual void operator()(const Trace<ReferenceData const> &, bool is_last) = 0;
-    virtual void operator()(const Trace<MarketStatus const> &, bool is_last) = 0;
-    virtual void operator()(const Trace<TopOfBook const> &, bool is_last) = 0;
-    virtual void operator()(
-        const Trace<MarketByPriceUpdate const> &, bool is_last, bool refresh) = 0;
-    virtual void operator()(const Trace<TradeSummary const> &, bool is_last) = 0;
-    virtual void operator()(const Trace<StatisticsUpdate const> &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus const> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
+    virtual void operator()(Trace<ReferenceData const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketStatus const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TopOfBook const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketByPriceUpdate const> const &, bool is_last, bool refresh) = 0;
+    virtual void operator()(Trace<TradeSummary const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StatisticsUpdate const> const &, bool is_last) = 0;
   };
 
   MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &);
 
   MarketData(MarketData &&) = delete;
-  MarketData(const MarketData &) = delete;
+  MarketData(MarketData const &) = delete;
 
-  void operator()(const Event<Start> &);
-  void operator()(const Event<Stop> &);
-  void operator()(const Event<Timer> &);
+  void operator()(Event<Start> const &);
+  void operator()(Event<Stop> const &);
+  void operator()(Event<Timer> const &);
 
   void operator()(metrics::Writer &);
 
  protected:
-  void operator()(const core::web::ClientSocket::Connected &) override;
-  void operator()(const core::web::ClientSocket::Disconnected &) override;
-  void operator()(const core::web::ClientSocket::Ready &) override;
-  void operator()(const core::web::ClientSocket::Close &) override;
-  void operator()(const core::web::ClientSocket::Latency &) override;
-  void operator()(const core::web::ClientSocket::Text &) override;
-  void operator()(const core::web::ClientSocket::Binary &) override;
+  void operator()(core::web::ClientSocket::Connected const &) override;
+  void operator()(core::web::ClientSocket::Disconnected const &) override;
+  void operator()(core::web::ClientSocket::Ready const &) override;
+  void operator()(core::web::ClientSocket::Close const &) override;
+  void operator()(core::web::ClientSocket::Latency const &) override;
+  void operator()(core::web::ClientSocket::Text const &) override;
+  void operator()(core::web::ClientSocket::Binary const &) override;
 
  private:
   void operator()(ConnectionStatus);
 
-  void send_subscribe(const std::string_view &topic);
-  void send_unsubscribe(const std::string_view &topic);
+  void send_subscribe(std::string_view const &topic);
+  void send_unsubscribe(std::string_view const &topic);
 
-  void send_subscribe(const std::span<std::string_view> &topics);
+  void send_subscribe(std::span<std::string_view> const &topics);
 
-  void send_subscribe(const std::string_view &topic, const std::string_view &symbol);
-  void send_unsubscribe(const std::string_view &topic, const std::string_view &symbol);
+  void send_subscribe(std::string_view const &topic, std::string_view const &symbol);
+  void send_unsubscribe(std::string_view const &topic, std::string_view const &symbol);
 
   uint32_t download(MarketDataState);
 
   void subscribe_instrument();
   void subscribe_order_book_l2();
 
-  void parse(const std::string_view &message);
-  void parse_helper(const std::string_view &message);
+  void parse(std::string_view const &message);
+  void parse_helper(std::string_view const &message);
 
-  void operator()(const Trace<json::CancelAllAfter const> &) override;
-  void operator()(const Trace<json::Error const> &) override;
-  void operator()(const Trace<json::Handshake const> &) override;
-  void operator()(const Trace<json::Subscribe const> &) override;
-  void operator()(const Trace<json::Unsubscribe const> &) override;
+  void operator()(Trace<json::CancelAllAfter const> const &) override;
+  void operator()(Trace<json::Error const> const &) override;
+  void operator()(Trace<json::Handshake const> const &) override;
+  void operator()(Trace<json::Subscribe const> const &) override;
+  void operator()(Trace<json::Unsubscribe const> const &) override;
 
-  void operator()(const Trace<json::Funding const> &, json::Action) override;
-  void operator()(const Trace<json::Instrument const> &, json::Action) override;
-  void operator()(const Trace<json::Liquidation const> &, json::Action) override;
-  void operator()(const Trace<json::OrderBookL2 const> &, json::Action) override;
-  void operator()(const Trace<json::Quote const> &, json::Action) override;
-  void operator()(const Trace<json::Settlement const> &, json::Action) override;
-  void operator()(const Trace<json::Trade const> &, json::Action) override;
+  void operator()(Trace<json::Funding const> const &, json::Action) override;
+  void operator()(Trace<json::Instrument const> const &, json::Action) override;
+  void operator()(Trace<json::Liquidation const> const &, json::Action) override;
+  void operator()(Trace<json::OrderBookL2 const> const &, json::Action) override;
+  void operator()(Trace<json::Quote const> const &, json::Action) override;
+  void operator()(Trace<json::Settlement const> const &, json::Action) override;
+  void operator()(Trace<json::Trade const> const &, json::Action) override;
   // ... unexpected
-  void operator()(const Trace<json::Execution const> &, json::Action) override;
-  void operator()(const Trace<json::Margin const> &, json::Action) override;
-  void operator()(const Trace<json::Order const> &, json::Action) override;
-  void operator()(const Trace<json::Position const> &, json::Action) override;
+  void operator()(Trace<json::Execution const> const &, json::Action) override;
+  void operator()(Trace<json::Margin const> const &, json::Action) override;
+  void operator()(Trace<json::Order const> const &, json::Action) override;
+  void operator()(Trace<json::Position const> const &, json::Action) override;
 
   // utilities
 
-  Product &find_product(const json::InstrumentItem &);
-  Product &find_product(const json::FundingItem &);
+  Product &find_product(json::InstrumentItem const &);
+  Product &find_product(json::FundingItem const &);
 
   // experimental
 
   void publish_market_by_price(
-      const TraceInfo &,
+      TraceInfo const &,
       bool is_last,
-      const std::string_view &symbol,
-      const std::span<MBPUpdate> &bids,
-      const std::span<MBPUpdate> &asks,
+      std::string_view const &symbol,
+      std::span<MBPUpdate> const &bids,
+      std::span<MBPUpdate> const &asks,
       bool snapshot,
       const std::chrono::nanoseconds exchange_time_utc);
-  void resubscribe_order_book_l2(const std::string_view &symbol);
+  void resubscribe_order_book_l2(std::string_view const &symbol);
 
  private:
   Handler &handler_;
@@ -134,8 +132,8 @@ class MarketData final : public core::web::ClientSocket::Handler,
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, cancel_all_after, error, funding, handshake, instrument,
-        liquidation, order_book_l2, quote, settlement, subscribe, unsubscribe, trade;
+    core::metrics::Profile parse, cancel_all_after, error, funding, handshake, instrument, liquidation, order_book_l2,
+        quote, settlement, subscribe, unsubscribe, trade;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

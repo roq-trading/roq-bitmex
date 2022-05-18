@@ -39,9 +39,9 @@ void update(Type &result, const Type type) {
 
 void StreamParser::dispatch(
     StreamParser::Handler &handler,
-    const std::string_view &message,
+    std::string_view const &message,
     core::json::Buffer &buffer,
-    const TraceInfo &trace_info) {
+    TraceInfo const &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN;

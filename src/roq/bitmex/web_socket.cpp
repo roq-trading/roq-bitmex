@@ -25,7 +25,7 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-const auto NAME = "ex"sv;
+auto const NAME = "ex"sv;
 const Mask SUPPORTS{
     SupportType::ORDER_ACK,
     SupportType::ORDER,
@@ -33,10 +33,10 @@ const Mask SUPPORTS{
     SupportType::POSITION,
 };
 
-const auto REQUEST_EXPIRES = 5s;
+auto const REQUEST_EXPIRES = 5s;
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(const std::string_view &group, const std::string_view &function)
+  explicit create_metrics(std::string_view const &group, std::string_view const &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
@@ -65,11 +65,7 @@ void emplace(Fill &result, const T &value) {
 }  // namespace
 
 WebSocket::WebSocket(
-    Handler &handler,
-    core::io::Context &context,
-    uint16_t stream_id,
-    Security &security,
-    Shared &shared)
+    Handler &handler, core::io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
     : handler_(handler), stream_id_(stream_id),
       name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())),
       connection_(create_connection(*this, context, [this]() { return create_upgrade_headers(); })),
@@ -99,15 +95,15 @@ WebSocket::WebSocket(
       download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
 }
 
-void WebSocket::operator()(const Event<Start> &) {
+void WebSocket::operator()(Event<Start> const &) {
   connection_.start();
 }
 
-void WebSocket::operator()(const Event<Stop> &) {
+void WebSocket::operator()(Event<Stop> const &) {
   connection_.stop();
 }
 
-void WebSocket::operator()(const Event<Timer> &event) {
+void WebSocket::operator()(Event<Timer> const &event) {
   if (!connection_.refresh(event.value.now))
     return;
   if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after().count() && ready_ &&
@@ -140,40 +136,39 @@ void WebSocket::operator()(metrics::Writer &writer) {
 }
 
 uint16_t WebSocket::operator()(
-    const Event<CreateOrder> &event, const oms::Order &order, const std::string_view &request_id) {
+    Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
   create_order(event, order, request_id);
   return stream_id_;
 }
 
 uint16_t WebSocket::operator()(
-    const Event<ModifyOrder> &event,
-    const oms::Order &order,
-    const std::string_view &request_id,
-    const std::string_view &previous_request_id) {
+    Event<ModifyOrder> const &event,
+    oms::Order const &order,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   modify_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
 
 uint16_t WebSocket::operator()(
-    const Event<CancelOrder> &event,
-    const oms::Order &order,
-    const std::string_view &request_id,
-    const std::string_view &previous_request_id) {
+    Event<CancelOrder> const &event,
+    oms::Order const &order,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   cancel_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
 
-uint16_t WebSocket::operator()(
-    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
+uint16_t WebSocket::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   cancel_all_orders(event, request_id);
   return stream_id_;
 }
 
-void WebSocket::operator()(const core::web::ClientSocket::Connected &) {
+void WebSocket::operator()(core::web::ClientSocket::Connected const &) {
   // note! don't notify gateway: wait for ready
 }
 
-void WebSocket::operator()(const core::web::ClientSocket::Disconnected &) {
+void WebSocket::operator()(core::web::ClientSocket::Disconnected const &) {
   ready_ = false;
   next_cancel_all_after_ = {};
   partial_received_ = {};
@@ -181,15 +176,15 @@ void WebSocket::operator()(const core::web::ClientSocket::Disconnected &) {
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void WebSocket::operator()(const core::web::ClientSocket::Ready &) {
+void WebSocket::operator()(core::web::ClientSocket::Ready const &) {
   // note! don't notify gateway: wait for handshake
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
-void WebSocket::operator()(const core::web::ClientSocket::Close &) {
+void WebSocket::operator()(core::web::ClientSocket::Close const &) {
 }
 
-void WebSocket::operator()(const core::web::ClientSocket::Latency &latency) {
+void WebSocket::operator()(core::web::ClientSocket::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -200,11 +195,11 @@ void WebSocket::operator()(const core::web::ClientSocket::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void WebSocket::operator()(const core::web::ClientSocket::Text &text) {
+void WebSocket::operator()(core::web::ClientSocket::Text const &text) {
   parse(text.payload);
 }
 
-void WebSocket::operator()(const core::web::ClientSocket::Binary &) {
+void WebSocket::operator()(core::web::ClientSocket::Binary const &) {
   log::fatal("Unexpected"sv);
 }
 
@@ -229,9 +224,7 @@ void WebSocket::operator()(ConnectionStatus status) {
 // create-order
 
 void WebSocket::create_order(
-    const Event<CreateOrder> &,
-    const oms::Order &,
-    [[maybe_unused]] const std::string_view &request_id) {
+    Event<CreateOrder> const &, oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
       throw oms::NotReady("not ready"sv);
@@ -241,10 +234,10 @@ void WebSocket::create_order(
 // modify-order
 
 void WebSocket::modify_order(
-    const Event<ModifyOrder> &,
-    const oms::Order &,
-    [[maybe_unused]] const std::string_view &request_id,
-    [[maybe_unused]] const std::string_view &previous_request_id) {
+    Event<ModifyOrder> const &,
+    oms::Order const &,
+    [[maybe_unused]] std::string_view const &request_id,
+    [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
       throw oms::NotReady("not ready"sv);
@@ -254,10 +247,10 @@ void WebSocket::modify_order(
 // cancel-order
 
 void WebSocket::cancel_order(
-    const Event<CancelOrder> &,
-    const oms::Order &,
-    [[maybe_unused]] const std::string_view &request_id,
-    [[maybe_unused]] const std::string_view &previous_request_id) {
+    Event<CancelOrder> const &,
+    oms::Order const &,
+    [[maybe_unused]] std::string_view const &request_id,
+    [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
       throw oms::NotReady("not ready"sv);
@@ -266,8 +259,7 @@ void WebSocket::cancel_order(
 
 // cancel-all-orders
 
-void WebSocket::cancel_all_orders(
-    const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
+void WebSocket::cancel_all_orders(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {});
 }
 
@@ -301,7 +293,7 @@ uint32_t WebSocket::download(WebSocketState state) {
   return {};
 }
 
-void WebSocket::parse(const std::string_view &message) {
+void WebSocket::parse(std::string_view const &message) {
   log::info<4>(R"(message="{}")"sv, message);
   profile_.parse([&]() {
     try {
@@ -313,20 +305,20 @@ void WebSocket::parse(const std::string_view &message) {
   });
 }
 
-void WebSocket::parse_helper(const std::string_view &message) {
+void WebSocket::parse_helper(std::string_view const &message) {
   auto trace_info = server::create_trace_info();
   core::json::Buffer buffer(decode_buffer_);
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
-void WebSocket::operator()(const Trace<json::CancelAllAfter const> &event) {
+void WebSocket::operator()(Trace<json::CancelAllAfter const> const &event) {
   profile_.cancel_all_after([&]() {
     auto &[trace_info, cancel_all_after] = event;
     log::info<2>("cancel_all_after={}"sv, cancel_all_after);
   });
 }
 
-void WebSocket::operator()(const Trace<json::Error const> &event) {
+void WebSocket::operator()(Trace<json::Error const> const &event) {
   profile_.error([&]() {
     auto &[trace_info, error] = event;
     log::warn("error={}"sv, error);
@@ -334,7 +326,7 @@ void WebSocket::operator()(const Trace<json::Error const> &event) {
   connection_.close();
 }
 
-void WebSocket::operator()(const Trace<json::Handshake const> &event) {
+void WebSocket::operator()(Trace<json::Handshake const> const &event) {
   profile_.handshake([&]() {
     auto &[trace_info, handshake] = event;
     log::info<2>("handshake={}"sv, handshake);
@@ -345,13 +337,13 @@ void WebSocket::operator()(const Trace<json::Handshake const> &event) {
   });
 }
 
-void WebSocket::operator()(const Trace<json::Subscribe const> &) {
+void WebSocket::operator()(Trace<json::Subscribe const> const &) {
 }
 
-void WebSocket::operator()(const Trace<json::Unsubscribe const> &) {
+void WebSocket::operator()(Trace<json::Unsubscribe const> const &) {
 }
 
-void WebSocket::operator()(const Trace<json::Execution const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Execution const> const &event, json::Action action) {
   profile_.execution([&]() {
     // auto &[trace_info, execution] = event; // XXX clang13
     auto &trace_info = event.trace_info;
@@ -371,8 +363,7 @@ void WebSocket::operator()(const Trace<json::Execution const> &event, json::Acti
       auto request_status = compute_request_status(item.exec_type);
       auto error = json::guess_error(item.ord_rej_reason);
       // cancel order does not allow passing a custom id
-      auto request_id =
-          request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
+      auto request_id = request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
       oms::Response response{
           .type = request_type,
           .origin = Origin::EXCHANGE,
@@ -411,32 +402,30 @@ void WebSocket::operator()(const Trace<json::Execution const> &event, json::Acti
           .last_liquidity = last_liquidity,
           .update_type = {},
       };
-      if (shared_.update_order(
-              item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
-                if (item.exec_type == json::ExecType::TRADE) {
-                  fills.emplace_back([&](auto &result) { emplace(result, item); });
-                }
-                if (last && !std::empty(fills)) {
-                  const TradeUpdate trade_update{
-                      .stream_id = stream_id_,
-                      .account = order.account,
-                      .order_id = order.order_id,
-                      .exchange = order.exchange,
-                      .symbol = order.symbol,
-                      .side = order.side,
-                      .position_effect = order.position_effect,
-                      .create_time_utc = item.timestamp,
-                      .update_time_utc = item.timestamp,
-                      .external_account = external_account,
-                      .external_order_id = order.external_order_id,
-                      .fills = fills,
-                      .routing_id = order.routing_id,
-                      .update_type = {},
-                  };
-                  create_trace_and_dispatch(
-                      handler_, trace_info, trade_update, true, order.user_id);
-                }
-              })) {
+      if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
+            if (item.exec_type == json::ExecType::TRADE) {
+              fills.emplace_back([&](auto &result) { emplace(result, item); });
+            }
+            if (last && !std::empty(fills)) {
+              const TradeUpdate trade_update{
+                  .stream_id = stream_id_,
+                  .account = order.account,
+                  .order_id = order.order_id,
+                  .exchange = order.exchange,
+                  .symbol = order.symbol,
+                  .side = order.side,
+                  .position_effect = order.position_effect,
+                  .create_time_utc = item.timestamp,
+                  .update_time_utc = item.timestamp,
+                  .external_account = external_account,
+                  .external_order_id = order.external_order_id,
+                  .fills = fills,
+                  .routing_id = order.routing_id,
+                  .update_type = {},
+              };
+              create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
+            }
+          })) {
       } else {
         log::warn<1>("*** EXTERNAL ORDER ***"sv);
       }
@@ -444,7 +433,7 @@ void WebSocket::operator()(const Trace<json::Execution const> &event, json::Acti
   });
 }
 
-void WebSocket::operator()(const Trace<json::Margin const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Margin const> const &event, json::Action action) {
   profile_.margin([&]() {
     auto &[trace_info, margin] = event;
     log::info<2>("event={{action={}, margin={}}}"sv, action, margin);
@@ -452,7 +441,7 @@ void WebSocket::operator()(const Trace<json::Margin const> &event, json::Action 
   });
 }
 
-void WebSocket::operator()(const Trace<json::Order const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Order const> const &event, json::Action action) {
   profile_.order([&]() {
     auto &[trace_info, order] = event;
     log::info<2>("event={{action={}, order={}}}"sv, action, order);
@@ -467,7 +456,7 @@ void WebSocket::operator()(const Trace<json::Order const> &event, json::Action a
   });
 }
 
-void WebSocket::operator()(const Trace<json::Position const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Position const> const &event, json::Action action) {
   profile_.position([&]() {
     auto &[trace_info, position] = event;
     log::info<2>("event={{action={}, position={}}}"sv, action, position);
@@ -491,37 +480,37 @@ void WebSocket::operator()(const Trace<json::Position const> &event, json::Actio
   });
 }
 
-void WebSocket::operator()(const Trace<json::Funding const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Funding const> const &event, json::Action action) {
   auto &[trace_info, funding] = event;
   log::fatal("Unexpected: action={}, funding={}"sv, action, funding);
 }
 
-void WebSocket::operator()(const Trace<json::Instrument const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Instrument const> const &event, json::Action action) {
   auto &[trace_info, instrument] = event;
   log::fatal("Unexpected: action={}, instrument={}"sv, action, instrument);
 }
 
-void WebSocket::operator()(const Trace<json::Liquidation const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Liquidation const> const &event, json::Action action) {
   auto &[trace_info, liquidation] = event;
   log::fatal("Unexpected: action={}, liquidation={}"sv, action, liquidation);
 }
 
-void WebSocket::operator()(const Trace<json::OrderBookL2 const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::OrderBookL2 const> const &event, json::Action action) {
   auto &[trace_info, order_book_l2] = event;
   log::fatal("Unexpected: action={}, order_book_l2={}"sv, action, order_book_l2);
 }
 
-void WebSocket::operator()(const Trace<json::Quote const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Quote const> const &event, json::Action action) {
   auto &[trace_info, quote] = event;
   log::fatal("Unexpected: action={}, quote={}"sv, action, quote);
 }
 
-void WebSocket::operator()(const Trace<json::Settlement const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Settlement const> const &event, json::Action action) {
   auto &[trace_info, settlement] = event;
   log::fatal("Unexpected: action={}, settlement={}"sv, action, settlement);
 }
 
-void WebSocket::operator()(const Trace<json::Trade const> &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Trade const> const &event, json::Action action) {
   auto &[trace_info, trade] = event;
   log::fatal("Unexpected: action={}, trade={}"sv, action, trade);
 }

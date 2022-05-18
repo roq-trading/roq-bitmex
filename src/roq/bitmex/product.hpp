@@ -16,20 +16,20 @@ namespace bitmex {
 
 class Product final {
  public:
-  explicit Product(const json::InstrumentItem &);
-  explicit Product(const json::FundingItem &);
+  explicit Product(json::InstrumentItem const &);
+  explicit Product(json::FundingItem const &);
 
   Product(Product &&) = default;
-  Product(const Product &) = delete;
+  Product(Product const &) = delete;
 
-  bool update(const json::InstrumentItem &);
-  bool update(const json::FundingItem &);
+  bool update(json::InstrumentItem const &);
+  bool update(json::FundingItem const &);
 
-  ReferenceData reference_data(const json::InstrumentItem &, uint16_t stream_id) const;
-  MarketStatus market_status(const json::InstrumentItem &, uint16_t stream_id) const;
-  StatisticsUpdate statistics_update(const json::InstrumentItem &, uint16_t stream_id) const;
+  ReferenceData reference_data(json::InstrumentItem const &, uint16_t stream_id) const;
+  MarketStatus market_status(json::InstrumentItem const &, uint16_t stream_id) const;
+  StatisticsUpdate statistics_update(json::InstrumentItem const &, uint16_t stream_id) const;
 
-  StatisticsUpdate statistics_update(const json::FundingItem &, uint16_t stream_id) const;
+  StatisticsUpdate statistics_update(json::FundingItem const &, uint16_t stream_id) const;
 
   bool is_market_status_dirty() const { return market_status_dirty_; }
   bool is_statistics_dirty() const { return !std::empty(statistics_); }

@@ -27,98 +27,95 @@
 namespace roq {
 namespace bitmex {
 
-class WebSocket final : public core::web::ClientSocket::Handler,
-                        public json::StreamParser::Handler {
+class WebSocket final : public core::web::ClientSocket::Handler, public json::StreamParser::Handler {
  public:
   struct Handler {
-    virtual void operator()(const Trace<StreamStatus const> &) = 0;
-    virtual void operator()(const Trace<ExternalLatency const> &) = 0;
-    virtual void operator()(const Trace<TradeUpdate const> &, bool is_last, uint8_t user_id) = 0;
-    virtual void operator()(const Trace<PositionUpdate const> &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus const> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
+    virtual void operator()(Trace<TradeUpdate const> const &, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(Trace<PositionUpdate const> const &, bool is_last) = 0;
   };
 
   WebSocket(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
 
   WebSocket(WebSocket &&) = delete;
-  WebSocket(const WebSocket &) = delete;
+  WebSocket(WebSocket const &) = delete;
 
   bool ready() const { return ready_; }
 
-  void operator()(const Event<Start> &);
-  void operator()(const Event<Stop> &);
-  void operator()(const Event<Timer> &);
+  void operator()(Event<Start> const &);
+  void operator()(Event<Stop> const &);
+  void operator()(Event<Timer> const &);
 
   void operator()(metrics::Writer &);
 
+  uint16_t operator()(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
   uint16_t operator()(
-      const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
+      Event<ModifyOrder> const &,
+      oms::Order const &,
+      std::string_view const &request_id,
+      std::string_view const &previous_request_id);
   uint16_t operator()(
-      const Event<ModifyOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
-  uint16_t operator()(
-      const Event<CancelOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
+      Event<CancelOrder> const &,
+      oms::Order const &,
+      std::string_view const &request_id,
+      std::string_view const &previous_request_id);
 
-  uint16_t operator()(const Event<CancelAllOrders> &, const std::string_view &request_id);
+  uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
  protected:
-  void operator()(const core::web::ClientSocket::Connected &) override;
-  void operator()(const core::web::ClientSocket::Disconnected &) override;
-  void operator()(const core::web::ClientSocket::Ready &) override;
-  void operator()(const core::web::ClientSocket::Close &) override;
-  void operator()(const core::web::ClientSocket::Latency &) override;
-  void operator()(const core::web::ClientSocket::Text &) override;
-  void operator()(const core::web::ClientSocket::Binary &) override;
+  void operator()(core::web::ClientSocket::Connected const &) override;
+  void operator()(core::web::ClientSocket::Disconnected const &) override;
+  void operator()(core::web::ClientSocket::Ready const &) override;
+  void operator()(core::web::ClientSocket::Close const &) override;
+  void operator()(core::web::ClientSocket::Latency const &) override;
+  void operator()(core::web::ClientSocket::Text const &) override;
+  void operator()(core::web::ClientSocket::Binary const &) override;
 
  private:
   void operator()(ConnectionStatus);
 
-  void create_order(
-      const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
+  void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
 
   void modify_order(
-      const Event<ModifyOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
+      Event<ModifyOrder> const &,
+      oms::Order const &,
+      std::string_view const &request_id,
+      std::string_view const &previous_request_id);
 
   void cancel_order(
-      const Event<CancelOrder> &,
-      const oms::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
+      Event<CancelOrder> const &,
+      oms::Order const &,
+      std::string_view const &request_id,
+      std::string_view const &previous_request_id);
 
-  void cancel_all_orders(const Event<CancelAllOrders> &, const std::string_view &request_id);
+  void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
   void send_cancel_all_after(std::chrono::nanoseconds timeout);
 
   uint32_t download(WebSocketState);
 
-  void parse(const std::string_view &message);
-  void parse_helper(const std::string_view &message);
+  void parse(std::string_view const &message);
+  void parse_helper(std::string_view const &message);
 
-  void operator()(const Trace<json::CancelAllAfter const> &) override;
-  void operator()(const Trace<json::Error const> &) override;
-  void operator()(const Trace<json::Handshake const> &) override;
-  void operator()(const Trace<json::Subscribe const> &) override;
-  void operator()(const Trace<json::Unsubscribe const> &) override;
+  void operator()(Trace<json::CancelAllAfter const> const &) override;
+  void operator()(Trace<json::Error const> const &) override;
+  void operator()(Trace<json::Handshake const> const &) override;
+  void operator()(Trace<json::Subscribe const> const &) override;
+  void operator()(Trace<json::Unsubscribe const> const &) override;
 
-  void operator()(const Trace<json::Execution const> &, json::Action) override;
-  void operator()(const Trace<json::Margin const> &, json::Action) override;
-  void operator()(const Trace<json::Order const> &, json::Action) override;
-  void operator()(const Trace<json::Position const> &, json::Action) override;
+  void operator()(Trace<json::Execution const> const &, json::Action) override;
+  void operator()(Trace<json::Margin const> const &, json::Action) override;
+  void operator()(Trace<json::Order const> const &, json::Action) override;
+  void operator()(Trace<json::Position const> const &, json::Action) override;
   // ... unexpected
-  void operator()(const Trace<json::Funding const> &, json::Action) override;
-  void operator()(const Trace<json::Instrument const> &, json::Action) override;
-  void operator()(const Trace<json::Liquidation const> &, json::Action) override;
-  void operator()(const Trace<json::OrderBookL2 const> &, json::Action) override;
-  void operator()(const Trace<json::Quote const> &, json::Action) override;
-  void operator()(const Trace<json::Settlement const> &, json::Action) override;
-  void operator()(const Trace<json::Trade const> &, json::Action) override;
+  void operator()(Trace<json::Funding const> const &, json::Action) override;
+  void operator()(Trace<json::Instrument const> const &, json::Action) override;
+  void operator()(Trace<json::Liquidation const> const &, json::Action) override;
+  void operator()(Trace<json::OrderBookL2 const> const &, json::Action) override;
+  void operator()(Trace<json::Quote const> const &, json::Action) override;
+  void operator()(Trace<json::Settlement const> const &, json::Action) override;
+  void operator()(Trace<json::Trade const> const &, json::Action) override;
 
   // utilities
 
@@ -139,8 +136,8 @@ class WebSocket final : public core::web::ClientSocket::Handler,
   } counter_;
   struct {
     core::metrics::Profile parse,  //
-        create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error,
-        execution, handshake, margin, order, position;
+        create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error, execution, handshake,
+        margin, order, position;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

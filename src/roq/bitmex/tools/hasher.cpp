@@ -20,15 +20,14 @@ auto create_timestamp_secs(std::chrono::nanoseconds value) {
 }
 }  // namespace
 
-Hasher::Hasher(const std::string_view &key, const std::string_view &secret)
-    : key_(key), hmac_(secret) {
+Hasher::Hasher(std::string_view const &key, std::string_view const &secret) : key_(key), hmac_(secret) {
 }
 
 std::string Hasher::create_signature(
     std::chrono::nanoseconds expires,
     core::http::Method method,
-    const std::string_view &path,
-    const std::string_view &body) {
+    std::string_view const &path,
+    std::string_view const &body) {
   auto expires_ = create_timestamp_secs(expires);
   auto method_ = magic_enum::enum_name(method);
   hmac_.clear();
@@ -46,8 +45,8 @@ std::string Hasher::create_signature(
 std::string Hasher::create_headers(
     std::chrono::nanoseconds expires,
     core::http::Method method,
-    const std::string_view &path,
-    const std::string_view &body) {
+    std::string_view const &path,
+    std::string_view const &body) {
   auto signature = create_signature(expires, method, path, body);
   return fmt::format(
       "api-signature: {}\r\n"

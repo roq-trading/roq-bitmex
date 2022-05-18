@@ -16,7 +16,7 @@ using namespace std::literals;
 using namespace Catch::literals;
 
 TEST_CASE("json_instrument_item_unlisted", "[json_instrument_item]") {
-  const auto message = R"({)"
+  auto const message = R"({)"
                        R"("symbol":".EVOL7D",)"
                        R"("rootSymbol":"EVOL",)"
                        R"("state":"Unlisted",)"
@@ -149,7 +149,7 @@ TEST_CASE("json_instrument_item_unlisted", "[json_instrument_item]") {
 }
 
 TEST_CASE("json_instrument_item_open", "[json_instrument_item]") {
-  const auto message = R"({)"
+  auto const message = R"({)"
                        R"("symbol":"XRPH20",)"
                        R"("rootSymbol":"XRP",)"
                        R"("state":"Open",)"
@@ -332,7 +332,7 @@ TEST_CASE("json_instrument_item_open", "[json_instrument_item]") {
 }
 
 TEST_CASE("json_instrument_empty", "[json_instrument]") {
-  const auto message = "[]"sv;
+  auto const message = "[]"sv;
   core::Buffer buffer(8192);
   core::json::Buffer decode_buffer(buffer);
   auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
@@ -340,7 +340,7 @@ TEST_CASE("json_instrument_empty", "[json_instrument]") {
 }
 
 TEST_CASE("json_instrument_simple", "[json_instrument]") {
-  const auto message = R"([)"
+  auto const message = R"([)"
                        R"({)"
                        R"("symbol":".EVOL7D",)"
                        R"("rootSymbol":"EVOL",)"

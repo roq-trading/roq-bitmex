@@ -10,7 +10,7 @@ namespace json {
 
 struct ErrorParser final {
   template <typename F>
-  static bool dispatch(const std::string_view &message, F &&callback) {
+  static bool dispatch(std::string_view const &message, F &&callback) {
     using namespace std::literals;
     core::json::Parser parser(message);
     auto root = parser.root();

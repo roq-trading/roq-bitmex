@@ -16,22 +16,22 @@ namespace tools {
 
 class Hasher final {
  public:
-  Hasher(const std::string_view &key, const std::string_view &secret);
+  Hasher(std::string_view const &key, std::string_view const &secret);
 
   Hasher(Hasher &&) = delete;
-  Hasher(const Hasher &) = delete;
+  Hasher(Hasher const &) = delete;
 
   std::string create_signature(
       std::chrono::nanoseconds expires,
       core::http::Method method,
-      const std::string_view &path,
-      const std::string_view &body);
+      std::string_view const &path,
+      std::string_view const &body);
 
   std::string create_headers(
       std::chrono::nanoseconds expires,
       core::http::Method method,
-      const std::string_view &path,
-      const std::string_view &body);
+      std::string_view const &path,
+      std::string_view const &body);
 
  private:
   const std::string key_;

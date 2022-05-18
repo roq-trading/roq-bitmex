@@ -11,8 +11,7 @@ using namespace std::literals;
 namespace roq {
 namespace bitmex {
 
-std::pair<double, double> PriceCache::operator()(
-    json::Action action, uint64_t id, double price, double size) {
+std::pair<double, double> PriceCache::operator()(json::Action action, uint64_t id, double price, double size) {
   auto result = NaN;
   auto iter = price_lookup_.find(id);
   switch (action) {

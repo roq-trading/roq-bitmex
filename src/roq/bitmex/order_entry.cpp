@@ -24,7 +24,7 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-const auto NAME = "om"sv;
+auto const NAME = "om"sv;
 
 const Mask SUPPORTS{
     SupportType::CREATE_ORDER,
@@ -34,7 +34,7 @@ const Mask SUPPORTS{
 };
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(const std::string_view &group, const std::string_view &function)
+  explicit create_metrics(std::string_view const &group, std::string_view const &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
@@ -69,11 +69,7 @@ auto get_quality_of_service() {
 }  // namespace
 
 OrderEntry::OrderEntry(
-    Handler &handler,
-    core::io::Context &context,
-    uint16_t stream_id,
-    Security &security,
-    Shared &shared)
+    Handler &handler, core::io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
     : handler_(handler), stream_id_(stream_id),
       name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())),
       connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
@@ -96,15 +92,15 @@ OrderEntry::OrderEntry(
       security_(security), shared_(shared) {
 }
 
-void OrderEntry::operator()(const Event<Start> &) {
+void OrderEntry::operator()(Event<Start> const &) {
   connection_.start();
 }
 
-void OrderEntry::operator()(const Event<Stop> &) {
+void OrderEntry::operator()(Event<Stop> const &) {
   connection_.stop();
 }
 
-void OrderEntry::operator()(const Event<Timer> &event) {
+void OrderEntry::operator()(Event<Timer> const &event) {
   connection_.refresh(event.value.now);
 }
 
@@ -126,45 +122,44 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<CreateOrder> &event, const oms::Order &order, const std::string_view &request_id) {
+    Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
   create_order(event, order, request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<ModifyOrder> &event,
-    const oms::Order &order,
-    const std::string_view &request_id,
-    const std::string_view &previous_request_id) {
+    Event<ModifyOrder> const &event,
+    oms::Order const &order,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   modify_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<CancelOrder> &event,
-    const oms::Order &order,
-    const std::string_view &request_id,
-    const std::string_view &previous_request_id) {
+    Event<CancelOrder> const &event,
+    oms::Order const &order,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   cancel_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
 
-uint16_t OrderEntry::operator()(
-    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
+uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   cancel_all_orders(event, request_id);
   return stream_id_;
 }
 
-void OrderEntry::operator()(const core::web::Client::Connected &) {
+void OrderEntry::operator()(core::web::Client::Connected const &) {
   (*this)(ConnectionStatus::READY);
 }
 
-void OrderEntry::operator()(const core::web::Client::Disconnected &) {
+void OrderEntry::operator()(core::web::Client::Disconnected const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void OrderEntry::operator()(const core::web::Client::Latency &latency) {
+void OrderEntry::operator()(core::web::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -195,8 +190,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 // create-order
 
-void OrderEntry::create_order(
-    const Event<CreateOrder> &event, const oms::Order &, const std::string_view &request_id) {
+void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const &, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
       throw oms::NotReady("not ready"sv);
@@ -255,10 +249,7 @@ void OrderEntry::create_order(
 }
 
 void OrderEntry::create_order_ack(
-    const Trace<core::web::Response const> &event,
-    uint8_t user_id,
-    uint32_t order_id,
-    uint32_t version) {
+    Trace<core::web::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -296,12 +287,7 @@ void OrderEntry::create_order_ack(
               .price = NaN,
           };
           if (shared_.update_order(
-                  user_id,
-                  order_id,
-                  stream_id_,
-                  trace_info,
-                  response,
-                  []([[maybe_unused]] auto &order) {})) {
+                  user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
           } else {
             log::warn("Did not find order: user_id={}, order_id={}"sv, user_id, order_id);
           }
@@ -324,12 +310,7 @@ void OrderEntry::create_order_ack(
           .price = NaN,
       };
       if (shared_.update_order(
-              user_id,
-              order_id,
-              stream_id_,
-              trace_info,
-              response,
-              []([[maybe_unused]] auto &order) {})) {
+              user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
       } else {
         log::warn("Did not find order: user_id={}, order_id={}"sv, user_id, order_id);
       }
@@ -340,10 +321,10 @@ void OrderEntry::create_order_ack(
 // modify-order
 
 void OrderEntry::modify_order(
-    const Event<ModifyOrder> &event,
-    const oms::Order &,
-    const std::string_view &request_id,
-    const std::string_view &previous_request_id) {
+    Event<ModifyOrder> const &event,
+    oms::Order const &,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
       throw oms::NotReady("not ready"sv);
@@ -377,10 +358,8 @@ void OrderEntry::modify_order(
     connection_(
         request_id,
         request,
-        [this,
-         user_id = message_info.source,
-         order_id = modify_order.order_id,
-         version = modify_order.version]([[maybe_unused]] auto &request_id, auto &response) {
+        [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
+            [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
           Trace event(trace_info, response);
           modify_order_ack(event, user_id, order_id, version);
@@ -389,10 +368,7 @@ void OrderEntry::modify_order(
 }
 
 void OrderEntry::modify_order_ack(
-    const Trace<core::web::Response const> &event,
-    uint8_t user_id,
-    uint32_t order_id,
-    uint32_t version) {
+    Trace<core::web::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -431,18 +407,9 @@ void OrderEntry::modify_order_ack(
               .price = NaN,
           };
           if (shared_.update_order(
-                  user_id,
-                  order_id,
-                  stream_id_,
-                  trace_info,
-                  response,
-                  []([[maybe_unused]] auto &order) {})) {
+                  user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
           } else {
-            log::warn(
-                "Did not find order: user_id={}, order_id={}, version={}"sv,
-                user_id,
-                order_id,
-                version);
+            log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
           }
           break;
         }
@@ -463,18 +430,9 @@ void OrderEntry::modify_order_ack(
           .price = NaN,
       };
       if (shared_.update_order(
-              user_id,
-              order_id,
-              stream_id_,
-              trace_info,
-              response,
-              []([[maybe_unused]] auto &order) {})) {
+              user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
       } else {
-        log::warn(
-            "Did not find order: user_id={}, order_id={}, version={}"sv,
-            user_id,
-            order_id,
-            version);
+        log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
       }
     }
   });
@@ -483,10 +441,10 @@ void OrderEntry::modify_order_ack(
 // cancel-order
 
 void OrderEntry::cancel_order(
-    const Event<CancelOrder> &event,
-    const oms::Order &order,
-    [[maybe_unused]] const std::string_view &request_id,
-    [[maybe_unused]] const std::string_view &previous_request_id) {
+    Event<CancelOrder> const &event,
+    oms::Order const &order,
+    [[maybe_unused]] std::string_view const &request_id,
+    [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
       throw oms::NotReady("not ready"sv);
@@ -514,10 +472,8 @@ void OrderEntry::cancel_order(
     connection_(
         request_id,
         request,
-        [this,
-         user_id = message_info.source,
-         order_id = cancel_order.order_id,
-         version = cancel_order.version]([[maybe_unused]] auto &request_id, auto &response) {
+        [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
+            [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
           Trace event(trace_info, response);
           cancel_order_ack(event, user_id, order_id, version);
@@ -526,10 +482,7 @@ void OrderEntry::cancel_order(
 }
 
 void OrderEntry::cancel_order_ack(
-    const Trace<core::web::Response const> &event,
-    uint8_t user_id,
-    uint32_t order_id,
-    uint32_t version) {
+    Trace<core::web::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -569,18 +522,9 @@ void OrderEntry::cancel_order_ack(
               .price = NaN,
           };
           if (shared_.update_order(
-                  user_id,
-                  order_id,
-                  stream_id_,
-                  trace_info,
-                  response,
-                  []([[maybe_unused]] auto &order) {})) {
+                  user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
           } else {
-            log::warn(
-                "Did not find order: user_id={}, order_id={}, version={}"sv,
-                user_id,
-                order_id,
-                version);
+            log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
           }
           break;
         }
@@ -601,18 +545,9 @@ void OrderEntry::cancel_order_ack(
           .price = NaN,
       };
       if (shared_.update_order(
-              user_id,
-              order_id,
-              stream_id_,
-              trace_info,
-              response,
-              []([[maybe_unused]] auto &order) {})) {
+              user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
       } else {
-        log::warn(
-            "Did not find order: user_id={}, order_id={}, version={}"sv,
-            user_id,
-            order_id,
-            version);
+        log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
       }
     }
   });
@@ -620,8 +555,7 @@ void OrderEntry::cancel_order_ack(
 
 // cancel-all-orders
 
-void OrderEntry::cancel_all_orders(
-    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
+void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
     if (ready()) {
       auto method = core::http::Method::DELETE;
@@ -646,14 +580,12 @@ void OrderEntry::cancel_all_orders(
       });
     } else {
       auto &[message_info, cancel_all_orders] = event;
-      log::warn(
-          R"(*** NOT CONNECTED! UNABLE TO CANCEL ALL ORDERS FOR ACCOUNT="{}")"sv,
-          cancel_all_orders.account);
+      log::warn(R"(*** NOT CONNECTED! UNABLE TO CANCEL ALL ORDERS FOR ACCOUNT="{}")"sv, cancel_all_orders.account);
     }
   });
 }
 
-void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response const> &event) {
+void OrderEntry::cancel_all_orders_ack(Trace<core::web::Response const> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto &[trace_info, response] = event;
     try {
@@ -668,8 +600,7 @@ void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response const> &e
           break;
         }
         case CLIENT_ERROR: {  // 4xx
-          if (json::ErrorParser::dispatch(
-                  body, [&](auto &error) { log::warn("error={}"sv, error); })) {
+          if (json::ErrorParser::dispatch(body, [&](auto &error) { log::warn("error={}"sv, error); })) {
           } else {
             log::warn(R"(Unable to parse response="{}")"sv, body);
           }
@@ -688,12 +619,12 @@ void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response const> &e
 
 // utilities
 
-void OrderEntry::operator()(const json::OrderItem &order_item) {
+void OrderEntry::operator()(json::OrderItem const &order_item) {
   auto trace_info = server::create_trace_info();
   OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info, false);
 }
 
-void OrderEntry::operator()(const json::Order &order) {
+void OrderEntry::operator()(json::Order const &order) {
   auto trace_info = server::create_trace_info();
   OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, false);
 }

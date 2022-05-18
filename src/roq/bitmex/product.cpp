@@ -17,16 +17,15 @@ namespace bitmex {
 // XXX markPrice ?
 // XXX openInterest ?
 
-Product::Product(const json::InstrumentItem &item)
-    : quote_currency_(item.quote_currency), settl_currency_(item.settl_currency),
-      tick_size_(item.tick_size), multiplier_(item.multiplier), lot_size_(item.lot_size),
-      option_strike_price_(item.option_strike_price), underlying_symbol_(item.underlying_symbol),
-      expiry_(item.expiry), settle_(item.settle) {
+Product::Product(json::InstrumentItem const &item)
+    : quote_currency_(item.quote_currency), settl_currency_(item.settl_currency), tick_size_(item.tick_size),
+      multiplier_(item.multiplier), lot_size_(item.lot_size), option_strike_price_(item.option_strike_price),
+      underlying_symbol_(item.underlying_symbol), expiry_(item.expiry), settle_(item.settle) {
   statistics_.reserve(magic_enum::enum_count<StatisticsType>());
   update(item);
 }
 
-Product::Product(const json::FundingItem &) {
+Product::Product(json::FundingItem const &) {
   statistics_.reserve(magic_enum::enum_count<StatisticsType>());
 }
 
@@ -38,7 +37,7 @@ std::chrono::seconds strip_time_part(T timestamp) {
 }
 }  // namespace
 
-bool Product::update(const json::InstrumentItem &item) {
+bool Product::update(json::InstrumentItem const &item) {
   // market status
   market_status_dirty_ |= item.state && utils::update(state_, item.state) != 0;
   // statistics update
@@ -90,9 +89,8 @@ bool Product::update(const json::InstrumentItem &item) {
     using end_time_t = decltype(Statistics::end_time_utc);
     auto begin_time_utc = std::chrono::duration_cast<begin_time_t>(item.timestamp);
     auto duration = strip_time_part(item.funding_interval);
-    auto end_time_utc = begin_time_utc.count()
-                            ? std::chrono::duration_cast<end_time_t>(begin_time_utc + duration)
-                            : end_time_t{};
+    auto end_time_utc =
+        begin_time_utc.count() ? std::chrono::duration_cast<end_time_t>(begin_time_utc + duration) : end_time_t{};
     auto update_funding_rate = false;
     update_funding_rate |= utils::update(funding_rate_.value, item.funding_rate) != 0;
     update_funding_rate |= utils::update(funding_rate_.begin_time_utc, begin_time_utc) != 0;
@@ -120,7 +118,7 @@ bool Product::update(const json::InstrumentItem &item) {
   return market_status_dirty_ || !std::empty(statistics_);
 }
 
-bool Product::update(const json::FundingItem &) {
+bool Product::update(json::FundingItem const &) {
   /*
   // statistics update
   using begin_time_t = decltype(Statistics::begin_time_utc);
@@ -161,7 +159,7 @@ bool Product::update(const json::FundingItem &) {
   return false;
 }
 
-ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t stream_id) const {
+ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
   return ReferenceData{
       .stream_id = stream_id,
@@ -190,7 +188,7 @@ ReferenceData Product::reference_data(const json::InstrumentItem &item, uint16_t
   };
 }
 
-MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t stream_id) const {
+MarketStatus Product::market_status(json::InstrumentItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
   auto trading_status = json::map(state_);
   return MarketStatus{
@@ -201,8 +199,7 @@ MarketStatus Product::market_status(const json::InstrumentItem &item, uint16_t s
   };
 }
 
-StatisticsUpdate Product::statistics_update(
-    const json::InstrumentItem &item, uint16_t stream_id) const {
+StatisticsUpdate Product::statistics_update(json::InstrumentItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
   return StatisticsUpdate{
       .stream_id = stream_id,
@@ -214,8 +211,7 @@ StatisticsUpdate Product::statistics_update(
   };
 }
 
-StatisticsUpdate Product::statistics_update(
-    const json::FundingItem &item, uint16_t stream_id) const {
+StatisticsUpdate Product::statistics_update(json::FundingItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
   return StatisticsUpdate{
       .stream_id = stream_id,

@@ -23,29 +23,23 @@ namespace bitmex {
 namespace json {
 
 template <typename T>
-inline void update(T &result, const core::json::Value &value) {
+inline void update(T &result, core::json::Value const &value) {
   result = core::json::get<T>(value);
 }
 
 template <>
-inline void update(std::chrono::milliseconds &result, const core::json::Value &value) {
+inline void update(std::chrono::milliseconds &result, core::json::Value const &value) {
   std::visit(
       overloaded{
-          [&](const core::json::Null &) { result = std::chrono::milliseconds{}; },
+          [&](core::json::Null const &) { result = std::chrono::milliseconds{}; },
           [](bool) { throw std::bad_cast(); },
-          [&](int64_t value) {
-            result = std::chrono::milliseconds{static_cast<uint64_t>(value * int64_t{1000})};
+          [&](int64_t value) { result = std::chrono::milliseconds{static_cast<uint64_t>(value * int64_t{1000})}; },
+          [&](double value) { result = std::chrono::milliseconds{static_cast<uint64_t>(value * 1.0e3)}; },
+          [&](std::string_view const &value) {
+            result = core::charconv::datetime_from_string<std::remove_reference<decltype(result)>::type>(value);
           },
-          [&](double value) {
-            result = std::chrono::milliseconds{static_cast<uint64_t>(value * 1.0e3)};
-          },
-          [&](const std::string_view &value) {
-            result =
-                core::charconv::datetime_from_string<std::remove_reference<decltype(result)>::type>(
-                    value);
-          },
-          [](const core::json::Object &) { throw std::bad_cast(); },
-          [](const core::json::Array &) { throw std::bad_cast(); },
+          [](core::json::Object const &) { throw std::bad_cast(); },
+          [](core::json::Array const &) { throw std::bad_cast(); },
       },
       value);
 }
@@ -245,7 +239,7 @@ inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   return json::TimeInForce::UNDEFINED;
 }
 
-inline json::ExecInst map(const Mask<roq::ExecutionInstruction> &execution_instructions) {
+inline json::ExecInst map(Mask<roq::ExecutionInstruction> const &execution_instructions) {
   // XXX support multiple?
   if (execution_instructions.has(roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE))
     return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
@@ -254,7 +248,7 @@ inline json::ExecInst map(const Mask<roq::ExecutionInstruction> &execution_instr
   return json::ExecInst::UNDEFINED;
 }
 
-extern roq::Error guess_error(const std::string_view &message);
+extern roq::Error guess_error(std::string_view const &message);
 
 }  // namespace json
 }  // namespace bitmex

@@ -21,7 +21,7 @@ namespace roq {
 namespace bitmex {
 
 namespace {
-const auto NAME = "md"sv;
+auto const NAME = "md"sv;
 const Mask SUPPORTS{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
@@ -32,7 +32,7 @@ const Mask SUPPORTS{
 };
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(const std::string_view &group, const std::string_view &function)
+  explicit create_metrics(std::string_view const &group, std::string_view const &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
@@ -70,8 +70,7 @@ void emplace(Trade &result, const T &value) {
 }
 }  // namespace
 
-MarketData::MarketData(
-    Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
+MarketData::MarketData(Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"sv, stream_id_, NAME)),
       connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
       counter_{
@@ -96,19 +95,18 @@ MarketData::MarketData(
           .ping = create_metrics(name_, "ping"sv),
           .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
-      shared_(shared),
-      download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
+      shared_(shared), download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
 }
 
-void MarketData::operator()(const Event<Start> &) {
+void MarketData::operator()(Event<Start> const &) {
   connection_.start();
 }
 
-void MarketData::operator()(const Event<Stop> &) {
+void MarketData::operator()(Event<Stop> const &) {
   connection_.stop();
 }
 
-void MarketData::operator()(const Event<Timer> &event) {
+void MarketData::operator()(Event<Timer> const &event) {
   connection_.refresh(event.value.now);
 }
 
@@ -135,26 +133,26 @@ void MarketData::operator()(metrics::Writer &writer) {
       .write(latency_.heartbeat, metrics::LATENCY);
 }
 
-void MarketData::operator()(const core::web::ClientSocket::Connected &) {
+void MarketData::operator()(core::web::ClientSocket::Connected const &) {
   // note! don't notify gateway: wait for ready
 }
 
-void MarketData::operator()(const core::web::ClientSocket::Disconnected &) {
+void MarketData::operator()(core::web::ClientSocket::Disconnected const &) {
   ready_ = false;
   partial_received_ = {};
   download_.reset();
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void MarketData::operator()(const core::web::ClientSocket::Ready &) {
+void MarketData::operator()(core::web::ClientSocket::Ready const &) {
   // note! don't notify gateway: wait for handshake
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
-void MarketData::operator()(const core::web::ClientSocket::Close &) {
+void MarketData::operator()(core::web::ClientSocket::Close const &) {
 }
 
-void MarketData::operator()(const core::web::ClientSocket::Latency &latency) {
+void MarketData::operator()(core::web::ClientSocket::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -165,11 +163,11 @@ void MarketData::operator()(const core::web::ClientSocket::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void MarketData::operator()(const core::web::ClientSocket::Text &text) {
+void MarketData::operator()(core::web::ClientSocket::Text const &text) {
   parse(text.payload);
 }
 
-void MarketData::operator()(const core::web::ClientSocket::Binary &) {
+void MarketData::operator()(core::web::ClientSocket::Binary const &) {
   log::fatal("Unexpected"sv);
 }
 
@@ -191,7 +189,7 @@ void MarketData::operator()(ConnectionStatus status) {
   }
 }
 
-void MarketData::send_subscribe(const std::string_view &topic) {
+void MarketData::send_subscribe(std::string_view const &topic) {
   auto message = fmt::format(
       R"({{)"
       R"("op":"subscribe",)"
@@ -202,7 +200,7 @@ void MarketData::send_subscribe(const std::string_view &topic) {
   connection_.send_text(message);
 }
 
-void MarketData::send_unsubscribe(const std::string_view &topic) {
+void MarketData::send_unsubscribe(std::string_view const &topic) {
   auto message = fmt::format(
       R"({{)"
       R"("op":"unsubscribe",)"
@@ -213,7 +211,7 @@ void MarketData::send_unsubscribe(const std::string_view &topic) {
   connection_.send_text(message);
 }
 
-void MarketData::send_subscribe(const std::span<std::string_view> &topics) {
+void MarketData::send_subscribe(std::span<std::string_view> const &topics) {
   assert(!std::empty(topics));
   if (std::size(topics) == 1) {
     send_subscribe(topics[0]);
@@ -229,7 +227,7 @@ void MarketData::send_subscribe(const std::span<std::string_view> &topics) {
   }
 }
 
-void MarketData::send_subscribe(const std::string_view &topic, const std::string_view &symbol) {
+void MarketData::send_subscribe(std::string_view const &topic, std::string_view const &symbol) {
   auto message = fmt::format(
       R"({{)"
       R"("op":"subscribe",)"
@@ -241,7 +239,7 @@ void MarketData::send_subscribe(const std::string_view &topic, const std::string
   connection_.send_text(message);
 }
 
-void MarketData::send_unsubscribe(const std::string_view &topic, const std::string_view &symbol) {
+void MarketData::send_unsubscribe(std::string_view const &topic, std::string_view const &symbol) {
   auto message = fmt::format(
       R"({{)"
       R"("op":"unsubscribe",)"
@@ -294,7 +292,7 @@ void MarketData::subscribe_order_book_l2() {
   send_subscribe(topics);
 }
 
-void MarketData::parse(const std::string_view &message) {
+void MarketData::parse(std::string_view const &message) {
   log::info<4>(R"(message="{}")"sv, message);
   profile_.parse([&]() {
     try {
@@ -306,20 +304,20 @@ void MarketData::parse(const std::string_view &message) {
   });
 }
 
-void MarketData::parse_helper(const std::string_view &message) {
+void MarketData::parse_helper(std::string_view const &message) {
   auto trace_info = server::create_trace_info();
   core::json::Buffer buffer(decode_buffer_);
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
-void MarketData::operator()(const Trace<json::CancelAllAfter const> &event) {
+void MarketData::operator()(Trace<json::CancelAllAfter const> const &event) {
   profile_.cancel_all_after([&]() {
     auto &[trace_info, cancel_all_after] = event;
     log::info<2>("cancel_all_after={}"sv, cancel_all_after);
   });
 }
 
-void MarketData::operator()(const Trace<json::Error const> &event) {
+void MarketData::operator()(Trace<json::Error const> const &event) {
   profile_.error([&]() {
     auto &[trace_info, error] = event;
     log::warn("error={}"sv, error);
@@ -327,7 +325,7 @@ void MarketData::operator()(const Trace<json::Error const> &event) {
   connection_.close();
 }
 
-void MarketData::operator()(const Trace<json::Handshake const> &event) {
+void MarketData::operator()(Trace<json::Handshake const> const &event) {
   profile_.handshake([&]() {
     auto &[trace_info, handshake] = event;
     log::info<2>("handshake={}"sv, handshake);
@@ -336,7 +334,7 @@ void MarketData::operator()(const Trace<json::Handshake const> &event) {
   });
 }
 
-void MarketData::operator()(const Trace<json::Subscribe const> &event) {
+void MarketData::operator()(Trace<json::Subscribe const> const &event) {
   profile_.subscribe([&]() {
     auto &[trace_info, subscribe] = event;
     log::info<2>("subscribe={}"sv, subscribe);
@@ -353,7 +351,7 @@ void MarketData::operator()(const Trace<json::Subscribe const> &event) {
   });
 }
 
-void MarketData::operator()(const Trace<json::Unsubscribe const> &event) {
+void MarketData::operator()(Trace<json::Unsubscribe const> const &event) {
   profile_.unsubscribe([&]() {
     auto &[trace_info, unsubscribe] = event;
     log::info<2>("unsubscribe={}"sv, unsubscribe);
@@ -370,7 +368,7 @@ void MarketData::operator()(const Trace<json::Unsubscribe const> &event) {
   });
 }
 
-void MarketData::operator()(const Trace<json::Funding const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Funding const> const &event, json::Action action) {
   profile_.funding([&]() {
     auto &[trace_info, funding] = event;
     log::info<4>("event={{action={}, funding={}}}"sv, action, funding);
@@ -387,7 +385,7 @@ void MarketData::operator()(const Trace<json::Funding const> &event, json::Actio
   });
 }
 
-void MarketData::operator()(const Trace<json::Instrument const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Instrument const> const &event, json::Action action) {
   profile_.instrument([&]() {
     auto &[trace_info, instrument] = event;
     log::info<4>("event={{action={}, instrument={}}}"sv, action, instrument);
@@ -464,7 +462,7 @@ void MarketData::operator()(const Trace<json::Instrument const> &event, json::Ac
   });
 }
 
-void MarketData::operator()(const Trace<json::Liquidation const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Liquidation const> const &event, json::Action action) {
   profile_.liquidation([&]() {
     auto &[trace_info, liquidation] = event;
     log::info<4>("event={{action={}, liquidation={}}}"sv, action, liquidation);
@@ -472,7 +470,7 @@ void MarketData::operator()(const Trace<json::Liquidation const> &event, json::A
   });
 }
 
-void MarketData::operator()(const Trace<json::OrderBookL2 const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::OrderBookL2 const> const &event, json::Action action) {
   profile_.order_book_l2([&]() {
     auto &[trace_info, order_book_l2] = event;
     log::info<4>("event={{action={}, order_book_l2={}}}"sv, action, order_book_l2);
@@ -535,7 +533,7 @@ void MarketData::operator()(const Trace<json::OrderBookL2 const> &event, json::A
   });
 }
 
-void MarketData::operator()(const Trace<json::Quote const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Quote const> const &event, json::Action action) {
   profile_.quote([&]() {
     auto &[trace_info, quote] = event;
     log::info<4>("event={{action={}, quote={}}}"sv, action, quote);
@@ -559,7 +557,7 @@ void MarketData::operator()(const Trace<json::Quote const> &event, json::Action 
   });
 }
 
-void MarketData::operator()(const Trace<json::Settlement const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Settlement const> const &event, json::Action action) {
   profile_.settlement([&]() {
     auto &[trace_info, settlement] = event;
     log::info<4>("event={{action={}, settlement={}}}"sv, action, settlement);
@@ -567,7 +565,7 @@ void MarketData::operator()(const Trace<json::Settlement const> &event, json::Ac
   });
 }
 
-void MarketData::operator()(const Trace<json::Trade const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Trade const> const &event, json::Action action) {
   profile_.trade([&]() {
     auto &[trace_info, trade] = event;
     log::info<4>("event={{action={}, trade={}}}"sv, action, trade);
@@ -577,8 +575,7 @@ void MarketData::operator()(const Trace<json::Trade const> &event, json::Action 
     core::back_emplacer trades(shared_.trades);
     std::chrono::nanoseconds timestamp = {};
     for (auto &item : trade.data) {
-      timestamp =
-          std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));
+      timestamp = std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));
       if (item.symbol.compare(previous) != 0) {
         if (!std::empty(previous) && !std::empty(trades)) {
           const TradeSummary trade_summary{
@@ -609,27 +606,27 @@ void MarketData::operator()(const Trace<json::Trade const> &event, json::Action 
   });
 }
 
-void MarketData::operator()(const Trace<json::Execution const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Execution const> const &event, json::Action action) {
   auto &[trace_info, execution] = event;
   log::fatal("Unexpected: action={}, execution={}"sv, action, execution);
 }
 
-void MarketData::operator()(const Trace<json::Margin const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Margin const> const &event, json::Action action) {
   auto &[trace_info, margin] = event;
   log::fatal("Unexpected: action={}, margin={}"sv, action, margin);
 }
 
-void MarketData::operator()(const Trace<json::Order const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Order const> const &event, json::Action action) {
   auto &[trace_info, order] = event;
   log::fatal("Unexpected: action={}, order={}"sv, action, order);
 }
 
-void MarketData::operator()(const Trace<json::Position const> &event, json::Action action) {
+void MarketData::operator()(Trace<json::Position const> const &event, json::Action action) {
   auto &[trace_info, position] = event;
   log::fatal("Unexpected: action={}, position={}"sv, action, position);
 }
 
-Product &MarketData::find_product(const json::InstrumentItem &item) {
+Product &MarketData::find_product(json::InstrumentItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
     iter = product_cache_.emplace(item.symbol, item).first;
@@ -640,7 +637,7 @@ Product &MarketData::find_product(const json::InstrumentItem &item) {
   return (*iter).second;
 }
 
-Product &MarketData::find_product(const json::FundingItem &item) {
+Product &MarketData::find_product(json::FundingItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
     log::warn<1>(R"(Create product symbol="{}" from funding (no reference data))"sv, item.symbol);
@@ -653,11 +650,11 @@ Product &MarketData::find_product(const json::FundingItem &item) {
 }
 
 void MarketData::publish_market_by_price(
-    const TraceInfo &trace_info,
+    TraceInfo const &trace_info,
     bool is_last,
-    const std::string_view &symbol,
-    const std::span<MBPUpdate> &bids,
-    const std::span<MBPUpdate> &asks,
+    std::string_view const &symbol,
+    std::span<MBPUpdate> const &bids,
+    std::span<MBPUpdate> const &asks,
     bool snapshot,
     const std::chrono::nanoseconds exchange_time_utc) {
   assert(!(std::empty(bids) && std::empty(asks)));
@@ -684,7 +681,7 @@ void MarketData::publish_market_by_price(
   }
 }
 
-void MarketData::resubscribe_order_book_l2(const std::string_view &symbol) {
+void MarketData::resubscribe_order_book_l2(std::string_view const &symbol) {
   log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"sv, symbol);
   /* this does not work because we subscribe everything
   send_unsubscribe("orderBookL2"sv, symbol);

@@ -16,24 +16,23 @@ auto create_base_path() {
 }
 }  // namespace
 
-Security::Security(const Config &config, const std::string_view &account)
-    : account_(account), base_path(create_base_path()),
-      hasher_(config.get_api_key(), config.get_secret()) {
+Security::Security(Config const &config, std::string_view const &account)
+    : account_(account), base_path(create_base_path()), hasher_(config.get_api_key(), config.get_secret()) {
 }
 
 std::string Security::create_signature(
     std::chrono::nanoseconds expires,
     core::http::Method method,
-    const std::string_view &path,
-    const std::string_view &body) {
+    std::string_view const &path,
+    std::string_view const &body) {
   return hasher_.create_signature(expires, method, path, body);
 }
 
 std::string Security::create_headers(
     std::chrono::nanoseconds expires,
     core::http::Method method,
-    const std::string_view &path,
-    const std::string_view &body) {
+    std::string_view const &path,
+    std::string_view const &body) {
   return hasher_.create_headers(expires, method, path, body);
 }
 

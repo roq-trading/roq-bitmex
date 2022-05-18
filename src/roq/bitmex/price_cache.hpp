@@ -16,7 +16,7 @@ class PriceCache final {
   PriceCache() = default;
 
   PriceCache(PriceCache &&) = default;
-  PriceCache(const PriceCache &) = delete;
+  PriceCache(PriceCache const &) = delete;
 
   std::pair<double, double> operator()(json::Action action, uint64_t id, double price, double size);
 

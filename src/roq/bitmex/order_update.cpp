@@ -18,21 +18,18 @@ namespace bitmex {
 
 // drop copy
 
-void OrderUpdate::operator()(
-    const json::OrderItem &order_item, const TraceInfo &trace_info, bool download) {
+void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const &trace_info, bool download) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
-  auto external_account =
-      order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
+  auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
-  auto request_type = order_item.ord_status == json::OrdStatus::CANCELED ? RequestType::CANCEL_ORDER
-                                                                         : RequestType::UNDEFINED;
-  auto request_status = order_item.ord_status == json::OrdStatus::REJECTED
-                            ? RequestStatus::REJECTED
-                            : RequestStatus::ACCEPTED;
+  auto request_type =
+      order_item.ord_status == json::OrdStatus::CANCELED ? RequestType::CANCEL_ORDER : RequestType::UNDEFINED;
+  auto request_status =
+      order_item.ord_status == json::OrdStatus::REJECTED ? RequestStatus::REJECTED : RequestStatus::ACCEPTED;
   auto update_type = download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   oms::Response response{
       .type = request_type,
@@ -73,19 +70,14 @@ void OrderUpdate::operator()(
       .update_type = update_type,
   };
   if (shared_.update_order(
-          order_item.cl_ord_id,
-          stream_id_,
-          trace_info,
-          response,
-          order_update,
-          []([[maybe_unused]] auto &order) {})) {
+          order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);
   }
 }
 
-void OrderUpdate::operator()(const json::Order &order, const TraceInfo &trace_info, bool download) {
+void OrderUpdate::operator()(json::Order const &order, TraceInfo const &trace_info, bool download) {
   log::debug("order={}"sv, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info, download);
@@ -94,8 +86,8 @@ void OrderUpdate::operator()(const json::Order &order, const TraceInfo &trace_in
 // order entry
 
 void OrderUpdate::operator()(
-    const json::OrderItem &order_item,
-    const TraceInfo &trace_info,
+    json::OrderItem const &order_item,
+    TraceInfo const &trace_info,
     RequestType request_type,
     [[maybe_unused]] uint8_t user_id,
     [[maybe_unused]] uint32_t order_id,
@@ -103,15 +95,13 @@ void OrderUpdate::operator()(
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
-  auto external_account =
-      order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
+  auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
   auto request_status = compute_request_status(order_item.ord_status);
   auto error = json::guess_error(order_item.ord_rej_reason);
-  auto request_id =
-      request_type != RequestType::CANCEL_ORDER ? order_item.cl_ord_id : std::string_view{};
+  auto request_id = request_type != RequestType::CANCEL_ORDER ? order_item.cl_ord_id : std::string_view{};
   oms::Response response{
       .type = request_type,
       .origin = Origin::EXCHANGE,
@@ -151,12 +141,7 @@ void OrderUpdate::operator()(
       .update_type = UpdateType::INCREMENTAL,
   };
   if (shared_.update_order(
-          order_item.cl_ord_id,
-          stream_id_,
-          trace_info,
-          response,
-          order_update,
-          []([[maybe_unused]] auto &order) {})) {
+          order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);
@@ -164,8 +149,8 @@ void OrderUpdate::operator()(
 }
 
 void OrderUpdate::operator()(
-    const json::Order &order,
-    const TraceInfo &trace_info,
+    json::Order const &order,
+    TraceInfo const &trace_info,
     RequestType request_type,
     uint8_t user_id,
     uint32_t order_id,

@@ -20,17 +20,17 @@ namespace bitmex {
 
 class Config final : public server::Config, public server::ConfigReader::Handler {
  public:
-  Config(const std::string_view &config_path, const std::string_view &secrets_path);
+  Config(std::string_view const &config_path, std::string_view const &secrets_path);
 
-  const Account &get_master_account() const;
+  Account const &get_master_account() const;
 
-  const auto &get_api_key() const {
+  auto const &get_api_key() const {
     using namespace std::literals;
     if (std::size(accounts) != 1)
       throw RuntimeError("More accounts not yet supported"sv);
     return (*std::begin(accounts)).second.login;
   }
-  const auto &get_secret() const {
+  auto const &get_secret() const {
     using namespace std::literals;
     if (std::size(accounts) != 1)
       throw RuntimeError("More accounts not yet supported"sv);
@@ -46,7 +46,7 @@ class Config final : public server::Config, public server::ConfigReader::Handler
   void operator()(server::Account &&) override;
   void operator()(server::User &&) override;
   void operator()(server::RateLimit &&) override;
-  void operator()(const std::string_view &key, toml::node &) override;
+  void operator()(std::string_view const &key, toml::node &) override;
 
  public:
   server::Users users;
@@ -77,7 +77,7 @@ struct fmt::formatter<roq::bitmex::Config> {
     return std::begin(context);
   }
   template <typename Context>
-  auto format(const roq::bitmex::Config &value, Context &context) {
+  auto format(roq::bitmex::Config const &value, Context &context) {
     using namespace std::literals;
     return fmt::format_to(
         context.out(),
