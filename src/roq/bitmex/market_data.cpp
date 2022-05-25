@@ -538,6 +538,8 @@ void MarketData::operator()(Trace<json::Quote const> const &event, json::Action 
     auto &[trace_info, quote] = event;
     log::info<4>("event={{action={}, quote={}}}"sv, action, quote);
     for (auto &item : quote.data) {
+      if (shared_.discard_symbol(item.symbol))
+        continue;
       const TopOfBook top_of_book{
           .stream_id = stream_id_,
           .exchange = Flags::exchange(),
@@ -578,14 +580,16 @@ void MarketData::operator()(Trace<json::Trade const> const &event, json::Action 
       timestamp = std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));
       if (item.symbol.compare(previous) != 0) {
         if (!std::empty(previous) && !std::empty(trades)) {
-          const TradeSummary trade_summary{
-              .stream_id = stream_id_,
-              .exchange = Flags::exchange(),
-              .symbol = previous,
-              .trades = trades,
-              .exchange_time_utc = timestamp,
-          };
-          create_trace_and_dispatch(handler_, trace_info, trade_summary, false);
+          if (!shared_.discard_symbol(previous)) {
+            const TradeSummary trade_summary{
+                .stream_id = stream_id_,
+                .exchange = Flags::exchange(),
+                .symbol = previous,
+                .trades = trades,
+                .exchange_time_utc = timestamp,
+            };
+            create_trace_and_dispatch(handler_, trace_info, trade_summary, false);
+          }
         }
         previous = item.symbol;
         trades.clear();
@@ -594,14 +598,16 @@ void MarketData::operator()(Trace<json::Trade const> const &event, json::Action 
       trades.emplace_back([&item](auto &result) { emplace(result, item); });
     }
     if (!std::empty(previous) && !std::empty(trades)) {
-      const TradeSummary trade_summary{
-          .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
-          .symbol = previous,
-          .trades = trades,
-          .exchange_time_utc = timestamp,
-      };
-      create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+      if (!shared_.discard_symbol(previous)) {
+        const TradeSummary trade_summary{
+            .stream_id = stream_id_,
+            .exchange = Flags::exchange(),
+            .symbol = previous,
+            .trades = trades,
+            .exchange_time_utc = timestamp,
+        };
+        create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+      }
     }
   });
 }
@@ -658,6 +664,8 @@ void MarketData::publish_market_by_price(
     bool snapshot,
     const std::chrono::nanoseconds exchange_time_utc) {
   assert(!(std::empty(bids) && std::empty(asks)));
+  if (shared_.discard_symbol(symbol))
+    return;
   if (snapshot)
     log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
   const MarketByPriceUpdate market_by_price_update{

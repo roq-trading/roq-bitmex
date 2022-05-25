@@ -9,8 +9,8 @@ symbols = [
 
   [accounts.A1]
   master = true
-  login = "YMadKbapYi5RWCGRipiESBp3"
-  secret = "nsbVJFzdlqwlFXRWvzi9zeZUbbKm-ZAxfHpwq0ENdJ82E7ju"
+  login = "i1CCYz7Hk_y-E7Mc31Dz_DYh"
+  secret = "D3vgkzYuagzHaUIBwioOmEvCegMX15Od5VnEDU5F7oVBEu1J"
   symbols = ".*"
 
 [users]

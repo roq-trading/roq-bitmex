@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Fixed
+
+* Symbol filtering was not used (#223)
+
 ## 0.8.4 &ndash; 2022-05-14
 
 ### Fixed
