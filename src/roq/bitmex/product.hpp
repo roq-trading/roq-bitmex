@@ -25,7 +25,7 @@ class Product final {
   bool update(json::InstrumentItem const &);
   bool update(json::FundingItem const &);
 
-  ReferenceData reference_data(json::InstrumentItem const &, uint16_t stream_id) const;
+  ReferenceData reference_data(json::InstrumentItem const &, uint16_t stream_id, bool discard) const;
   MarketStatus market_status(json::InstrumentItem const &, uint16_t stream_id) const;
   StatisticsUpdate statistics_update(json::InstrumentItem const &, uint16_t stream_id) const;
 

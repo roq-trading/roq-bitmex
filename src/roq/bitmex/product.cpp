@@ -159,7 +159,7 @@ bool Product::update(json::FundingItem const &) {
   return false;
 }
 
-ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t stream_id) const {
+ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t stream_id, bool discard) const {
   assert(!std::empty(item.symbol));
   return ReferenceData{
       .stream_id = stream_id,
@@ -185,6 +185,7 @@ ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t
       .settlement_date = utils::safe_cast(settle_),
       .expiry_datetime = utils::safe_cast(expiry_),
       .expiry_datetime_utc = utils::safe_cast(expiry_),
+      .discard = discard,
   };
 }
 
