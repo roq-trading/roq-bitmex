@@ -43,7 +43,7 @@ auto create_connection(auto &handler, auto &context) {
   core::web::Client::Config config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
-      .validate_certificate = server::Flags::tls_validate_certificate(),
+      .validate_certificate = server::Flags::net_tls_validate_certificate(),
       .uris = {&uri, 1},
       .proxy = Flags::rest_proxy(),
       .user_agent = ROQ_PACKAGE_NAME,
