@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* Market data support for `--net_disconnect_on_idle_timeout`.
+
 ### Fixed
 
 * Symbol filtering was not used (#223)

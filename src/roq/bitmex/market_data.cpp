@@ -41,7 +41,7 @@ auto create_connection(auto &handler, auto &context) {
   core::web::ClientSocket::Config config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
-      .disconnect_on_idle_timeout = {},
+      .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
       .uris = {&uri, 1},
       .query = {},
@@ -332,6 +332,7 @@ void MarketData::operator()(Trace<json::Handshake const> const &event) {
   profile_.handshake([&]() {
     auto &[trace_info, handshake] = event;
     log::info<2>("handshake={}"sv, handshake);
+    connection_.touch(trace_info.source_receive_time);
     (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
   });
@@ -375,6 +376,7 @@ void MarketData::operator()(Trace<json::Funding const> const &event, json::Actio
   profile_.funding([&]() {
     auto &[trace_info, funding] = event;
     log::info<4>("event={{action={}, funding={}}}"sv, action, funding);
+    connection_.touch(trace_info.source_receive_time);
     for (auto &item : funding.data) {
       auto &product = find_product(item);
       if (product.update(item)) {
@@ -392,6 +394,7 @@ void MarketData::operator()(Trace<json::Instrument const> const &event, json::Ac
   profile_.instrument([&]() {
     auto &[trace_info, instrument] = event;
     log::info<4>("event={{action={}, instrument={}}}"sv, action, instrument);
+    connection_.touch(trace_info.source_receive_time);
     // note!
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
@@ -470,6 +473,7 @@ void MarketData::operator()(Trace<json::Liquidation const> const &event, json::A
   profile_.liquidation([&]() {
     auto &[trace_info, liquidation] = event;
     log::info<4>("event={{action={}, liquidation={}}}"sv, action, liquidation);
+    connection_.touch(trace_info.source_receive_time);
     // don't use
   });
 }
@@ -478,6 +482,7 @@ void MarketData::operator()(Trace<json::OrderBookL2 const> const &event, json::A
   profile_.order_book_l2([&]() {
     auto &[trace_info, order_book_l2] = event;
     log::info<4>("event={{action={}, order_book_l2={}}}"sv, action, order_book_l2);
+    connection_.touch(trace_info.source_receive_time);
     assert(action != json::Action::UNKNOWN);
     auto snapshot = action == json::Action::PARTIAL;
     // note!
@@ -541,6 +546,7 @@ void MarketData::operator()(Trace<json::Quote const> const &event, json::Action 
   profile_.quote([&]() {
     auto &[trace_info, quote] = event;
     log::info<4>("event={{action={}, quote={}}}"sv, action, quote);
+    connection_.touch(trace_info.source_receive_time);
     for (auto &item : quote.data) {
       if (shared_.discard_symbol(item.symbol))
         continue;
@@ -567,6 +573,7 @@ void MarketData::operator()(Trace<json::Settlement const> const &event, json::Ac
   profile_.settlement([&]() {
     auto &[trace_info, settlement] = event;
     log::info<4>("event={{action={}, settlement={}}}"sv, action, settlement);
+    connection_.touch(trace_info.source_receive_time);
     // do nothing
   });
 }
@@ -575,6 +582,7 @@ void MarketData::operator()(Trace<json::Trade const> const &event, json::Action 
   profile_.trade([&]() {
     auto &[trace_info, trade] = event;
     log::info<4>("event={{action={}, trade={}}}"sv, action, trade);
+    connection_.touch(trace_info.source_receive_time);
     if (action != json::Action::INSERT)
       return;
     std::string_view previous;
