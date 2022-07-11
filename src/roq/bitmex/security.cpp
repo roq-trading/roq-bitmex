@@ -2,7 +2,7 @@
 
 #include "roq/bitmex/security.hpp"
 
-#include "roq/core/uri.hpp"
+#include "roq/io/web/uri.hpp"
 
 #include "roq/bitmex/flags.hpp"
 
@@ -11,7 +11,7 @@ namespace bitmex {
 
 namespace {
 auto create_base_path() {
-  core::URI uri(Flags::rest_uri());
+  io::web::URI uri{Flags::rest_uri()};
   return uri.path;
 }
 }  // namespace
