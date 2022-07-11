@@ -74,7 +74,7 @@ void emplace(Trade &result, const T &value) {
 }
 }  // namespace
 
-MarketData::MarketData(Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
+MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"sv, stream_id_, NAME)),
       connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
       counter_{

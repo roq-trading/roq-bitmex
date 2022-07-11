@@ -67,7 +67,7 @@ void emplace(Fill &result, const T &value) {
 }
 }  // namespace
 
-DropCopy::DropCopy(Handler &handler, core::io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
+DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
     : handler_(handler), stream_id_(stream_id),
       name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())),
       connection_(create_connection(*this, context, [this]() { return create_upgrade_headers(); })),

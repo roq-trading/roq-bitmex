@@ -53,6 +53,7 @@ target_link_libraries(
   roq-server::roq-server
   roq-core::roq-core
   roq-api::roq-api
+  roq-io::roq-io
   roq-logging::roq-logging
   absl::flags
   absl::flat_hash_map

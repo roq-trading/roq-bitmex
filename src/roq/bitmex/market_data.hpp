@@ -14,7 +14,7 @@
 #include "roq/core/metrics/latency.hpp"
 #include "roq/core/metrics/profile.hpp"
 
-#include "roq/core/io/context.hpp"
+#include "roq/io/context.hpp"
 
 #include "roq/core/web/client_socket.hpp"
 
@@ -43,7 +43,7 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::S
     virtual void operator()(Trace<StatisticsUpdate const> const &, bool is_last) = 0;
   };
 
-  MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &);
+  MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &);
 
   MarketData(MarketData &&) = delete;
   MarketData(MarketData const &) = delete;

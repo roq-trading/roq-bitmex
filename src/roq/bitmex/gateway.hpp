@@ -9,7 +9,7 @@
 
 #include "roq/server.hpp"
 
-#include "roq/core/io/context.hpp"
+#include "roq/io/context.hpp"
 
 #include "roq/bitmex/config.hpp"
 #include "roq/bitmex/security.hpp"
@@ -78,7 +78,7 @@ class Gateway final : public server::Handler,
   // security
   absl::flat_hash_map<Account, std::unique_ptr<Security>> security_;
   // io
-  std::unique_ptr<core::io::Context> context_;
+  std::unique_ptr<io::Context> context_;
   // shared
   Shared shared_;
   // seed

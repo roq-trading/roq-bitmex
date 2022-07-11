@@ -12,7 +12,7 @@
 #include "roq/core/metrics/latency.hpp"
 #include "roq/core/metrics/profile.hpp"
 
-#include "roq/core/io/context.hpp"
+#include "roq/io/context.hpp"
 
 #include "roq/core/web/client_socket.hpp"
 
@@ -36,7 +36,7 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
     virtual void operator()(Trace<PositionUpdate const> const &, bool is_last) = 0;
   };
 
-  DropCopy(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
+  DropCopy(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &);
 
   DropCopy(DropCopy &&) = delete;
   DropCopy(DropCopy const &) = delete;
