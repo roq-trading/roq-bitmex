@@ -28,6 +28,7 @@ requirements:
     - roq-oss-catch2
     - roq-oss-http-parser
     - roq-oss-libevent
+    - roq-oss-libsodium
     - roq-oss-magic_enum
     - roq-oss-re2
     - roq-oss-tomlplusplus
