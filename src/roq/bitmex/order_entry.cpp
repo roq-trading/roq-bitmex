@@ -12,6 +12,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/web/rest/client_factory.hpp"
+
 #include "roq/bitmex/flags.hpp"
 #include "roq/bitmex/order_update.hpp"
 
@@ -40,20 +42,20 @@ struct create_metrics final : public core::metrics::Factory {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
-  core::web::Client::Config config{
+  web::rest::Client::Config config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
       .uris = {&uri, 1},
       .proxy = Flags::rest_proxy(),
       .user_agent = ROQ_PACKAGE_NAME,
-      .connection = core::http::Connection::KEEP_ALIVE,
+      .connection = web::http::Connection::KEEP_ALIVE,
       .allow_pipelining = true,
       .request_timeout = Flags::rest_request_timeout(),
       .ping_frequency = Flags::rest_ping_freq(),
       .ping_path = Flags::rest_ping_path(),
   };
-  return core::web::Client{handler, context, config};
+  return web::rest::ClientFactory::create(handler, context, config);
 }
 
 auto compute_expires() {
@@ -63,8 +65,7 @@ auto compute_expires() {
 }
 
 auto get_quality_of_service() {
-  return Flags::rest_allow_order_request_pipeline() ? core::web::QualityOfService::IMMEDIATE
-                                                    : core::web::QualityOfService::CRITICAL;
+  return Flags::rest_allow_order_request_pipeline() ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
 }
 }  // namespace
 
@@ -92,15 +93,15 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
 }
 
 void OrderEntry::operator()(Event<Start> const &) {
-  connection_.start();
+  (*connection_).start();
 }
 
 void OrderEntry::operator()(Event<Stop> const &) {
-  connection_.stop();
+  (*connection_).stop();
 }
 
 void OrderEntry::operator()(Event<Timer> const &event) {
-  connection_.refresh(event.value.now);
+  (*connection_).refresh(event.value.now);
 }
 
 void OrderEntry::operator()(metrics::Writer &writer) {
@@ -149,16 +150,16 @@ uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &event, std::string
   return stream_id_;
 }
 
-void OrderEntry::operator()(core::web::Client::Connected const &) {
+void OrderEntry::operator()(web::rest::Client::Connected const &) {
   (*this)(ConnectionStatus::READY);
 }
 
-void OrderEntry::operator()(core::web::Client::Disconnected const &) {
+void OrderEntry::operator()(web::rest::Client::Disconnected const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void OrderEntry::operator()(core::web::Client::Latency const &latency) {
+void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -194,7 +195,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
     if (!ready())
       throw oms::NotReady("not ready"sv);
     auto &[message_info, create_order] = event;
-    auto method = core::http::Method::POST;
+    auto method = web::http::Method::POST;
     auto path = "/api/v1/order"sv;
     auto expires = compute_expires();
     auto side = json::map(create_order.side).as_raw_text();
@@ -224,17 +225,17 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         exec_inst);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
-    core::web::Request request{
+    web::rest::Request request{
         .method = method,
         .path = path,
         .query = {},
-        .accept = core::http::Accept::JSON,
-        .content_type = core::http::ContentType::JSON,
+        .accept = web::http::Accept::JSON,
+        .content_type = web::http::ContentType::JSON,
         .headers = headers,
         .body = body,
         .quality_of_service = get_quality_of_service(),
     };
-    connection_(
+    (*connection_)(
         request_id,
         request,
         [this, user_id = message_info.source, order_id = create_order.order_id](
@@ -248,7 +249,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
 }
 
 void OrderEntry::create_order_ack(
-    Trace<core::web::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -256,7 +257,7 @@ void OrderEntry::create_order_ack(
       auto [status, category, body] = response.result();
       log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        using enum core::http::Category;
+        using enum web::http::Category;
         case SUCCESS: {  // 2xx
           auto order_item = core::json::Parser::create<json::OrderItem>(body);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(
@@ -293,7 +294,7 @@ void OrderEntry::create_order_ack(
           break;
         }
         default:
-          response.expect(core::http::Status::OK);  // throws
+          response.expect(web::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
@@ -328,7 +329,7 @@ void OrderEntry::modify_order(
     if (!ready())
       throw oms::NotReady("not ready"sv);
     auto &[message_info, modify_order] = event;
-    auto method = core::http::Method::PUT;
+    auto method = web::http::Method::PUT;
     auto path = "/api/v1/order"sv;
     auto expires = compute_expires();
     auto body = fmt::format(
@@ -344,17 +345,17 @@ void OrderEntry::modify_order(
         modify_order.price);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
-    core::web::Request request{
+    web::rest::Request request{
         .method = method,
         .path = path,
         .query = {},
-        .accept = core::http::Accept::JSON,
-        .content_type = core::http::ContentType::JSON,
+        .accept = web::http::Accept::JSON,
+        .content_type = web::http::ContentType::JSON,
         .headers = headers,
         .body = body,
         .quality_of_service = get_quality_of_service(),
     };
-    connection_(
+    (*connection_)(
         request_id,
         request,
         [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
@@ -367,7 +368,7 @@ void OrderEntry::modify_order(
 }
 
 void OrderEntry::modify_order_ack(
-    Trace<core::web::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -375,7 +376,7 @@ void OrderEntry::modify_order_ack(
       auto [status, category, body] = response.result();
       log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        using enum core::http::Category;
+        using enum web::http::Category;
         case SUCCESS: {  // 2xx
           auto order_item = core::json::Parser::create<json::OrderItem>(body);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(
@@ -413,7 +414,7 @@ void OrderEntry::modify_order_ack(
           break;
         }
         default:
-          response.expect(core::http::Status::OK);  // throws
+          response.expect(web::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
@@ -448,7 +449,7 @@ void OrderEntry::cancel_order(
     if (!ready())
       throw oms::NotReady("not ready"sv);
     auto &[message_info, cancel_order] = event;
-    auto method = core::http::Method::DELETE;
+    auto method = web::http::Method::DELETE;
     auto path = "/api/v1/order"sv;
     auto expires = compute_expires();
     auto body = fmt::format(
@@ -458,17 +459,17 @@ void OrderEntry::cancel_order(
         order.external_order_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
-    core::web::Request request{
+    web::rest::Request request{
         .method = method,
         .path = path,
         .query = {},
-        .accept = core::http::Accept::JSON,
-        .content_type = core::http::ContentType::JSON,
+        .accept = web::http::Accept::JSON,
+        .content_type = web::http::ContentType::JSON,
         .headers = headers,
         .body = body,
         .quality_of_service = get_quality_of_service(),
     };
-    connection_(
+    (*connection_)(
         request_id,
         request,
         [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
@@ -481,7 +482,7 @@ void OrderEntry::cancel_order(
 }
 
 void OrderEntry::cancel_order_ack(
-    Trace<core::web::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -489,7 +490,7 @@ void OrderEntry::cancel_order_ack(
       auto [status, category, body] = response.result();
       log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        using enum core::http::Category;
+        using enum web::http::Category;
         case SUCCESS: {  // 2xx
           core::json::Buffer buffer(decode_buffer_);
           auto order = core::json::Parser::create<json::Order>(body, buffer);
@@ -528,7 +529,7 @@ void OrderEntry::cancel_order_ack(
           break;
         }
         default:
-          response.expect(core::http::Status::OK);  // throws
+          response.expect(web::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
@@ -557,22 +558,22 @@ void OrderEntry::cancel_order_ack(
 void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
     if (ready()) {
-      auto method = core::http::Method::DELETE;
+      auto method = web::http::Method::DELETE;
       auto path = "/api/v1/order/all"sv;
       auto expires = compute_expires();
       auto body = "{}"sv;
       auto headers = security_.create_headers(expires, method, path, body);
-      core::web::Request request{
+      web::rest::Request request{
           .method = method,
           .path = path,
           .query = {},
-          .accept = core::http::Accept::JSON,
-          .content_type = core::http::ContentType::JSON,
+          .accept = web::http::Accept::JSON,
+          .content_type = web::http::ContentType::JSON,
           .headers = headers,
           .body = body,
           .quality_of_service = get_quality_of_service(),
       };
-      connection_(request_id, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+      (*connection_)(request_id, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
         auto trace_info = server::create_trace_info();
         Trace event(trace_info, response);
         cancel_all_orders_ack(event);
@@ -584,14 +585,14 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
   });
 }
 
-void OrderEntry::cancel_all_orders_ack(Trace<core::web::Response const> const &event) {
+void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response const> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto &[trace_info, response] = event;
     try {
       auto [status, category, body] = response.result();
       log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        using enum core::http::Category;
+        using enum web::http::Category;
         case SUCCESS: {  // 2xx
           core::json::Buffer buffer(decode_buffer_);
           auto order = core::json::Parser::create<json::Order>(body, buffer);
@@ -607,7 +608,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<core::web::Response const> const &e
           break;
         }
         default:
-          response.expect(core::http::Status::OK);  // throws
+          response.expect(web::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());

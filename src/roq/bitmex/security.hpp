@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/http/method.hpp"
+#include "roq/web/http/method.hpp"
 
 #include "roq/bitmex/config.hpp"
 
@@ -26,13 +26,13 @@ class Security final {
 
   std::string create_signature(
       std::chrono::nanoseconds expires,
-      core::http::Method method,
+      web::http::Method method,
       std::string_view const &path,
       std::string_view const &body);
 
   std::string create_headers(
       std::chrono::nanoseconds expires,
-      core::http::Method method,
+      web::http::Method method,
       std::string_view const &path,
       std::string_view const &body);
 

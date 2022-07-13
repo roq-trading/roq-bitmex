@@ -22,7 +22,7 @@ Security::Security(Config const &config, std::string_view const &account)
 
 std::string Security::create_signature(
     std::chrono::nanoseconds expires,
-    core::http::Method method,
+    web::http::Method method,
     std::string_view const &path,
     std::string_view const &body) {
   return hasher_.create_signature(expires, method, path, body);
@@ -30,7 +30,7 @@ std::string Security::create_signature(
 
 std::string Security::create_headers(
     std::chrono::nanoseconds expires,
-    core::http::Method method,
+    web::http::Method method,
     std::string_view const &path,
     std::string_view const &body) {
   return hasher_.create_headers(expires, method, path, body);

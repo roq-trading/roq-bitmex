@@ -51,6 +51,7 @@ target_link_libraries(
   "${PROJECT_NAME}-flags"
   "${PROJECT_NAME}-tools"
   roq-server::roq-server
+  roq-web::roq-web
   roq-core::roq-core
   roq-api::roq-api
   roq-io::roq-io

@@ -33,6 +33,7 @@ requirements:
     - roq-oss-re2
     - roq-oss-tomlplusplus
     - roq-server
+    - roq-web
 
 about:
   home: https://roq-trading.com

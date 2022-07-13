@@ -25,7 +25,7 @@ Hasher::Hasher(std::string_view const &key, std::string_view const &secret) : ke
 
 std::string Hasher::create_signature(
     std::chrono::nanoseconds expires,
-    core::http::Method method,
+    web::http::Method method,
     std::string_view const &path,
     std::string_view const &body) {
   auto expires_ = create_timestamp_secs(expires);
@@ -44,7 +44,7 @@ std::string Hasher::create_signature(
 
 std::string Hasher::create_headers(
     std::chrono::nanoseconds expires,
-    core::http::Method method,
+    web::http::Method method,
     std::string_view const &path,
     std::string_view const &body) {
   auto signature = create_signature(expires, method, path, body);

@@ -12,6 +12,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/web/socket/client_factory.hpp"
+
 #include "roq/bitmex/flags.hpp"
 #include "roq/bitmex/order_update.hpp"
 #include "roq/bitmex/utils.hpp"
@@ -42,7 +44,7 @@ struct create_metrics final : public core::metrics::Factory {
 
 auto create_connection(auto &handler, auto &context, auto &&create_upgrade_headers) {
   auto uri = Flags::ws_uri();
-  core::web::ClientSocket::Config config{
+  web::socket::Client::Config config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
       .disconnect_on_idle_timeout = {},
@@ -53,7 +55,7 @@ auto create_connection(auto &handler, auto &context, auto &&create_upgrade_heade
       .read_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
-  return core::web::ClientSocket{handler, context, config, std::move(create_upgrade_headers)};
+  return web::socket::ClientFactory::create(handler, context, config, std::move(create_upgrade_headers));
 }
 
 template <typename T>
@@ -98,15 +100,15 @@ WebSocket::WebSocket(Handler &handler, io::Context &context, uint16_t stream_id,
 }
 
 void WebSocket::operator()(Event<Start> const &) {
-  connection_.start();
+  (*connection_).start();
 }
 
 void WebSocket::operator()(Event<Stop> const &) {
-  connection_.stop();
+  (*connection_).stop();
 }
 
 void WebSocket::operator()(Event<Timer> const &event) {
-  if (!connection_.refresh(event.value.now))
+  if (!(*connection_).refresh(event.value.now))
     return;
   if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after().count() && ready_ &&
       next_cancel_all_after_ <= event.value.now) {
@@ -166,11 +168,11 @@ uint16_t WebSocket::operator()(Event<CancelAllOrders> const &event, std::string_
   return stream_id_;
 }
 
-void WebSocket::operator()(core::web::ClientSocket::Connected const &) {
+void WebSocket::operator()(web::socket::Client::Connected const &) {
   // note! don't notify gateway: wait for ready
 }
 
-void WebSocket::operator()(core::web::ClientSocket::Disconnected const &) {
+void WebSocket::operator()(web::socket::Client::Disconnected const &) {
   ready_ = false;
   next_cancel_all_after_ = {};
   partial_received_ = {};
@@ -178,15 +180,15 @@ void WebSocket::operator()(core::web::ClientSocket::Disconnected const &) {
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void WebSocket::operator()(core::web::ClientSocket::Ready const &) {
+void WebSocket::operator()(web::socket::Client::Ready const &) {
   // note! don't notify gateway: wait for handshake
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
-void WebSocket::operator()(core::web::ClientSocket::Close const &) {
+void WebSocket::operator()(web::socket::Client::Close const &) {
 }
 
-void WebSocket::operator()(core::web::ClientSocket::Latency const &latency) {
+void WebSocket::operator()(web::socket::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -197,11 +199,11 @@ void WebSocket::operator()(core::web::ClientSocket::Latency const &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void WebSocket::operator()(core::web::ClientSocket::Text const &text) {
+void WebSocket::operator()(web::socket::Client::Text const &text) {
   parse(text.payload);
 }
 
-void WebSocket::operator()(core::web::ClientSocket::Binary const &) {
+void WebSocket::operator()(web::socket::Client::Binary const &) {
   log::fatal("Unexpected"sv);
 }
 
@@ -274,7 +276,7 @@ void WebSocket::send_cancel_all_after(std::chrono::nanoseconds timeout) {
       R"("args":{})"
       R"(}})"sv,
       std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
-  connection_.send_text(message);
+  (*connection_).send_text(message);
 }
 
 uint32_t WebSocket::download(WebSocketState state) {
@@ -325,7 +327,7 @@ void WebSocket::operator()(Trace<json::Error const> const &event) {
     auto &[trace_info, error] = event;
     log::warn("error={}"sv, error);
   });
-  connection_.close();
+  (*connection_).close();
 }
 
 void WebSocket::operator()(Trace<json::Handshake const> const &event) {
@@ -527,7 +529,7 @@ auto compute_expires() {
 
 std::string WebSocket::create_upgrade_headers() {
   auto expires = compute_expires();
-  return security_.create_headers(expires, core::http::Method::GET, "/realtime"sv, {});
+  return security_.create_headers(expires, web::http::Method::GET, "/realtime"sv, {});
 }
 
 }  // namespace bitmex

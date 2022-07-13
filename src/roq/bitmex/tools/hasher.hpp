@@ -8,7 +8,7 @@
 
 #include "roq/core/crypto/hmac_sha256.hpp"
 
-#include "roq/core/http/method.hpp"
+#include "roq/web/http/method.hpp"
 
 namespace roq {
 namespace bitmex {
@@ -23,13 +23,13 @@ class Hasher final {
 
   std::string create_signature(
       std::chrono::nanoseconds expires,
-      core::http::Method method,
+      web::http::Method method,
       std::string_view const &path,
       std::string_view const &body);
 
   std::string create_headers(
       std::chrono::nanoseconds expires,
-      core::http::Method method,
+      web::http::Method method,
       std::string_view const &path,
       std::string_view const &body);
 

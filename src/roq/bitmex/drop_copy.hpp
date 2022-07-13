@@ -14,7 +14,7 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/core/web/client_socket.hpp"
+#include "roq/web/socket/client.hpp"
 
 #include "roq/server.hpp"
 
@@ -27,7 +27,7 @@
 namespace roq {
 namespace bitmex {
 
-class DropCopy final : public core::web::ClientSocket::Handler, public json::StreamParser::Handler {
+class DropCopy final : public web::socket::Client::Handler, public json::StreamParser::Handler {
  public:
   struct Handler {
     virtual void operator()(Trace<StreamStatus const> const &) = 0;
@@ -48,13 +48,13 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
   void operator()(metrics::Writer &);
 
  protected:
-  void operator()(core::web::ClientSocket::Connected const &) override;
-  void operator()(core::web::ClientSocket::Disconnected const &) override;
-  void operator()(core::web::ClientSocket::Ready const &) override;
-  void operator()(core::web::ClientSocket::Close const &) override;
-  void operator()(core::web::ClientSocket::Latency const &) override;
-  void operator()(core::web::ClientSocket::Text const &) override;
-  void operator()(core::web::ClientSocket::Binary const &) override;
+  void operator()(web::socket::Client::Connected const &) override;
+  void operator()(web::socket::Client::Disconnected const &) override;
+  void operator()(web::socket::Client::Ready const &) override;
+  void operator()(web::socket::Client::Close const &) override;
+  void operator()(web::socket::Client::Latency const &) override;
+  void operator()(web::socket::Client::Text const &) override;
+  void operator()(web::socket::Client::Binary const &) override;
 
  private:
   void operator()(ConnectionStatus);
@@ -100,7 +100,7 @@ class DropCopy final : public core::web::ClientSocket::Handler, public json::Str
   const uint16_t stream_id_;
   const std::string name_;
   // connection
-  core::web::ClientSocket connection_;
+  std::unique_ptr<web::socket::Client> connection_;
   // buffers
   core::Buffer decode_buffer_;
   // metrics
