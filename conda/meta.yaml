@@ -20,14 +20,11 @@ requirements:
     - cmake
     - make
   host:
-    - roq-api
     - roq-core
     - roq-oss-abseil-cpp
     - roq-oss-benchmark
     - roq-oss-brotli
     - roq-oss-catch2
-    - roq-oss-http-parser
-    - roq-oss-libevent
     - roq-oss-libsodium
     - roq-oss-magic_enum
     - roq-oss-re2
