@@ -52,8 +52,8 @@ target_link_libraries(
           "${PROJECT_NAME}-tools"
           roq-server::roq-server
           roq-web::roq-web
-          roq-core::roq-core
           roq-io::roq-io
+          roq-core::roq-core
           roq-logging::roq-logging
           roq-api::roq-api
           fmt::fmt
