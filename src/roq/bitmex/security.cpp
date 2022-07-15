@@ -12,7 +12,7 @@ namespace bitmex {
 namespace {
 auto create_base_path() {
   io::web::URI uri{Flags::rest_uri()};
-  return uri.path;
+  return std::string{uri.get_path()};
 }
 }  // namespace
 
