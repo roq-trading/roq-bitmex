@@ -47,7 +47,6 @@ add_dependencies("${TARGET_NAME}" autogen-headers autogen-json-headers)
 
 target_link_libraries(
   "${TARGET_NAME}"
-  PUBLIC roq-api::roq-api roq-logging::roq-logging
   PRIVATE "${PROJECT_NAME}-json"
           "${PROJECT_NAME}-flags"
           "${PROJECT_NAME}-tools"
@@ -55,7 +54,10 @@ target_link_libraries(
           roq-web::roq-web
           roq-core::roq-core
           roq-io::roq-io
-          absl::flags_parse
+          roq-logging::roq-logging
+          roq-api::roq-api
+          fmt::fmt
+          absl::flags
           absl::flat_hash_map
           absl::flat_hash_set
           ${UUID_LIBRARIES}
