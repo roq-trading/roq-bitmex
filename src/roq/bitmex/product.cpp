@@ -173,6 +173,7 @@ ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t
       .commission_currency = {},
       .tick_size = tick_size_,
       .multiplier = multiplier_,
+      .min_notional = NaN,
       .min_trade_vol = lot_size_,  // XXX correct?
       .max_trade_vol = NaN,
       .trade_vol_step_size = lot_size_,  // XXX correct?
