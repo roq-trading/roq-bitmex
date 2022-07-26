@@ -426,6 +426,7 @@ void WebSocket::operator()(Trace<json::Execution const> const &event, json::Acti
                   .fills = fills,
                   .routing_id = order.routing_id,
                   .update_type = {},
+                  .user = {},
               };
               create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
             }
