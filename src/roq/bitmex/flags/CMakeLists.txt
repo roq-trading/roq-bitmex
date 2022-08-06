@@ -38,4 +38,4 @@ add_dependencies("${TARGET_NAME}" flags-autogen-headers)
 
 target_link_libraries("${TARGET_NAME}" absl::flags)
 
-target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_14)
+target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_20)
