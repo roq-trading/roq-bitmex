@@ -7,9 +7,9 @@ source:
 
 build:
   skip: True  # [win]
-  number: {{ ROQ_BUILD_NUMBER if ROQ_BUILD_NUMBER is defined else GIT_DESCRIBE_NUMBER }}                                
-  script_env:                                                                                                           
-    - ROQ_BUILD_NUMBER                                                                                                  
+  number: {{ ROQ_BUILD_NUMBER if ROQ_BUILD_NUMBER is defined else GIT_DESCRIBE_NUMBER }}
+  script_env:
+    - ROQ_BUILD_NUMBER
     - ROQ_BUILD_TYPE
   run_exports:
     - {{ pin_subpackage('roq-bitmex', max_pin='x.x.x') }}
@@ -27,7 +27,7 @@ requirements:
     - roq-oss-brotli
     - roq-oss-catch2
     - roq-oss-libsodium
-    - roq-oss-libsodium                                                                                                    
+    - roq-oss-libsodium
     - roq-oss-magic_enum
     - roq-oss-range-v3
     - roq-oss-re2
