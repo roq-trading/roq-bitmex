@@ -27,10 +27,12 @@ requirements:
     - roq-oss-brotli
     - roq-oss-catch2
     - roq-oss-libsodium
+    - roq-oss-libsodium                                                                                                    
     - roq-oss-magic_enum
     - roq-oss-range-v3
     - roq-oss-re2
     - roq-oss-tomlplusplus
+    - roq-oss-zlib-ng
     - roq-server
     - roq-web
 
