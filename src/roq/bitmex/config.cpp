@@ -52,6 +52,7 @@ void Config::dispatch(server::Config::Handler &handler) const {
       .mbp_min_trade_vol_multiplier = NaN,
       .mbp_allow_remove_non_existing = {},
       .mbp_allow_price_inversion = Flags::mbp_allow_price_inversion(),
+      .mbp_checksum = server::Flags::cache_mbp_checksum(),
       .oms_download_has_state = {},
       .oms_download_has_routing_id = {},
       .oms_request_id_type = RequestIdType::BASE64,
