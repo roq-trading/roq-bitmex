@@ -315,14 +315,14 @@ void WebSocket::parse_helper(std::string_view const &message) {
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
-void WebSocket::operator()(Trace<json::CancelAllAfter const> const &event) {
+void WebSocket::operator()(Trace<json::CancelAllAfter> const &event) {
   profile_.cancel_all_after([&]() {
     auto &[trace_info, cancel_all_after] = event;
     log::info<2>("cancel_all_after={}"sv, cancel_all_after);
   });
 }
 
-void WebSocket::operator()(Trace<json::Error const> const &event) {
+void WebSocket::operator()(Trace<json::Error> const &event) {
   profile_.error([&]() {
     auto &[trace_info, error] = event;
     log::warn("error={}"sv, error);
@@ -330,7 +330,7 @@ void WebSocket::operator()(Trace<json::Error const> const &event) {
   (*connection_).close();
 }
 
-void WebSocket::operator()(Trace<json::Handshake const> const &event) {
+void WebSocket::operator()(Trace<json::Handshake> const &event) {
   profile_.handshake([&]() {
     auto &[trace_info, handshake] = event;
     log::info<2>("handshake={}"sv, handshake);
@@ -341,13 +341,13 @@ void WebSocket::operator()(Trace<json::Handshake const> const &event) {
   });
 }
 
-void WebSocket::operator()(Trace<json::Subscribe const> const &) {
+void WebSocket::operator()(Trace<json::Subscribe> const &) {
 }
 
-void WebSocket::operator()(Trace<json::Unsubscribe const> const &) {
+void WebSocket::operator()(Trace<json::Unsubscribe> const &) {
 }
 
-void WebSocket::operator()(Trace<json::Execution const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Execution> const &event, json::Action action) {
   profile_.execution([&]() {
     // auto &[trace_info, execution] = event; // XXX clang13
     auto &trace_info = event.trace_info;
@@ -438,7 +438,7 @@ void WebSocket::operator()(Trace<json::Execution const> const &event, json::Acti
   });
 }
 
-void WebSocket::operator()(Trace<json::Margin const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Margin> const &event, json::Action action) {
   profile_.margin([&]() {
     auto &[trace_info, margin] = event;
     log::info<2>("event={{action={}, margin={}}}"sv, action, margin);
@@ -446,7 +446,7 @@ void WebSocket::operator()(Trace<json::Margin const> const &event, json::Action 
   });
 }
 
-void WebSocket::operator()(Trace<json::Order const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Order> const &event, json::Action action) {
   profile_.order([&]() {
     auto &[trace_info, order] = event;
     log::info<2>("event={{action={}, order={}}}"sv, action, order);
@@ -461,7 +461,7 @@ void WebSocket::operator()(Trace<json::Order const> const &event, json::Action a
   });
 }
 
-void WebSocket::operator()(Trace<json::Position const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Position> const &event, json::Action action) {
   profile_.position([&]() {
     auto &[trace_info, position] = event;
     log::info<2>("event={{action={}, position={}}}"sv, action, position);
@@ -485,37 +485,37 @@ void WebSocket::operator()(Trace<json::Position const> const &event, json::Actio
   });
 }
 
-void WebSocket::operator()(Trace<json::Funding const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Funding> const &event, json::Action action) {
   auto &[trace_info, funding] = event;
   log::fatal("Unexpected: action={}, funding={}"sv, action, funding);
 }
 
-void WebSocket::operator()(Trace<json::Instrument const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Instrument> const &event, json::Action action) {
   auto &[trace_info, instrument] = event;
   log::fatal("Unexpected: action={}, instrument={}"sv, action, instrument);
 }
 
-void WebSocket::operator()(Trace<json::Liquidation const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Liquidation> const &event, json::Action action) {
   auto &[trace_info, liquidation] = event;
   log::fatal("Unexpected: action={}, liquidation={}"sv, action, liquidation);
 }
 
-void WebSocket::operator()(Trace<json::OrderBookL2 const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::OrderBookL2> const &event, json::Action action) {
   auto &[trace_info, order_book_l2] = event;
   log::fatal("Unexpected: action={}, order_book_l2={}"sv, action, order_book_l2);
 }
 
-void WebSocket::operator()(Trace<json::Quote const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Quote> const &event, json::Action action) {
   auto &[trace_info, quote] = event;
   log::fatal("Unexpected: action={}, quote={}"sv, action, quote);
 }
 
-void WebSocket::operator()(Trace<json::Settlement const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Settlement> const &event, json::Action action) {
   auto &[trace_info, settlement] = event;
   log::fatal("Unexpected: action={}, settlement={}"sv, action, settlement);
 }
 
-void WebSocket::operator()(Trace<json::Trade const> const &event, json::Action action) {
+void WebSocket::operator()(Trace<json::Trade> const &event, json::Action action) {
   auto &[trace_info, trade] = event;
   log::fatal("Unexpected: action={}, trade={}"sv, action, trade);
 }

@@ -33,14 +33,14 @@ namespace bitmex {
 class MarketData final : public web::socket::Client::Handler, public json::StreamParser::Handler {
  public:
   struct Handler {
-    virtual void operator()(Trace<StreamStatus const> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
-    virtual void operator()(Trace<ReferenceData const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<MarketStatus const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<TopOfBook const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<MarketByPriceUpdate const> const &, bool is_last, bool refresh) = 0;
-    virtual void operator()(Trace<TradeSummary const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<StatisticsUpdate const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
+    virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketByPriceUpdate> const &, bool is_last, bool refresh) = 0;
+    virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
   };
 
   MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &);
@@ -82,24 +82,24 @@ class MarketData final : public web::socket::Client::Handler, public json::Strea
   void parse(std::string_view const &message);
   void parse_helper(std::string_view const &message);
 
-  void operator()(Trace<json::CancelAllAfter const> const &) override;
-  void operator()(Trace<json::Error const> const &) override;
-  void operator()(Trace<json::Handshake const> const &) override;
-  void operator()(Trace<json::Subscribe const> const &) override;
-  void operator()(Trace<json::Unsubscribe const> const &) override;
+  void operator()(Trace<json::CancelAllAfter> const &) override;
+  void operator()(Trace<json::Error> const &) override;
+  void operator()(Trace<json::Handshake> const &) override;
+  void operator()(Trace<json::Subscribe> const &) override;
+  void operator()(Trace<json::Unsubscribe> const &) override;
 
-  void operator()(Trace<json::Funding const> const &, json::Action) override;
-  void operator()(Trace<json::Instrument const> const &, json::Action) override;
-  void operator()(Trace<json::Liquidation const> const &, json::Action) override;
-  void operator()(Trace<json::OrderBookL2 const> const &, json::Action) override;
-  void operator()(Trace<json::Quote const> const &, json::Action) override;
-  void operator()(Trace<json::Settlement const> const &, json::Action) override;
-  void operator()(Trace<json::Trade const> const &, json::Action) override;
+  void operator()(Trace<json::Funding> const &, json::Action) override;
+  void operator()(Trace<json::Instrument> const &, json::Action) override;
+  void operator()(Trace<json::Liquidation> const &, json::Action) override;
+  void operator()(Trace<json::OrderBookL2> const &, json::Action) override;
+  void operator()(Trace<json::Quote> const &, json::Action) override;
+  void operator()(Trace<json::Settlement> const &, json::Action) override;
+  void operator()(Trace<json::Trade> const &, json::Action) override;
   // ... unexpected
-  void operator()(Trace<json::Execution const> const &, json::Action) override;
-  void operator()(Trace<json::Margin const> const &, json::Action) override;
-  void operator()(Trace<json::Order const> const &, json::Action) override;
-  void operator()(Trace<json::Position const> const &, json::Action) override;
+  void operator()(Trace<json::Execution> const &, json::Action) override;
+  void operator()(Trace<json::Margin> const &, json::Action) override;
+  void operator()(Trace<json::Order> const &, json::Action) override;
+  void operator()(Trace<json::Position> const &, json::Action) override;
 
   // utilities
 

@@ -249,7 +249,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
 }
 
 void OrderEntry::create_order_ack(
-    Trace<web::rest::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -368,7 +368,7 @@ void OrderEntry::modify_order(
 }
 
 void OrderEntry::modify_order_ack(
-    Trace<web::rest::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -482,7 +482,7 @@ void OrderEntry::cancel_order(
 }
 
 void OrderEntry::cancel_order_ack(
-    Trace<web::rest::Response const> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto &[trace_info, response] = event;
     log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
@@ -585,7 +585,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
   });
 }
 
-void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response const> const &event) {
+void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto &[trace_info, response] = event;
     try {

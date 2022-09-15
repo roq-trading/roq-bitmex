@@ -29,8 +29,8 @@ namespace bitmex {
 class OrderEntry final : public web::rest::Client::Handler {
  public:
   struct Handler {
-    virtual void operator()(Trace<StreamStatus const> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
+    virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
   };
 
   OrderEntry(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &);
@@ -69,24 +69,24 @@ class OrderEntry final : public web::rest::Client::Handler {
   void operator()(ConnectionStatus);
 
   void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
-  void create_order_ack(Trace<web::rest::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void create_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
 
   void modify_order(
       Event<ModifyOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void modify_order_ack(Trace<web::rest::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void modify_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
 
   void cancel_order(
       Event<CancelOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void cancel_order_ack(Trace<web::rest::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
-  void cancel_all_orders_ack(Trace<web::rest::Response const> const &);
+  void cancel_all_orders_ack(Trace<web::rest::Response> const &);
 
   void operator()(json::OrderItem const &);
   void operator()(json::Order const &);

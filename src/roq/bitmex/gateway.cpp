@@ -183,44 +183,44 @@ void Gateway::operator()(metrics::Writer &writer) {
   market_data_(writer);
 }
 
-void Gateway::operator()(Trace<StreamStatus const> const &event) {
+void Gateway::operator()(Trace<StreamStatus> const &event) {
   dispatcher_(event);
 }
 
-void Gateway::operator()(Trace<ExternalLatency const> const &event) {
+void Gateway::operator()(Trace<ExternalLatency> const &event) {
   dispatcher_(event);
 }
 
-void Gateway::operator()(Trace<ReferenceData const> const &event, bool is_last) {
+void Gateway::operator()(Trace<ReferenceData> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<MarketStatus const> const &event, bool is_last) {
+void Gateway::operator()(Trace<MarketStatus> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<TopOfBook const> const &event, bool is_last) {
+void Gateway::operator()(Trace<TopOfBook> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<MarketByPriceUpdate const> const &event, bool is_last, bool refresh) {
+void Gateway::operator()(Trace<MarketByPriceUpdate> const &event, bool is_last, bool refresh) {
   dispatcher_(
       event, is_last, refresh, shared_.final_bids, shared_.final_asks, []([[maybe_unused]] auto &market_by_price) {});
 }
 
-void Gateway::operator()(Trace<TradeSummary const> const &event, bool is_last) {
+void Gateway::operator()(Trace<TradeSummary> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<StatisticsUpdate const> const &event, bool is_last) {
+void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<TradeUpdate const> const &event, bool is_last, uint8_t user_id) {
+void Gateway::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id) {
   dispatcher_(event, is_last, user_id);
 }
 
-void Gateway::operator()(Trace<PositionUpdate const> const &event, bool is_last) {
+void Gateway::operator()(Trace<PositionUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 

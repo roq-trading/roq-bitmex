@@ -30,10 +30,10 @@ namespace bitmex {
 class DropCopy final : public web::socket::Client::Handler, public json::StreamParser::Handler {
  public:
   struct Handler {
-    virtual void operator()(Trace<StreamStatus const> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
-    virtual void operator()(Trace<TradeUpdate const> const &, bool is_last, uint8_t user_id) = 0;
-    virtual void operator()(Trace<PositionUpdate const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
+    virtual void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
   };
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &);
@@ -71,24 +71,24 @@ class DropCopy final : public web::socket::Client::Handler, public json::StreamP
   void parse(std::string_view const &message);
   void parse_helper(std::string_view const &message);
 
-  void operator()(Trace<json::CancelAllAfter const> const &) override;
-  void operator()(Trace<json::Error const> const &) override;
-  void operator()(Trace<json::Handshake const> const &) override;
-  void operator()(Trace<json::Subscribe const> const &) override;
-  void operator()(Trace<json::Unsubscribe const> const &) override;
+  void operator()(Trace<json::CancelAllAfter> const &) override;
+  void operator()(Trace<json::Error> const &) override;
+  void operator()(Trace<json::Handshake> const &) override;
+  void operator()(Trace<json::Subscribe> const &) override;
+  void operator()(Trace<json::Unsubscribe> const &) override;
 
-  void operator()(Trace<json::Execution const> const &, json::Action) override;
-  void operator()(Trace<json::Margin const> const &, json::Action) override;
-  void operator()(Trace<json::Order const> const &, json::Action) override;
-  void operator()(Trace<json::Position const> const &, json::Action) override;
+  void operator()(Trace<json::Execution> const &, json::Action) override;
+  void operator()(Trace<json::Margin> const &, json::Action) override;
+  void operator()(Trace<json::Order> const &, json::Action) override;
+  void operator()(Trace<json::Position> const &, json::Action) override;
   // ... unexpected
-  void operator()(Trace<json::Funding const> const &, json::Action) override;
-  void operator()(Trace<json::Instrument const> const &, json::Action) override;
-  void operator()(Trace<json::Liquidation const> const &, json::Action) override;
-  void operator()(Trace<json::OrderBookL2 const> const &, json::Action) override;
-  void operator()(Trace<json::Quote const> const &, json::Action) override;
-  void operator()(Trace<json::Settlement const> const &, json::Action) override;
-  void operator()(Trace<json::Trade const> const &, json::Action) override;
+  void operator()(Trace<json::Funding> const &, json::Action) override;
+  void operator()(Trace<json::Instrument> const &, json::Action) override;
+  void operator()(Trace<json::Liquidation> const &, json::Action) override;
+  void operator()(Trace<json::OrderBookL2> const &, json::Action) override;
+  void operator()(Trace<json::Quote> const &, json::Action) override;
+  void operator()(Trace<json::Settlement> const &, json::Action) override;
+  void operator()(Trace<json::Trade> const &, json::Action) override;
 
   // utilities
 
