@@ -4,8 +4,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/io/engine/context_factory.hpp"
-
 #include "roq/bitmex/flags.hpp"
 
 using namespace std::literals;
@@ -47,12 +45,12 @@ auto create_drop_copy(Gateway &gateway, io::Context &context, uint16_t &stream_i
 }
 }  // namespace
 
-Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config)
-    : dispatcher_(dispatcher), security_(create_security<decltype(security_)>(config)),
-      context_(io::engine::ContextFactory::create_libevent()), shared_(dispatcher),
-      order_entry_(create_order_entry<decltype(order_entry_)>(*this, *context_, stream_id_, security_, shared_)),
-      drop_copy_(create_drop_copy<decltype(drop_copy_)>(*this, *context_, stream_id_, security_, shared_)),
-      market_data_(*this, *context_, ++stream_id_, shared_) {
+Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
+    : dispatcher_(dispatcher), security_(create_security<decltype(security_)>(config)), context_(context),
+      shared_(dispatcher),
+      order_entry_(create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, security_, shared_)),
+      drop_copy_(create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, security_, shared_)),
+      market_data_(*this, context_, ++stream_id_, shared_) {
   if (!Flags::ws_cancel_on_disconnect()) [[unlikely]]
     log::warn("Orders will *NOT* be cancelled on disconnect"sv);
 }
@@ -87,7 +85,6 @@ void Gateway::operator()(Event<Timer> const &event) {
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);
   market_data_(event);
-  (*context_).drain();
 }
 
 void Gateway::operator()(Event<Connected> const &) {
