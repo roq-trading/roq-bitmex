@@ -66,12 +66,14 @@ void emplace(MBPUpdate &result, double price, double size) {
 }
 
 template <typename T>
-void emplace(Trade &result, const T &value) {
+void emplace(Trade &result, T const &value) {
   new (&result) Trade{
       .side = json::map(value.side),
       .price = value.price,
       .quantity = value.size,
       .trade_id = value.trd_match_id,
+      .taker_order_id = {},
+      .maker_order_id = {},
   };
 }
 }  // namespace
@@ -602,6 +604,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
                 .symbol = previous,
                 .trades = trades,
                 .exchange_time_utc = timestamp,
+                .exchange_sequence = {},
             };
             create_trace_and_dispatch(handler_, trace_info, trade_summary, false);
           }
@@ -620,6 +623,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
             .symbol = previous,
             .trades = trades,
             .exchange_time_utc = timestamp,
+            .exchange_sequence = {},
         };
         create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
       }
