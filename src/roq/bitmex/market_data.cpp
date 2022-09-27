@@ -22,8 +22,11 @@ using namespace std::literals;
 namespace roq {
 namespace bitmex {
 
+// === CONSTANTS ===
+
 namespace {
 auto const NAME = "md"sv;
+
 const Mask SUPPORTS{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
@@ -32,11 +35,14 @@ const Mask SUPPORTS{
     SupportType::TRADE_SUMMARY,
     SupportType::STATISTICS,
 };
+}  // namespace
 
-struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(std::string_view const &group, std::string_view const &function)
-      : core::metrics::Factory(server::Flags::name(), group, function) {}
-};
+// === HELPERS ===
+
+namespace {
+auto create_name(auto stream_id) {
+  return fmt::format("{}:{}"sv, stream_id, NAME);
+}
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::ws_uri();
@@ -54,32 +60,16 @@ auto create_connection(auto &handler, auto &context) {
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
 
-void emplace(MBPUpdate &result, double price, double size) {
-  new (&result) MBPUpdate{
-      .price = price,
-      .quantity = size,
-      .implied_quantity = NaN,
-      .number_of_orders = {},
-      .update_action = {},
-      .price_level = {},
-  };
-}
-
-template <typename T>
-void emplace(Trade &result, T const &value) {
-  new (&result) Trade{
-      .side = json::map(value.side),
-      .price = value.price,
-      .quantity = value.size,
-      .trade_id = value.trd_match_id,
-      .taker_order_id = {},
-      .maker_order_id = {},
-  };
-}
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(auto const &group, auto const &function)
+      : core::metrics::Factory(server::Flags::name(), group, function) {}
+};
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"sv, stream_id_, NAME)),
+    : handler_(handler), stream_id_(stream_id), name_(create_name(stream_id_)),
       connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -497,6 +487,16 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
       return;
     std::string_view previous;
     std::chrono::nanoseconds timestamp = {};
+    auto create_mbp_update = []<typename T>(T &result, auto price, auto size) {
+      new (&result) T{
+          .price = price,
+          .quantity = size,
+          .implied_quantity = NaN,
+          .number_of_orders = {},
+          .update_action = {},
+          .price_level = {},
+      };
+    };
     core::back_emplacer bids(shared_.bids), asks(shared_.asks);
     for (auto &item : order_book_l2.data) {
       if (std::empty(previous)) {
@@ -516,10 +516,10 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
         switch (item.side) {
           using enum json::Side::type_t;
           case BUY:
-            bids.emplace_back([&](auto &result) { emplace(result, price, size); });
+            bids.emplace_back([&](auto &result) { create_mbp_update(result, price, size); });
             break;
           case SELL:
-            asks.emplace_back([&](auto &result) { emplace(result, price, size); });
+            asks.emplace_back([&](auto &result) { create_mbp_update(result, price, size); });
             break;
           default:
             log::fatal("Unexpected"sv);
@@ -591,6 +591,16 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
     if (action != json::Action::INSERT)
       return;
     std::string_view previous;
+    auto create_trade = []<typename T>(T &result, auto const &value) {
+      new (&result) T{
+          .side = json::map(value.side),
+          .price = value.price,
+          .quantity = value.size,
+          .trade_id = value.trd_match_id,
+          .taker_order_id = {},
+          .maker_order_id = {},
+      };
+    };
     core::back_emplacer trades(shared_.trades);
     std::chrono::nanoseconds timestamp = {};
     for (auto &item : trade.data) {
@@ -613,7 +623,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
         trades.clear();
         timestamp = {};
       }
-      trades.emplace_back([&item](auto &result) { emplace(result, item); });
+      trades.emplace_back([&](auto &result) { create_trade(result, item); });
     }
     if (!std::empty(previous) && !std::empty(trades)) {
       if (!shared_.discard_symbol(previous)) {

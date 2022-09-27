@@ -26,8 +26,11 @@ using namespace std::chrono_literals;  // NOLINT
 namespace roq {
 namespace bitmex {
 
+// === CONSTANTS ===
+
 namespace {
 auto const NAME = "ex"sv;
+
 const Mask SUPPORTS{
     SupportType::ORDER_ACK,
     SupportType::ORDER,
@@ -36,11 +39,14 @@ const Mask SUPPORTS{
 };
 
 auto const REQUEST_EXPIRES = 5s;
+}  // namespace
 
-struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(std::string_view const &group, std::string_view const &function)
-      : core::metrics::Factory(server::Flags::name(), group, function) {}
-};
+// === HELPERS ===
+
+namespace {
+auto create_name(auto stream_id, auto const &account) {
+  return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
+}
 
 auto create_connection(auto &handler, auto &context, auto &&create_upgrade_headers) {
   auto uri = Flags::ws_uri();
@@ -58,20 +64,16 @@ auto create_connection(auto &handler, auto &context, auto &&create_upgrade_heade
   return web::socket::ClientFactory::create(handler, context, config, std::move(create_upgrade_headers));
 }
 
-template <typename T>
-void emplace(Fill &result, const T &value) {
-  new (&result) Fill{
-      .external_trade_id = value.trd_match_id,
-      .quantity = value.last_qty,
-      .price = value.last_px,
-      .liquidity = {},
-  };
-}
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(auto const &group, auto const &function)
+      : core::metrics::Factory(server::Flags::name(), group, function) {}
+};
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
-    : handler_(handler), stream_id_(stream_id),
-      name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())),
+    : handler_(handler), stream_id_(stream_id), name_(create_name(stream_id_, security.get_account())),
       connection_(create_connection(*this, context, [this]() { return create_upgrade_headers(); })),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
@@ -341,10 +343,17 @@ void DropCopy::operator()(Trace<json::Unsubscribe> const &event) {
 
 void DropCopy::operator()(Trace<json::Execution> const &event, json::Action action) {
   profile_.execution([&]() {
-    // auto &[trace_info, execution] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
     log::info<2>("event={{action={}, execution={}}}"sv, action, execution);
+    auto create_fill = []<typename T>(T &result, const auto &value) {
+      new (&result) T{
+          .external_trade_id = value.trd_match_id,
+          .quantity = value.last_qty,
+          .price = value.last_px,
+          .liquidity = {},
+      };
+    };
     core::back_emplacer fills(shared_.fills);
     size_t index = {};
     for (auto &item : execution.data) {
@@ -400,7 +409,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
       };
       if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
             if (item.exec_type == json::ExecType::TRADE) {
-              fills.emplace_back([&](auto &result) { emplace(result, item); });
+              fills.emplace_back([&](auto &result) { create_fill(result, item); });
             }
             if (last && !std::empty(fills)) {
               const TradeUpdate trade_update{
