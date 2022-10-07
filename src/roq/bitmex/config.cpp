@@ -15,8 +15,8 @@ using namespace std::literals;
 namespace roq {
 namespace bitmex {
 
-Config::Config(std::string_view const &config_path, std::string_view const &secrets_path) {
-  server::ConfigReader::parse_file(*this, config_path, secrets_path);
+Config::Config() {
+  server::ConfigReader::parse_file(*this);
 }
 
 Account const &Config::get_master_account() const {

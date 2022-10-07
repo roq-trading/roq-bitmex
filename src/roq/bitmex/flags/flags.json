@@ -3,18 +3,6 @@
   "type": "flags",
   "values": [
     {
-      "name": "config_file",
-      "type": "std::string",
-      "validator": "roq::core::flags::Path",
-      "description": "config file (path)"
-    },
-    {
-      "name": "secrets_file",
-      "type": "std::string",
-      "validator": "roq::core::flags::Path",
-      "description": "secrets file (path, optional)"
-    },
-    {
       "name": "exchange",
       "type": "std::string",
       "validator": "roq::core::flags::NonEmpty",

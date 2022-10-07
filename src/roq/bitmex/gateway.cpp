@@ -56,7 +56,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Conte
 }
 
 void Gateway::operator()(Event<Start> const &event) {
-  log::info("Starting the gateway..."sv);
+  log::info("Starting..."sv);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
   for (auto &[_, web_socket] : web_socket_)
@@ -67,7 +67,7 @@ void Gateway::operator()(Event<Start> const &event) {
 }
 
 void Gateway::operator()(Event<Stop> const &event) {
-  log::info("Stopping the gateway..."sv);
+  log::info("Stopping..."sv);
   market_data_(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);

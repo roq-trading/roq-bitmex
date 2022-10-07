@@ -20,7 +20,7 @@ namespace bitmex {
 
 class Config final : public server::Config, public server::ConfigReader::Handler {
  public:
-  Config(std::string_view const &config_path, std::string_view const &secrets_path);
+  Config();
 
   Account const &get_master_account() const;
 
