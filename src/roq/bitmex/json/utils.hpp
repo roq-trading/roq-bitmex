@@ -239,7 +239,7 @@ inline json::TimeInForce map(roq::TimeInForce time_in_force) {
   return json::TimeInForce::UNDEFINED;
 }
 
-inline json::ExecInst map(Mask<roq::ExecutionInstruction> const &execution_instructions) {
+inline json::ExecInst map(Mask<roq::ExecutionInstruction> execution_instructions) {
   // XXX support multiple?
   if (execution_instructions.has(roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE))
     return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
