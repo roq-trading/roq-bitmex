@@ -9,12 +9,16 @@
 namespace roq {
 namespace bitmex {
 
+// === HELPERS ===
+
 namespace {
 auto create_base_path() {
   io::web::URI uri{Flags::rest_uri()};
   return std::string{uri.get_path()};
 }
 }  // namespace
+
+// === IMPLEMENTATION ===
 
 Security::Security(Config const &config, std::string_view const &account)
     : account_(account), base_path(create_base_path()), hasher_(config.get_api_key(), config.get_secret()) {

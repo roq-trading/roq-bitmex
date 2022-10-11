@@ -31,7 +31,7 @@ namespace bitmex {
 namespace {
 auto const NAME = "ex"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::ORDER_ACK,
     SupportType::ORDER,
     SupportType::TRADE,
@@ -233,7 +233,7 @@ void WebSocket::create_order(
     Event<CreateOrder> const &, oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
   });
 }
 
@@ -246,7 +246,7 @@ void WebSocket::modify_order(
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
   });
 }
 
@@ -259,7 +259,7 @@ void WebSocket::cancel_order(
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
   });
 }
 
@@ -313,7 +313,7 @@ void WebSocket::parse(std::string_view const &message) {
 
 void WebSocket::parse_helper(std::string_view const &message) {
   auto trace_info = server::create_trace_info();
-  core::json::Buffer buffer(decode_buffer_);
+  core::json::Buffer buffer{decode_buffer_};
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 

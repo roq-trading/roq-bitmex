@@ -27,7 +27,7 @@ namespace bitmex {
 namespace {
 auto const NAME = "md"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,
@@ -304,7 +304,7 @@ void MarketData::parse(std::string_view const &message) {
 
 void MarketData::parse_helper(std::string_view const &message) {
   auto trace_info = server::create_trace_info();
-  core::json::Buffer buffer(decode_buffer_);
+  core::json::Buffer buffer{decode_buffer_};
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
@@ -497,7 +497,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
           .price_level = {},
       };
     };
-    core::back_emplacer bids(shared_.bids), asks(shared_.asks);
+    core::back_emplacer bids{shared_.bids}, asks{shared_.asks};
     for (auto &item : order_book_l2.data) {
       if (std::empty(previous)) {
         previous = item.symbol;
@@ -601,7 +601,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
           .maker_order_id = {},
       };
     };
-    core::back_emplacer trades(shared_.trades);
+    core::back_emplacer trades{shared_.trades};
     std::chrono::nanoseconds timestamp = {};
     for (auto &item : trade.data) {
       timestamp = std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));

@@ -16,6 +16,8 @@ using namespace std::literals;
 namespace roq {
 namespace bitmex {
 
+// === IMPLEMENTATION ===
+
 // drop copy
 
 void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const &trace_info, bool download) {

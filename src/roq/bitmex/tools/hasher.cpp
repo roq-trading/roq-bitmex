@@ -14,11 +14,15 @@ namespace roq {
 namespace bitmex {
 namespace tools {
 
+// === HELPERS ===
+
 namespace {
 auto create_timestamp_secs(std::chrono::nanoseconds value) {
   return fmt::format("{}"sv, std::chrono::duration_cast<std::chrono::seconds>(value).count());
 }
 }  // namespace
+
+// === IMPLEMENTATION ===
 
 Hasher::Hasher(std::string_view const &key, std::string_view const &secret) : key_(key), hmac_(secret) {
 }

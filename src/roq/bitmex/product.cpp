@@ -14,6 +14,17 @@
 namespace roq {
 namespace bitmex {
 
+// === HELPERS ===
+
+namespace {
+auto strip_time_part(auto timestamp) {
+  auto seconds = std::chrono::duration_cast<std::chrono::seconds>(timestamp);
+  return std::chrono::seconds{seconds.count() % 86400};
+}
+}  // namespace
+
+// === IMPLEMENTATION ===
+
 // XXX markPrice ?
 // XXX openInterest ?
 
@@ -28,14 +39,6 @@ Product::Product(json::InstrumentItem const &item)
 Product::Product(json::FundingItem const &) {
   statistics_.reserve(magic_enum::enum_count<StatisticsType>());
 }
-
-namespace {
-template <typename T>
-std::chrono::seconds strip_time_part(T timestamp) {
-  auto seconds = std::chrono::duration_cast<std::chrono::seconds>(timestamp);
-  return std::chrono::seconds{seconds.count() % 86400};
-}
-}  // namespace
 
 bool Product::update(json::InstrumentItem const &item) {
   // market status

@@ -4,22 +4,22 @@
 
 using namespace std::literals;
 
+// === CONSTANTS ===
+
 namespace {
-auto const DESCRIPTION = "Roq BitMEX Gateway"sv;
+roq::Service::Info const INFO{
+    .description = "Roq BitMEX Gateway"sv,
+    .package_name = ROQ_PACKAGE_NAME,
+    .host = ROQ_HOST,
+    .build_version = ROQ_BUILD_VERSION,
+    .build_number = ROQ_BUILD_NUMBER,
+    .build_type = ROQ_BUILD_TYPE,
+    .git_hash = ROQ_GIT_DESCRIBE_HASH,
+};
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 int main(int argc, char **argv) {
-  return roq::bitmex::Application(
-             argc,
-             argv,
-             {
-                 .description = DESCRIPTION,
-                 .package_name = ROQ_PACKAGE_NAME,
-                 .host = ROQ_HOST,
-                 .build_version = ROQ_BUILD_VERSION,
-                 .build_number = ROQ_BUILD_NUMBER,
-                 .build_type = ROQ_BUILD_TYPE,
-                 .git_hash = ROQ_GIT_DESCRIBE_HASH,
-             })
-      .run();
+  return roq::bitmex::Application(argc, argv, INFO).run();
 }

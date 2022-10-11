@@ -31,7 +31,7 @@ namespace bitmex {
 namespace {
 auto const NAME = "ex"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::ORDER_ACK,
     SupportType::ORDER,
     SupportType::TRADE,
@@ -277,7 +277,7 @@ void DropCopy::parse(std::string_view const &message) {
 
 void DropCopy::parse_helper(std::string_view const &message) {
   auto trace_info = server::create_trace_info();
-  core::json::Buffer buffer(decode_buffer_);
+  core::json::Buffer buffer{decode_buffer_};
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
 
@@ -354,7 +354,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .liquidity = {},
       };
     };
-    core::back_emplacer fills(shared_.fills);
+    core::back_emplacer fills{shared_.fills};
     size_t index = {};
     for (auto &item : execution.data) {
       auto last = std::size(execution.data) == ++index;

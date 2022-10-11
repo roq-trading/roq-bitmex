@@ -30,7 +30,7 @@ namespace bitmex {
 namespace {
 auto const NAME = "om"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
@@ -204,7 +204,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
 void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const &, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
     auto &[message_info, create_order] = event;
     auto method = web::http::Method::POST;
     auto path = "/api/v1/order"sv;
@@ -252,7 +252,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         [this, user_id = message_info.source, order_id = create_order.order_id](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
+          Trace event{trace_info, response};
           uint32_t version = 1;
           create_order_ack(event, user_id, order_id, version);
         });
@@ -338,7 +338,7 @@ void OrderEntry::modify_order(
     std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
     auto &[message_info, modify_order] = event;
     auto method = web::http::Method::PUT;
     auto path = "/api/v1/order"sv;
@@ -372,7 +372,7 @@ void OrderEntry::modify_order(
         [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
+          Trace event{trace_info, response};
           modify_order_ack(event, user_id, order_id, version);
         });
   });
@@ -458,7 +458,7 @@ void OrderEntry::cancel_order(
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
     auto &[message_info, cancel_order] = event;
     auto method = web::http::Method::DELETE;
     auto path = "/api/v1/order"sv;
@@ -486,7 +486,7 @@ void OrderEntry::cancel_order(
         [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
+          Trace event{trace_info, response};
           cancel_order_ack(event, user_id, order_id, version);
         });
   });
@@ -503,7 +503,7 @@ void OrderEntry::cancel_order_ack(
       switch (category) {
         using enum web::http::Category;
         case SUCCESS: {  // 2xx
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto order = core::json::Parser::create<json::Order>(body, buffer);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(
               order, trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
@@ -586,7 +586,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
       };
       (*connection_)(request_id, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
         auto trace_info = server::create_trace_info();
-        Trace event(trace_info, response);
+        Trace event{trace_info, response};
         cancel_all_orders_ack(event);
       });
     } else {
@@ -605,7 +605,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
       switch (category) {
         using enum web::http::Category;
         case SUCCESS: {  // 2xx
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto order = core::json::Parser::create<json::Order>(body, buffer);
           OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, false);
           break;

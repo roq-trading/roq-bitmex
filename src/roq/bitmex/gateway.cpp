@@ -11,39 +11,43 @@ using namespace std::literals;
 namespace roq {
 namespace bitmex {
 
+// === HELPERS ===
+
 namespace {
 template <typename R>
-auto create_security(Config const &config) {
+auto create_security(auto const &config) {
   R result;
-  for (auto &[_, iter] : config.accounts)
-    result.try_emplace(iter.name, std::make_unique<Security>(config, iter.name));
+  for (auto &[_, account] : config.accounts)
+    result.try_emplace(account.name, std::make_unique<Security>(config, account.name));
   return result;
 }
 
-template <typename R, typename T>
-auto create_order_entry(Gateway &gateway, io::Context &context, uint16_t &stream_id, T &security, Shared &shared) {
+template <typename R>
+auto create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &security_by_account, auto &shared) {
   R result;
-  for (auto &iter : security)
-    result.try_emplace(iter.first, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *iter.second, shared));
+  for (auto &[account, security] : security_by_account)
+    result.try_emplace(account, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *security, shared));
   return result;
 }
 
-template <typename R, typename T>
-auto create_web_socket(Gateway &gateway, io::Context &context, uint16_t &stream_id, T &security, Shared &shared) {
+template <typename R>
+auto create_web_socket(auto &gateway, auto &context, auto &stream_id, auto &security_by_account, auto &shared) {
   R result;
-  for (auto &iter : security)
-    result.try_emplace(iter.first, std::make_unique<WebSocket>(gateway, context, ++stream_id, *iter.second, shared));
+  for (auto &[account, security] : security_by_account)
+    result.try_emplace(account, std::make_unique<WebSocket>(gateway, context, ++stream_id, *security, shared));
   return result;
 }
 
-template <typename R, typename T>
-auto create_drop_copy(Gateway &gateway, io::Context &context, uint16_t &stream_id, T &security, Shared &shared) {
+template <typename R>
+auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &security_by_account, auto &shared) {
   R result;
-  for (auto &iter : security)
-    result.try_emplace(iter.first, std::make_unique<DropCopy>(gateway, context, ++stream_id, *iter.second, shared));
+  for (auto &[account, security] : security_by_account)
+    result.try_emplace(account, std::make_unique<DropCopy>(gateway, context, ++stream_id, *security, shared));
   return result;
 }
 }  // namespace
+
+// === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
     : dispatcher_(dispatcher), security_(create_security<decltype(security_)>(config)), context_(context),
@@ -112,7 +116,7 @@ void Gateway::operator()(Event<Disconnected> const &event) {
             CancelAllOrders cancel_all_orders{
                 .account = account,
             };
-            Event event(message_info, cancel_all_orders);
+            Event event{message_info, cancel_all_orders};
             (*web_socket)(event, {});
           }
         }
@@ -123,7 +127,7 @@ void Gateway::operator()(Event<Disconnected> const &event) {
             CancelAllOrders cancel_all_orders{
                 .account = account,
             };
-            Event event(message_info, cancel_all_orders);
+            Event event{message_info, cancel_all_orders};
             (*order_entry)(event, {});
           }
         }
@@ -225,14 +229,14 @@ OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
   auto iter = order_entry_.find(account);
   if (iter != std::end(order_entry_))
     return *(*iter).second;
-  throw RuntimeError(R"(Unknown account="{}")"sv, account);
+  throw RuntimeError{R"(Unknown account="{}")"sv, account};
 }
 
 WebSocket &Gateway::get_web_socket(std::string_view const &account) {
   auto iter = web_socket_.find(account);
   if (iter != std::end(web_socket_))
     return *(*iter).second;
-  throw RuntimeError(R"(Unknown account="{}")"sv, account);
+  throw RuntimeError{R"(Unknown account="{}")"sv, account};
 }
 
 }  // namespace bitmex
