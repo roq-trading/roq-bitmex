@@ -26,7 +26,7 @@ server::Settings const SETTINGS{
 int Application::main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   Config config;
   auto context = server::create_io_context();
-  server::Trading<Gateway>(SETTINGS, config, *context).dispatch();
+  server::Trading<Gateway>{SETTINGS, config, *context}.dispatch();
   return EXIT_SUCCESS;
 }
 
