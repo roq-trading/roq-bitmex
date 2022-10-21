@@ -8,9 +8,9 @@ else
   PREFIX=
 fi
 
-NAME="bitmex-testnet"
+NAME="bitmex"
 
-CONFIG_FILE="$CWD/config/$NAME.toml"
+CONFIG_FILE="$CWD/config/$NAME-testnet.toml"
 
 URI="testnet.bitmex.com"
 
