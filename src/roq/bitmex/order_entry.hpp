@@ -91,6 +91,15 @@ class OrderEntry final : public web::rest::Client::Handler {
   void operator()(json::OrderItem const &);
   void operator()(json::Order const &);
 
+  template <typename SuccessHandler, typename ErrorHandler>
+  void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
+
+  template <typename... Args>
+  void operator()(Trace<oms::Response> const &, uint8_t user_id, uint32_t order_id, Args &&...);
+
+  template <typename... Args>
+  void operator()(Trace<oms::OrderUpdate> const &, std::string_view const &client_order_id, Args &&...);
+
  private:
   Handler &handler_;
   // config

@@ -30,7 +30,7 @@ namespace bitmex {
 namespace {
 auto const NAME = "om"sv;
 
-Mask const SUPPORTS{
+auto const SUPPORTS = Mask{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
@@ -260,70 +260,27 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
 void OrderEntry::create_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
-    auto &[trace_info, response] = event;
-    log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
-    try {
-      auto [status, category, body] = response.result();
-      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
-      switch (category) {
-        using enum web::http::Category;
-        case SUCCESS: {  // 2xx
-          auto order_item = core::json::Parser::create<json::OrderItem>(body);
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
-              order_item, trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
-          break;
-        }
-        case CLIENT_ERROR: {
-          std::string_view text;
-          if (json::ErrorParser::dispatch(body, [&](auto &error) {
-                log::warn("error={}"sv, error);
-                text = error.message;
-              })) {
-          } else {
-            log::warn(R"(Unable to parse response="{}")"sv, body);
-            text = "Unknown"sv;
-          }
-          auto error = json::guess_error(text);
-          oms::Response response{
-              .type = RequestType::CREATE_ORDER,
-              .origin = Origin::EXCHANGE,
-              .status = RequestStatus::REJECTED,
-              .error = error,
-              .text = text,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          if (shared_.update_order(
-                  user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-          } else {
-            log::warn("Did not find order: user_id={}, order_id={}"sv, user_id, order_id);
-          }
-          break;
-        }
-        default:
-          response.expect(web::http::Status::OK);  // throws
-      }
-    } catch (NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    auto handle_success = [&](auto &body) {
+      auto order_item = core::json::Parser::create<json::OrderItem>(body);
+      OrderUpdate{shared_, stream_id_, security_.get_account()}(
+          order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
+    };
+    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       oms::Response response{
           .type = RequestType::CREATE_ORDER,
-          .origin = Origin::GATEWAY,
-          .status = e.request_status(),
-          .error = e.error(),
-          .text = e.what(),
+          .origin = origin,
+          .status = status,
+          .error = error,
+          .text = text,
           .version = version,
           .request_id = {},
           .quantity = NaN,
           .price = NaN,
       };
-      if (shared_.update_order(
-              user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-      } else {
-        log::warn("Did not find order: user_id={}, order_id={}"sv, user_id, order_id);
-      }
-    }
+      Trace event_2{event, response};
+      (*this)(event_2, user_id, order_id);
+    };
+    process_response(event, handle_success, handle_error);
   });
 }
 
@@ -378,71 +335,27 @@ void OrderEntry::modify_order(
 void OrderEntry::modify_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
-    auto &[trace_info, response] = event;
-    log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
-    try {
-      auto [status, category, body] = response.result();
-      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
-      switch (category) {
-        using enum web::http::Category;
-        case SUCCESS: {  // 2xx
-          auto order_item = core::json::Parser::create<json::OrderItem>(body);
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
-              order_item, trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
-          break;
-        }
-        case CLIENT_ERROR: {  // 4xx
-          std::string_view text;
-          auto body = response.body();
-          if (json::ErrorParser::dispatch(body, [&](auto &error) {
-                log::warn("error={}"sv, error);
-                text = error.message;
-              })) {
-          } else {
-            log::warn(R"(Unable to parse response="{}")"sv, body);
-            text = "Unknown"sv;
-          }
-          auto error = json::guess_error(text);
-          oms::Response response{
-              .type = RequestType::MODIFY_ORDER,
-              .origin = Origin::EXCHANGE,
-              .status = RequestStatus::REJECTED,
-              .error = error,
-              .text = text,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          if (shared_.update_order(
-                  user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-          } else {
-            log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
-          }
-          break;
-        }
-        default:
-          response.expect(web::http::Status::OK);  // throws
-      }
-    } catch (NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    auto handle_success = [&](auto &body) {
+      auto order_item = core::json::Parser::create<json::OrderItem>(body);
+      OrderUpdate{shared_, stream_id_, security_.get_account()}(
+          order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
+    };
+    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       oms::Response response{
           .type = RequestType::MODIFY_ORDER,
-          .origin = Origin::GATEWAY,
-          .status = e.request_status(),
-          .error = e.error(),
-          .text = e.what(),
+          .origin = origin,
+          .status = status,
+          .error = error,
+          .text = text,
           .version = version,
           .request_id = {},
           .quantity = NaN,
           .price = NaN,
       };
-      if (shared_.update_order(
-              user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-      } else {
-        log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
-      }
-    }
+      Trace event_2{event, response};
+      (*this)(event_2, user_id, order_id);
+    };
+    process_response(event, handle_success, handle_error);
   });
 }
 
@@ -491,72 +404,28 @@ void OrderEntry::cancel_order(
 void OrderEntry::cancel_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
-    auto &[trace_info, response] = event;
-    log::info<2>("user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
-    try {
-      auto [status, category, body] = response.result();
-      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
-      switch (category) {
-        using enum web::http::Category;
-        case SUCCESS: {  // 2xx
-          core::json::Buffer buffer{decode_buffer_};
-          auto order = core::json::Parser::create<json::Order>(body, buffer);
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
-              order, trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
-          break;
-        }
-        case CLIENT_ERROR: {  // 4xx
-          std::string_view text;
-          auto body = response.body();
-          if (json::ErrorParser::dispatch(body, [&](auto &error) {
-                log::warn("error={}"sv, error);
-                text = error.message;
-              })) {
-          } else {
-            log::warn(R"(Unable to parse response="{}")"sv, body);
-            text = "Unknown"sv;
-          }
-          auto error = json::guess_error(text);
-          oms::Response response{
-              .type = RequestType::CANCEL_ORDER,
-              .origin = Origin::EXCHANGE,
-              .status = RequestStatus::REJECTED,
-              .error = error,
-              .text = text,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          if (shared_.update_order(
-                  user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-          } else {
-            log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
-          }
-          break;
-        }
-        default:
-          response.expect(web::http::Status::OK);  // throws
-      }
-    } catch (NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    auto handle_success = [&](auto &body) {
+      core::json::Buffer buffer{decode_buffer_};
+      auto order = core::json::Parser::create<json::Order>(body, buffer);
+      OrderUpdate{shared_, stream_id_, security_.get_account()}(
+          order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
+    };
+    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       oms::Response response{
           .type = RequestType::CANCEL_ORDER,
-          .origin = Origin::GATEWAY,
-          .status = e.request_status(),
-          .error = e.error(),
-          .text = e.what(),
+          .origin = origin,
+          .status = status,
+          .error = error,
+          .text = text,
           .version = version,
           .request_id = {},
           .quantity = NaN,
           .price = NaN,
       };
-      if (shared_.update_order(
-              user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-      } else {
-        log::warn("Did not find order: user_id={}, order_id={}, version={}"sv, user_id, order_id, version);
-      }
-    }
+      Trace event_2{event, response};
+      (*this)(event_2, user_id, order_id);
+    };
+    process_response(event, handle_success, handle_error);
   });
 }
 
@@ -595,33 +464,16 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
 
 void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
-    auto &[trace_info, response] = event;
-    try {
-      auto [status, category, body] = response.result();
-      log::info<2>(R"(status={}, category={}, body="{}")"sv, status, category, body);
-      switch (category) {
-        using enum web::http::Category;
-        case SUCCESS: {  // 2xx
-          core::json::Buffer buffer{decode_buffer_};
-          auto order = core::json::Parser::create<json::Order>(body, buffer);
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, false);
-          break;
-        }
-        case CLIENT_ERROR: {  // 4xx
-          if (json::ErrorParser::dispatch(body, [&](auto &error) { log::warn("error={}"sv, error); })) {
-          } else {
-            log::warn(R"(Unable to parse response="{}")"sv, body);
-          }
-          // note! this event does not require a response
-          break;
-        }
-        default:
-          response.expect(web::http::Status::OK);  // throws
-      }
-    } catch (NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
-      // note! this event does not require a response
-    }
+    auto handle_success = [&](auto &body) {
+      core::json::Buffer buffer{decode_buffer_};
+      auto order = core::json::Parser::create<json::Order>(body, buffer);
+      OrderUpdate{shared_, stream_id_, security_.get_account()}(order, event.trace_info, false);
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      // note! no response required
+    };
+    process_response(event, handle_success, handle_error);
   });
 }
 
@@ -635,6 +487,76 @@ void OrderEntry::operator()(json::OrderItem const &order_item) {
 void OrderEntry::operator()(json::Order const &order) {
   auto trace_info = server::create_trace_info();
   OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, false);
+}
+
+template <typename SuccessHandler, typename ErrorHandler>
+void OrderEntry::process_response(
+    web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
+  try {
+    auto [status, category, body] = response.result();
+    log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
+    switch (category) {
+      using enum web::http::Category;
+      case SUCCESS:  // 2xx
+        success_handler(body);
+        break;
+      case CLIENT_ERROR: {  // 4xx
+        std::string_view text;
+        if (json::ErrorParser::dispatch(body, [&](auto &error) {
+              log::warn("error={}"sv, error);
+              text = error.message;
+            })) {
+        } else {
+          log::warn(R"(Unable to parse response="{}")"sv, body);
+          text = "Unknown"sv;
+        }
+        auto error = json::guess_error(text);
+        error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, error, text);
+        break;
+      }
+      case SERVER_ERROR:  // 5xx
+        error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, magic_enum::enum_name(status));
+        break;
+      default:
+        response.expect(web::http::Status::OK);  // throws
+    }
+  } catch (oms::Exception &e) {
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    error_handler(e.origin, e.status, e.error, e.what());
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    error_handler(Origin::GATEWAY, e.request_status(), e.error(), e.what());
+  } catch (std::exception &e) {
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, e.what());
+  }
+}
+
+template <typename... Args>
+void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint32_t order_id, Args &&...args) {
+  auto &[trace_info, response] = event;
+  if (shared_.update_order(
+          user_id,
+          order_id,
+          stream_id_,
+          trace_info,
+          response,
+          std::forward<Args>(args)...,
+          []([[maybe_unused]] auto &order) {})) {
+  } else {
+    log::warn("Did not find order: user_id={}, order_id={}"sv, user_id, order_id);
+  }
+}
+
+template <typename... Args>
+void OrderEntry::operator()(
+    Trace<oms::OrderUpdate> const &event, std::string_view const &client_order_id, Args &&...args) {
+  auto &[trace_info, order_update] = event;
+  if (shared_.update_order(
+          client_order_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
+  } else {
+    log::warn("*** EXTERNAL ORDER ***"sv);
+  }
 }
 
 }  // namespace bitmex
