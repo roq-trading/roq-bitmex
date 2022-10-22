@@ -261,7 +261,7 @@ void OrderEntry::create_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      auto order_item = core::json::Parser::create<json::OrderItem>(body);
+      json::OrderItem order_item{body};
       OrderUpdate{shared_, stream_id_, security_.get_account()}(
           order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
@@ -336,7 +336,7 @@ void OrderEntry::modify_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      auto order_item = core::json::Parser::create<json::OrderItem>(body);
+      json::OrderItem order_item{body};
       OrderUpdate{shared_, stream_id_, security_.get_account()}(
           order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
@@ -405,8 +405,7 @@ void OrderEntry::cancel_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      core::json::Buffer buffer{decode_buffer_};
-      auto order = core::json::Parser::create<json::Order>(body, buffer);
+      json::Order order{body, decode_buffer_};
       OrderUpdate{shared_, stream_id_, security_.get_account()}(
           order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
     };
@@ -465,8 +464,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
 void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
-      core::json::Buffer buffer{decode_buffer_};
-      auto order = core::json::Parser::create<json::Order>(body, buffer);
+      json::Order order{body, decode_buffer_};
       OrderUpdate{shared_, stream_id_, security_.get_account()}(order, event.trace_info, false);
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
