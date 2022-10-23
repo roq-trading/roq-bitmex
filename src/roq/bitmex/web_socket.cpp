@@ -191,7 +191,7 @@ void WebSocket::operator()(web::socket::Client::Close const &) {
 }
 
 void WebSocket::operator()(web::socket::Client::Latency const &latency) {
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
@@ -211,7 +211,7 @@ void WebSocket::operator()(web::socket::Client::Binary const &) {
 
 void WebSocket::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
-    auto trace_info = server::create_trace_info();
+    TraceInfo trace_info;
     const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -312,7 +312,7 @@ void WebSocket::parse(std::string_view const &message) {
 }
 
 void WebSocket::parse_helper(std::string_view const &message) {
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   core::json::Buffer buffer{decode_buffer_};
   json::StreamParser::dispatch(*this, message, buffer, trace_info);
 }
@@ -531,7 +531,7 @@ void WebSocket::operator()(Trace<json::Trade> const &event, json::Action action)
 
 namespace {
 auto compute_expires() {
-  auto now = core::clock::GetRealTime();
+  auto now = clock::get_realtime();
   auto expires = now + REQUEST_EXPIRES;
   return std::chrono::ceil<std::chrono::seconds>(expires);
 }

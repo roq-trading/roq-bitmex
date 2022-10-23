@@ -69,7 +69,7 @@ struct create_metrics final : public core::metrics::Factory {
 };
 
 auto compute_expires() {
-  auto now = core::clock::GetRealTime();
+  auto now = clock::get_realtime();
   auto result = now + Flags::rest_expires_timeout();
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
@@ -171,7 +171,7 @@ void OrderEntry::operator()(web::rest::Client::Disconnected const &) {
 }
 
 void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
@@ -183,7 +183,7 @@ void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
 
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
-    auto trace_info = server::create_trace_info();
+    TraceInfo trace_info;
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -248,7 +248,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
     };
     auto callback = [this, user_id = message_info.source, order_id = create_order.order_id](
                         [[maybe_unused]] auto &request_id, auto &response) {
-      auto trace_info = server::create_trace_info();
+      TraceInfo trace_info;
       Trace event{trace_info, response};
       auto version = uint32_t{1};
       create_order_ack(event, user_id, order_id, version);
@@ -324,7 +324,7 @@ void OrderEntry::modify_order(
     auto callback =
         [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
-          auto trace_info = server::create_trace_info();
+          TraceInfo trace_info;
           Trace event{trace_info, response};
           modify_order_ack(event, user_id, order_id, version);
         };
@@ -393,7 +393,7 @@ void OrderEntry::cancel_order(
     auto callback =
         [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
-          auto trace_info = server::create_trace_info();
+          TraceInfo trace_info;
           Trace event{trace_info, response};
           cancel_order_ack(event, user_id, order_id, version);
         };
@@ -449,7 +449,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
           .quality_of_service = get_quality_of_service(),
       };
       auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
-        auto trace_info = server::create_trace_info();
+        TraceInfo trace_info;
         Trace event{trace_info, response};
         cancel_all_orders_ack(event);
       };
@@ -478,12 +478,12 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
 // utilities
 
 void OrderEntry::operator()(json::OrderItem const &order_item) {
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info, false);
 }
 
 void OrderEntry::operator()(json::Order const &order) {
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, false);
 }
 
