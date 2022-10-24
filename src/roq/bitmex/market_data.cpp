@@ -27,7 +27,7 @@ namespace bitmex {
 namespace {
 auto const NAME = "md"sv;
 
-Mask const SUPPORTS{
+auto const SUPPORTS = Mask{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,
@@ -69,8 +69,8 @@ struct create_metrics final : public core::metrics::Factory {
 // === IMPLEMENTATION ===
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(create_name(stream_id_)),
-      connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
+      connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
       },
@@ -93,7 +93,7 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
           .ping = create_metrics(name_, "ping"sv),
           .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
-      shared_(shared), download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
+      shared_{shared}, download_{Flags::ws_request_timeout(), [this](auto state) { return download(state); }} {
 }
 
 void MarketData::operator()(Event<Start> const &) {

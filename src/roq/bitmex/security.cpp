@@ -21,7 +21,7 @@ auto create_base_path() {
 // === IMPLEMENTATION ===
 
 Security::Security(Config const &config, std::string_view const &account)
-    : account_(account), base_path(create_base_path()), hasher_(config.get_api_key(), config.get_secret()) {
+    : account_{account}, base_path{create_base_path()}, hasher_{config.get_api_key(), config.get_secret()} {
 }
 
 std::string Security::create_signature(

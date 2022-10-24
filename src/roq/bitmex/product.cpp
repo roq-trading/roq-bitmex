@@ -29,9 +29,9 @@ auto strip_time_part(auto timestamp) {
 // XXX openInterest ?
 
 Product::Product(json::InstrumentItem const &item)
-    : quote_currency_(item.quote_currency), settl_currency_(item.settl_currency), tick_size_(item.tick_size),
-      multiplier_(item.multiplier), lot_size_(item.lot_size), option_strike_price_(item.option_strike_price),
-      underlying_symbol_(item.underlying_symbol), expiry_(item.expiry), settle_(item.settle) {
+    : quote_currency_{item.quote_currency}, settl_currency_{item.settl_currency}, tick_size_{item.tick_size},
+      multiplier_{item.multiplier}, lot_size_{item.lot_size}, option_strike_price_{item.option_strike_price},
+      underlying_symbol_{item.underlying_symbol}, expiry_{item.expiry}, settle_{item.settle} {
   statistics_.reserve(magic_enum::enum_count<StatisticsType>());
   update(item);
 }
@@ -164,7 +164,7 @@ bool Product::update(json::FundingItem const &) {
 
 ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t stream_id, bool discard) const {
   assert(!std::empty(item.symbol));
-  return ReferenceData{
+  return {
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
@@ -196,7 +196,7 @@ ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t
 MarketStatus Product::market_status(json::InstrumentItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
   auto trading_status = json::map(state_);
-  return MarketStatus{
+  return {
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
@@ -206,7 +206,7 @@ MarketStatus Product::market_status(json::InstrumentItem const &item, uint16_t s
 
 StatisticsUpdate Product::statistics_update(json::InstrumentItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
-  return StatisticsUpdate{
+  return {
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,
@@ -218,7 +218,7 @@ StatisticsUpdate Product::statistics_update(json::InstrumentItem const &item, ui
 
 StatisticsUpdate Product::statistics_update(json::FundingItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
-  return StatisticsUpdate{
+  return {
       .stream_id = stream_id,
       .exchange = Flags::exchange(),
       .symbol = item.symbol,

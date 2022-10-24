@@ -31,7 +31,7 @@ namespace bitmex {
 namespace {
 auto const NAME = "ex"sv;
 
-Mask const SUPPORTS{
+auto const SUPPORTS = Mask{
     SupportType::ORDER_ACK,
     SupportType::ORDER,
     SupportType::TRADE,
@@ -73,9 +73,9 @@ struct create_metrics final : public core::metrics::Factory {
 // === IMPLEMENTATION ===
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(create_name(stream_id_, security.get_account())),
-      connection_(create_connection(*this, context, [this]() { return create_upgrade_headers(); })),
-      decode_buffer_(Flags::decode_buffer_size()),
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, security.get_account())},
+      connection_{create_connection(*this, context, [this]() { return create_upgrade_headers(); })},
+      decode_buffer_{Flags::decode_buffer_size()},
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
       },
@@ -95,8 +95,9 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, S
           .ping = create_metrics(name_, "ping"sv),
           .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
-      security_(security), shared_(shared),
-      download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
+      security_{security}, shared_{shared}, download_{Flags::ws_request_timeout(), [this](auto state) {
+                                                        return download(state);
+                                                      }} {
 }
 
 void DropCopy::operator()(Event<Start> const &) {
