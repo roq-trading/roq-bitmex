@@ -46,6 +46,7 @@ include(GNUInstallDirs)
 # dependencies
 
 find_package(absl REQUIRED)
+find_package(base64 REQUIRED)
 find_package(fmt REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(re2 REQUIRED)

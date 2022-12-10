@@ -23,6 +23,7 @@ requirements:
   host:
     - roq-core
     - abseil-cpp
+    - roq-oss-base64
     - roq-oss-benchmark
     - roq-oss-brotli
     - catch2  # [linux]
