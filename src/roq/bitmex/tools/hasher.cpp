@@ -40,10 +40,12 @@ std::string Hasher::create_signature(
   hmac_.update(expires_);
   if (!std::empty(body))
     hmac_.update(body);
-  std::array<char, 32> buffer;
+  std::array<std::byte, 32> buffer;
   auto length = hmac_.digest(buffer);
   assert(length == std::size(buffer));
-  return core::binascii::Hex::encode(buffer);
+  std::string result;
+  core::binascii::Hex::encode(result, buffer);
+  return result;
 }
 
 std::string Hasher::create_headers(
