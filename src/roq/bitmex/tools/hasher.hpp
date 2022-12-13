@@ -2,11 +2,12 @@
 
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <string>
 #include <string_view>
 
-#include "roq/core/mac/hmac_sha256.hpp"
+#include "roq/core/mac/hmac.hpp"
 
 #include "roq/web/http/method.hpp"
 
@@ -34,8 +35,12 @@ class Hasher final {
       std::string_view const &body);
 
  private:
-  const std::string key_;
-  core::mac::HMAC_SHA256 hmac_;
+  using MAC = core::mac::HMAC<core::hash::SHA256>;
+  using Digest = std::array<std::byte, MAC::DIGEST_LENGTH>;
+
+  std::string const key_;
+  MAC mac_;
+  Digest digest_;
 };
 
 }  // namespace tools

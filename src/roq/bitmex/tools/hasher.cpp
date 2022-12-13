@@ -24,7 +24,7 @@ auto create_timestamp_secs(auto value) {
 
 // === IMPLEMENTATION ===
 
-Hasher::Hasher(std::string_view const &key, std::string_view const &secret) : key_{key}, hmac_{secret} {
+Hasher::Hasher(std::string_view const &key, std::string_view const &secret) : key_{key}, mac_{secret} {
 }
 
 std::string Hasher::create_signature(
@@ -34,17 +34,15 @@ std::string Hasher::create_signature(
     std::string_view const &body) {
   auto expires_ = create_timestamp_secs(expires);
   auto method_ = magic_enum::enum_name(method);
-  hmac_.clear();
-  hmac_.update(method_);
-  hmac_.update(path);
-  hmac_.update(expires_);
+  mac_.clear();
+  mac_.update(method_);
+  mac_.update(path);
+  mac_.update(expires_);
   if (!std::empty(body))
-    hmac_.update(body);
-  std::array<std::byte, 32> buffer;
-  auto length = hmac_.digest(buffer);
-  assert(length == std::size(buffer));
+    mac_.update(body);
+  auto digest = mac_.final(digest_);
   std::string result;
-  core::binascii::Hex::encode(result, buffer);
+  core::binascii::Hex::encode(result, digest);
   return result;
 }
 
