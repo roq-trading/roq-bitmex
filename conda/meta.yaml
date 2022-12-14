@@ -26,6 +26,7 @@ requirements:
     - abseil-cpp
     - roq-oss-base64
     - roq-oss-benchmark
+    - roq-oss-botan
     - roq-oss-brotli
     - catch2  # [linux]
     - roq-oss-catch2  # [osx]
