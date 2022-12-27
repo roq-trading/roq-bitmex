@@ -502,7 +502,12 @@ void WebSocket::operator()(Trace<json::Funding> const &event, json::Action actio
 
 void WebSocket::operator()(Trace<json::Instrument> const &event, json::Action action) {
   auto &[trace_info, instrument] = event;
+  // note! compile-time formatting doesn't work
+#if defined(__clang__)
+  log::fatal("Unexpected: action={}"sv, action);
+#else
   log::fatal("Unexpected: action={}, instrument={}"sv, action, instrument);
+#endif
 }
 
 void WebSocket::operator()(Trace<json::Liquidation> const &event, json::Action action) {

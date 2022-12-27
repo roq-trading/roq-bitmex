@@ -388,7 +388,11 @@ void MarketData::operator()(Trace<json::Funding> const &event, json::Action acti
 void MarketData::operator()(Trace<json::Instrument> const &event, json::Action action) {
   profile_.instrument([&]() {
     auto &[trace_info, instrument] = event;
+    // note! compile-time formatting doesn't work
+#if defined(__clang__)
+#else
     log::info<4>("event={{action={}, instrument={}}}"sv, action, instrument);
+#endif
     (*connection_).touch(trace_info.source_receive_time);
     // note!
     //   first partial update will include *all* instruments
@@ -401,7 +405,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
         break;
       case PARTIAL:
         if (partial_received_.instrument) {
-          log::debug("event={{action={}, instrument={}}}"sv, action, instrument);
+          // log::debug("event={{action={}, instrument={}}}"sv, action, instrument);
           assert(false);  // didn't expect this
         } else {
           partial_received_.instrument = true;
@@ -432,7 +436,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
         }
         break;
       case INSERT:
-        log::debug("event={{action={}, instrument={}}}"sv, action, instrument);
+        // log::debug("event={{action={}, instrument={}}}"sv, action, instrument);
         assert(false);  // XXX should we just drop these updates?
         break;
       case UPDATE: {
