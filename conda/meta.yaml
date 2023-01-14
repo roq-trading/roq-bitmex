@@ -19,6 +19,7 @@ requirements:
     - {{ compiler('cxx') }}
     - clangdev
     - cmake
+    - jinja2
     - make
     - pkg-config
   host:
