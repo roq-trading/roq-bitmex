@@ -27,8 +27,7 @@
 namespace roq {
 namespace bitmex {
 
-class DropCopy final : public web::socket::Client::Handler, public json::StreamParser::Handler {
- public:
+struct DropCopy final : public web::socket::Client::Handler, public json::StreamParser::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;

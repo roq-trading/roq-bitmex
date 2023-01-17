@@ -14,8 +14,7 @@
 namespace roq {
 namespace bitmex {
 
-class Product final {
- public:
+struct Product final {
   explicit Product(json::InstrumentItem const &);
   explicit Product(json::FundingItem const &);
 

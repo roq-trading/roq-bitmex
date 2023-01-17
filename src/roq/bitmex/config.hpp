@@ -18,8 +18,7 @@
 namespace roq {
 namespace bitmex {
 
-class Config final : public server::Config, public server::ConfigReader::Handler {
- public:
+struct Config final : public server::Config, public server::ConfigReader::Handler {
   Config();
 
   Account const &get_master_account() const;

@@ -11,8 +11,7 @@
 namespace roq {
 namespace bitmex {
 
-class PriceCache final {
- public:
+struct PriceCache final {
   PriceCache() = default;
 
   PriceCache(PriceCache &&) = default;

@@ -23,14 +23,13 @@
 namespace roq {
 namespace bitmex {
 
-class MarketData;
+struct MarketData;
 
-class Gateway final : public server::Handler,
-                      public OrderEntry::Handler,
-                      public WebSocket::Handler,
-                      public DropCopy::Handler,
-                      public MarketData::Handler {
- public:
+struct Gateway final : public server::Handler,
+                       public OrderEntry::Handler,
+                       public WebSocket::Handler,
+                       public DropCopy::Handler,
+                       public MarketData::Handler {
   Gateway(server::Dispatcher &, Config const &, io::Context &);
 
  protected:
