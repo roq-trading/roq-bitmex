@@ -8,8 +8,6 @@
 #include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
-#include "roq/core/back_emplacer.hpp"
-
 #include "roq/core/metrics/factory.hpp"
 
 #include "roq/web/socket/client_factory.hpp"
@@ -50,7 +48,7 @@ auto create_name(auto stream_id, auto const &account) {
 
 auto create_connection(auto &handler, auto &context, auto &&create_upgrade_headers) {
   auto uri = Flags::ws_uri();
-  web::socket::Client::Config config{
+  auto config = web::socket::Client::Config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
       .disconnect_on_idle_timeout = {},
@@ -160,7 +158,7 @@ void DropCopy::operator()(web::socket::Client::Close const &) {
 
 void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
-  const ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -180,7 +178,7 @@ void DropCopy::operator()(web::socket::Client::Binary const &) {
 void DropCopy::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    const StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -347,15 +345,16 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
     log::info<2>("event={{action={}, execution={}}}"sv, action, execution);
-    auto create_fill = []<typename T>(T &result, const auto &value) {
-      new (&result) T{
+    shared_.fills.clear();
+    auto emplace_back = [](auto &result, auto &value) {
+      auto fill = Fill{
           .external_trade_id = value.trd_match_id,
           .quantity = value.last_qty,
           .price = value.last_px,
           .liquidity = {},
       };
+      result.emplace_back(std::move(fill));
     };
-    core::back_emplacer fills{shared_.fills};
     size_t index = {};
     for (auto &item : execution.data) {
       auto last = std::size(execution.data) == ++index;
@@ -370,7 +369,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
       auto error = json::guess_error(item.ord_rej_reason);
       // cancel order does not allow passing a custom id
       auto request_id = request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
-      oms::Response response{
+      auto response = oms::Response{
           .type = request_type,
           .origin = Origin::EXCHANGE,
           .status = request_status,
@@ -381,7 +380,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .quantity = item.order_qty,
           .price = item.price,
       };
-      oms::OrderUpdate order_update{
+      auto order_update = oms::OrderUpdate{
           .account = security_.get_account(),
           .exchange = Flags::exchange(),
           .symbol = item.symbol,
@@ -410,10 +409,10 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
       };
       if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
             if (item.exec_type == json::ExecType::TRADE) {
-              fills.emplace_back([&](auto &result) { create_fill(result, item); });
+              emplace_back(shared_.fills, item);
             }
-            if (last && !std::empty(fills)) {
-              const TradeUpdate trade_update{
+            if (last && !std::empty(shared_.fills)) {
+              auto trade_update = TradeUpdate{
                   .stream_id = stream_id_,
                   .account = order.account,
                   .order_id = order.order_id,
@@ -425,7 +424,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
                   .update_time_utc = item.timestamp,
                   .external_account = external_account,
                   .external_order_id = order.external_order_id,
-                  .fills = fills,
+                  .fills = shared_.fills,
                   .routing_id = order.routing_id,
                   .update_type = {},
                   .user = {},
@@ -471,7 +470,7 @@ void DropCopy::operator()(Trace<json::Position> const &event, json::Action actio
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto long_quantity = std::max(0.0, item.current_qty);
       auto short_quantity = std::max(0.0, -item.current_qty);
-      const PositionUpdate position_update{
+      auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = security_.get_account(),
           .exchange = Flags::exchange(),

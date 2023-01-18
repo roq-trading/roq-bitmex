@@ -47,7 +47,7 @@ auto create_name(auto stream_id, auto const &account) {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
-  web::rest::Client::Config config{
+  auto config = web::rest::Client::Config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
@@ -172,7 +172,7 @@ void OrderEntry::operator()(web::rest::Client::Disconnected const &) {
 
 void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
   TraceInfo trace_info;
-  ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -184,7 +184,7 @@ void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -236,7 +236,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         exec_inst);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = method,
         .path = path,
         .query = {},
@@ -266,7 +266,7 @@ void OrderEntry::create_order_ack(
           order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      oms::Response response{
+      auto response = oms::Response{
           .type = RequestType::CREATE_ORDER,
           .origin = origin,
           .status = status,
@@ -311,7 +311,7 @@ void OrderEntry::modify_order(
         modify_order.price);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = method,
         .path = path,
         .query = {},
@@ -341,7 +341,7 @@ void OrderEntry::modify_order_ack(
           order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      oms::Response response{
+      auto response = oms::Response{
           .type = RequestType::MODIFY_ORDER,
           .origin = origin,
           .status = status,
@@ -380,7 +380,7 @@ void OrderEntry::cancel_order(
         order.external_order_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = security_.create_headers(expires, method, path, body);
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = method,
         .path = path,
         .query = {},
@@ -410,7 +410,7 @@ void OrderEntry::cancel_order_ack(
           order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      oms::Response response{
+      auto response = oms::Response{
           .type = RequestType::CANCEL_ORDER,
           .origin = origin,
           .status = status,
@@ -438,7 +438,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
       auto expires = compute_expires();
       auto body = "{}"sv;
       auto headers = security_.create_headers(expires, method, path, body);
-      web::rest::Request request{
+      auto request = web::rest::Request{
           .method = method,
           .path = path,
           .query = {},

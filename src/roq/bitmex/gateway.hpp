@@ -87,6 +87,8 @@ struct Gateway final : public server::Handler,
   absl::flat_hash_map<Account, std::unique_ptr<WebSocket>> web_socket_;
   absl::flat_hash_map<Account, std::unique_ptr<DropCopy>> drop_copy_;
   MarketData market_data_;
+  // cache
+  std::vector<MBPUpdate> bids_, asks_;
 };
 
 }  // namespace bitmex
