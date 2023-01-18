@@ -514,7 +514,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
         shared_.asks.clear();
       }
       utils::update_max(timestamp, item.timestamp);
-      auto price_size = shared_.price_cache(action, item.id, item.price, item.size);  // XXX clang13
+      auto price_size = shared_.price_cache(action, item.id, item.price, item.size);
       auto price = price_size.first;
       auto size = price_size.second;
       if (std::isfinite(price)) {
@@ -595,7 +595,6 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
     (*connection_).touch(trace_info.source_receive_time);
     if (action != json::Action::INSERT)
       return;
-    std::string_view previous;
     shared_.trades.clear();
     auto emplace_back = [](auto &result, auto &value) {
       auto trade = Trade{
@@ -609,21 +608,24 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
       result.emplace_back(std::move(trade));
     };
     std::chrono::nanoseconds timestamp = {};
+    auto dispatch = [&](auto &symbol, auto is_last) {
+      auto trade_summary = TradeSummary{
+          .stream_id = stream_id_,
+          .exchange = Flags::exchange(),
+          .symbol = symbol,
+          .trades = shared_.trades,
+          .exchange_time_utc = timestamp,
+          .exchange_sequence = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_summary, is_last);
+    };
+    std::string_view previous;
     for (auto &item : trade.data) {
       timestamp = std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));
       if (item.symbol.compare(previous) != 0) {
         if (!std::empty(previous) && !std::empty(shared_.trades)) {
-          if (!shared_.discard_symbol(previous)) {
-            auto trade_summary = TradeSummary{
-                .stream_id = stream_id_,
-                .exchange = Flags::exchange(),
-                .symbol = previous,
-                .trades = shared_.trades,
-                .exchange_time_utc = timestamp,
-                .exchange_sequence = {},
-            };
-            create_trace_and_dispatch(handler_, trace_info, trade_summary, false);
-          }
+          if (!shared_.discard_symbol(previous))
+            dispatch(previous, false);
         }
         previous = item.symbol;
         shared_.trades.clear();
@@ -632,17 +634,8 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
       emplace_back(shared_.trades, item);
     }
     if (!std::empty(previous) && !std::empty(shared_.trades)) {
-      if (!shared_.discard_symbol(previous)) {
-        auto trade_summary = TradeSummary{
-            .stream_id = stream_id_,
-            .exchange = Flags::exchange(),
-            .symbol = previous,
-            .trades = shared_.trades,
-            .exchange_time_utc = timestamp,
-            .exchange_sequence = {},
-        };
-        create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
-      }
+      if (!shared_.discard_symbol(previous))
+        dispatch(previous, true);
     }
   });
 }
@@ -718,7 +711,7 @@ void MarketData::publish_market_by_price(
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
   try {
-    create_trace_and_dispatch(handler_, trace_info, market_by_price_update, is_last, false);
+    create_trace_and_dispatch(handler_, trace_info, market_by_price_update, is_last);
   } catch (BadState &) {
     resubscribe_order_book_l2(symbol);
   }

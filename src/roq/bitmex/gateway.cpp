@@ -204,9 +204,9 @@ void Gateway::operator()(Trace<TopOfBook> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<MarketByPriceUpdate> const &event, bool is_last, bool refresh) {
+void Gateway::operator()(Trace<MarketByPriceUpdate> const &event, bool is_last) {
   auto callback = []([[maybe_unused]] auto &market_by_price) {};
-  dispatcher_(event, is_last, refresh, bids_, asks_, callback);
+  dispatcher_(event, is_last, bids_, asks_, callback);
 }
 
 void Gateway::operator()(Trace<TradeSummary> const &event, bool is_last) {
