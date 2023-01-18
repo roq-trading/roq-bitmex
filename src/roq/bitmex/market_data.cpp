@@ -590,7 +590,8 @@ void MarketData::operator()(Trace<json::Settlement> const &event, json::Action a
 
 void MarketData::operator()(Trace<json::Trade> const &event, json::Action action) {
   profile_.trade([&]() {
-    auto &[trace_info, trade] = event;
+    auto &trace_info = event.trace_info;
+    auto &trade = event.value;
     log::info<4>("event={{action={}, trade={}}}"sv, action, trade);
     (*connection_).touch(trace_info.source_receive_time);
     if (action != json::Action::INSERT)
