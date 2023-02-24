@@ -4,6 +4,7 @@ add_subdirectory(flags)
 
 set(SOURCES
     application.cpp
+    authenticator.cpp
     config.cpp
     drop_copy.cpp
     flags.cpp
@@ -13,7 +14,6 @@ set(SOURCES
     order_update.cpp
     price_cache.cpp
     product.cpp
-    security.cpp
     shared.cpp
     web_socket.cpp
     main.cpp)

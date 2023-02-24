@@ -22,7 +22,6 @@
 
 #include "roq/bitmex/market_data_state.hpp"
 #include "roq/bitmex/product.hpp"
-#include "roq/bitmex/security.hpp"
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/json/stream_parser.hpp"

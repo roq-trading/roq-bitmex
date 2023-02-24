@@ -18,8 +18,8 @@
 
 #include "roq/server.hpp"
 
+#include "roq/bitmex/authenticator.hpp"
 #include "roq/bitmex/drop_copy_state.hpp"
-#include "roq/bitmex/security.hpp"
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/json/stream_parser.hpp"
@@ -35,7 +35,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Stream
     virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
   };
 
-  DropCopy(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &);
+  DropCopy(Handler &, io::Context &, uint16_t stream_id, Authenticator &, Shared &);
 
   DropCopy(DropCopy &&) = delete;
   DropCopy(DropCopy const &) = delete;
@@ -113,8 +113,8 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Stream
   struct {
     core::metrics::Latency ping, heartbeat;
   } latency_;
-  // security
-  Security &security_;
+  // authenticator
+  Authenticator &authenticator_;
   // cache
   Shared &shared_;
   // state

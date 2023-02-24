@@ -10,16 +10,16 @@
 
 #include "roq/bitmex/config.hpp"
 
-#include "roq/bitmex/tools/hasher.hpp"
+#include "roq/bitmex/tools/crypto.hpp"
 
 namespace roq {
 namespace bitmex {
 
-struct Security final {
-  Security(Config const &, std::string_view const &account);
+struct Authenticator final {
+  Authenticator(Config const &, std::string_view const &account);
 
-  Security(Security &&) = delete;
-  Security(Security const &) = delete;
+  Authenticator(Authenticator &&) = delete;
+  Authenticator(Authenticator const &) = delete;
 
   std::string_view get_account() const { return account_; }
 
@@ -38,7 +38,7 @@ struct Security final {
  private:
   const std::string account_;
   const std::string base_path;
-  tools::Hasher hasher_;
+  tools::Crypto crypto_;
 };
 
 }  // namespace bitmex

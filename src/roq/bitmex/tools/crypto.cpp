@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2023, Hans Erik Thrane */
 
-#include "roq/bitmex/tools/hasher.hpp"
+#include "roq/bitmex/tools/crypto.hpp"
 
 #include <cassert>
 
@@ -24,10 +24,10 @@ auto create_timestamp_secs(auto value) {
 
 // === IMPLEMENTATION ===
 
-Hasher::Hasher(std::string_view const &key, std::string_view const &secret) : key_{key}, mac_{secret} {
+Crypto::Crypto(std::string_view const &key, std::string_view const &secret) : key_{key}, mac_{secret} {
 }
 
-std::string Hasher::create_signature(
+std::string Crypto::create_signature(
     std::chrono::nanoseconds expires,
     web::http::Method method,
     std::string_view const &path,
@@ -46,7 +46,7 @@ std::string Hasher::create_signature(
   return result;
 }
 
-std::string Hasher::create_headers(
+std::string Crypto::create_headers(
     std::chrono::nanoseconds expires,
     web::http::Method method,
     std::string_view const &path,

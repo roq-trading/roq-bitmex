@@ -15,11 +15,11 @@ namespace roq {
 namespace bitmex {
 namespace tools {
 
-struct Hasher final {
-  Hasher(std::string_view const &key, std::string_view const &secret);
+struct Crypto final {
+  Crypto(std::string_view const &key, std::string_view const &secret);
 
-  Hasher(Hasher &&) = delete;
-  Hasher(Hasher const &) = delete;
+  Crypto(Crypto &&) = delete;
+  Crypto(Crypto const &) = delete;
 
   std::string create_signature(
       std::chrono::nanoseconds expires,

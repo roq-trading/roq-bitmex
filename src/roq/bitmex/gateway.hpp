@@ -11,8 +11,8 @@
 
 #include "roq/io/context.hpp"
 
+#include "roq/bitmex/authenticator.hpp"
 #include "roq/bitmex/config.hpp"
-#include "roq/bitmex/security.hpp"
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/drop_copy.hpp"
@@ -74,8 +74,8 @@ struct Gateway final : public server::Handler,
  private:
   server::Dispatcher &dispatcher_;
   // config
-  // security
-  absl::flat_hash_map<Account, std::unique_ptr<Security>> security_;
+  // authentication
+  absl::flat_hash_map<Account, std::unique_ptr<Authenticator>> authenticator_;
   // io
   io::Context &context_;
   // shared

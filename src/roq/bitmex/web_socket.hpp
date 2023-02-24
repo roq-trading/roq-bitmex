@@ -18,7 +18,7 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bitmex/security.hpp"
+#include "roq/bitmex/authenticator.hpp"
 #include "roq/bitmex/shared.hpp"
 #include "roq/bitmex/web_socket_state.hpp"
 
@@ -35,7 +35,7 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
     virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
   };
 
-  WebSocket(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &);
+  WebSocket(Handler &, io::Context &, uint16_t stream_id, Authenticator &, Shared &);
 
   WebSocket(WebSocket &&) = delete;
   WebSocket(WebSocket const &) = delete;
@@ -141,8 +141,8 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
   struct {
     core::metrics::Latency ping, heartbeat;
   } latency_;
-  // security
-  Security &security_;
+  // authenticator
+  Authenticator &authenticator_;
   // cache
   Shared &shared_;
   // state

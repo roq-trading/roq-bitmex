@@ -70,8 +70,9 @@ struct create_metrics final : public core::metrics::Factory {
 
 // === IMPLEMENTATION ===
 
-DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, security.get_account())},
+DropCopy::DropCopy(
+    Handler &handler, io::Context &context, uint16_t stream_id, Authenticator &authenticator, Shared &shared)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, authenticator.get_account())},
       connection_{create_connection(*this, context, [this]() { return create_upgrade_headers(); })},
       decode_buffer_{Flags::decode_buffer_size()},
       counter_{
@@ -93,9 +94,9 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, S
           .ping = create_metrics(name_, "ping"sv),
           .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
-      security_{security}, shared_{shared}, download_{Flags::ws_request_timeout(), [this](auto state) {
-                                                        return download(state);
-                                                      }} {
+      authenticator_{authenticator}, shared_{shared}, download_{Flags::ws_request_timeout(), [this](auto state) {
+                                                                  return download(state);
+                                                                }} {
 }
 
 void DropCopy::operator()(Event<Start> const &) {
@@ -160,7 +161,7 @@ void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = security_.get_account(),
+      .account = authenticator_.get_account(),
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -180,7 +181,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = security_.get_account(),
+        .account = authenticator_.get_account(),
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
@@ -381,7 +382,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .price = item.price,
       };
       auto order_update = oms::OrderUpdate{
-          .account = security_.get_account(),
+          .account = authenticator_.get_account(),
           .exchange = Flags::exchange(),
           .symbol = item.symbol,
           .side = side,
@@ -452,7 +453,7 @@ void DropCopy::operator()(Trace<json::Order> const &event, json::Action action) 
     auto &[trace_info, order] = event;
     log::info<2>("event={{action={}, order={}}}"sv, action, order);
     auto download = !partial_received_.order && action == json::Action::PARTIAL;
-    OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info, download);
+    OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(order, trace_info, download);
     // state management
     if (download) {
       partial_received_.order = true;
@@ -472,7 +473,7 @@ void DropCopy::operator()(Trace<json::Position> const &event, json::Action actio
       auto short_quantity = std::max(0.0, -item.current_qty);
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
-          .account = security_.get_account(),
+          .account = authenticator_.get_account(),
           .exchange = Flags::exchange(),
           .symbol = item.symbol,
           .external_account = external_account,
@@ -536,7 +537,7 @@ auto compute_expires() {
 
 std::string DropCopy::create_upgrade_headers() {
   auto expires = compute_expires();
-  return security_.create_headers(expires, web::http::Method::GET, "/realtime"sv, {});
+  return authenticator_.create_headers(expires, web::http::Method::GET, "/realtime"sv, {});
 }
 
 }  // namespace bitmex
