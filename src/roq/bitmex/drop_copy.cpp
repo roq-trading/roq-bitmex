@@ -428,7 +428,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
                   .fills = shared_.fills,
                   .routing_id = order.routing_id,
                   .update_type = {},
-                  .user = {},
+                  .user = shared_.get_user_name(order.user_id),
               };
               create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
             }
