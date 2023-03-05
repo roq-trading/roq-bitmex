@@ -413,8 +413,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
               emplace_back(shared_.fills, item);
             }
             if (last && !std::empty(shared_.fills)) {
-              auto trade_update = TradeUpdate{
-                  .stream_id = stream_id_,
+              auto trade_update = oms::TradeUpdate{
                   .account = order.account,
                   .order_id = order.order_id,
                   .exchange = order.exchange,
@@ -426,11 +425,9 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
                   .external_account = external_account,
                   .external_order_id = order.external_order_id,
                   .fills = shared_.fills,
-                  .routing_id = order.routing_id,
                   .update_type = {},
-                  .user = shared_.get_user_name(order.user_id),
               };
-              create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
+              create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
             }
           })) {
       } else {

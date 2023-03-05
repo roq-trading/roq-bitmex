@@ -23,8 +23,6 @@ struct Shared final {
 
   std::string_view next_request_id();
 
-  auto get_user_name(uint8_t user_id) const { return dispatcher_.get_user_name(user_id); }
-
   auto discard_symbol(std::string_view const &name) const { return dispatcher_.discard_symbol(name); }
 
   template <typename... Args>
