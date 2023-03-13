@@ -212,7 +212,9 @@ StatisticsUpdate Product::statistics_update(json::InstrumentItem const &item, ui
       .symbol = item.symbol,
       .statistics = {std::data(statistics_), std::size(statistics_)},
       .update_type = UpdateType::INCREMENTAL,
-      .exchange_time_utc = {},
+      .exchange_time_utc = item.timestamp,  // XXX not sure
+      .exchange_sequence = {},
+      .sending_time_utc = {},
   };
 }
 
@@ -224,7 +226,9 @@ StatisticsUpdate Product::statistics_update(json::FundingItem const &item, uint1
       .symbol = item.symbol,
       .statistics = {std::data(statistics_), std::size(statistics_)},
       .update_type = UpdateType::INCREMENTAL,
-      .exchange_time_utc = {},
+      .exchange_time_utc = item.timestamp,  // XXX not sure
+      .exchange_sequence = {},
+      .sending_time_utc = {},
   };
 }
 

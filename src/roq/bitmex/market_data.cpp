@@ -571,8 +571,9 @@ void MarketData::operator()(Trace<json::Quote> const &event, json::Action action
               .ask_quantity = item.ask_size,
           },
           .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = item.timestamp,
+          .exchange_time_utc = item.timestamp,  // XXX not sure
           .exchange_sequence = {},
+          .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
     }
@@ -615,8 +616,9 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
           .exchange = Flags::exchange(),
           .symbol = symbol,
           .trades = shared_.trades,
-          .exchange_time_utc = timestamp,
+          .exchange_time_utc = timestamp,  // XXX not sure
           .exchange_sequence = {},
+          .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, trade_summary, is_last);
     };
@@ -706,6 +708,7 @@ void MarketData::publish_market_by_price(
       .update_type = snapshot ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL,
       .exchange_time_utc = exchange_time_utc,
       .exchange_sequence = {},
+      .sending_time_utc = {},
       .price_decimals = {},
       .quantity_decimals = {},
       .checksum = {},
