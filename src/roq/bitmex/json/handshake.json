@@ -17,6 +17,10 @@
     {
       "name": "version",
       "type": "std::string_view"
+    },
+    {
+      "name": "heartbeatEnabled",
+      "type": "bool"
     }
   ]
 }

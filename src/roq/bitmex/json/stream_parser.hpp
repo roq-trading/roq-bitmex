@@ -66,6 +66,7 @@ struct StreamParser final {
   std::string_view table;
   std::chrono::milliseconds timestamp = {};
   std::string_view version;
+  bool heartbeat_enabled = {};
 
   static void dispatch(
       Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace);

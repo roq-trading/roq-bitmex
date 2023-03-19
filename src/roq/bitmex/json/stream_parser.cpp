@@ -239,6 +239,9 @@ void StreamParser::dispatch(
           update(result.version, value);
           update(type, Type::INFO);
           break;
+        case HEARTBEAT_ENABLED:
+          update(result.heartbeat_enabled, value);
+          break;
       }
     }
     switch (type) {
@@ -269,6 +272,7 @@ void StreamParser::dispatch(
             .info = {},
             .timestamp = result.timestamp,
             .version = result.version,
+            .heartbeat_enabled = result.heartbeat_enabled,
         };
         Trace event(trace_info, handshake);
         handler(event);
