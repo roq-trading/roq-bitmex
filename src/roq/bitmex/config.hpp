@@ -45,6 +45,7 @@ struct Config final : public server::Config, public server::ConfigReader::Handle
   void operator()(server::Account &&) override;
   void operator()(server::User &&) override;
   void operator()(server::RateLimit &&) override;
+  void operator()(server::RequestTemplate, std::string_view const &label, toml::table &) override;
   void operator()(std::string_view const &key, toml::node &) override;
 
  public:

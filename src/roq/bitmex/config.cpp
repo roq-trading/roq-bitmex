@@ -55,7 +55,7 @@ void Config::dispatch(server::Config::Handler &handler) const {
     handler(iter.second);
   for (auto &user : users)
     handler(user);
-  GatewaySettings gateway_settings{
+  auto gateway_settings = GatewaySettings{
       .supports = SUPPORTS,
       .mbp_max_depth = {},
       .mbp_tick_size_multiplier = NaN,
@@ -88,6 +88,10 @@ void Config::operator()(server::User &&user) {
 
 void Config::operator()(server::RateLimit &&rate_limit) {
   rate_limits.emplace(rate_limit.name, std::move(rate_limit));
+}
+
+void Config::operator()(server::RequestTemplate, [[maybe_unused]] std::string_view const &label, toml::table &) {
+  log::fatal("Unexpected: request templates not supported"sv);
 }
 
 void Config::operator()(std::string_view const &key, toml::node &) {
