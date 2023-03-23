@@ -399,7 +399,6 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .order_type = order_type,
           .time_in_force = time_in_force,
           .execution_instructions = {},
-          .order_template = {},
           .create_time_utc = {},
           .update_time_utc = item.timestamp,
           .external_account = external_account,

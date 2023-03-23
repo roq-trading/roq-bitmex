@@ -391,7 +391,6 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .order_type = order_type,
           .time_in_force = time_in_force,
           .execution_instructions = {},
-          .order_template = {},
           .create_time_utc = {},
           .update_time_utc = item.timestamp,
           .external_account = external_account,
