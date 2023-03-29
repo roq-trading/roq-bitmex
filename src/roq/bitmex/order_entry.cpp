@@ -48,17 +48,18 @@ auto create_name(auto stream_id, auto const &account) {
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
   auto config = web::rest::Client::Config{
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
-      .uris = {&uri, 1},
+      .interface = {},
       .proxy = Flags::rest_proxy(),
+      .uris = {&uri, 1},
       .user_agent = ROQ_PACKAGE_NAME,
       .connection = web::http::Connection::KEEP_ALIVE,
       .allow_pipelining = true,
       .request_timeout = Flags::rest_request_timeout(),
       .ping_frequency = Flags::rest_ping_freq(),
       .ping_path = Flags::rest_ping_path(),
+      .decode_buffer_size = Flags::decode_buffer_size(),
+      .encode_buffer_size = Flags::encode_buffer_size(),
   };
   return web::rest::ClientFactory::create(handler, context, config);
 }
