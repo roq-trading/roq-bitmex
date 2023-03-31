@@ -196,6 +196,10 @@ void DropCopy::operator()(ConnectionStatus status) {
         .encoding = {Encoding::JSON},
         .priority = Priority::PRIMARY,
         .connection_status = status_,
+        .interface = (*connection_).get_interface(),
+        .authority = (*connection_).get_current_authority(),
+        .path = (*connection_).get_current_path(),
+        .proxy = (*connection_).get_proxy(),
     };
     log::info("stream_status={}"sv, stream_status);
     create_trace_and_dispatch(handler_, trace_info, stream_status);
