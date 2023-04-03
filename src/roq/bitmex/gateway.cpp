@@ -51,8 +51,8 @@ auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &authe
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, authenticator_{create_authenticator<decltype(authenticator_)>(config)},
-      context_{context}, shared_{dispatcher}, order_entry_{create_order_entry<decltype(order_entry_)>(
-                                                  *this, context_, stream_id_, authenticator_, shared_)},
+      context_{context}, shared_{dispatcher},
+      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, authenticator_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, authenticator_, shared_)},
       market_data_{*this, context_, ++stream_id_, shared_} {
   if (!Flags::ws_cancel_on_disconnect()) [[unlikely]]
