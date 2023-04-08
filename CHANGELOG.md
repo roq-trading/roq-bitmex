@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Fixed
+
+* Broken price-caching for L2 books (#339)
+
 ## 0.9.3 &ndash; 2023-03-20
 
 ## 0.9.2 &ndash; 2023-02-22

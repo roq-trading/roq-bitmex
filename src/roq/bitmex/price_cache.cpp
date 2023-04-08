@@ -14,7 +14,7 @@ namespace bitmex {
 // === IMPLEMENTATION ===
 
 std::pair<double, double> PriceCache::operator()(json::Action action, uint64_t id, double price, double size) {
-  auto result = NaN;
+  auto result = price;
   auto iter = price_lookup_.find(id);
   switch (action) {
     using enum json::Action::type_t;
@@ -42,29 +42,22 @@ std::pair<double, double> PriceCache::operator()(json::Action action, uint64_t i
       }
       break;
     case UPDATE:
-      if (std::isnan(price) && !std::isnan(size) && utils::is_greater(size, 0.0)) {
-        if (iter != std::end(price_lookup_)) {
-          result = (*iter).second;
-        } else {
-          // unable to find the cached price ==> fail
-        }
+      if (iter != std::end(price_lookup_)) {
+        result = (*iter).second;
       } else {
-        // unexpected price or size ==> fail
+        // unable to find the cached price ==> fail
       }
       break;
     case DELETE:
-      if (std::isnan(price) && (std::isnan(size) || utils::is_zero(size))) {
-        if (iter != std::end(price_lookup_)) {
-          result = (*iter).second;
-          price_lookup_.erase(iter);
-        } else {
-          // unable to find the cached price ==> fail
-        }
+      // if (std::isnan(price) && (std::isnan(size) || utils::is_zero(size))) {
+      if (iter != std::end(price_lookup_)) {
+        result = (*iter).second;
+        price_lookup_.erase(iter);
       } else {
-        // unexpected price or size ==> fail
+        // unable to find the cached price ==> fail
       }
   }
-  return std::make_pair(result, std::isnan(size) ? 0.0 : size);
+  return {result, std::isnan(size) ? 0.0 : size};
 }
 
 }  // namespace bitmex

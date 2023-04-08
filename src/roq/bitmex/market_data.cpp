@@ -501,6 +501,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
     //   drop everything received before partial (as per bitmex documentation)
     if (!snapshot && !partial_received_.order_book_l2)
       return;
+    bool discard = true;
     std::string_view previous;
     std::chrono::nanoseconds timestamp = {};
     shared_.bids.clear();
@@ -516,21 +517,27 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
       };
       result.emplace_back(std::move(mbp_update));
     };
+    auto publish = [&]() {
+      if (!std::empty(previous) && !(std::empty(shared_.bids) && std::empty(shared_.asks)))
+        publish_market_by_price(trace_info, false, previous, shared_.bids, shared_.asks, snapshot, timestamp);
+    };
     for (auto &item : order_book_l2.data) {
       if (std::empty(previous)) {
         previous = item.symbol;
+        discard = shared_.discard_symbol(previous);
       } else if (previous.compare(item.symbol) != 0) {
-        publish_market_by_price(trace_info, false, previous, shared_.bids, shared_.asks, snapshot, timestamp);
+        publish();
         previous = item.symbol;
+        discard = shared_.discard_symbol(previous);
         timestamp = {};
         shared_.bids.clear();
         shared_.asks.clear();
       }
+      if (discard)
+        continue;
       utils::update_max(timestamp, item.timestamp);
-      auto price_size = shared_.price_cache(action, item.id, item.price, item.size);
-      auto price = price_size.first;
-      auto size = price_size.second;
-      if (std::isfinite(price)) {
+      auto [price, size] = shared_.price_cache(action, item.id, item.price, item.size);
+      if (!std::isnan(price)) {
         switch (item.side) {
           using enum json::Side::type_t;
           case BUY:
@@ -543,19 +550,14 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
             log::fatal("Unexpected"sv);
         }
       } else {
-        log::warn(
-            "Closing web-socket: "
-            "unexpected action={} id={} price={} size={}"sv,
-            action,
-            item.id,
-            item.price,
-            item.size);
+        log::warn("Unexpected: action={}, item={}, cache={{price={}, size={}}}"sv, action, item, price, size);
         (*connection_).close();
+        log::warn("Closing web-socket"sv);
         return;
       }
     }
-    assert(!std::empty(previous));
-    publish_market_by_price(trace_info, false, previous, shared_.bids, shared_.asks, snapshot, timestamp);
+    if (!std::empty(previous) && !(std::empty(shared_.bids) && std::empty(shared_.asks)))
+      publish();
     // state management
     if (snapshot) {
       partial_received_.order_book_l2 = true;
