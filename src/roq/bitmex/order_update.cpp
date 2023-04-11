@@ -69,6 +69,7 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
       .last_traded_price = NaN,
       .last_liquidity = {},
       .update_type = update_type,
+      .sending_time_utc = {},
   };
   if (shared_.update_order(
           order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
@@ -139,6 +140,7 @@ void OrderUpdate::operator()(
       .last_traded_price = NaN,
       .last_liquidity = {},
       .update_type = UpdateType::INCREMENTAL,
+      .sending_time_utc = {},
   };
   if (shared_.update_order(
           order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {

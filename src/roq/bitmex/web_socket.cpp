@@ -426,6 +426,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
           .update_type = {},
+          .sending_time_utc = {},
       };
       if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
             if (item.exec_type == json::ExecType::TRADE) {
@@ -445,6 +446,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
                   .external_order_id = order.external_order_id,
                   .fills = shared_.fills,
                   .update_type = {},
+                  .sending_time_utc = {},
               };
               create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
             }
@@ -487,7 +489,7 @@ void WebSocket::operator()(Trace<json::Position> const &event, json::Action acti
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto long_quantity = std::max(0.0, item.current_qty);
       auto short_quantity = std::max(0.0, -item.current_qty);
-      const PositionUpdate position_update{
+      auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = authenticator_.get_account(),
           .exchange = Flags::exchange(),
@@ -495,8 +497,9 @@ void WebSocket::operator()(Trace<json::Position> const &event, json::Action acti
           .external_account = external_account,
           .long_quantity = long_quantity,
           .short_quantity = short_quantity,
-          .long_quantity_begin = NaN,
-          .short_quantity_begin = NaN,
+          .update_type = {},
+          .exchange_time_utc = {},
+          .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, position_update, false);
     }

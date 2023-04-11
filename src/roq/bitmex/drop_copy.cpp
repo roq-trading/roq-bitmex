@@ -418,6 +418,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
           .update_type = UpdateType::INCREMENTAL,  // XXX not sure if this is correct...
+          .sending_time_utc = {},
       };
       if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
             if (item.exec_type == json::ExecType::TRADE) {
@@ -437,6 +438,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
                   .external_order_id = order.external_order_id,
                   .fills = shared_.fills,
                   .update_type = {},
+                  .sending_time_utc = {},
               };
               create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
             }
@@ -487,8 +489,9 @@ void DropCopy::operator()(Trace<json::Position> const &event, json::Action actio
           .external_account = external_account,
           .long_quantity = long_quantity,
           .short_quantity = short_quantity,
-          .long_quantity_begin = NaN,
-          .short_quantity_begin = NaN,
+          .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = item.timestamp,  // ???
+          .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, position_update, false);
     }
