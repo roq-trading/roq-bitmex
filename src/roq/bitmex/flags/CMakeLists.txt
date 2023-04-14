@@ -37,5 +37,3 @@ add_library("${TARGET_NAME}" STATIC ${AUTOGEN_SOURCES})
 add_dependencies("${TARGET_NAME}" flags-autogen-headers)
 
 target_link_libraries("${TARGET_NAME}" PRIVATE roq-api::roq-api absl::flags)
-
-target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_20)
