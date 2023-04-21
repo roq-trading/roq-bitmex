@@ -585,7 +585,7 @@ void MarketData::operator()(Trace<json::Quote> const &event, json::Action action
               .ask_price = item.ask_price,
               .ask_quantity = item.ask_size,
           },
-          .update_type = UpdateType::INCREMENTAL,
+          .update_type = UpdateType::SNAPSHOT,
           .exchange_time_utc = item.timestamp,  // XXX not sure
           .exchange_sequence = {},
           .sending_time_utc = {},
