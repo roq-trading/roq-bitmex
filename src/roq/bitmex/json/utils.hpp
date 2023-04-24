@@ -31,7 +31,7 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
       overloaded{
           [&](core::json::Null const &) { result = std::chrono::milliseconds{}; },
           [](bool) { throw std::bad_cast{}; },
-          [&](int64_t value) { result = std::chrono::milliseconds{static_cast<uint64_t>(value *int64_t{1000})}; },
+          [&](int64_t value) { result = std::chrono::milliseconds{static_cast<uint64_t>(value * int64_t{1000})}; },
           [&](double value) { result = std::chrono::milliseconds{static_cast<uint64_t>(value * 1.0e3)}; },
           [&](std::string_view const &value) {
             result = core::charconv::datetime_from_string<std::remove_reference<decltype(result)>::type>(value);
