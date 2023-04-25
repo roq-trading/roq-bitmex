@@ -44,8 +44,8 @@ void StreamParser::dispatch(
     TraceInfo const &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
-  auto table = Table::UNKNOWN;
-  auto action = Action::UNKNOWN;
+  auto table = Table::UNKNOWN__;
+  auto action = Action::UNKNOWN__;
   bool dispatched = false;
   for (int i = 0; i < 2; ++i) {
     core::json::Parser parser(message);
@@ -54,10 +54,10 @@ void StreamParser::dispatch(
       auto field = Field(key);
       switch (field) {
         using enum Field::type_t;
-        case UNDEFINED:
+        case UNDEFINED__:
           log::fatal("Unexpected"sv);
           break;
-        case UNKNOWN:
+        case UNKNOWN__:
           log::fatal(R"(Unknown key="{}")"sv, key);
           break;
         case ACTION:
@@ -74,13 +74,13 @@ void StreamParser::dispatch(
           update(type, Type::CANCEL_ALL_AFTER);
           break;
         case DATA:
-          if (action == Action::UNKNOWN) {
+          if (action == Action::UNKNOWN__) {
             // not ready -- finish and try again
           } else {
             switch (table) {
               using enum Table::type_t;
-              case UNDEFINED:
-              case UNKNOWN:
+              case UNDEFINED__:
+              case UNKNOWN__:
                 break;
               case EXECUTION: {
                 const Execution execution(value, buffer);
@@ -224,7 +224,7 @@ void StreamParser::dispatch(
         case TABLE:
           update(result.table, value);
           update(type, Type::TABLE);
-          assert(table == Table::UNKNOWN);
+          assert(table == Table::UNKNOWN__);
           table = Table(result.table);
           break;
         case TIMESTAMP:

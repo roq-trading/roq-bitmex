@@ -411,8 +411,8 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
     //   drop everything received before partial (as per bitmex documentation)
     switch (action) {
       using enum json::Action::type_t;
-      case UNDEFINED:
-      case UNKNOWN:
+      case UNDEFINED__:
+      case UNKNOWN__:
         log::fatal("Unexpected"sv);
         break;
       case PARTIAL:
@@ -494,7 +494,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
     auto &[trace_info, order_book_l2] = event;
     log::info<4>("event={{action={}, order_book_l2={}}}"sv, action, order_book_l2);
     (*connection_).touch(trace_info.source_receive_time);
-    assert(action != json::Action::UNKNOWN);
+    assert(action != json::Action::UNKNOWN__);
     auto snapshot = action == json::Action::PARTIAL;
     // note!
     //   first partial update will include *all* instruments
