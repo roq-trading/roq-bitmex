@@ -61,34 +61,16 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Conte
 
 void Gateway::operator()(Event<Start> const &event) {
   log::info("Starting..."sv);
-  for (auto &[_, order_entry] : order_entry_)
-    (*order_entry)(event);
-  for (auto &[_, web_socket] : web_socket_)
-    (*web_socket)(event);
-  for (auto &[_, drop_copy] : drop_copy_)
-    (*drop_copy)(event);
-  market_data_(event);
+  dispatch(event);
 }
 
 void Gateway::operator()(Event<Stop> const &event) {
   log::info("Stopping..."sv);
-  market_data_(event);
-  for (auto &[_, drop_copy] : drop_copy_)
-    (*drop_copy)(event);
-  for (auto &[_, web_socket] : web_socket_)
-    (*web_socket)(event);
-  for (auto &[_, order_entry] : order_entry_)
-    (*order_entry)(event);
+  dispatch(event);
 }
 
 void Gateway::operator()(Event<Timer> const &event) {
-  for (auto &[_, order_entry] : order_entry_)
-    (*order_entry)(event);
-  for (auto &[_, web_socket] : web_socket_)
-    (*web_socket)(event);
-  for (auto &[_, drop_copy] : drop_copy_)
-    (*drop_copy)(event);
-  market_data_(event);
+  dispatch(event);
 }
 
 void Gateway::operator()(Event<Connected> const &) {
@@ -175,13 +157,7 @@ uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_vi
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
-  for (auto &[_, order_entry] : order_entry_)
-    (*order_entry)(writer);
-  for (auto &[_, web_socket] : web_socket_)
-    (*web_socket)(writer);
-  for (auto &[_, drop_copy] : drop_copy_)
-    (*drop_copy)(writer);
-  market_data_(writer);
+  dispatch(writer);
 }
 
 void Gateway::operator()(Trace<StreamStatus> const &event) {
@@ -223,6 +199,17 @@ void Gateway::operator()(Trace<oms::TradeUpdate> const &event, uint16_t stream_i
 
 void Gateway::operator()(Trace<PositionUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
+}
+
+template <typename... Args>
+void Gateway::dispatch(Args &&...args) {
+  for (auto &[_, item] : order_entry_)
+    (*item)(std::forward<Args>(args)...);
+  for (auto &[_, item] : web_socket_)
+    (*item)(std::forward<Args>(args)...);
+  for (auto &[_, item] : drop_copy_)
+    (*item)(std::forward<Args>(args)...);
+  market_data_(std::forward<Args>(args)...);
 }
 
 OrderEntry &Gateway::get_order_entry(std::string_view const &account) {

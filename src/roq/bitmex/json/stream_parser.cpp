@@ -48,10 +48,10 @@ void StreamParser::dispatch(
   auto action = Action::UNKNOWN__;
   bool dispatched = false;
   for (int i = 0; i < 2; ++i) {
-    core::json::Parser parser(message);
+    core::json::Parser parser{message};
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::Object>(root)) {
-      auto field = Field(key);
+      Field field{key};
       switch (field) {
         using enum Field::type_t;
         case UNDEFINED__:
@@ -63,7 +63,7 @@ void StreamParser::dispatch(
         case ACTION:
           update(result.action, value);
           update(type, Type::TABLE);
-          action = Action(result.action);
+          action = Action{result.action};
           break;
         case ATTRIBUTES:
           // not used
@@ -83,79 +83,79 @@ void StreamParser::dispatch(
               case UNKNOWN__:
                 break;
               case EXECUTION: {
-                const Execution execution(value, buffer);
+                Execution execution{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, execution);
+                Trace event{trace_info, execution};
                 handler(event, action);
                 break;
               }
               case FUNDING: {
-                const Funding funding(value, buffer);
+                Funding funding{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, funding);
+                Trace event{trace_info, funding};
                 handler(event, action);
                 break;
               }
               case INSTRUMENT: {
-                const Instrument instrument(value, buffer);
+                Instrument instrument{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, instrument);
+                Trace event{trace_info, instrument};
                 handler(event, action);
                 break;
               }
               case LIQUIDATION: {
-                const Liquidation liquidation(value, buffer);
+                Liquidation liquidation{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, liquidation);
+                Trace event{trace_info, liquidation};
                 handler(event, action);
                 break;
               }
               case MARGIN: {
-                const Margin margin(value, buffer);
+                Margin margin{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, margin);
+                Trace event{trace_info, margin};
                 handler(event, action);
                 break;
               }
               case ORDER: {
-                const Order order(value, buffer);
+                Order order{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, order);
+                Trace event{trace_info, order};
                 handler(event, action);
                 break;
               }
               case ORDER_BOOK_L2: {
-                const OrderBookL2 order_book_l2(value, buffer);
+                OrderBookL2 order_book_l2{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, order_book_l2);
+                Trace event{trace_info, order_book_l2};
                 handler(event, action);
                 break;
               }
               case POSITION: {
-                const Position position(value, buffer);
+                Position position{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, position);
+                Trace event{trace_info, position};
                 handler(event, action);
                 break;
               }
               case QUOTE: {
-                const Quote quote(value, buffer);
+                Quote quote{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, quote);
+                Trace event{trace_info, quote};
                 handler(event, action);
                 break;
               }
               case SETTLEMENT: {
-                const Settlement settlement(value, buffer);
+                Settlement settlement{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, settlement);
+                Trace event{trace_info, settlement};
                 handler(event, action);
                 break;
               }
               case TRADE: {
-                const Trade trade(value, buffer);
+                Trade trade{value, buffer};
                 dispatched = true;
-                Trace event(trace_info, trade);
+                Trace event{trace_info, trade};
                 handler(event, action);
                 break;
               }
@@ -225,7 +225,7 @@ void StreamParser::dispatch(
           update(result.table, value);
           update(type, Type::TABLE);
           assert(table == Table::UNKNOWN__);
-          table = Table(result.table);
+          table = Table{result.table};
           break;
         case TIMESTAMP:
           update(result.timestamp, value);
@@ -249,52 +249,52 @@ void StreamParser::dispatch(
       case UNKNOWN:
         throw RuntimeError{"Can't detect message type"sv};
       case CANCEL_ALL_AFTER: {
-        const CancelAllAfter cancel_all_after{
+        auto cancel_all_after = CancelAllAfter{
             .cancel_time = result.cancel_time,
             .now = result.now,
         };
-        Trace event(trace_info, cancel_all_after);
+        Trace event{trace_info, cancel_all_after};
         handler(event);
         return;
       }
       case ERROR: {
-        const Error error{
+        auto error = Error{
             .error = result.error,
             .status = result.status,
         };
-        Trace event(trace_info, error);
+        Trace event{trace_info, error};
         handler(event);
         return;
       }
       case INFO: {
-        const Handshake handshake{
+        auto handshake = Handshake{
             .docs = {},
             .info = {},
             .timestamp = result.timestamp,
             .version = result.version,
             .heartbeat_enabled = result.heartbeat_enabled,
         };
-        Trace event(trace_info, handshake);
+        Trace event{trace_info, handshake};
         handler(event);
         return;
       }
       case SUBSCRIBE: {
-        const Subscribe subscribe{
+        auto subscribe = Subscribe{
             .failure = result.failure,
             .subscribe = result.subscribe,
             .success = result.success,
         };
-        Trace event(trace_info, subscribe);
+        Trace event{trace_info, subscribe};
         handler(event);
         return;
       }
       case UNSUBSCRIBE: {
-        const Unsubscribe unsubscribe{
+        auto unsubscribe = Unsubscribe{
             .failure = result.failure,
             .unsubscribe = result.unsubscribe,
             .success = result.success,
         };
-        Trace event(trace_info, unsubscribe);
+        Trace event{trace_info, unsubscribe};
         handler(event);
         return;
       }

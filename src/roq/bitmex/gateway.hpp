@@ -68,6 +68,9 @@ struct Gateway final : public server::Handler,
   void operator()(metrics::Writer &) override;
 
  private:
+  template <typename... Args>
+  void dispatch(Args &&...);
+
   OrderEntry &get_order_entry(std::string_view const &account);
   WebSocket &get_web_socket(std::string_view const &account);
 

@@ -12,12 +12,12 @@ struct ErrorParser final {
   template <typename F>
   static bool dispatch(std::string_view const &message, F &&callback) {
     using namespace std::literals;
-    core::json::Parser parser(message);
+    core::json::Parser parser{message};
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::Object>(root)) {
       if (key.compare("error"sv) == 0) {
-        ErrorResponse error(value);
-        callback(error);
+        ErrorResponse error_response{value};
+        callback(error_response);
         return true;
       } else {
         return false;
