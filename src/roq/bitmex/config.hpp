@@ -41,7 +41,7 @@ struct Config final : public server::config::Dispatcher, public server::config::
 
  protected:
   // server::config::Dispatcher
-  void dispatch(server::config::Dispatcher::Handler &) const override;
+  void dispatch(server::config::Handler &) const override;
 
   // server::config::Reader::Handler
   void operator()(server::config::Symbols &&) override;

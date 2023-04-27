@@ -48,7 +48,7 @@ Account const &Config::get_master_account() const {
   return master_account_;
 }
 
-void Config::dispatch(server::config::Dispatcher::Handler &handler) const {
+void Config::dispatch(server::config::Handler &handler) const {
   handler(Flags::exchange());
   handler(symbols);
   for (auto &iter : accounts)
