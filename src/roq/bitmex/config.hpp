@@ -15,10 +15,13 @@
 #include "roq/logging.hpp"
 #include "roq/server.hpp"
 
+#include "roq/server/config/dispatcher.hpp"
+#include "roq/server/config/reader.hpp"
+
 namespace roq {
 namespace bitmex {
 
-struct Config final : public server::Config, public server::ConfigReader::Handler {
+struct Config final : public server::config::Dispatcher, public server::config::Reader::Handler {
   Config();
 
   Account const &get_master_account() const;
@@ -37,23 +40,23 @@ struct Config final : public server::Config, public server::ConfigReader::Handle
   }
 
  protected:
-  // server::Config
-  void dispatch(server::Config::Handler &) const override;
+  // server::config::Dispatcher
+  void dispatch(server::config::Dispatcher::Handler &) const override;
 
-  // server::ConfigReader::Handler
-  void operator()(server::Symbols &&) override;
-  void operator()(server::Account &&) override;
-  void operator()(server::User &&) override;
-  void operator()(server::RateLimit &&) override;
-  void operator()(server::RequestTemplate, std::string_view const &label, toml::table &) override;
+  // server::config::Reader::Handler
+  void operator()(server::config::Symbols &&) override;
+  void operator()(server::config::Account &&) override;
+  void operator()(server::config::User &&) override;
+  void operator()(server::config::RateLimit &&) override;
+  void operator()(server::config::RequestTemplate, std::string_view const &label, toml::table &) override;
   void operator()(std::string_view const &key, toml::node &) override;
 
  public:
-  server::Users users;
-  server::Symbols symbols;
-  server::Accounts accounts;
+  server::config::Users users;
+  server::config::Symbols symbols;
+  server::config::Accounts accounts;
   Account master_account_;
-  server::RateLimits rate_limits;
+  server::config::RateLimits rate_limits;
 };
 
 /*
