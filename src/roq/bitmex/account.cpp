@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2023, Hans Erik Thrane */
 
-#include "roq/bitmex/authenticator.hpp"
+#include "roq/bitmex/account.hpp"
 
 #include "roq/io/web/uri.hpp"
 
@@ -20,11 +20,11 @@ auto create_base_path() {
 
 // === IMPLEMENTATION ===
 
-Authenticator::Authenticator(Config const &config, std::string_view const &account)
-    : account_{account}, base_path{create_base_path()}, crypto_{config.get_api_key(), config.get_secret()} {
+Account::Account(Config const &config, std::string_view const &name)
+    : name_{name}, base_path{create_base_path()}, crypto_{config.get_api_key(), config.get_secret()} {
 }
 
-std::string Authenticator::create_signature(
+std::string Account::create_signature(
     std::chrono::nanoseconds expires,
     web::http::Method method,
     std::string_view const &path,
@@ -32,7 +32,7 @@ std::string Authenticator::create_signature(
   return crypto_.create_signature(expires, method, path, body);
 }
 
-std::string Authenticator::create_headers(
+std::string Account::create_headers(
     std::chrono::nanoseconds expires,
     web::http::Method method,
     std::string_view const &path,

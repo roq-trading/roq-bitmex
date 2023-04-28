@@ -90,9 +90,8 @@ auto get_quality_of_service() {
 
 // === IMPLEMENTATION ===
 
-OrderEntry::OrderEntry(
-    Handler &handler, io::Context &context, uint16_t stream_id, Authenticator &authenticator, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, authenticator.get_account())},
+OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
       connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -110,7 +109,7 @@ OrderEntry::OrderEntry(
       latency_{
           .ping = create_metrics(name_, "ping"sv),
       },
-      authenticator_{authenticator}, shared_{shared} {
+      account_{account}, shared_{shared} {
 }
 
 void OrderEntry::operator()(Event<Start> const &) {
@@ -184,7 +183,7 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = authenticator_.get_account(),
+      .account = account_.get_name(),
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -200,7 +199,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = authenticator_.get_account(),
+        .account = account_.get_name(),
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
@@ -253,7 +252,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         time_in_force,
         exec_inst);
     log::info<2>(R"(body="{}")"sv, body);
-    auto headers = authenticator_.create_headers(expires, method, path, body);
+    auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
         .path = path,
@@ -280,7 +279,7 @@ void OrderEntry::create_order_ack(
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::OrderItem order_item{body};
-      OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(
+      OrderUpdate{shared_, stream_id_, account_.get_name()}(
           order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -328,7 +327,7 @@ void OrderEntry::modify_order(
         modify_order.quantity,
         modify_order.price);
     log::info<2>(R"(body="{}")"sv, body);
-    auto headers = authenticator_.create_headers(expires, method, path, body);
+    auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
         .path = path,
@@ -355,7 +354,7 @@ void OrderEntry::modify_order_ack(
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::OrderItem order_item{body};
-      OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(
+      OrderUpdate{shared_, stream_id_, account_.get_name()}(
           order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -397,7 +396,7 @@ void OrderEntry::cancel_order(
         R"(}})"sv,
         order.external_order_id);
     log::info<2>(R"(body="{}")"sv, body);
-    auto headers = authenticator_.create_headers(expires, method, path, body);
+    auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
         .path = path,
@@ -424,7 +423,7 @@ void OrderEntry::cancel_order_ack(
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::Order order{body, decode_buffer_};
-      OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(
+      OrderUpdate{shared_, stream_id_, account_.get_name()}(
           order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -455,7 +454,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
       auto path = "/api/v1/order/all"sv;
       auto expires = compute_expires();
       auto body = "{}"sv;
-      auto headers = authenticator_.create_headers(expires, method, path, body);
+      auto headers = account_.create_headers(expires, method, path, body);
       auto request = web::rest::Request{
           .method = method,
           .path = path,
@@ -483,7 +482,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
   profile_.cancel_all_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::Order order{body, decode_buffer_};
-      OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(order, event.trace_info, false);
+      OrderUpdate{shared_, stream_id_, account_.get_name()}(order, event.trace_info, false);
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
@@ -497,12 +496,12 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
 
 void OrderEntry::operator()(json::OrderItem const &order_item) {
   TraceInfo trace_info;
-  OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(order_item, trace_info, false);
+  OrderUpdate{shared_, stream_id_, account_.get_name()}(order_item, trace_info, false);
 }
 
 void OrderEntry::operator()(json::Order const &order) {
   TraceInfo trace_info;
-  OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(order, trace_info, false);
+  OrderUpdate{shared_, stream_id_, account_.get_name()}(order, trace_info, false);
 }
 
 template <typename SuccessHandler, typename ErrorHandler>

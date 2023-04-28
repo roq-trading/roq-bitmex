@@ -11,7 +11,7 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/bitmex/authenticator.hpp"
+#include "roq/bitmex/account.hpp"
 #include "roq/bitmex/config.hpp"
 #include "roq/bitmex/shared.hpp"
 
@@ -76,9 +76,8 @@ struct Gateway final : public server::Handler,
 
  private:
   server::Dispatcher &dispatcher_;
-  // config
-  // authentication
-  absl::flat_hash_map<Account, std::unique_ptr<Authenticator>> authenticator_;
+  // accounts
+  absl::flat_hash_map<std::string, std::unique_ptr<Account>> const accounts_;
   // io
   io::Context &context_;
   // shared
@@ -86,9 +85,9 @@ struct Gateway final : public server::Handler,
   // seed
   uint16_t stream_id_ = {};
   // streams
-  absl::flat_hash_map<Account, std::unique_ptr<OrderEntry>> order_entry_;
-  absl::flat_hash_map<Account, std::unique_ptr<WebSocket>> web_socket_;
-  absl::flat_hash_map<Account, std::unique_ptr<DropCopy>> drop_copy_;
+  absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
+  absl::flat_hash_map<std::string, std::unique_ptr<WebSocket>> web_socket_;
+  absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   MarketData market_data_;
   // cache
   std::vector<MBPUpdate> bids_, asks_;

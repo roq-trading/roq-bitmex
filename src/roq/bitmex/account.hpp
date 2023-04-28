@@ -15,13 +15,13 @@
 namespace roq {
 namespace bitmex {
 
-struct Authenticator final {
-  Authenticator(Config const &, std::string_view const &account);
+struct Account final {
+  Account(Config const &, std::string_view const &name);
 
-  Authenticator(Authenticator &&) = delete;
-  Authenticator(Authenticator const &) = delete;
+  Account(Account &&) = delete;
+  Account(Account const &) = delete;
 
-  std::string_view get_account() const { return account_; }
+  std::string_view get_name() const { return name_; }
 
   std::string create_signature(
       std::chrono::nanoseconds expires,
@@ -36,8 +36,8 @@ struct Authenticator final {
       std::string_view const &body);
 
  private:
-  const std::string account_;
-  const std::string base_path;
+  std::string const name_;
+  std::string const base_path;
   tools::Crypto crypto_;
 };
 

@@ -17,7 +17,7 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bitmex/authenticator.hpp"
+#include "roq/bitmex/account.hpp"
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/json/order.hpp"
@@ -32,7 +32,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
   };
 
-  OrderEntry(Handler &, io::Context &, uint16_t stream_id, Authenticator &, Shared &);
+  OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
   OrderEntry(OrderEntry &&) = delete;
   OrderEntry(OrderEntry const &) = delete;
@@ -103,10 +103,10 @@ struct OrderEntry final : public web::rest::Client::Handler {
  private:
   Handler &handler_;
   // config
-  const uint16_t stream_id_;
-  const std::string name_;
+  uint16_t const stream_id_;
+  std::string const name_;
   // connection
-  std::unique_ptr<web::rest::Client> connection_;
+  std::unique_ptr<web::rest::Client> const connection_;
   // buffers
   core::Buffer decode_buffer_;
   // metrics
@@ -122,8 +122,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
   struct {
     core::metrics::Latency ping;
   } latency_;
-  // authenticator
-  Authenticator &authenticator_;
+  // account
+  Account &account_;
   // cache
   Shared &shared_;
   // state
