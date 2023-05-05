@@ -357,19 +357,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
     log::info<2>("event={{action={}, execution={}}}"sv, action, execution);
-    shared_.fills.clear();
-    auto emplace_back = [](auto &result, auto &value) {
-      auto fill = Fill{
-          .external_trade_id = value.trd_match_id,
-          .quantity = value.last_qty,
-          .price = value.last_px,
-          .liquidity = {},
-      };
-      result.emplace_back(std::move(fill));
-    };
-    size_t index = {};
     for (auto &item : execution.data) {
-      auto last = std::size(execution.data) == ++index;
       auto order_status = json::map(item.ord_status);
       auto side = json::map(item.side);
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
@@ -419,32 +407,42 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .update_type = UpdateType::INCREMENTAL,  // XXX not sure if this is correct...
           .sending_time_utc = {},
       };
+      auto order_id = ORDER_ID_NONE;
+      auto user_id = SOURCE_NONE;
       if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
-            if (item.exec_type == json::ExecType::TRADE) {
-              emplace_back(shared_.fills, item);
-            }
-            if (last && !std::empty(shared_.fills)) {
-              auto trade_update = oms::TradeUpdate{
-                  .account = order.account,
-                  .order_id = order.order_id,
-                  .exchange = order.exchange,
-                  .symbol = order.symbol,
-                  .side = order.side,
-                  .position_effect = order.position_effect,
-                  .create_time_utc = item.timestamp,
-                  .update_time_utc = item.timestamp,
-                  .external_account = external_account,
-                  .external_order_id = order.external_order_id,
-                  .fills = shared_.fills,
-                  .update_type = {},
-                  .sending_time_utc = {},
-              };
-              create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
-            }
+            order_id = order.order_id;
+            user_id = order.user_id;
           })) {
       } else {
         log::warn<1>("*** EXTERNAL ORDER ***"sv);
       }
+      if (item.exec_type != json::ExecType::TRADE)
+        continue;
+      auto fill = Fill{
+          .external_trade_id = item.trd_match_id,
+          .quantity = item.last_qty,
+          .price = item.last_px,
+          .liquidity = {},
+      };
+      auto trade_update = TradeUpdate{
+          .stream_id = stream_id_,
+          .account = account_.get_name(),
+          .order_id = order_id,
+          .exchange = flags::Flags::exchange(),
+          .symbol = item.symbol,
+          .side = side,
+          .position_effect = {},
+          .create_time_utc = item.timestamp,
+          .update_time_utc = item.timestamp,
+          .external_account = external_account,
+          .external_order_id = item.order_id,
+          .fills = {&fill, 1},
+          .routing_id = {},
+          .update_type = UpdateType::INCREMENTAL,
+          .sending_time_utc = {},
+          .user = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, user_id, item.cl_ord_id);
     }
   });
 }

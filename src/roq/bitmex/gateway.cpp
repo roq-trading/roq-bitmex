@@ -197,8 +197,9 @@ void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<oms::TradeUpdate> const &event, uint16_t stream_id, bool is_last, uint8_t user_id) {
-  dispatcher_(event, stream_id, is_last, user_id);
+void Gateway::operator()(
+    Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
+  dispatcher_(event, is_last, user_id, request_id);
 }
 
 void Gateway::operator()(Trace<PositionUpdate> const &event, bool is_last) {
