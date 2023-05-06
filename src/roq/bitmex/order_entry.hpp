@@ -97,8 +97,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   template <typename... Args>
   void operator()(Trace<oms::Response> const &, uint8_t user_id, uint32_t order_id, Args &&...);
 
-  template <typename... Args>
-  void operator()(Trace<oms::OrderUpdate> const &, std::string_view const &client_order_id, Args &&...);
+  void operator()(Trace<oms::OrderUpdate> const &, std::string_view const &client_order_id);
 
  private:
   Handler &handler_;
