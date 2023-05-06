@@ -14,6 +14,7 @@ set(SOURCES
     order_update.cpp
     price_cache.cpp
     product.cpp
+    settings.cpp
     shared.cpp
     web_socket.cpp
     main.cpp)

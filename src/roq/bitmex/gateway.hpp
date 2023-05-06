@@ -13,6 +13,7 @@
 
 #include "roq/bitmex/account.hpp"
 #include "roq/bitmex/config.hpp"
+#include "roq/bitmex/settings.hpp"
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/drop_copy.hpp"
@@ -30,7 +31,7 @@ struct Gateway final : public server::Handler,
                        public WebSocket::Handler,
                        public DropCopy::Handler,
                        public MarketData::Handler {
-  Gateway(server::Dispatcher &, Config const &, io::Context &);
+  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
  protected:
   // server::Handler
