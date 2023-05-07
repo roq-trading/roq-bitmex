@@ -53,9 +53,9 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 
 // === IMPLEMENTATION ===
 
-Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &, Config const &config, io::Context &context)
+Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(config)}, context_{context},
-      shared_{dispatcher},
+      shared_{dispatcher, settings},
       order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)},
       market_data_{*this, context_, ++stream_id_, shared_} {

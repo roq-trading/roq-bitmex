@@ -11,7 +11,7 @@ namespace bitmex {
 
 // === IMPLEMENTATION ===
 
-Shared::Shared(server::Dispatcher &dispatcher) : dispatcher_{dispatcher} {
+Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings) : dispatcher_{dispatcher}, settings{settings} {
 }
 
 std::string_view Shared::next_request_id() {

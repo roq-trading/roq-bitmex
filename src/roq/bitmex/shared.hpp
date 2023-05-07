@@ -11,12 +11,13 @@
 #include "roq/core/stack/buffer.hpp"
 
 #include "roq/bitmex/price_cache.hpp"
+#include "roq/bitmex/settings.hpp"
 
 namespace roq {
 namespace bitmex {
 
 struct Shared final {
-  explicit Shared(server::Dispatcher &);
+  Shared(server::Dispatcher &, Settings const &);
 
   Shared(Shared &&) = default;
   Shared(Shared const &) = delete;
@@ -44,6 +45,11 @@ struct Shared final {
 
  private:
   server::Dispatcher &dispatcher_;
+
+ public:
+  Settings const &settings;
+
+ private:
   uint32_t request_id_ = 0;
   core::stack::Buffer<char, 32> stack_buffer_;
 };
