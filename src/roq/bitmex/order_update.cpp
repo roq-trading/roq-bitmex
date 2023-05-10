@@ -6,7 +6,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/bitmex/flags.hpp"
 #include "roq/bitmex/utils.hpp"
 
 #include "roq/bitmex/json/utils.hpp"
@@ -46,7 +45,7 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
   };
   auto order_update = oms::OrderUpdate{
       .account = account_,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = order_item.symbol,
       .side = side,
       .position_effect = {},
@@ -117,7 +116,7 @@ void OrderUpdate::operator()(
   };
   auto order_update = oms::OrderUpdate{
       .account = account_,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = order_item.symbol,
       .side = side,
       .position_effect = {},

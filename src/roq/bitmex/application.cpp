@@ -20,9 +20,9 @@ auto const TYPE = server::Type::ORDER_MANAGEMENT;
 // === IMPLEMENTATION ===
 
 int Application::main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
-  auto settings = Settings::create(TYPE);
+  Settings settings{TYPE};
   Config config{settings};
-  auto context = server::create_io_context();
+  auto context = server::create_io_context(settings);
   server::Trading<Gateway>{settings, config, *context}.dispatch();
   return EXIT_SUCCESS;
 }

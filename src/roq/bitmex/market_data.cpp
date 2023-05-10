@@ -12,8 +12,6 @@
 
 #include "roq/web/socket/client_factory.hpp"
 
-#include "roq/bitmex/flags.hpp"
-
 #include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
@@ -44,7 +42,7 @@ auto create_name(auto stream_id) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::ws_uri();
+  auto uri = settings.ws.uri;
   auto config = web::socket::Client::Config{
       // connection
       .interface = {},
@@ -60,10 +58,10 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
-      .ping_frequency = Flags::ws_ping_freq(),
+      .ping_frequency = settings.ws.ping_freq,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
   };
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
@@ -78,7 +76,8 @@ struct create_metrics final : public core::metrics::Factory {
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -101,7 +100,7 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
           .ping = create_metrics(shared.settings, name_, "ping"sv),
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
-      shared_{shared}, download_{Flags::ws_request_timeout(), [this](auto state) { return download(state); }} {
+      shared_{shared}, download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void MarketData::operator()(Event<Start> const &) {
@@ -577,7 +576,7 @@ void MarketData::operator()(Trace<json::Quote> const &event, json::Action action
         continue;
       auto top_of_book = TopOfBook{
           .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .layer{
               .bid_price = item.bid_price,
@@ -628,7 +627,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
     auto dispatch = [&](auto &symbol, auto is_last) {
       auto trade_summary = TradeSummary{
           .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .trades = shared_.trades,
           .exchange_time_utc = timestamp,  // XXX not sure
@@ -681,7 +680,7 @@ void MarketData::operator()(Trace<json::Position> const &event, json::Action act
 Product &MarketData::find_product(json::InstrumentItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
-    iter = product_cache_.emplace(item.symbol, item).first;
+    iter = product_cache_.try_emplace(item.symbol, shared_, item).first;
   } else {
     (*iter).second.update(item);
   }
@@ -693,7 +692,7 @@ Product &MarketData::find_product(json::FundingItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
     log::warn<1>(R"(Create product symbol="{}" from funding (no reference data))"sv, item.symbol);
-    iter = product_cache_.emplace(item.symbol, item).first;
+    iter = product_cache_.try_emplace(item.symbol, shared_, item).first;
   } else {
     (*iter).second.update(item);
   }
@@ -716,7 +715,7 @@ void MarketData::publish_market_by_price(
     log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
   auto market_by_price_update = MarketByPriceUpdate{
       .stream_id = stream_id_,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = symbol,
       .bids = bids,
       .asks = asks,

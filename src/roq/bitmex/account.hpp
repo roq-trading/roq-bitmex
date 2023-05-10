@@ -9,6 +9,7 @@
 #include "roq/web/http/method.hpp"
 
 #include "roq/bitmex/config.hpp"
+#include "roq/bitmex/settings.hpp"
 
 #include "roq/bitmex/tools/crypto.hpp"
 
@@ -16,7 +17,7 @@ namespace roq {
 namespace bitmex {
 
 struct Account final {
-  Account(Config const &, std::string_view const &name);
+  Account(Settings const &, Config const &, std::string_view const &name);
 
   Account(Account &&) = delete;
   Account(Account const &) = delete;

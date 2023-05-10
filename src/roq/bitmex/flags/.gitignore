@@ -1,4 +1,10 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bitmex-flags
+common.hpp
+rest.hpp
+ws.hpp
 flags.hpp
+common.cpp
+rest.cpp
+ws.cpp
 flags.cpp

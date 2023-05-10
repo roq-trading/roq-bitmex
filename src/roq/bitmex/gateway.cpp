@@ -4,8 +4,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/bitmex/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -15,11 +13,11 @@ namespace bitmex {
 
 namespace {
 template <typename R>
-R create_accounts(auto &config) {
+R create_accounts(auto &settings, auto &config) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[_, account] : config.accounts)
-    result.try_emplace(account.name, std::make_unique<Account>(config, account.name));
+    result.try_emplace(account.name, std::make_unique<Account>(settings, config, account.name));
   return result;
 }
 
@@ -54,12 +52,12 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 // === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(config)}, context_{context},
+    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context},
       shared_{dispatcher, settings},
       order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)},
       market_data_{*this, context_, ++stream_id_, shared_} {
-  if (!Flags::ws_cancel_on_disconnect()) [[unlikely]]
+  if (!settings.ws.cancel_on_disconnect) [[unlikely]]
     log::warn("Orders will *NOT* be cancelled on disconnect"sv);
 }
 
@@ -95,7 +93,7 @@ void Gateway::operator()(Event<Disconnected> const &event) {
       break;
     case BY_ACCOUNT:
       log::warn("*** CANCEL ALL ACCOUNT ORDERS ***"sv);
-      if (Flags::oms_using_web_socket()) {
+      if (shared_.settings.common.oms_using_web_socket) {
         for (auto &[account, web_socket] : web_socket_) {
           if (dispatcher_.can_user_trade_account(account, message_info.source)) {
             log::warn(R"(- account="{}")"sv, account);
@@ -124,7 +122,7 @@ void Gateway::operator()(Event<Disconnected> const &event) {
 uint16_t Gateway::operator()(
     Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  if (Flags::oms_using_web_socket())
+  if (shared_.settings.common.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id);
   return get_order_entry(event.value.account)(event, order, request_id);
 }
@@ -136,7 +134,7 @@ uint16_t Gateway::operator()(
     std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  if (Flags::oms_using_web_socket())
+  if (shared_.settings.common.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
@@ -148,14 +146,14 @@ uint16_t Gateway::operator()(
     std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  if (Flags::oms_using_web_socket())
+  if (shared_.settings.common.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  if (Flags::oms_using_web_socket())
+  if (shared_.settings.common.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, request_id);
   return get_order_entry(event.value.account)(event, request_id);
 }

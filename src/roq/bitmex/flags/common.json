@@ -1,0 +1,32 @@
+{
+  "name": "Common",
+  "type": "flags",
+  "values": [
+    {
+      "name": "encode_buffer_size",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 1048576,
+      "description": "encode buffer size"
+    },
+    {
+      "name": "decode_buffer_size",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::NonZero<uint32_t>",
+      "default": 10485760,
+      "description": "decode buffer size"
+    },
+    {
+      "name": "mbp_allow_price_inversion",
+      "type": "bool",
+      "default": false,
+      "description": "allow price inversion?"
+    },
+    {
+      "name": "oms_using_web_socket",
+      "type": "bool",
+      "default": false,
+      "description": "use web-socket for order management?"
+    }
+  ]
+}

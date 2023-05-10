@@ -7,8 +7,6 @@
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
-#include "roq/bitmex/flags.hpp"
-
 #include "roq/bitmex/json/utils.hpp"
 
 namespace roq {
@@ -28,15 +26,16 @@ auto strip_time_part(auto timestamp) {
 // XXX markPrice ?
 // XXX openInterest ?
 
-Product::Product(json::InstrumentItem const &item)
-    : quote_currency_{item.quote_currency}, settl_currency_{item.settl_currency}, tick_size_{item.tick_size},
-      multiplier_{item.multiplier}, lot_size_{item.lot_size}, option_strike_price_{item.option_strike_price},
-      underlying_symbol_{item.underlying_symbol}, expiry_{item.expiry}, settle_{item.settle} {
+Product::Product(Shared &shared, json::InstrumentItem const &item)
+    : shared_{shared}, quote_currency_{item.quote_currency}, settl_currency_{item.settl_currency},
+      tick_size_{item.tick_size}, multiplier_{item.multiplier}, lot_size_{item.lot_size},
+      option_strike_price_{item.option_strike_price}, underlying_symbol_{item.underlying_symbol}, expiry_{item.expiry},
+      settle_{item.settle} {
   statistics_.reserve(magic_enum::enum_count<StatisticsType>());
   update(item);
 }
 
-Product::Product(json::FundingItem const &) {
+Product::Product(Shared &shared, json::FundingItem const &) : shared_{shared} {
   statistics_.reserve(magic_enum::enum_count<StatisticsType>());
 }
 
@@ -166,7 +165,7 @@ ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t
   assert(!std::empty(item.symbol));
   return {
       .stream_id = stream_id,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = item.symbol,
       .description = {},
       .security_type = {},  // XXX typ?
@@ -198,7 +197,7 @@ MarketStatus Product::market_status(json::InstrumentItem const &item, uint16_t s
   auto trading_status = json::map(state_);
   return {
       .stream_id = stream_id,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = item.symbol,
       .trading_status = trading_status,
   };
@@ -208,7 +207,7 @@ StatisticsUpdate Product::statistics_update(json::InstrumentItem const &item, ui
   assert(!std::empty(item.symbol));
   return {
       .stream_id = stream_id,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = item.symbol,
       .statistics = {std::data(statistics_), std::size(statistics_)},
       .update_type = UpdateType::INCREMENTAL,
@@ -222,7 +221,7 @@ StatisticsUpdate Product::statistics_update(json::FundingItem const &item, uint1
   assert(!std::empty(item.symbol));
   return {
       .stream_id = stream_id,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = item.symbol,
       .statistics = {std::data(statistics_), std::size(statistics_)},
       .update_type = UpdateType::INCREMENTAL,

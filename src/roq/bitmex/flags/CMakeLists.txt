@@ -2,7 +2,7 @@ set(TARGET_NAME "${PROJECT_NAME}-flags")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS flags.json)
+set(AUTOGEN_SCHEMAS common.json rest.json ws.json flags.json)
 
 roq_autogen(
   OUTPUT

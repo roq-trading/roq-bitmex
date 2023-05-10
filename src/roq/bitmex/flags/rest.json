@@ -1,0 +1,54 @@
+{
+  "name": "REST",
+  "type": "flags",
+  "prefix": "rest_",
+  "values": [
+    {
+      "name": "uri",
+      "type": "roq::io::web::URI",
+      "validator": "roq::core::flags::URI",
+      "default": "https://testnet.bitmex.com",
+      "description": "REST end-point (URI)"
+    },
+    {
+      "name": "proxy",
+      "type": "roq::io::web::URI",
+      "validator": "roq::core::flags::URI",
+      "description": "proxy end-point (URI)"
+    },
+    {
+      "name": "ping_freq",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "5s",
+      "description": "ping frequency"
+    },
+    {
+      "name": "ping_path",
+      "type": "std::string",
+      "validator": "roq::core::flags::Path",
+      "default": "/api/v1/announcement/urgent",
+      "description": "URI path used for REST connection keep-alive messages"
+    },
+    {
+      "name": "request_timeout",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "30s",
+      "description": "request: timeout"
+    },
+    {
+      "name": "expires_timeout",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "1s",
+      "description": "expires time-out"
+    },
+    {
+      "name": "allow_order_request_pipeline",
+      "type": "bool",
+      "default": false,
+      "description": "allow more than one in-flight order action? (bool)"
+    }
+  ]
+}

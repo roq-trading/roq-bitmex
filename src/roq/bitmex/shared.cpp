@@ -2,8 +2,6 @@
 
 #include "roq/bitmex/shared.hpp"
 
-#include "roq/bitmex/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {

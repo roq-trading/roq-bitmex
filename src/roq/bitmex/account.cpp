@@ -4,24 +4,22 @@
 
 #include "roq/io/web/uri.hpp"
 
-#include "roq/bitmex/flags.hpp"
-
 namespace roq {
 namespace bitmex {
 
 // === HELPERS ===
 
 namespace {
-auto create_base_path() {
-  io::web::URI uri{Flags::rest_uri()};
+auto create_base_path(auto &settings) {
+  io::web::URI uri{settings.rest.uri};
   return std::string{uri.get_path()};
 }
 }  // namespace
 
 // === IMPLEMENTATION ===
 
-Account::Account(Config const &config, std::string_view const &name)
-    : name_{name}, base_path{create_base_path()}, crypto_{config.get_api_key(), config.get_secret()} {
+Account::Account(Settings const &settings, Config const &config, std::string_view const &name)
+    : name_{name}, base_path{create_base_path(settings)}, crypto_{config.get_api_key(), config.get_secret()} {
 }
 
 std::string Account::create_signature(

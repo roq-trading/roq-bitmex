@@ -14,7 +14,6 @@
 
 #include "roq/web/rest/client_factory.hpp"
 
-#include "roq/bitmex/flags.hpp"
 #include "roq/bitmex/order_update.hpp"
 
 #include "roq/bitmex/json/error_parser.hpp"
@@ -46,7 +45,7 @@ auto create_name(auto stream_id, auto const &account) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::rest_uri();
+  auto uri = settings.rest.uri;
   auto config = web::rest::Client::Config{
       // connection
       .interface = {},
@@ -57,16 +56,16 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .disconnect_on_idle_timeout = {},
       .connection = web::http::Connection::KEEP_ALIVE,
       // proxy
-      .proxy = Flags::rest_proxy(),
+      .proxy = settings.rest.proxy,
       // http
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
-      .request_timeout = Flags::rest_request_timeout(),
-      .ping_frequency = Flags::rest_ping_freq(),
-      .ping_path = Flags::rest_ping_path(),
+      .request_timeout = settings.rest.request_timeout,
+      .ping_frequency = settings.rest.ping_freq,
+      .ping_path = settings.rest.ping_path,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
       .allow_pipelining = true,
   };
   return web::rest::ClientFactory::create(handler, context, config);
@@ -77,14 +76,14 @@ struct create_metrics final : public core::metrics::Factory {
       : core::metrics::Factory(settings.app.name, group, function) {}
 };
 
-auto compute_expires() {
+auto compute_expires(auto &settings) {
   auto now = clock::get_realtime();
-  auto result = now + Flags::rest_expires_timeout();
+  auto result = now + settings.rest.expires_timeout;
   return std::chrono::ceil<std::chrono::seconds>(result);
 }
 
-auto get_quality_of_service() {
-  return Flags::rest_allow_order_request_pipeline() ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
+auto get_quality_of_service(auto &settings) {
+  return settings.rest.allow_order_request_pipeline ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
 }
 }  // namespace
 
@@ -92,7 +91,8 @@ auto get_quality_of_service() {
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -225,7 +225,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
     auto &[message_info, create_order] = event;
     auto method = web::http::Method::POST;
     auto path = "/api/v1/order"sv;
-    auto expires = compute_expires();
+    auto expires = compute_expires(shared_.settings);
     auto side = json::map(create_order.side).as_raw_text();
     auto ord_type = json::map(create_order.order_type).as_raw_text();
     auto time_in_force = json::map(create_order.time_in_force).as_raw_text();
@@ -261,7 +261,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         .content_type = web::http::ContentType::APPLICATION_JSON,
         .headers = headers,
         .body = body,
-        .quality_of_service = get_quality_of_service(),
+        .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback = [this, user_id = message_info.source, order_id = create_order.order_id](
                         [[maybe_unused]] auto &request_id, auto &response) {
@@ -314,7 +314,7 @@ void OrderEntry::modify_order(
     auto &[message_info, modify_order] = event;
     auto method = web::http::Method::PUT;
     auto path = "/api/v1/order"sv;
-    auto expires = compute_expires();
+    auto expires = compute_expires(shared_.settings);
     auto body = fmt::format(
         R"({{)"
         R"("clOrdID":"{}",)"
@@ -336,7 +336,7 @@ void OrderEntry::modify_order(
         .content_type = web::http::ContentType::APPLICATION_JSON,
         .headers = headers,
         .body = body,
-        .quality_of_service = get_quality_of_service(),
+        .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback =
         [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
@@ -389,7 +389,7 @@ void OrderEntry::cancel_order(
     auto &[message_info, cancel_order] = event;
     auto method = web::http::Method::DELETE;
     auto path = "/api/v1/order"sv;
-    auto expires = compute_expires();
+    auto expires = compute_expires(shared_.settings);
     auto body = fmt::format(
         R"({{)"
         R"("orderID":"{}")"
@@ -405,7 +405,7 @@ void OrderEntry::cancel_order(
         .content_type = web::http::ContentType::APPLICATION_JSON,
         .headers = headers,
         .body = body,
-        .quality_of_service = get_quality_of_service(),
+        .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback =
         [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
@@ -452,7 +452,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
     if (ready()) {
       auto method = web::http::Method::DELETE;
       auto path = "/api/v1/order/all"sv;
-      auto expires = compute_expires();
+      auto expires = compute_expires(shared_.settings);
       auto body = "{}"sv;
       auto headers = account_.create_headers(expires, method, path, body);
       auto request = web::rest::Request{
@@ -463,7 +463,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
           .content_type = web::http::ContentType::APPLICATION_JSON,
           .headers = headers,
           .body = body,
-          .quality_of_service = get_quality_of_service(),
+          .quality_of_service = get_quality_of_service(shared_.settings),
       };
       auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
         TraceInfo trace_info;

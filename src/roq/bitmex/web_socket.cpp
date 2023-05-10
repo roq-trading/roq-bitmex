@@ -12,7 +12,6 @@
 
 #include "roq/web/socket/client_factory.hpp"
 
-#include "roq/bitmex/flags.hpp"
 #include "roq/bitmex/order_update.hpp"
 #include "roq/bitmex/utils.hpp"
 
@@ -47,7 +46,7 @@ auto create_name(auto stream_id, auto const &account) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context, auto &&create_upgrade_headers) {
-  auto uri = Flags::ws_uri();
+  auto uri = settings.ws.uri;
   auto config = web::socket::Client::Config{
       // connection
       .interface = {},
@@ -63,10 +62,10 @@ auto create_connection(auto &handler, auto &settings, auto &context, auto &&crea
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
-      .ping_frequency = Flags::ws_ping_freq(),
+      .ping_frequency = settings.ws.ping_freq,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
   };
   return web::socket::ClientFactory::create(handler, context, config, std::move(create_upgrade_headers));
 }
@@ -82,7 +81,7 @@ struct create_metrics final : public core::metrics::Factory {
 WebSocket::WebSocket(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
       connection_{create_connection(*this, shared.settings, context, [this]() { return create_upgrade_headers(); })},
-      decode_buffer_{Flags::decode_buffer_size()},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -105,7 +104,7 @@ WebSocket::WebSocket(Handler &handler, io::Context &context, uint16_t stream_id,
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
       account_{account}, shared_{shared},
-      download_{Flags::ws_request_timeout(), [this](auto state) { return download(state); }} {
+      download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void WebSocket::operator()(Event<Start> const &) {
@@ -119,10 +118,10 @@ void WebSocket::operator()(Event<Stop> const &) {
 void WebSocket::operator()(Event<Timer> const &event) {
   if (!(*connection_).refresh(event.value.now))
     return;
-  if (Flags::ws_cancel_on_disconnect() && Flags::ws_cancel_all_after().count() && ready_ &&
+  if (shared_.settings.ws.cancel_on_disconnect && shared_.settings.ws.cancel_all_after.count() && ready_ &&
       next_cancel_all_after_ <= event.value.now) {
-    next_cancel_all_after_ = event.value.now + Flags::ws_cancel_all_after() / 4;
-    send_cancel_all_after(Flags::ws_cancel_all_after());
+    next_cancel_all_after_ = event.value.now + shared_.settings.ws.cancel_all_after / 4;
+    send_cancel_all_after(shared_.settings.ws.cancel_all_after);
   }
 }
 
@@ -349,7 +348,7 @@ void WebSocket::operator()(Trace<json::Handshake> const &event) {
     log::info<2>("handshake={}"sv, handshake);
     (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
-    if (!Flags::ws_cancel_on_disconnect() || Flags::ws_cancel_all_after().count() == 0)
+    if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0)
       send_cancel_all_after(std::chrono::seconds{});
   });
 }
@@ -390,7 +389,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
       };
       auto order_update = oms::OrderUpdate{
           .account = account_.get_name(),
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .side = side,
           .position_effect = {},
@@ -436,7 +435,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .stream_id = stream_id_,
           .account = account_.get_name(),
           .order_id = order_id,
-          .exchange = flags::Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .side = side,
           .position_effect = {},
@@ -489,7 +488,7 @@ void WebSocket::operator()(Trace<json::Position> const &event, json::Action acti
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .external_account = external_account,
           .long_quantity = long_quantity,

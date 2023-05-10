@@ -8,6 +8,8 @@
 
 #include "roq/api.hpp"
 
+#include "roq/bitmex/shared.hpp"
+
 #include "roq/bitmex/json/funding_item.hpp"
 #include "roq/bitmex/json/instrument_item.hpp"
 
@@ -15,8 +17,8 @@ namespace roq {
 namespace bitmex {
 
 struct Product final {
-  explicit Product(json::InstrumentItem const &);
-  explicit Product(json::FundingItem const &);
+  Product(Shared &, json::InstrumentItem const &);
+  Product(Shared &, json::FundingItem const &);
 
   Product(Product &&) = default;
   Product(Product const &) = delete;
@@ -39,6 +41,7 @@ struct Product final {
   }
 
  private:
+  Shared &shared_;
   // reference data
   std::string description_;
   std::string quote_currency_;
