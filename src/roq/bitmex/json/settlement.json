@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "data",
-      "type": "std::span<SettlementItem>"
+      "type": "std::span<SettlementItem const>"
     }
   ]
 }

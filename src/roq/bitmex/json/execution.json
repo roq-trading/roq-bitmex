@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "data",
-      "type": "std::span<ExecutionItem>"
+      "type": "std::span<ExecutionItem const>"
     }
   ]
 }
