@@ -333,9 +333,8 @@ TEST_CASE("json_instrument_item_open", "[json_instrument_item]") {
 
 TEST_CASE("json_instrument_empty", "[json_instrument]") {
   auto const message = "[]"sv;
-  core::Buffer buffer(8192);
-  core::json::Buffer decode_buffer(buffer);
-  auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::Instrument::create(message, buffer);
   CHECK(std::size(obj.data) == size_t{0});
 }
 
@@ -551,9 +550,8 @@ TEST_CASE("json_instrument_simple", "[json_instrument]") {
                        R"("timestamp":"2020-01-22T19:09:30.000Z")"
                        R"(})"
                        R"(])"sv;
-  core::Buffer buffer(8192);
-  core::json::Buffer decode_buffer(buffer);
-  auto obj = core::json::Parser::create<json::Instrument>(message, decode_buffer);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::Instrument::create(message, buffer);
   CHECK(std::size(obj.data) == size_t{2});
   // item #0
   CHECK(obj.data[0].symbol == ".EVOL7D");

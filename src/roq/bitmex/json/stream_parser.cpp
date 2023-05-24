@@ -16,6 +16,8 @@ namespace roq {
 namespace bitmex {
 namespace json {
 
+// === HELPERS ===
+
 namespace {
 enum class Type {
   UNKNOWN,
@@ -37,10 +39,12 @@ void update(Type &result, const Type type) {
 }
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 void StreamParser::dispatch(
     StreamParser::Handler &handler,
     std::string_view const &message,
-    core::json::Buffer &buffer,
+    std::span<std::byte> const &buffer,
     TraceInfo const &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
@@ -77,83 +81,84 @@ void StreamParser::dispatch(
           if (action == Action::UNKNOWN__) {
             // not ready -- finish and try again
           } else {
+            core::json::Buffer buffer_2{buffer};
             switch (table) {
               using enum Table::type_t;
               case UNDEFINED__:
               case UNKNOWN__:
                 break;
               case EXECUTION: {
-                Execution execution{value, buffer};
+                Execution execution{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, execution};
                 handler(event, action);
                 break;
               }
               case FUNDING: {
-                Funding funding{value, buffer};
+                Funding funding{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, funding};
                 handler(event, action);
                 break;
               }
               case INSTRUMENT: {
-                Instrument instrument{value, buffer};
+                Instrument instrument{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, instrument};
                 handler(event, action);
                 break;
               }
               case LIQUIDATION: {
-                Liquidation liquidation{value, buffer};
+                Liquidation liquidation{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, liquidation};
                 handler(event, action);
                 break;
               }
               case MARGIN: {
-                Margin margin{value, buffer};
+                Margin margin{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, margin};
                 handler(event, action);
                 break;
               }
               case ORDER: {
-                Order order{value, buffer};
+                Order order{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, order};
                 handler(event, action);
                 break;
               }
               case ORDER_BOOK_L2: {
-                OrderBookL2 order_book_l2{value, buffer};
+                OrderBookL2 order_book_l2{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, order_book_l2};
                 handler(event, action);
                 break;
               }
               case POSITION: {
-                Position position{value, buffer};
+                Position position{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, position};
                 handler(event, action);
                 break;
               }
               case QUOTE: {
-                Quote quote{value, buffer};
+                Quote quote{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, quote};
                 handler(event, action);
                 break;
               }
               case SETTLEMENT: {
-                Settlement settlement{value, buffer};
+                Settlement settlement{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, settlement};
                 handler(event, action);
                 break;
               }
               case TRADE: {
-                Trade trade{value, buffer};
+                Trade trade{value, buffer_2};
                 dispatched = true;
                 Trace event{trace_info, trade};
                 handler(event, action);

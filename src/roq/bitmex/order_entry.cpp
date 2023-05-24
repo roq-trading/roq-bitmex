@@ -92,7 +92,7 @@ auto get_quality_of_service(auto &settings) {
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -422,7 +422,7 @@ void OrderEntry::cancel_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::Order order{body, decode_buffer_};
+      auto order = json::Order::create(body, decode_buffer_);
       OrderUpdate{shared_, stream_id_, account_.get_name()}(
           order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
     };
@@ -481,7 +481,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
 void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::Order order{body, decode_buffer_};
+      auto order = json::Order::create(body, decode_buffer_);
       OrderUpdate{shared_, stream_id_, account_.get_name()}(order, event.trace_info, false);
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {

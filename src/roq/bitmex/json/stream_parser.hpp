@@ -5,9 +5,7 @@
 #include <chrono>
 #include <string_view>
 
-#include "roq/core/json/buffer.hpp"
-
-#include "roq/server.hpp"
+#include "roq/trace_info.hpp"
 
 #include "roq/bitmex/json/action.hpp"
 #include "roq/bitmex/json/cancel_all_after.hpp"
@@ -68,8 +66,7 @@ struct StreamParser final {
   std::string_view version;
   bool heartbeat_enabled = {};
 
-  static void dispatch(
-      Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace);
+  static void dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, TraceInfo const &);
 };
 
 }  // namespace json

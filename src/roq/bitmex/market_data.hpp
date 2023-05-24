@@ -124,7 +124,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Stre
   // connection
   std::unique_ptr<web::socket::Client> const connection_;
   // buffers
-  core::Buffer decode_buffer_;
+  std::vector<std::byte> decode_buffer_;
   // metrics
   struct {
     core::metrics::Counter disconnect;
