@@ -57,6 +57,7 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .external_account = external_account,
       .external_order_id = external_order_id,
+      .client_order_id = {},
       .status = status,
       .quantity = order_item.order_qty,
       .price = order_item.price,
@@ -128,6 +129,7 @@ void OrderUpdate::operator()(
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .external_account = external_account,
       .external_order_id = external_order_id,
+      .client_order_id = {},
       .status = status,
       .quantity = order_item.order_qty,
       .price = order_item.price,
