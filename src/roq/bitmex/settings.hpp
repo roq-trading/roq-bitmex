@@ -2,10 +2,11 @@
 
 #pragma once
 
+#include <fmt/chrono.h>
 #include <fmt/compile.h>
 #include <fmt/format.h>
 
-#include "roq/server.hpp"
+#include "roq/server/flags/settings.hpp"
 
 #include "roq/bitmex/flags/common.hpp"
 #include "roq/bitmex/flags/rest.hpp"
@@ -14,8 +15,8 @@
 namespace roq {
 namespace bitmex {
 
-struct Settings final : public server::Settings {
-  explicit Settings(server::Type);
+struct Settings final : public server::flags::Settings {
+  explicit Settings(args::Parser const &, server::Type);
 
   std::string_view exchange;
 
