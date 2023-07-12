@@ -1,16 +1,16 @@
-set(TARGET_NAME "${PROJECT_NAME}-benchmark")
+set(TARGET_NAME ${PROJECT_NAME}-benchmark)
 
 set(SOURCES main.cpp)
 
-roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}")
+roq_gitignore(OUTPUT .gitignore SOURCES ${TARGET_NAME})
 
-add_executable("${TARGET_NAME}" ${SOURCES})
+add_executable(${TARGET_NAME} ${SOURCES})
 
 target_link_libraries(
-  "${TARGET_NAME}"
+  ${TARGET_NAME}
   # ${PROJECT_NAME}
   benchmark::benchmark)
 
-set_target_properties("${TARGET_NAME}" PROPERTIES LINK_FLAGS_RELEASE -s)
+set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
 
 install(TARGETS ${TARGET_NAME})
