@@ -19,28 +19,28 @@
     {
       "name": "ping_freq",
       "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
+      "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
       "description": "ping frequency"
     },
     {
       "name": "ping_path",
       "type": "std::string",
-      "validator": "roq::core::flags::Path",
+      "validator": "roq::flags::validators::Path",
       "default": "/api/v1/announcement/urgent",
       "description": "URI path used for REST connection keep-alive messages"
     },
     {
       "name": "request_timeout",
       "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
+      "validator": "roq::flags::validators::TimePeriod",
       "default": "30s",
       "description": "request: timeout"
     },
     {
       "name": "expires_timeout",
       "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
+      "validator": "roq::flags::validators::TimePeriod",
       "default": "1s",
       "description": "expires time-out"
     },
