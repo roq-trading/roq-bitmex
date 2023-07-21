@@ -1,36 +1,21 @@
 #!/usr/bin/env bash
 
+if [ "$1" == "debug" ]; then
+  PREFIX="gdb --args"
+else
+  PREFIX=
+fi
+
 NAME="bitmex"
 
-CONFIG_FILE="config/$NAME-prod.toml"
+CONFIG="${CONFIG:-$NAME-prod}"
+
+CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bitmex/$CONFIG.toml"
 
 URI="bitmex.com"
 
 REST_URI="https://www.$URI"
 WS_URI="wss://ws.$URI/realtime"
-
-# debug?
-
-if [ "$1" == "debug" ]; then
-  KERNEL="$(uname -a)"
-  case "$KERNEL" in
-    Linux*)
-      PREFIX="gdb --args"
-      ;;
-    Darwin*)
-      PREFIX="lldb --"
-      ;;
-  esac
-  shift 1
-else
-  PREFIX=
-fi
-
-# launch
-
-echo "$WS_URI"
-echo "$REST_URI"
-
 
 $PREFIX ./roq-bitmex \
   --name "$NAME" \

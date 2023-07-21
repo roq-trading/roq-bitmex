@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-CWD="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-
 if [ "$1" == "debug" ]; then
   PREFIX="gdb --args"
 else
@@ -10,7 +8,9 @@ fi
 
 NAME="bitmex"
 
-CONFIG_FILE="$CWD/config/$NAME-testnet.toml"
+CONFIG="${CONFIG:-$NAME-testnet}"
+
+CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bitmex/$CONFIG.toml"
 
 URI="testnet.bitmex.com"
 
@@ -18,7 +18,7 @@ REST_URI="https://$URI"
 WS_URI="wss://ws.$URI/realtime"
 
 $PREFIX ./roq-bitmex \
-  --name "bitmex" \
+  --name "$NAME" \
   --config_file "$CONFIG_FILE" \
   --cache_dir "$HOME/var/lib/roq/cache" \
   --event_log_dir "$HOME/var/lib/roq/data" \
