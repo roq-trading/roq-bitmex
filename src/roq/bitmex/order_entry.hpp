@@ -67,21 +67,21 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void operator()(ConnectionStatus);
 
   void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
-  void create_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void create_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void modify_order(
       Event<ModifyOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void modify_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void modify_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void cancel_order(
       Event<CancelOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
   void cancel_all_orders_ack(Trace<web::rest::Response> const &);
@@ -93,7 +93,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
 
   template <typename... Args>
-  void operator()(Trace<oms::Response> const &, uint8_t user_id, uint32_t order_id, Args &&...);
+  void operator()(Trace<oms::Response> const &, uint8_t user_id, uint64_t order_id, Args &&...);
 
   void operator()(Trace<oms::OrderUpdate> const &, std::string_view const &client_order_id);
 

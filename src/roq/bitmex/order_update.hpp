@@ -25,9 +25,9 @@ struct OrderUpdate final {
 
   // order entry
   void operator()(
-      json::OrderItem const &, TraceInfo const &, RequestType, uint8_t user_id, uint32_t order_id, uint32_t version);
+      json::OrderItem const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
   void operator()(
-      json::Order const &, TraceInfo const &, RequestType, uint8_t user_id, uint32_t order_id, uint32_t version);
+      json::Order const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
 
  private:
   Shared &shared_;

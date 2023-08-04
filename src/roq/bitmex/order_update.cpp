@@ -92,7 +92,7 @@ void OrderUpdate::operator()(
     TraceInfo const &trace_info,
     RequestType request_type,
     [[maybe_unused]] uint8_t user_id,
-    [[maybe_unused]] uint32_t order_id,
+    [[maybe_unused]] uint64_t order_id,
     uint32_t version) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   log::debug("status={}"sv, status);
@@ -156,7 +156,7 @@ void OrderUpdate::operator()(
     TraceInfo const &trace_info,
     RequestType request_type,
     uint8_t user_id,
-    uint32_t order_id,
+    uint64_t order_id,
     uint32_t version) {
   log::debug("order={}"sv, order);
   for (auto &iter : order.data)
