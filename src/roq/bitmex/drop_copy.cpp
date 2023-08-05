@@ -406,11 +406,13 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .update_type = UpdateType::INCREMENTAL,  // XXX not sure if this is correct...
           .sending_time_utc = {},
       };
-      auto order_id = ORDER_ID_NONE;
       auto user_id = SOURCE_NONE;
+      auto order_id = ORDER_ID_NONE;
+      auto strategy_id = STRATEGY_ID_NONE;
       if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
-            order_id = order.order_id;
             user_id = order.user_id;
+            order_id = order.order_id;
+            strategy_id = order.strategy_id;
           })) {
       } else {
         log::warn<1>("*** EXTERNAL ORDER ***"sv);
@@ -440,6 +442,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = {},
           .user = {},
+          .strategy_id = strategy_id,
       };
       create_trace_and_dispatch(handler_, trace_info, trade_update, true, user_id, item.cl_ord_id);
     }
