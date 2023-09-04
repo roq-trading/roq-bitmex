@@ -11,6 +11,8 @@ target_link_libraries(
   # ${PROJECT_NAME}
   benchmark::benchmark)
 
-set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
+if(ROQ_BUILD_TYPE STREQUAL "Release")
+  set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
+endif()
 
 install(TARGETS ${TARGET_NAME})
