@@ -445,6 +445,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .update_time_utc = item.timestamp,
           .external_account = external_account,
           .external_order_id = item.order_id,
+          .client_order_id = {},
           .fills = {&fill, 1},
           .routing_id = {},
           .update_type = UpdateType::INCREMENTAL,  // XXX ???
