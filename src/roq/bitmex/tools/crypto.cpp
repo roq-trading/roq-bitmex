@@ -6,7 +6,7 @@
 
 #include <magic_enum.hpp>
 
-#include "roq/core/codec/hex.hpp"
+#include "roq/utils/codec/hex.hpp"
 
 using namespace std::literals;
 
@@ -42,7 +42,7 @@ std::string Crypto::create_signature(
     mac_.update(body);
   auto digest = mac_.final(digest_);
   std::string result;
-  core::codec::Hex::encode(result, digest);
+  utils::codec::Hex::encode(result, digest);
   return result;
 }
 
