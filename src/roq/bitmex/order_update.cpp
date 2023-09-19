@@ -68,6 +68,7 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
+      .routing_id = {},
       .update_type = update_type,
       .sending_time_utc = {},
   };
@@ -140,6 +141,7 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
+      .routing_id = {},
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = {},
   };
