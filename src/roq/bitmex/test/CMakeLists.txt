@@ -1,3 +1,5 @@
+include(RoqAutogen)
+
 set(TARGET_NAME ${PROJECT_NAME}-test)
 
 set(SOURCES json_error_response.cpp json_instrument.cpp json_position.cpp main.cpp)
