@@ -7,7 +7,7 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/mac/hmac.hpp"
+#include "roq/utils/mac/hmac.hpp"
 
 #include "roq/web/http/method.hpp"
 
@@ -34,7 +34,7 @@ struct Crypto final {
       std::string_view const &body);
 
  private:
-  using MAC = core::mac::HMAC<core::hash::SHA256>;
+  using MAC = utils::mac::HMAC<utils::hash::SHA256>;
   using Digest = std::array<std::byte, MAC::DIGEST_LENGTH>;
 
   std::string const key_;
