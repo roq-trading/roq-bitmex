@@ -412,6 +412,9 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
           .routing_id = {},
+          .max_request_version = {},
+          .max_response_version = {},
+          .max_accepted_version = {},
           .update_type = {},
           .sending_time_utc = {},
       };

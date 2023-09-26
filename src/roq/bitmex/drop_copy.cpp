@@ -404,6 +404,9 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .last_traded_price = item.last_px,
           .last_liquidity = last_liquidity,
           .routing_id = {},
+          .max_request_version = {},
+          .max_response_version = {},
+          .max_accepted_version = {},
           .update_type = UpdateType::INCREMENTAL,  // XXX not sure if this is correct...
           .sending_time_utc = {},
       };
