@@ -706,7 +706,7 @@ void MarketData::publish_market_by_price(
     std::span<MBPUpdate> const &bids,
     std::span<MBPUpdate> const &asks,
     bool snapshot,
-    const std::chrono::nanoseconds exchange_time_utc) {
+    std::chrono::nanoseconds const exchange_time_utc) {
   assert(!(std::empty(bids) && std::empty(asks)));
   if (shared_.discard_symbol(symbol))
     return;

@@ -113,7 +113,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Stre
       std::span<MBPUpdate> const &bids,
       std::span<MBPUpdate> const &asks,
       bool snapshot,
-      const std::chrono::nanoseconds exchange_time_utc);
+      std::chrono::nanoseconds const exchange_time_utc);
   void resubscribe_order_book_l2(std::string_view const &symbol);
 
  private:

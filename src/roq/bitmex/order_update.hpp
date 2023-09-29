@@ -31,8 +31,8 @@ struct OrderUpdate final {
 
  private:
   Shared &shared_;
-  const uint16_t stream_id_;
-  const std::string_view account_;
+  uint16_t const stream_id_;
+  std::string_view const account_;
 };
 
 }  // namespace bitmex

@@ -29,7 +29,7 @@ enum class Type {
   TABLE,
 };
 
-void update(Type &result, const Type type) {
+void update(Type &result, Type const type) {
   assert(type != Type::UNKNOWN);
   if (result == Type::UNKNOWN) {
     result = type;
