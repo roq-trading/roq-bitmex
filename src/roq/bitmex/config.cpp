@@ -33,7 +33,7 @@ auto const SUPPORTS = Mask{
     SupportType::POSITION,
 };
 auto const OMS_REQUEST_ID_TYPE = RequestIdType::BASE64;
-auto const OMS_CANCEL_ALL_ORDERS = Mask<CancelAllOrdersFilter>{};
+auto const OMS_CANCEL_ALL_ORDERS = Mask<Filter>{};
 }  // namespace
 
 // === HELPERS ===
