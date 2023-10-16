@@ -84,7 +84,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
-  void cancel_all_orders_ack(Trace<web::rest::Response> const &);
+  void cancel_all_orders_ack(Trace<web::rest::Response> const &, std::string_view const &request_id);
 
   void operator()(json::OrderItem const &);
   void operator()(json::Order const &);
