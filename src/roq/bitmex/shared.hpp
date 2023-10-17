@@ -8,8 +8,6 @@
 #include "roq/api.hpp"
 #include "roq/server.hpp"
 
-#include "roq/core/stack/buffer.hpp"
-
 #include "roq/bitmex/price_cache.hpp"
 #include "roq/bitmex/settings.hpp"
 
@@ -51,7 +49,7 @@ struct Shared final {
 
  private:
   uint32_t request_id_ = 0;
-  core::stack::Buffer<char, 32> stack_buffer_;
+  std::string request_id_encode_buffer_;
 };
 
 }  // namespace bitmex

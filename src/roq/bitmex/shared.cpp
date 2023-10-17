@@ -14,9 +14,9 @@ Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings) : dispa
 
 std::string_view Shared::next_request_id() {
   auto request_id = ++request_id_;
-  stack_buffer_.clear();
-  fmt::format_to(std::back_inserter(stack_buffer_), "roq-{}"sv, request_id);
-  return {std::data(stack_buffer_), std::size(stack_buffer_)};
+  request_id_encode_buffer_.clear();
+  fmt::format_to(std::back_inserter(request_id_encode_buffer_), "roq-{}"sv, request_id);
+  return request_id_encode_buffer_;
 }
 
 }  // namespace bitmex
