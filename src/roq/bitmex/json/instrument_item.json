@@ -421,6 +421,10 @@
     {
       "name": "vwap",
       "type": "double"
+    },
+    {
+      "name": "instantPnl",
+      "type": "bool"
     }
   ]
 }
