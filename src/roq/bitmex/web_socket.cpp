@@ -496,6 +496,7 @@ void WebSocket::operator()(Trace<json::Position> const &event, json::Action acti
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
+          .margin_mode = {},
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .external_account = external_account,
