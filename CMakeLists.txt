@@ -19,6 +19,10 @@ message("Using GIT_REPO_VERSION=${GIT_REPO_VERSION}")
 
 project(roq-bitmex VERSION ${GIT_REPO_VERSION})
 
+# filesystem
+
+include(GNUInstallDirs)
+
 # dependencies
 
 find_package(absl REQUIRED)
