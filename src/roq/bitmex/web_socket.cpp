@@ -376,9 +376,9 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
       // cancel order does not allow passing a custom id
       auto request_id = request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
       auto response = oms::Response{
-          .type = request_type,
+          .request_type = request_type,
           .origin = Origin::EXCHANGE,
-          .status = request_status,
+          .request_status = request_status,
           .error = error,
           .text = item.text,
           .version = {},
@@ -402,7 +402,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .external_account = external_account,
           .external_order_id = item.order_id,
           .client_order_id = {},
-          .status = order_status,
+          .order_status = order_status,
           .quantity = item.order_qty,
           .price = item.price,
           .stop_price = item.stop_px,

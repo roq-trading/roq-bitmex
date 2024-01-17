@@ -284,9 +284,9 @@ void OrderEntry::create_order_ack(
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       auto response = oms::Response{
-          .type = RequestType::CREATE_ORDER,
+          .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -359,9 +359,9 @@ void OrderEntry::modify_order_ack(
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       auto response = oms::Response{
-          .type = RequestType::MODIFY_ORDER,
+          .request_type = RequestType::MODIFY_ORDER,
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -428,9 +428,9 @@ void OrderEntry::cancel_order_ack(
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       auto response = oms::Response{
-          .type = RequestType::CANCEL_ORDER,
+          .request_type = RequestType::CANCEL_ORDER,
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -461,7 +461,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
           .symbol = cancel_all_orders.symbol,
           .side = cancel_all_orders.side,
           .origin = Origin::GATEWAY,
-          .status = RequestStatus::FORWARDED,
+          .request_status = RequestStatus::FORWARDED,
           .error = {},
           .text = {},
           .request_id = request_id,
@@ -511,7 +511,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
           .symbol = {},
           .side = {},
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .request_id = request_id,

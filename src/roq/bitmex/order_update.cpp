@@ -33,9 +33,9 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
       order_item.ord_status == json::OrdStatus::REJECTED ? RequestStatus::REJECTED : RequestStatus::ACCEPTED;
   auto update_type = download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   auto response = oms::Response{
-      .type = request_type,
+      .request_type = request_type,
       .origin = Origin::EXCHANGE,
-      .status = request_status,
+      .request_status = request_status,
       .error = json::guess_error(order_item.ord_rej_reason),
       .text = order_item.text,
       .version = {},
@@ -59,7 +59,7 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
       .external_account = external_account,
       .external_order_id = external_order_id,
       .client_order_id = {},
-      .status = status,
+      .order_status = status,
       .quantity = order_item.order_qty,
       .price = order_item.price,
       .stop_price = order_item.stop_px,
@@ -110,9 +110,9 @@ void OrderUpdate::operator()(
   auto error = json::guess_error(order_item.ord_rej_reason);
   auto request_id = request_type != RequestType::CANCEL_ORDER ? order_item.cl_ord_id : std::string_view{};
   auto response = oms::Response{
-      .type = request_type,
+      .request_type = request_type,
       .origin = Origin::EXCHANGE,
-      .status = request_status,
+      .request_status = request_status,
       .error = error,
       .text = order_item.text,
       .version = version,
@@ -136,7 +136,7 @@ void OrderUpdate::operator()(
       .external_account = external_account,
       .external_order_id = external_order_id,
       .client_order_id = {},
-      .status = status,
+      .order_status = status,
       .quantity = order_item.order_qty,
       .price = order_item.price,
       .stop_price = order_item.stop_px,
