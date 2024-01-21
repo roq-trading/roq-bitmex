@@ -6,7 +6,10 @@
 #include <utility>
 
 #include "roq/mask.hpp"
+
 #include "roq/utils/update.hpp"
+
+#include "roq/utils/metrics/const.hpp"
 
 #include "roq/core/metrics/factory.hpp"
 
@@ -126,21 +129,21 @@ void DropCopy::operator()(Event<Timer> const &event) {
 void DropCopy::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.parse, metrics::PROFILE)
-      .write(profile_.cancel_all_after, metrics::PROFILE)
-      .write(profile_.error, metrics::PROFILE)
-      .write(profile_.execution, metrics::PROFILE)
-      .write(profile_.handshake, metrics::PROFILE)
-      .write(profile_.margin, metrics::PROFILE)
-      .write(profile_.order, metrics::PROFILE)
-      .write(profile_.position, metrics::PROFILE)
-      .write(profile_.subscribe, metrics::PROFILE)
-      .write(profile_.unsubscribe, metrics::PROFILE)
+      .write(profile_.parse, utils::metrics::PROFILE)
+      .write(profile_.cancel_all_after, utils::metrics::PROFILE)
+      .write(profile_.error, utils::metrics::PROFILE)
+      .write(profile_.execution, utils::metrics::PROFILE)
+      .write(profile_.handshake, utils::metrics::PROFILE)
+      .write(profile_.margin, utils::metrics::PROFILE)
+      .write(profile_.order, utils::metrics::PROFILE)
+      .write(profile_.position, utils::metrics::PROFILE)
+      .write(profile_.subscribe, utils::metrics::PROFILE)
+      .write(profile_.unsubscribe, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY)
-      .write(latency_.heartbeat, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY)
+      .write(latency_.heartbeat, utils::metrics::LATENCY);
 }
 
 void DropCopy::operator()(web::socket::Client::Connected const &) {

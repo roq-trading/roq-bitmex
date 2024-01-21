@@ -8,7 +8,10 @@
 #include <utility>
 
 #include "roq/mask.hpp"
+
 #include "roq/utils/update.hpp"
+
+#include "roq/utils/metrics/const.hpp"
 
 #include "roq/core/metrics/factory.hpp"
 
@@ -127,18 +130,18 @@ void OrderEntry::operator()(Event<Timer> const &event) {
 void OrderEntry::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.create_order, metrics::PROFILE)
-      .write(profile_.create_order_ack, metrics::PROFILE)
-      .write(profile_.modify_order, metrics::PROFILE)
-      .write(profile_.modify_order_ack, metrics::PROFILE)
-      .write(profile_.cancel_order, metrics::PROFILE)
-      .write(profile_.cancel_order_ack, metrics::PROFILE)
-      .write(profile_.cancel_all_orders, metrics::PROFILE)
-      .write(profile_.cancel_all_orders_ack, metrics::PROFILE)
+      .write(profile_.create_order, utils::metrics::PROFILE)
+      .write(profile_.create_order_ack, utils::metrics::PROFILE)
+      .write(profile_.modify_order, utils::metrics::PROFILE)
+      .write(profile_.modify_order_ack, utils::metrics::PROFILE)
+      .write(profile_.cancel_order, utils::metrics::PROFILE)
+      .write(profile_.cancel_order_ack, utils::metrics::PROFILE)
+      .write(profile_.cancel_all_orders, utils::metrics::PROFILE)
+      .write(profile_.cancel_all_orders_ack, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY);
 }
 
 uint16_t OrderEntry::operator()(

@@ -6,7 +6,10 @@
 #include <utility>
 
 #include "roq/mask.hpp"
+
 #include "roq/utils/update.hpp"
+
+#include "roq/utils/metrics/const.hpp"
 
 #include "roq/core/metrics/factory.hpp"
 
@@ -118,24 +121,24 @@ void MarketData::operator()(Event<Timer> const &event) {
 void MarketData::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.parse, metrics::PROFILE)
-      .write(profile_.cancel_all_after, metrics::PROFILE)
-      .write(profile_.error, metrics::PROFILE)
-      .write(profile_.funding, metrics::PROFILE)
-      .write(profile_.handshake, metrics::PROFILE)
-      .write(profile_.instrument, metrics::PROFILE)
-      .write(profile_.liquidation, metrics::PROFILE)
-      .write(profile_.order_book_l2, metrics::PROFILE)
-      .write(profile_.quote, metrics::PROFILE)
-      .write(profile_.settlement, metrics::PROFILE)
-      .write(profile_.subscribe, metrics::PROFILE)
-      .write(profile_.unsubscribe, metrics::PROFILE)
-      .write(profile_.trade, metrics::PROFILE)
+      .write(profile_.parse, utils::metrics::PROFILE)
+      .write(profile_.cancel_all_after, utils::metrics::PROFILE)
+      .write(profile_.error, utils::metrics::PROFILE)
+      .write(profile_.funding, utils::metrics::PROFILE)
+      .write(profile_.handshake, utils::metrics::PROFILE)
+      .write(profile_.instrument, utils::metrics::PROFILE)
+      .write(profile_.liquidation, utils::metrics::PROFILE)
+      .write(profile_.order_book_l2, utils::metrics::PROFILE)
+      .write(profile_.quote, utils::metrics::PROFILE)
+      .write(profile_.settlement, utils::metrics::PROFILE)
+      .write(profile_.subscribe, utils::metrics::PROFILE)
+      .write(profile_.unsubscribe, utils::metrics::PROFILE)
+      .write(profile_.trade, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY)
-      .write(latency_.heartbeat, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY)
+      .write(latency_.heartbeat, utils::metrics::LATENCY);
 }
 
 void MarketData::operator()(web::socket::Client::Connected const &) {
