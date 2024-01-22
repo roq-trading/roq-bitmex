@@ -9,8 +9,6 @@
 
 #include "roq/utils/update.hpp"
 
-#include "roq/utils/metrics/const.hpp"
-
 #include "roq/core/metrics/factory.hpp"
 
 #include "roq/web/socket/client_factory.hpp"
@@ -131,23 +129,23 @@ void WebSocket::operator()(Event<Timer> const &event) {
 void WebSocket::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, utils::metrics::COUNTER)
+      .write(counter_.disconnect, metrics::Type::COUNTER)
       // profile
-      .write(profile_.parse, utils::metrics::PROFILE)
-      .write(profile_.create_order, utils::metrics::PROFILE)
-      .write(profile_.modify_order, utils::metrics::PROFILE)
-      .write(profile_.cancel_order, utils::metrics::PROFILE)
-      .write(profile_.cancel_all_orders, utils::metrics::PROFILE)
-      .write(profile_.cancel_all_after, utils::metrics::PROFILE)
-      .write(profile_.error, utils::metrics::PROFILE)
-      .write(profile_.execution, utils::metrics::PROFILE)
-      .write(profile_.handshake, utils::metrics::PROFILE)
-      .write(profile_.margin, utils::metrics::PROFILE)
-      .write(profile_.order, utils::metrics::PROFILE)
-      .write(profile_.position, utils::metrics::PROFILE)
+      .write(profile_.parse, metrics::Type::PROFILE)
+      .write(profile_.create_order, metrics::Type::PROFILE)
+      .write(profile_.modify_order, metrics::Type::PROFILE)
+      .write(profile_.cancel_order, metrics::Type::PROFILE)
+      .write(profile_.cancel_all_orders, metrics::Type::PROFILE)
+      .write(profile_.cancel_all_after, metrics::Type::PROFILE)
+      .write(profile_.error, metrics::Type::PROFILE)
+      .write(profile_.execution, metrics::Type::PROFILE)
+      .write(profile_.handshake, metrics::Type::PROFILE)
+      .write(profile_.margin, metrics::Type::PROFILE)
+      .write(profile_.order, metrics::Type::PROFILE)
+      .write(profile_.position, metrics::Type::PROFILE)
       // latency
-      .write(latency_.ping, utils::metrics::LATENCY)
-      .write(latency_.heartbeat, utils::metrics::LATENCY);
+      .write(latency_.ping, metrics::Type::LATENCY)
+      .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
 
 uint16_t WebSocket::operator()(
