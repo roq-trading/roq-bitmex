@@ -425,6 +425,10 @@
     {
       "name": "instantPnl",
       "type": "bool"
+    },
+    {
+      "name": "minTick",
+      "type": "double"
     }
   ]
 }
