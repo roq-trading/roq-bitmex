@@ -512,13 +512,8 @@ void DropCopy::operator()(Trace<json::Funding> const &event, json::Action action
 }
 
 void DropCopy::operator()([[maybe_unused]] Trace<json::Instrument> const &event, json::Action action) {
-#if defined(__clang__)
-  // note! compile-time formatting fails with clang
-  log::fatal("Unexpected: action={}"sv, action);
-#else
   auto &[trace_info, instrument] = event;
   log::fatal("Unexpected: action={}, instrument={}"sv, action, instrument);
-#endif
 }
 
 void DropCopy::operator()(Trace<json::Liquidation> const &event, json::Action action) {
