@@ -5,9 +5,9 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/metrics/counter.hpp"
-#include "roq/core/metrics/latency.hpp"
-#include "roq/core/metrics/profile.hpp"
+#include "roq/utils/metrics/counter.hpp"
+#include "roq/utils/metrics/latency.hpp"
+#include "roq/utils/metrics/profile.hpp"
 
 #include "roq/io/context.hpp"
 
@@ -108,16 +108,16 @@ struct OrderEntry final : public web::rest::Client::Handler {
   std::vector<std::byte> decode_buffer_;
   // metrics
   struct {
-    core::metrics::Counter disconnect;
+    utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile create_order, create_order_ack,  //
-        modify_order, modify_order_ack,                     //
-        cancel_order, cancel_order_ack,                     //
+    utils::metrics::Profile create_order, create_order_ack,  //
+        modify_order, modify_order_ack,                      //
+        cancel_order, cancel_order_ack,                      //
         cancel_all_orders, cancel_all_orders_ack;
   } profile_;
   struct {
-    core::metrics::Latency ping;
+    utils::metrics::Latency ping;
   } latency_;
   // account
   Account &account_;
