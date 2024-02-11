@@ -121,7 +121,7 @@ TEST_CASE("json_instrument_item_unlisted", "[json_instrument_item]") {
                        R"("settledPrice":null,)"
                        R"("timestamp":"2020-01-23T04:50:00.000Z")"
                        R"(})"sv;
-  auto obj = core::json::Parser::create<json::InstrumentItem>(message);
+  json::InstrumentItem obj{message};
   CHECK(obj.symbol == ".EVOL7D");
   CHECK(obj.root_symbol == "EVOL");
   CHECK(obj.state == json::State::UNLISTED);
@@ -254,7 +254,7 @@ TEST_CASE("json_instrument_item_open", "[json_instrument_item]") {
                        R"("settledPrice":null,)"
                        R"("timestamp":"2020-01-22T19:09:30.000Z")"
                        R"(})"sv;
-  auto obj = core::json::Parser::create<json::InstrumentItem>(message);
+  json::InstrumentItem obj{message};
   CHECK(obj.symbol == "XRPH20");
   CHECK(obj.root_symbol == "XRP");
   CHECK(obj.state == json::State::OPEN);
@@ -334,7 +334,7 @@ TEST_CASE("json_instrument_item_open", "[json_instrument_item]") {
 TEST_CASE("json_instrument_empty", "[json_instrument]") {
   auto const message = "[]"sv;
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Instrument::create(message, buffer);
+  json::Instrument obj{message, buffer};
   CHECK(std::size(obj.data) == size_t{0});
 }
 
@@ -551,7 +551,7 @@ TEST_CASE("json_instrument_simple", "[json_instrument]") {
                        R"(})"
                        R"(])"sv;
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Instrument::create(message, buffer);
+  json::Instrument obj{message, buffer};
   CHECK(std::size(obj.data) == size_t{2});
   // item #0
   CHECK(obj.data[0].symbol == ".EVOL7D");

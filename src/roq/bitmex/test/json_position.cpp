@@ -23,7 +23,7 @@ TEST_CASE("json_position_item_item_unlisted", "[json_position_item_item]") {
                        R"("unrealisedPnlPcnt":-0.0077,"unrealisedRoePcnt":-0.7651,"marginCallPrice":34750,)"
                        R"("liquidationPrice":34750,"bankruptPrice":34532.5,"timestamp":"2021-06-24T17:16:55.376Z",)"
                        R"("lastPrice":34734.8,"lastValue":-5182128,"currency":"XBt","currentQty":1800})";
-  auto obj = core::json::Parser::create<json::PositionItem>(message);
+  json::PositionItem obj{message};
   CHECK(obj.account == 359347);
   CHECK(obj.symbol == "XBTUSD"sv);
 }

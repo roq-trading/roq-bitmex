@@ -9,6 +9,8 @@
 
 #include "roq/mask.hpp"
 
+#include "roq/oms/exceptions.hpp"
+
 #include "roq/utils/update.hpp"
 
 #include "roq/core/metrics/factory.hpp"
@@ -419,7 +421,7 @@ void OrderEntry::cancel_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      auto order = json::Order::create(body, decode_buffer_);
+      json::Order order{body, decode_buffer_};
       OrderUpdate{shared_, stream_id_, account_.get_name()}(
           order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
     };
@@ -522,7 +524,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       shared_(event_2);
     };
     auto handle_success = [&](auto &body) {
-      auto order = json::Order::create(body, decode_buffer_);
+      json::Order order{body, decode_buffer_};
       OrderUpdate{shared_, stream_id_, account_.get_name()}(order, event.trace_info, false);
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
