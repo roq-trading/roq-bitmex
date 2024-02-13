@@ -9,7 +9,7 @@
 
 #include "roq/mask.hpp"
 
-#include "roq/oms/exceptions.hpp"
+#include "roq/server/oms/exceptions.hpp"
 
 #include "roq/utils/update.hpp"
 
@@ -147,14 +147,14 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 }
 
 uint16_t OrderEntry::operator()(
-    Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
+    Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   create_order(event, order, request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
     Event<ModifyOrder> const &event,
-    oms::Order const &order,
+    server::oms::Order const &order,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   modify_order(event, order, request_id, previous_request_id);
@@ -163,7 +163,7 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     Event<CancelOrder> const &event,
-    oms::Order const &order,
+    server::oms::Order const &order,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   cancel_order(event, order, request_id, previous_request_id);
@@ -219,10 +219,11 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 // create-order
 
-void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const &, std::string_view const &request_id) {
+void OrderEntry::create_order(
+    Event<CreateOrder> const &event, server::oms::Order const &, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReady{"not ready"sv};
+      throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, create_order] = event;
     auto method = web::http::Method::POST;
     auto path = "/api/v1/order"sv;
@@ -284,7 +285,7 @@ void OrderEntry::create_order_ack(
           order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      auto response = oms::Response{
+      auto response = server::oms::Response{
           .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
           .request_status = status,
@@ -306,12 +307,12 @@ void OrderEntry::create_order_ack(
 
 void OrderEntry::modify_order(
     Event<ModifyOrder> const &event,
-    oms::Order const &,
+    server::oms::Order const &,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReady{"not ready"sv};
+      throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, modify_order] = event;
     auto method = web::http::Method::PUT;
     auto path = "/api/v1/order"sv;
@@ -359,7 +360,7 @@ void OrderEntry::modify_order_ack(
           order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      auto response = oms::Response{
+      auto response = server::oms::Response{
           .request_type = RequestType::MODIFY_ORDER,
           .origin = origin,
           .request_status = status,
@@ -381,12 +382,12 @@ void OrderEntry::modify_order_ack(
 
 void OrderEntry::cancel_order(
     Event<CancelOrder> const &event,
-    oms::Order const &order,
+    server::oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReady{"not ready"sv};
+      throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, cancel_order] = event;
     auto method = web::http::Method::DELETE;
     auto path = "/api/v1/order"sv;
@@ -428,7 +429,7 @@ void OrderEntry::cancel_order_ack(
           order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      auto response = oms::Response{
+      auto response = server::oms::Response{
           .request_type = RequestType::CANCEL_ORDER,
           .origin = origin,
           .request_status = status,
@@ -451,7 +452,7 @@ void OrderEntry::cancel_order_ack(
 void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
     if (!ready()) [[unlikely]]
-      throw oms::NotReady{"not ready"sv};
+      throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, cancel_all_orders] = event;
     auto send_ack = [&]() {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
@@ -583,7 +584,7 @@ void OrderEntry::process_response(
       default:
         response.expect(web::http::Status::OK);  // throws
     }
-  } catch (oms::Exception &e) {
+  } catch (server::oms::Exception &e) {
     log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
     error_handler(e.origin, e.status, e.error, e.what());
   } catch (NetworkError &e) {
@@ -596,7 +597,8 @@ void OrderEntry::process_response(
 }
 
 template <typename... Args>
-void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint64_t order_id, Args &&...args) {
+void OrderEntry::operator()(
+    Trace<server::oms::Response> const &event, uint8_t user_id, uint64_t order_id, Args &&...args) {
   auto &[trace_info, response] = event;
   if (shared_.update_order(
           user_id,
@@ -611,7 +613,7 @@ void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, 
   }
 }
 
-void OrderEntry::operator()(Trace<oms::OrderUpdate> const &event, std::string_view const &client_order_id) {
+void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event, std::string_view const &client_order_id) {
   auto &[trace_info, order_update] = event;
   if (shared_.update_order(
           client_order_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {

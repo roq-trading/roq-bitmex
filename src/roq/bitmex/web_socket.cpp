@@ -7,7 +7,7 @@
 
 #include "roq/mask.hpp"
 
-#include "roq/oms/exceptions.hpp"
+#include "roq/server/oms/exceptions.hpp"
 
 #include "roq/utils/update.hpp"
 
@@ -153,14 +153,14 @@ void WebSocket::operator()(metrics::Writer &writer) {
 }
 
 uint16_t WebSocket::operator()(
-    Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
+    Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   create_order(event, order, request_id);
   return stream_id_;
 }
 
 uint16_t WebSocket::operator()(
     Event<ModifyOrder> const &event,
-    oms::Order const &order,
+    server::oms::Order const &order,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   modify_order(event, order, request_id, previous_request_id);
@@ -169,7 +169,7 @@ uint16_t WebSocket::operator()(
 
 uint16_t WebSocket::operator()(
     Event<CancelOrder> const &event,
-    oms::Order const &order,
+    server::oms::Order const &order,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   cancel_order(event, order, request_id, previous_request_id);
@@ -245,10 +245,10 @@ void WebSocket::operator()(ConnectionStatus status) {
 // create-order
 
 void WebSocket::create_order(
-    Event<CreateOrder> const &, oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
+    Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReady{"not ready"sv};
+      throw server::oms::NotReady{"not ready"sv};
   });
 }
 
@@ -256,12 +256,12 @@ void WebSocket::create_order(
 
 void WebSocket::modify_order(
     Event<ModifyOrder> const &,
-    oms::Order const &,
+    server::oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReady{"not ready"sv};
+      throw server::oms::NotReady{"not ready"sv};
   });
 }
 
@@ -269,12 +269,12 @@ void WebSocket::modify_order(
 
 void WebSocket::cancel_order(
     Event<CancelOrder> const &,
-    oms::Order const &,
+    server::oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReady{"not ready"sv};
+      throw server::oms::NotReady{"not ready"sv};
   });
 }
 
@@ -380,7 +380,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
       auto error = json::guess_error(item.ord_rej_reason);
       // cancel order does not allow passing a custom id
       auto request_id = request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
-      auto response = oms::Response{
+      auto response = server::oms::Response{
           .request_type = request_type,
           .origin = Origin::EXCHANGE,
           .request_status = request_status,
@@ -391,7 +391,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .quantity = item.order_qty,
           .price = item.price,
       };
-      auto order_update = oms::OrderUpdate{
+      auto order_update = server::oms::OrderUpdate{
           .account = account_.get_name(),
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,

@@ -370,7 +370,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
       auto error = json::guess_error(item.ord_rej_reason);
       // cancel order does not allow passing a custom id
       auto request_id = request_type != RequestType::CANCEL_ORDER ? item.cl_ord_id : std::string_view{};
-      auto response = oms::Response{
+      auto response = server::oms::Response{
           .request_type = request_type,
           .origin = Origin::EXCHANGE,
           .request_status = request_status,
@@ -381,7 +381,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .quantity = item.order_qty,
           .price = item.price,
       };
-      auto order_update = oms::OrderUpdate{
+      auto order_update = server::oms::OrderUpdate{
           .account = account_.get_name(),
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,

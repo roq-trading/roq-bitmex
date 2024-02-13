@@ -49,15 +49,15 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
 
   void operator()(metrics::Writer &);
 
-  uint16_t operator()(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
+  uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
   uint16_t operator()(
       Event<ModifyOrder> const &,
-      oms::Order const &,
+      server::oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
   uint16_t operator()(
       Event<CancelOrder> const &,
-      oms::Order const &,
+      server::oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
 
@@ -75,17 +75,17 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
  private:
   void operator()(ConnectionStatus);
 
-  void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
+  void create_order(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
 
   void modify_order(
       Event<ModifyOrder> const &,
-      oms::Order const &,
+      server::oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
 
   void cancel_order(
       Event<CancelOrder> const &,
-      oms::Order const &,
+      server::oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
 

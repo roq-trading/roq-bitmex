@@ -82,7 +82,7 @@ void Gateway::operator()(Event<Disconnected> const &) {
 }
 
 uint16_t Gateway::operator()(
-    Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
+    Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
   if (shared_.settings.common.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id);
@@ -91,7 +91,7 @@ uint16_t Gateway::operator()(
 
 uint16_t Gateway::operator()(
     Event<ModifyOrder> const &event,
-    oms::Order const &order,
+    server::oms::Order const &order,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
@@ -103,7 +103,7 @@ uint16_t Gateway::operator()(
 
 uint16_t Gateway::operator()(
     Event<CancelOrder> const &event,
-    oms::Order const &order,
+    server::oms::Order const &order,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
