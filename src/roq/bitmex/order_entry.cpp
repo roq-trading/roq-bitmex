@@ -52,24 +52,26 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
   auto config = web::rest::Client::Config{
       // connection
       .interface = {},
+      .proxy = settings.rest.proxy,
       .uris = {&uri, 1},
       .validate_certificate = settings.net.tls_validate_certificate,
       // connection manager
       .connection_timeout = {},
       .disconnect_on_idle_timeout = {},
       .connection = web::http::Connection::KEEP_ALIVE,
-      // proxy
-      .proxy = settings.rest.proxy,
+      // request
+      .allow_pipelining = true,
+      .request_timeout = settings.rest.request_timeout,
+      // response
+      .suspend_on_retry_after = {},
       // http
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
-      .request_timeout = settings.rest.request_timeout,
       .ping_frequency = settings.rest.ping_freq,
       .ping_path = settings.rest.ping_path,
       // implementation
       .decode_buffer_size = settings.common.decode_buffer_size,
       .encode_buffer_size = settings.common.encode_buffer_size,
-      .allow_pipelining = true,
   };
   return web::rest::Client::create(handler, context, config);
 }
