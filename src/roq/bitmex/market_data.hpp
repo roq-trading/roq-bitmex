@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include <absl/container/flat_hash_map.h>
-
 #include <chrono>
 #include <string>
 #include <string_view>
+
+#include "roq/utils/container.hpp"
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -138,7 +138,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Stre
   } latency_;
   // cache
   Shared &shared_;
-  absl::flat_hash_map<Symbol, Product> product_cache_;
+  utils::unordered_map<std::string, Product> product_cache_;
   // state
   bool ready_ = false;
   ConnectionStatus status_ = {};

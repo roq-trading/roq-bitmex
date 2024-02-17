@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include <absl/container/flat_hash_map.h>
-
 #include <utility>
+
+#include "roq/utils/container.hpp"
 
 #include "roq/bitmex/json/action.hpp"
 
@@ -20,7 +20,7 @@ struct PriceCache final {
   std::pair<double, double> operator()(json::Action action, uint64_t id, double price, double size);
 
  private:
-  absl::flat_hash_map<uint64_t, double> price_lookup_;
+  utils::unordered_map<uint64_t, double> price_lookup_;
 };
 
 }  // namespace bitmex
