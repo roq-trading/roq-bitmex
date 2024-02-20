@@ -721,8 +721,8 @@ void MarketData::publish_market_by_price(
       .exchange_time_utc = exchange_time_utc,
       .exchange_sequence = {},
       .sending_time_utc = {},
-      .price_decimals = {},
-      .quantity_decimals = {},
+      .price_precision = {},
+      .quantity_precision = {},
       .checksum = {},
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
