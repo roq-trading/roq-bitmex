@@ -54,6 +54,7 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .interface = {},
       .proxy = settings.rest.proxy,
       .uris = {&uri, 1},
+      .host = {},
       .validate_certificate = settings.net.tls_validate_certificate,
       // connection manager
       .connection_timeout = {},
