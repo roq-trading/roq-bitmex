@@ -1,5 +1,9 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bitmex-flags
+common.rstinc
+rest.rstinc
+ws.rstinc
+flags.rstinc
 common.hpp
 rest.hpp
 ws.hpp
