@@ -390,7 +390,7 @@ void MarketData::operator()(Trace<json::Funding> const &event, json::Action acti
       auto &product = find_product(item);
       if (product.update(item)) {
         if (product.is_statistics_dirty()) {
-          const auto statistics_update = product.statistics_update(item, stream_id_);
+          auto const statistics_update = product.statistics_update(item, stream_id_);
           create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
         }
         product.clear();
@@ -423,7 +423,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
           for (auto &item : instrument.data) {
             auto discard = shared_.discard_symbol(item.symbol);
             auto &product = find_product(item);
-            const auto reference_data = product.reference_data(item, stream_id_, discard);
+            auto const reference_data = product.reference_data(item, stream_id_, discard);
             create_trace_and_dispatch(handler_, trace_info, reference_data, true);
             if (discard) {
               log::info<2>(R"(Drop symbol="{}")"sv, item.symbol);
@@ -431,11 +431,11 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
             }
             ++security_count;
             if (product.is_market_status_dirty()) {
-              const auto market_status = product.market_status(item, stream_id_);
+              auto const market_status = product.market_status(item, stream_id_);
               create_trace_and_dispatch(handler_, trace_info, market_status, true);
             }
             if (product.is_statistics_dirty()) {
-              const auto statistics_update = product.statistics_update(item, stream_id_);
+              auto const statistics_update = product.statistics_update(item, stream_id_);
               create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
             }
             product.clear();
@@ -458,11 +458,11 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
             auto &product = find_product(item);
             if (product.update(item)) {
               if (product.is_market_status_dirty()) {
-                const auto market_status = product.market_status(item, stream_id_);
+                auto const market_status = product.market_status(item, stream_id_);
                 create_trace_and_dispatch(handler_, trace_info, market_status, true);
               }
               if (product.is_statistics_dirty()) {
-                const auto statistics_update = product.statistics_update(item, stream_id_);
+                auto const statistics_update = product.statistics_update(item, stream_id_);
                 create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
               }
               product.clear();
