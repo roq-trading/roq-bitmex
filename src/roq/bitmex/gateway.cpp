@@ -91,7 +91,7 @@ void Gateway::operator()(Event<Disconnected> const &) {
 uint16_t Gateway::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  if (shared_.settings.common.oms_using_web_socket)
+  if (shared_.settings.misc.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id);
   return get_order_entry(event.value.account)(event, order, request_id);
 }
@@ -103,7 +103,7 @@ uint16_t Gateway::operator()(
     std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  if (shared_.settings.common.oms_using_web_socket)
+  if (shared_.settings.misc.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
@@ -115,14 +115,14 @@ uint16_t Gateway::operator()(
     std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  if (shared_.settings.common.oms_using_web_socket)
+  if (shared_.settings.misc.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id, previous_request_id);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  if (shared_.settings.common.oms_using_web_socket)
+  if (shared_.settings.misc.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, request_id);
   return get_order_entry(event.value.account)(event, request_id);
 }

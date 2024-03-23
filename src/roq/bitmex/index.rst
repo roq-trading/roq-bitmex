@@ -15,16 +15,7 @@ Links
 * `Documentation <https://www.bitmex.com/app/apiOverview>`__
 
 
-Purpose
--------
-
-* Maintain network connectivity with the BitMEX exchange
-* Route exchange updates to connected clients
-* Route client requests to the relevant exchange accounts
-* Stream all messages to an event-log
-
-
-Overview
+Supports
 --------
 
 .. grid::  2
@@ -41,6 +32,8 @@ Overview
         - |checkmark|
       * - Options
         -
+      * - Combos
+        -
 
   .. grid-item-card::  Market Data
 
@@ -53,9 +46,9 @@ Overview
         - |checkmark|
       * - Top of Book
         - |checkmark|
-      * - Market by Price (L2)
+      * - Market by Price
         - |checkmark|
-      * - Market by Order (L3)
+      * - Market by Order
         -
       * - Trade Summary
         - |checkmark|
@@ -88,49 +81,39 @@ Overview
       * - Funds
         -
 
-* Data center located in
-  `eu-west-1 <http://ec2-reachability.amazonaws.com/>`__,
-  `AWS <https://aws.amazon.com/>`__,
-  Ireland
 
-
-Conda
------
+Installing
+----------
 
 * :ref:`Using Conda <tutorial-conda>`
 
-.. tab:: Install
+.. tab:: Stable
 
-  .. code-block:: bash
+  .. code-block:: shell
 
-    $ mamba install \
-      --channel https://roq-trading.com/conda/stable \
-      roq-bitmex
+     $ mamba install \
+           --channel https://roq-trading.com/conda/stable \
+           roq-bitmex
 
-.. tab:: Configure
+.. tab:: Unstable
 
-  .. code-block:: bash
+  .. code-block:: shell
 
-    $ cp $CONDA_PREFIX/share/roq-bitmex/config.toml $CONFIG_FILE_PATH
-
-    # Then modify $CONFIG_FILE_PATH to match your specific configuration
-
-.. tab:: Run
-
-  .. code-block:: bash
-
-    $ roq-bitmex \
-          --name "bitmex" \
-          --config_file "$CONFIG_FILE_PATH" \
-          --client_listen_address "$UNIX_SOCKET_PATH" \
-          --service_listen_address "$TCP_LISTEN_PORT" \
-          --flagfile "$FLAG_FILE"
+     $ mamba install \
+           --channel https://roq-trading.com/conda/unstable \
+           roq-bitmex
 
 
-Config
-------
+Using
+-----
 
-* :ref:`Common Config <gateway-config>`
+.. code-block:: shell
+
+   $ roq-bitmex \
+         --name "bitmex" \
+         --config_file $CONFIG_FILE_PATH \
+         --client_listen_address $UNIX_SOCKET_PATH \
+         --flagfile $ENVIRONMENT_FLAGFILE
 
 
 .. _roq-bitmex-flags:
@@ -139,19 +122,15 @@ Flags
 -----
 
 * :ref:`Using Flags <abseil-cpp>`
-* :ref:`Common Flags <gateway-flags>`
+* :ref:`Gateway Flags <gateway-flags>`
 
-.. code-block:: bash
+.. code-block:: shell
 
    $ roq-bitmex --help
 
 .. tab:: Flags
 
    .. include:: flags/flags.rstinc
-
-.. tab:: Common
-
-   .. include:: flags/common.rstinc
 
 .. tab:: REST
 
@@ -161,22 +140,49 @@ Flags
 
    .. include:: flags/ws.rstinc
 
+.. tab:: Misc
+
+   .. include:: flags/misc.rstinc
+
+
 Environments
 ------------
 
-.. code-block:: bash
-
-  $ $CONDA_PREFIX/share/roq-bitmex/flags
-
 .. tab:: Prod
 
+   .. code-block:: shell
+
+      $ $CONDA_PREFIX/share/roq-bitmex/flags/prod/flags.cfg
+
    .. include:: flags/prod/flags.cfg
-     :code: ini
+     :code: shell
 
 .. tab:: Test
 
+   .. code-block:: shell
+
+      $ $CONDA_PREFIX/share/roq-bitmex/flags/test/flags.cfg
+
    .. include:: flags/test/flags.cfg
-     :code: ini
+     :code: shell
+
+
+Configuration
+-------------
+
+* :ref:`Gateway Config <gateway-config>`
+
+.. code-block:: shell
+
+   $ $CONDA_PREFIX/share/roq-bitmex/config.toml
+
+.. important::
+
+   The template will be replaced when the software is upgraded.
+   Make a copy and modify to your needs.
+
+.. include:: config.toml
+   :code: toml
 
 
 Market Data

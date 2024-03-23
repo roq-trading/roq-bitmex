@@ -1,14 +1,14 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bitmex-flags
-common.rstinc
+misc.rstinc
 rest.rstinc
 ws.rstinc
 flags.rstinc
-common.hpp
+misc.hpp
 rest.hpp
 ws.hpp
 flags.hpp
-common.cpp
+misc.cpp
 rest.cpp
 ws.cpp
 flags.cpp

@@ -4,7 +4,7 @@ include(RoqAutogen)
 
 set(NAMESPACE "roq/bitmex/flags")
 
-set(AUTOGEN_SCHEMAS common.json rest.json ws.json flags.json)
+set(AUTOGEN_SCHEMAS misc.json rest.json ws.json flags.json)
 
 if(BUILD_DOCS)
 

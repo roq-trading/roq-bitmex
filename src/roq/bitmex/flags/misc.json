@@ -1,5 +1,5 @@
 {
-  "name": "Common",
+  "name": "Misc",
   "type": "flags",
   "values": [
     {
@@ -7,26 +7,26 @@
       "type": "uint32_t",
       "required": true,
       "default": 1048576,
-      "description": "encode buffer size"
+      "description": "Encode buffer size"
     },
     {
       "name": "decode_buffer_size",
       "type": "uint32_t",
       "required": true,
       "default": 10485760,
-      "description": "decode buffer size"
+      "description": "Decode buffer size"
     },
     {
       "name": "mbp_allow_price_inversion",
       "type": "bool",
       "default": false,
-      "description": "allow price inversion?"
+      "description": "Allow price inversion?"
     },
     {
       "name": "oms_using_web_socket",
       "type": "bool",
       "default": false,
-      "description": "use web-socket for order management?"
+      "description": "Use web-socket for order management?"
     }
   ]
 }

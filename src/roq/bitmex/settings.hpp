@@ -6,8 +6,8 @@
 
 #include "roq/server/flags/settings.hpp"
 
-#include "roq/bitmex/flags/common.hpp"
 #include "roq/bitmex/flags/flags.hpp"
+#include "roq/bitmex/flags/misc.hpp"
 #include "roq/bitmex/flags/rest.hpp"
 #include "roq/bitmex/flags/ws.hpp"
 
@@ -17,7 +17,7 @@ namespace bitmex {
 struct Settings final : public server::flags::Settings, public flags::Flags {
   explicit Settings(args::Parser const &);
 
-  flags::Common common;
+  flags::Misc misc;
   flags::REST rest;
   flags::WS ws;
 };
@@ -33,12 +33,12 @@ struct fmt::formatter<roq::bitmex::Settings> {
     return fmt::format_to(
         context.out(),
         R"({{)"
-        R"(common={}, )"
+        R"(misc={}, )"
         R"(rest={}, )"
         R"(ws={}, )"
         R"(server={})"
         R"(}})"sv,
-        value.common,
+        value.misc,
         value.rest,
         value.ws,
         static_cast<roq::server::Settings const &>(value));

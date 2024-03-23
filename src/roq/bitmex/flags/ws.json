@@ -8,34 +8,34 @@
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://ws.testnet.bitmex.com/realtime",
-      "description": "WebSocket end-point (URI)"
+      "description": "Exchange end-point"
     },
     {
       "name": "ping_freq",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
-      "description": "ping frequency"
+      "description": "Ping frequency"
     },
     {
       "name": "request_timeout",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
-      "description": "request time-out"
+      "description": "Request time-out"
     },
     {
       "name": "cancel_on_disconnect",
       "type": "bool",
       "default": true,
-      "description": "cancel orders on disconnect? (bool)"
+      "description": "Cancel orders on disconnect?"
     },
     {
       "name": "cancel_all_after",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
-      "description": "cancel all after, requires cancel-on-disconnect"
+      "description": "Cancel all after, requires cancel-on-disconnect"
     }
   ]
 }
