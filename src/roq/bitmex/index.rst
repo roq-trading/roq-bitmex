@@ -68,7 +68,7 @@ Supports
         - |checkmark|
       * - Cancel All
         - |checkmark|
-      * - Auto Cancellation
+      * - Auto-Cancel
         -
 
   .. grid-item-card::  Account Management
