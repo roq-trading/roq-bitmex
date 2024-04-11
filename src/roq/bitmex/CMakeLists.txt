@@ -12,6 +12,7 @@ add_subdirectory(flags)
 
 set(SOURCES
     account.cpp
+    api.cpp
     application.cpp
     config.cpp
     drop_copy.cpp

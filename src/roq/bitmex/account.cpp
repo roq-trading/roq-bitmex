@@ -19,7 +19,7 @@ auto create_base_path(auto &settings) {
 // === IMPLEMENTATION ===
 
 Account::Account(Settings const &settings, Config const &config, std::string_view const &name)
-    : name_{name}, base_path{create_base_path(settings)}, crypto_{config.get_api_key(), config.get_secret()} {
+    : name{name}, base_path{create_base_path(settings)}, crypto_{config.get_api_key(), config.get_secret()} {
 }
 
 std::string Account::create_signature(

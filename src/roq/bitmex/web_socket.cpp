@@ -46,7 +46,7 @@ auto const REQUEST_EXPIRES = 5s;
 // === HELPERS ===
 
 namespace {
-auto create_name(auto stream_id, auto const &account) {
+auto create_name(auto stream_id, auto &account) {
   return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
 }
 
@@ -80,12 +80,19 @@ struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(auto &settings, auto const &group, auto const &function)
       : core::metrics::Factory(settings.app.name, group, function) {}
 };
+
+auto compute_expires() {
+  auto now = clock::get_realtime();
+  auto expires = now + REQUEST_EXPIRES;
+  return std::chrono::ceil<std::chrono::seconds>(expires);
+}  // namespace
+
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 WebSocket::WebSocket(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
       connection_{create_connection(*this, shared.settings, context, [this]() { return create_upgrade_headers(); })},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
@@ -206,7 +213,7 @@ void WebSocket::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = account_.get_name(),
+      .account = account_.name,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -226,7 +233,7 @@ void WebSocket::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
@@ -304,32 +311,33 @@ uint32_t WebSocket::download(WebSocketState state) {
       assert(false);
       break;
     case AUTHENTICATE:
-      return {};
+      return 0;
     case DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 void WebSocket::parse(std::string_view const &message) {
-  log::info<4>(R"(message="{}")"sv, message);
   profile_.parse([&]() {
+    auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     try {
-      parse_helper(message);
+      if (!parse_helper(message))
+        log_message();
     } catch (...) {
-      log::warn(R"(message="{}")"sv, message);
+      log_message();
       core::tools::UnhandledException::terminate();
     }
   });
 }
 
-void WebSocket::parse_helper(std::string_view const &message) {
+bool WebSocket::parse_helper(std::string_view const &message) {
   TraceInfo trace_info;
-  json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info);
+  return json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info);
 }
 
 void WebSocket::operator()(Trace<json::CancelAllAfter> const &event) {
@@ -368,7 +376,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
   profile_.execution([&]() {
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
-    log::info<2>("event={{action={}, execution={}}}"sv, action, execution);
+    log::info<2>("execution={}, action={}"sv, execution, action);
     for (auto &item : execution.data) {
       auto order_status = json::map(item.ord_status);
       auto side = json::map(item.side);
@@ -393,7 +401,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .price = item.price,
       };
       auto order_update = server::oms::OrderUpdate{
-          .account = account_.get_name(),
+          .account = account_.name,
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .side = side,
@@ -446,7 +454,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = order_id,
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
@@ -473,7 +481,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
 void WebSocket::operator()(Trace<json::Margin> const &event, json::Action action) {
   profile_.margin([&]() {
     auto &[trace_info, margin] = event;
-    log::info<2>("event={{action={}, margin={}}}"sv, action, margin);
+    log::info<2>("margin={}, action={}"sv, margin, action);
     // not used
   });
 }
@@ -481,9 +489,9 @@ void WebSocket::operator()(Trace<json::Margin> const &event, json::Action action
 void WebSocket::operator()(Trace<json::Order> const &event, json::Action action) {
   profile_.order([&]() {
     auto &[trace_info, order] = event;
-    log::info<2>("event={{action={}, order={}}}"sv, action, order);
+    log::info<2>("order={}, action={}"sv, order, action);
     auto download = !partial_received_.order && action == json::Action::PARTIAL;
-    OrderUpdate{shared_, stream_id_, account_.get_name()}(order, trace_info, download);
+    OrderUpdate{shared_, stream_id_, account_.name}(order, trace_info, download);
     // state management
     if (download) {
       partial_received_.order = true;
@@ -496,14 +504,14 @@ void WebSocket::operator()(Trace<json::Order> const &event, json::Action action)
 void WebSocket::operator()(Trace<json::Position> const &event, json::Action action) {
   profile_.position([&]() {
     auto &[trace_info, position] = event;
-    log::info<2>("event={{action={}, position={}}}"sv, action, position);
+    log::info<2>("position={}, action={}"sv, position, action);
     for (auto &item : position.data) {
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto long_quantity = std::max(0.0, item.current_qty);
       auto short_quantity = std::max(0.0, -item.current_qty);
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .margin_mode = {},
@@ -521,50 +529,42 @@ void WebSocket::operator()(Trace<json::Position> const &event, json::Action acti
 
 void WebSocket::operator()(Trace<json::Funding> const &event, json::Action action) {
   auto &[trace_info, funding] = event;
-  log::fatal("Unexpected: action={}, funding={}"sv, action, funding);
+  log::fatal("Unexpected: funding={}, action={}"sv, funding, action);
 }
 
 void WebSocket::operator()([[maybe_unused]] Trace<json::Instrument> const &event, json::Action action) {
   auto &[trace_info, instrument] = event;
-  log::fatal("Unexpected: action={}, instrument={}"sv, action, instrument);
+  log::fatal("Unexpected: instrument={}, action={}"sv, instrument, action);
 }
 
 void WebSocket::operator()(Trace<json::Liquidation> const &event, json::Action action) {
   auto &[trace_info, liquidation] = event;
-  log::fatal("Unexpected: action={}, liquidation={}"sv, action, liquidation);
+  log::fatal("Unexpected: liquidation={}, action={}"sv, liquidation, action);
 }
 
 void WebSocket::operator()(Trace<json::OrderBookL2> const &event, json::Action action) {
   auto &[trace_info, order_book_l2] = event;
-  log::fatal("Unexpected: action={}, order_book_l2={}"sv, action, order_book_l2);
+  log::fatal("Unexpected: order_book_l2={}, action={}"sv, order_book_l2, action);
 }
 
 void WebSocket::operator()(Trace<json::Quote> const &event, json::Action action) {
   auto &[trace_info, quote] = event;
-  log::fatal("Unexpected: action={}, quote={}"sv, action, quote);
+  log::fatal("Unexpected: quote={}, action={}"sv, quote, action);
 }
 
 void WebSocket::operator()(Trace<json::Settlement> const &event, json::Action action) {
   auto &[trace_info, settlement] = event;
-  log::fatal("Unexpected: action={}, settlement={}"sv, action, settlement);
+  log::fatal("Unexpected: settlement={}, action={}"sv, settlement, action);
 }
 
 void WebSocket::operator()(Trace<json::Trade> const &event, json::Action action) {
   auto &[trace_info, trade] = event;
-  log::fatal("Unexpected: action={}, trade={}"sv, action, trade);
+  log::fatal("Unexpected: trade={}, action={}"sv, trade, action);
 }
-
-namespace {
-auto compute_expires() {
-  auto now = clock::get_realtime();
-  auto expires = now + REQUEST_EXPIRES;
-  return std::chrono::ceil<std::chrono::seconds>(expires);
-}
-}  // namespace
 
 std::string WebSocket::create_upgrade_headers() {
   auto expires = compute_expires();
-  return account_.create_headers(expires, web::http::Method::GET, "/realtime"sv, {});
+  return account_.create_headers(expires, web::http::Method::GET, shared_.api.ws.realtime, {});
 }
 
 }  // namespace bitmex

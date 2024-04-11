@@ -41,7 +41,7 @@ void update(Type &result, Type const type) {
 
 // === IMPLEMENTATION ===
 
-void StreamParser::dispatch(
+bool StreamParser::dispatch(
     StreamParser::Handler &handler,
     std::string_view const &message,
     std::span<std::byte> const &buffer,
@@ -59,11 +59,11 @@ void StreamParser::dispatch(
       switch (field) {
         using enum Field::type_t;
         case UNDEFINED__:
-          log::fatal("Unexpected"sv);
-          break;
+          log::warn("Unexpected"sv);
+          return false;  // note!
         case UNKNOWN__:
-          log::fatal(R"(Unknown key="{}")"sv, key);
-          break;
+          log::warn(R"(Unknown key="{}")"sv, key);
+          return false;  // note!
         case ACTION:
           update(result.action, value);
           update(type, Type::TABLE);
@@ -260,7 +260,7 @@ void StreamParser::dispatch(
         };
         Trace event{trace_info, cancel_all_after};
         handler(event);
-        return;
+        return true;
       }
       case ERROR: {
         auto error = Error{
@@ -269,7 +269,7 @@ void StreamParser::dispatch(
         };
         Trace event{trace_info, error};
         handler(event);
-        return;
+        return true;
       }
       case INFO: {
         auto handshake = Handshake{
@@ -281,7 +281,7 @@ void StreamParser::dispatch(
         };
         Trace event{trace_info, handshake};
         handler(event);
-        return;
+        return true;
       }
       case SUBSCRIBE: {
         auto subscribe = Subscribe{
@@ -291,7 +291,7 @@ void StreamParser::dispatch(
         };
         Trace event{trace_info, subscribe};
         handler(event);
-        return;
+        return true;
       }
       case UNSUBSCRIBE: {
         auto unsubscribe = Unsubscribe{
@@ -301,18 +301,17 @@ void StreamParser::dispatch(
         };
         Trace event{trace_info, unsubscribe};
         handler(event);
-        return;
+        return true;
       }
       case TABLE:
         if (dispatched)
-          return;
+          return true;
         // perhaps we were just unlucky with the ordering of keys
         // XXX increment warning counter
         break;
     }
   }
-  log::warn(R"(message="{}")"sv, message);
-  log::fatal("Unexpected"sv);
+  return false;
 }
 
 }  // namespace json

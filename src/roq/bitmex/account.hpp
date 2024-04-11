@@ -22,22 +22,15 @@ struct Account final {
   Account(Account &&) = delete;
   Account(Account const &) = delete;
 
-  std::string_view get_name() const { return name_; }
-
   std::string create_signature(
-      std::chrono::nanoseconds expires,
-      web::http::Method method,
-      std::string_view const &path,
-      std::string_view const &body);
+      std::chrono::nanoseconds expires, web::http::Method, std::string_view const &path, std::string_view const &body);
 
   std::string create_headers(
-      std::chrono::nanoseconds expires,
-      web::http::Method method,
-      std::string_view const &path,
-      std::string_view const &body);
+      std::chrono::nanoseconds expires, web::http::Method, std::string_view const &path, std::string_view const &body);
+
+  std::string const name;
 
  private:
-  std::string const name_;
   std::string const base_path;
   tools::Crypto crypto_;
 };

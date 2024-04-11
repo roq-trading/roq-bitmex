@@ -8,6 +8,7 @@
 #include "roq/api.hpp"
 #include "roq/server.hpp"
 
+#include "roq/bitmex/api.hpp"
 #include "roq/bitmex/price_cache.hpp"
 #include "roq/bitmex/settings.hpp"
 
@@ -46,6 +47,7 @@ struct Shared final {
 
  public:
   Settings const &settings;
+  API const api;
 
  private:
   uint32_t request_id_ = 0;

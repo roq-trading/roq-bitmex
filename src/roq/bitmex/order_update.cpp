@@ -21,7 +21,6 @@ namespace bitmex {
 
 void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const &trace_info, bool download) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
@@ -85,7 +84,6 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
 }
 
 void OrderUpdate::operator()(json::Order const &order, TraceInfo const &trace_info, bool download) {
-  log::debug("order={}"sv, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info, download);
 }
@@ -100,7 +98,6 @@ void OrderUpdate::operator()(
     [[maybe_unused]] uint64_t order_id,
     uint32_t version) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  log::debug("status={}"sv, status);
   auto side = json::map(order_item.side);
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
@@ -168,7 +165,6 @@ void OrderUpdate::operator()(
     uint8_t user_id,
     uint64_t order_id,
     uint32_t version) {
-  log::debug("order={}"sv, order);
   for (auto &iter : order.data)
     (*this)(iter, trace_info, request_type, user_id, order_id, version);
 }

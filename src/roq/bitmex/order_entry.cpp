@@ -43,7 +43,7 @@ auto const SUPPORTS = Mask{
 // === HELPERS ===
 
 namespace {
-auto create_name(auto stream_id, auto const &account) {
+auto create_name(auto stream_id, auto &account) {
   return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
 }
 
@@ -96,7 +96,7 @@ auto get_quality_of_service(auto &settings) {
 // === IMPLEMENTATION ===
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
       connection_{create_connection(*this, shared.settings, context)},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
@@ -189,7 +189,7 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = account_.get_name(),
+      .account = account_.name,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -201,7 +201,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
@@ -227,7 +227,7 @@ void OrderEntry::create_order(
       throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, create_order] = event;
     auto method = web::http::Method::POST;
-    auto path = "/api/v1/order"sv;
+    auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
     auto side = json::map(create_order.side).as_raw_text();
     auto ord_type = json::map(create_order.order_type).as_raw_text();
@@ -282,7 +282,7 @@ void OrderEntry::create_order_ack(
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::OrderItem order_item{body};
-      OrderUpdate{shared_, stream_id_, account_.get_name()}(
+      OrderUpdate{shared_, stream_id_, account_.name}(
           order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -316,7 +316,7 @@ void OrderEntry::modify_order(
       throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, modify_order] = event;
     auto method = web::http::Method::PUT;
-    auto path = "/api/v1/order"sv;
+    auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
     auto body = fmt::format(
         R"({{)"
@@ -357,7 +357,7 @@ void OrderEntry::modify_order_ack(
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::OrderItem order_item{body};
-      OrderUpdate{shared_, stream_id_, account_.get_name()}(
+      OrderUpdate{shared_, stream_id_, account_.name}(
           order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -391,7 +391,7 @@ void OrderEntry::cancel_order(
       throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, cancel_order] = event;
     auto method = web::http::Method::DELETE;
-    auto path = "/api/v1/order"sv;
+    auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
     auto body = fmt::format(
         R"({{)"
@@ -426,7 +426,7 @@ void OrderEntry::cancel_order_ack(
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::Order order{body, decode_buffer_};
-      OrderUpdate{shared_, stream_id_, account_.get_name()}(
+      OrderUpdate{shared_, stream_id_, account_.name}(
           order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -458,7 +458,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
     auto send_ack = [&]() {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = cancel_all_orders.order_id,
           .exchange = cancel_all_orders.exchange,
           .symbol = cancel_all_orders.symbol,
@@ -479,7 +479,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
       shared_(event_2);
     };
     auto method = web::http::Method::DELETE;
-    auto path = "/api/v1/order/all"sv;
+    auto path = shared_.api.order_management.order_all;
     auto expires = compute_expires(shared_.settings);
     auto body = "{}"sv;
     auto headers = account_.create_headers(expires, method, path, body);
@@ -508,7 +508,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
     auto send_ack = [&](auto origin, auto status, Error error, std::string_view const &text) {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = {},
           .exchange = {},
           .symbol = {},
@@ -529,7 +529,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
     };
     auto handle_success = [&](auto &body) {
       json::Order order{body, decode_buffer_};
-      OrderUpdate{shared_, stream_id_, account_.get_name()}(order, event.trace_info, false);
+      OrderUpdate{shared_, stream_id_, account_.name}(order, event.trace_info, false);
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -544,12 +544,12 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
 
 void OrderEntry::operator()(json::OrderItem const &order_item) {
   TraceInfo trace_info;
-  OrderUpdate{shared_, stream_id_, account_.get_name()}(order_item, trace_info, false);
+  OrderUpdate{shared_, stream_id_, account_.name}(order_item, trace_info, false);
 }
 
 void OrderEntry::operator()(json::Order const &order) {
   TraceInfo trace_info;
-  OrderUpdate{shared_, stream_id_, account_.get_name()}(order, trace_info, false);
+  OrderUpdate{shared_, stream_id_, account_.name}(order, trace_info, false);
 }
 
 template <typename SuccessHandler, typename ErrorHandler>
@@ -557,7 +557,6 @@ void OrderEntry::process_response(
     web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
   try {
     auto [status, category, body] = response.result();
-    log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
     switch (category) {
       using enum web::http::Category;
       case SUCCESS:  // 2xx

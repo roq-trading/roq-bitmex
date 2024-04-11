@@ -96,7 +96,7 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
   uint32_t download(WebSocketState);
 
   void parse(std::string_view const &message);
-  void parse_helper(std::string_view const &message);
+  bool parse_helper(std::string_view const &message);
 
   void operator()(Trace<json::CancelAllAfter> const &) override;
   void operator()(Trace<json::Error> const &) override;
