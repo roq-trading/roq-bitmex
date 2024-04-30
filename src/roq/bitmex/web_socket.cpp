@@ -451,6 +451,9 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .quantity = item.last_qty,
           .price = item.last_px,
           .liquidity = {},
+          .quote_quantity = NaN,
+          .commission_quantity = NaN,
+          .commission_currency = {},
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
