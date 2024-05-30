@@ -4,7 +4,8 @@
   "values": [
     {
       "name": "data",
-      "type": "std::span<LiquidationItem const>"
+      "type": "LiquidationItem",
+      "array": "std/span"
     }
   ]
 }

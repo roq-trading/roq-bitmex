@@ -12,27 +12,27 @@
     },
     {
       "name": "ping_freq",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
       "description": "Ping frequency"
     },
     {
       "name": "request_timeout",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
       "description": "Request time-out"
     },
     {
       "name": "cancel_on_disconnect",
-      "type": "bool",
+      "type": "std/bool",
       "default": true,
       "description": "Cancel orders on disconnect?"
     },
     {
       "name": "cancel_all_after",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
       "description": "Cancel all after, requires cancel-on-disconnect"

@@ -4,39 +4,39 @@
   "values": [
     {
       "name": "account",
-      "type": "uint64_t"
+      "type": "std/uint64"
     },
     {
       "name": "avgPx",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "clOrdID",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "clOrdLinkID",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "contingencyType",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "cumQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "currency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "displayQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "exDestination",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "execInst",
@@ -44,7 +44,7 @@
     },
     {
       "name": "leavesQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "multiLegReportingType",
@@ -52,15 +52,15 @@
     },
     {
       "name": "orderID",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "orderQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "ordRejReason",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "ordStatus",
@@ -72,19 +72,19 @@
     },
     {
       "name": "pegOffsetValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "pegPriceType",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "settlCurrency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "side",
@@ -92,27 +92,27 @@
     },
     {
       "name": "simpleCumQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "simpleLeavesQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "simpleOrderQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "stopPx",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "text",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "timeInForce",
@@ -120,19 +120,19 @@
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "transactTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "triggered",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "workingIndicator",
-      "type": "bool"
+      "type": "std/bool"
     }
   ]
 }

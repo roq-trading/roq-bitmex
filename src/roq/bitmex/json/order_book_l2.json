@@ -4,7 +4,8 @@
   "values": [
     {
       "name": "data",
-      "type": "std::span<OrderBookL2Item const>"
+      "type": "OrderBookL2Item",
+      "array": "std/span"
     }
   ]
 }

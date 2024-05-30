@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "error",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "meta"
@@ -14,7 +14,7 @@
     },
     {
       "name": "status",
-      "type": "int32_t"
+      "type": "std/int32"
     }
   ]
 }

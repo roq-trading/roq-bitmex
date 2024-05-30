@@ -4,351 +4,351 @@
   "values": [
     {
       "name": "askPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "bankruptLimitDownPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "bankruptLimitUpPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "bidPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "buyLeg",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "calcInterval",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "capped",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "closingTimestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "deleverage",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "expiry",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "fairBasis",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "fairBasisRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "fairMethod",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "fairPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "foreignNotional24h",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "front",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "fundingBaseSymbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "fundingInterval",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "fundingPremiumSymbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "fundingQuoteSymbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "fundingRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "fundingTimestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "hasLiquidity",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "highPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "homeNotional24h",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "impactAskPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "impactBidPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "impactMidPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "indicativeFundingRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "indicativeSettlePrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "indicativeTaxRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "initMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "insuranceFee",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "inverseLeg",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "isInverse",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "isQuanto",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "lastChangePcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "lastPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "lastPriceProtected",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "lastTickDirection",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "limit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "limitDownPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "limitUpPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "listedSettle",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "listing",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "lotSize",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "lowPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maintMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "makerFee",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "markMethod",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "markPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxOrderQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "midPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "multiplier",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openInterest",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openingTimestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "optionMultiplier",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "optionStrikePcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "optionStrikePrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "optionStrikeRound",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "optionUnderlyingPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "positionCurrency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "prevClosePrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "prevPrice24h",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "prevTotalTurnover",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "prevTotalVolume",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "publishInterval",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "publishTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "quoteCurrency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "quoteToSettleMultiplier",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "rebalanceInterval",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "rebalanceTimestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "reference",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "referenceSymbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "relistInterval",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "riskLimit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "riskStep",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "rootSymbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "sellLeg",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "sessionInterval",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "settlCurrency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "settle",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "settledPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "settledPriceAdjustmentRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "settlementFee",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "state",
@@ -356,39 +356,39 @@
     },
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "takerFee",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "taxed",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "tickSize",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "totalTurnover",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "totalVolume",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "turnover",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "turnover24h",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "typ",
@@ -396,39 +396,39 @@
     },
     {
       "name": "underlying",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "underlyingSymbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "underlyingToPositionMultiplier",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "underlyingToSettleMultiplier",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "volume",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "volume24h",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "vwap",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "instantPnl",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "minTick",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

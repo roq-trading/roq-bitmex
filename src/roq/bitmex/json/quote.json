@@ -4,7 +4,8 @@
   "values": [
     {
       "name": "data",
-      "type": "std::span<QuoteItem const>"
+      "type": "QuoteItem",
+      "array": "std/span"
     }
   ]
 }

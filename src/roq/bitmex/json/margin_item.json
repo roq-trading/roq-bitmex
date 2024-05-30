@@ -4,167 +4,167 @@
   "values": [
     {
       "name": "account",
-      "type": "uint64_t"
+      "type": "std/uint64"
     },
     {
       "name": "action",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "amount",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "availableMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "commission",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "confirmedDebit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "currency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "excessMarginPcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "excessMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossComm",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossExecCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossLastValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossMarkValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossOpenCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossOpenPremium",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "indicativeTax",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "initMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maintMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "marginBalancePcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "marginBalance",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "marginLeverage",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "marginUsedPcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "pendingCredit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "pendingDebit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "prevRealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "prevState",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "prevUnrealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "realisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "riskLimit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "riskValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "sessionMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "state",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "syntheticMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "targetExcessMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "taxableMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "unrealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedProfit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "varMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "walletBalance",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "withdrawableMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "makerFeeDiscount",

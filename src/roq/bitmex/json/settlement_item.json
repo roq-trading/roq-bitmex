@@ -4,19 +4,19 @@
   "values": [
     {
       "name": "bankrupt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "optionStrikePrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "optionUnderlyingPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "settledPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "settlementType",
@@ -24,19 +24,19 @@
     },
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "taxBase",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "taxRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

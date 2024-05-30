@@ -4,18 +4,18 @@
   "values": [
     {
       "name": "failure",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "request"
     },
     {
       "name": "unsubscribe",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "success",
-      "type": "bool"
+      "type": "std/bool"
     }
   ]
 }

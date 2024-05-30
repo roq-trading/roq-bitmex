@@ -4,367 +4,367 @@
   "values": [
     {
       "name": "account",
-      "type": "uint64_t"
+      "type": "std/uint64"
     },
     {
       "name": "avgCostPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "avgEntryPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "bankruptPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "breakEvenPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "commission",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "crossMargin",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "currency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "currentComm",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "currentCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "currentQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "currentTimestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "deleveragePercentile",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "execBuyCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "execBuyQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "execComm",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "execCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "execQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "execSellCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "execSellQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "foreignNotional",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossExecCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossOpenCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "grossOpenPremium",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "homeNotional",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "indicativeTax",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "indicativeTaxRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "initMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "initMarginReq",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "isOpen",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "lastPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "lastValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "leverage",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "liquidationPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "longBankrupt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maintMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maintMarginReq",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "marginCallPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "markPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "markValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openingComm",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openingCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openingQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openingTimestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "openOrderBuyCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openOrderBuyPremium",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openOrderBuyQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openOrderSellCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openOrderSellPremium",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openOrderSellQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posAllowance",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posComm",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posCost2",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posCross",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posInit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posLoss",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posMaint",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "posState",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "prevClosePrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "prevRealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "prevUnrealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "quoteCurrency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "realisedCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "realisedGrossPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "realisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "realisedTax",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "rebalancedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "riskLimit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "riskValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "sessionMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "shortBankrupt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "simpleCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "simplePnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "simplePnlPcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "simpleQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "simpleValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "targetExcessMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "taxableMargin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "taxBase",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "underlying",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "unrealisedCost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedGrossPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedPnlPcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedRoePcnt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedTax",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "varMargin",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

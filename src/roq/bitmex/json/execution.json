@@ -4,7 +4,8 @@
   "values": [
     {
       "name": "data",
-      "type": "std::span<ExecutionItem const>"
+      "type": "ExecutionItem",
+      "array": "std/span"
     }
   ]
 }

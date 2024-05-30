@@ -4,7 +4,8 @@
   "values": [
     {
       "name": "data",
-      "type": "std::span<InstrumentItem const>"
+      "type": "InstrumentItem",
+      "array": "std/span"
     }
   ]
 }
