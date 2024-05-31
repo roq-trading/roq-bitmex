@@ -1,10 +1,10 @@
 {
-  "name": "Trade",
+  "name": "roq/bitmex/json/Trade",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "TradeItem",
+      "type": "roq/bitmex/json/TradeItem",
       "array": "std/span"
     }
   ]

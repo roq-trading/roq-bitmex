@@ -1,10 +1,10 @@
 {
-  "name": "Order",
+  "name": "roq/bitmex/json/Order",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "OrderItem",
+      "type": "roq/bitmex/json/OrderItem",
       "array": "std/span"
     }
   ]

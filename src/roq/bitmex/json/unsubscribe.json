@@ -1,5 +1,5 @@
 {
-  "name": "Unsubscribe",
+  "name": "roq/bitmex/json/Unsubscribe",
   "type": "struct",
   "values": [
     {

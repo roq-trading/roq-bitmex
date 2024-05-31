@@ -1,10 +1,10 @@
 {
-  "name": "OrderBookL2",
+  "name": "roq/bitmex/json/OrderBookL2",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "OrderBookL2Item",
+      "type": "roq/bitmex/json/OrderBookL2Item",
       "array": "std/span"
     }
   ]

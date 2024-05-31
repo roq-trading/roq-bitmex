@@ -1,5 +1,5 @@
 {
-  "name": "Side",
+  "name": "roq/bitmex/json/Side",
   "type": "enum",
   "values": [
     {

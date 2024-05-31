@@ -1,10 +1,10 @@
 {
-  "name": "Instrument",
+  "name": "roq/bitmex/json/Instrument",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "InstrumentItem",
+      "type": "roq/bitmex/json/InstrumentItem",
       "array": "std/span"
     }
   ]

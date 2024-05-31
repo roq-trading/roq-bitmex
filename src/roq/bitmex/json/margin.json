@@ -1,10 +1,10 @@
 {
-  "name": "Margin",
+  "name": "roq/bitmex/json/Margin",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "MarginItem",
+      "type": "roq/bitmex/json/MarginItem",
       "array": "std/span"
     }
   ]

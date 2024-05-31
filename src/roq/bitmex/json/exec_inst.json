@@ -1,5 +1,5 @@
 {
-  "name": "ExecInst",
+  "name": "roq/bitmex/json/ExecInst",
   "type": "enum",
   "values": [
     {

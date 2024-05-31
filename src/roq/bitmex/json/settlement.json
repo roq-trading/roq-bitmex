@@ -1,10 +1,10 @@
 {
-  "name": "Settlement",
+  "name": "roq/bitmex/json/Settlement",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "SettlementItem",
+      "type": "roq/bitmex/json/SettlementItem",
       "array": "std/span"
     }
   ]

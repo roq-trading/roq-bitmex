@@ -1,5 +1,5 @@
 {
-  "name": "LiquidityInd",
+  "name": "roq/bitmex/json/LiquidityInd",
   "type": "enum",
   "values": [
     {

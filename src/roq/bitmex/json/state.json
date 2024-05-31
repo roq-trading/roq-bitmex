@@ -1,5 +1,5 @@
 {
-  "name": "State",
+  "name": "roq/bitmex/json/State",
   "type": "enum",
   "values": [
     {

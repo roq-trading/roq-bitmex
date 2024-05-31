@@ -1,5 +1,5 @@
 {
-  "name": "SettlementItem",
+  "name": "roq/bitmex/json/SettlementItem",
   "type": "item",
   "values": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "name": "settlementType",
-      "type": "SettlementType"
+      "type": "roq/bitmex/json/SettlementType"
     },
     {
       "name": "symbol",

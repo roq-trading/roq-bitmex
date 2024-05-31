@@ -1,18 +1,18 @@
 {
-  "name": "REST",
+  "name": "roq/bitmex/flags/REST",
   "type": "flags",
   "prefix": "rest_",
   "values": [
     {
       "name": "uri",
-      "type": "roq::io::web::URI",
+      "type": "roq/io/web/URI",
       "validator": "roq::core::flags::URI",
       "default": "https://testnet.bitmex.com",
       "description": "Exchange end-point"
     },
     {
       "name": "proxy",
-      "type": "roq::io::web::URI",
+      "type": "roq/io/web/URI",
       "validator": "roq::core::flags::URI",
       "description": "Proxy end-point"
     },

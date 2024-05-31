@@ -1,10 +1,10 @@
 {
-  "name": "Execution",
+  "name": "roq/bitmex/json/Execution",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "ExecutionItem",
+      "type": "roq/bitmex/json/ExecutionItem",
       "array": "std/span"
     }
   ]

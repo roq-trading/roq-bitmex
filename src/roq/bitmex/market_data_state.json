@@ -1,5 +1,5 @@
 {
-  "name": "MarketDataState",
+  "name": "roq/bitmex/MarketDataState",
   "type": "enum",
   "values": [
     {

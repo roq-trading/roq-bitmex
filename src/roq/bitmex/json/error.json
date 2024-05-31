@@ -1,5 +1,5 @@
 {
-  "name": "Error",
+  "name": "roq/bitmex/json/Error",
   "type": "struct",
   "values": [
     {

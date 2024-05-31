@@ -1,10 +1,10 @@
 {
-  "name": "Position",
+  "name": "roq/bitmex/json/Position",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "PositionItem",
+      "type": "roq/bitmex/json/PositionItem",
       "array": "std/span"
     }
   ]

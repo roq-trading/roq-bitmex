@@ -1,5 +1,5 @@
 {
-  "name": "OrderBookL2Item",
+  "name": "roq/bitmex/json/OrderBookL2Item",
   "type": "item",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bitmex/json/Side"
     },
     {
       "name": "size",

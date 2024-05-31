@@ -1,5 +1,5 @@
 {
-  "name": "Action",
+  "name": "roq/bitmex/json/Action",
   "type": "enum",
   "values": [
     {

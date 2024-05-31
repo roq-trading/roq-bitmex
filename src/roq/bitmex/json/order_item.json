@@ -1,5 +1,5 @@
 {
-  "name": "OrderItem",
+  "name": "roq/bitmex/json/OrderItem",
   "type": "item",
   "values": [
     {
@@ -40,7 +40,7 @@
     },
     {
       "name": "execInst",
-      "type": "ExecInst"
+      "type": "roq/bitmex/json/ExecInst"
     },
     {
       "name": "leavesQty",
@@ -48,7 +48,7 @@
     },
     {
       "name": "multiLegReportingType",
-      "type": "MultiLegReportingType"
+      "type": "roq/bitmex/json/MultiLegReportingType"
     },
     {
       "name": "orderID",
@@ -64,11 +64,11 @@
     },
     {
       "name": "ordStatus",
-      "type": "OrdStatus"
+      "type": "roq/bitmex/json/OrdStatus"
     },
     {
       "name": "ordType",
-      "type": "OrdType"
+      "type": "roq/bitmex/json/OrdType"
     },
     {
       "name": "pegOffsetValue",
@@ -88,7 +88,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bitmex/json/Side"
     },
     {
       "name": "simpleCumQty",
@@ -116,7 +116,7 @@
     },
     {
       "name": "timeInForce",
-      "type": "TimeInForce"
+      "type": "roq/bitmex/json/TimeInForce"
     },
     {
       "name": "timestamp",

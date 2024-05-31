@@ -1,10 +1,10 @@
 {
-  "name": "Quote",
+  "name": "roq/bitmex/json/Quote",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "QuoteItem",
+      "type": "roq/bitmex/json/QuoteItem",
       "array": "std/span"
     }
   ]

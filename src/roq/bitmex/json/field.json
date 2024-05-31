@@ -1,5 +1,5 @@
 {
-  "name": "Field",
+  "name": "roq/bitmex/json/Field",
   "type": "enum",
   "values": [
     {

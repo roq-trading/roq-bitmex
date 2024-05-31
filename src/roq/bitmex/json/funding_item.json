@@ -1,5 +1,5 @@
 {
-  "name": "FundingItem",
+  "name": "roq/bitmex/json/FundingItem",
   "type": "item",
   "values": [
     {

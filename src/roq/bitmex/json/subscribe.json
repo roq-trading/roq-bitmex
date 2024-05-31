@@ -1,5 +1,5 @@
 {
-  "name": "Subscribe",
+  "name": "roq/bitmex/json/Subscribe",
   "type": "struct",
   "values": [
     {

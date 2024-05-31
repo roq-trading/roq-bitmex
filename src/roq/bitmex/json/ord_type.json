@@ -1,5 +1,5 @@
 {
-  "name": "OrdType",
+  "name": "roq/bitmex/json/OrdType",
   "type": "enum",
   "values": [
     {

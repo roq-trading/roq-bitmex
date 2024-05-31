@@ -1,5 +1,5 @@
 {
-  "name": "DropCopyState",
+  "name": "roq/bitmex/DropCopyState",
   "type": "enum",
   "values": [
     {

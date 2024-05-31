@@ -1,5 +1,5 @@
 {
-  "name": "TimeInForce",
+  "name": "roq/bitmex/json/TimeInForce",
   "type": "enum",
   "values": [
     {

@@ -1,5 +1,5 @@
 {
-  "name": "ExecutionItem",
+  "name": "roq/bitmex/json/ExecutionItem",
   "type": "item",
   "values": [
     {
@@ -60,7 +60,7 @@
     },
     {
       "name": "execType",
-      "type": "ExecType"
+      "type": "roq/bitmex/json/ExecType"
     },
     {
       "name": "foreignNotional",
@@ -72,7 +72,7 @@
     },
     {
       "name": "lastLiquidityInd",
-      "type": "LiquidityInd"
+      "type": "roq/bitmex/json/LiquidityInd"
     },
     {
       "name": "lastMkt",
@@ -92,7 +92,7 @@
     },
     {
       "name": "multiLegReportingType",
-      "type": "MultiLegReportingType"
+      "type": "roq/bitmex/json/MultiLegReportingType"
     },
     {
       "name": "orderID",
@@ -108,11 +108,11 @@
     },
     {
       "name": "ordStatus",
-      "type": "OrdStatus"
+      "type": "roq/bitmex/json/OrdStatus"
     },
     {
       "name": "ordType",
-      "type": "OrdType"
+      "type": "roq/bitmex/json/OrdType"
     },
     {
       "name": "pegOffsetValue",
@@ -132,7 +132,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bitmex/json/Side"
     },
     {
       "name": "simpleCumQty",
@@ -160,7 +160,7 @@
     },
     {
       "name": "timeInForce",
-      "type": "TimeInForce"
+      "type": "roq/bitmex/json/TimeInForce"
     },
     {
       "name": "timestamp",

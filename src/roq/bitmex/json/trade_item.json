@@ -1,5 +1,5 @@
 {
-  "name": "TradeItem",
+  "name": "roq/bitmex/json/TradeItem",
   "type": "item",
   "values": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bitmex/json/Side"
     },
     {
       "name": "size",

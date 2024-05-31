@@ -1,11 +1,11 @@
 {
-  "name": "WS",
+  "name": "roq/bitmex/flags/WS",
   "type": "flags",
   "prefix": "ws_",
   "values": [
     {
       "name": "uri",
-      "type": "roq::io::web::URI",
+      "type": "roq/io/web/URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://ws.testnet.bitmex.com/realtime",
       "description": "Exchange end-point"

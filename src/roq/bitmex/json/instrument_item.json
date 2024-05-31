@@ -1,5 +1,5 @@
 {
-  "name": "InstrumentItem",
+  "name": "roq/bitmex/json/InstrumentItem",
   "type": "item",
   "values": [
     {
@@ -352,7 +352,7 @@
     },
     {
       "name": "state",
-      "type": "State"
+      "type": "roq/bitmex/json/State"
     },
     {
       "name": "symbol",
@@ -392,7 +392,7 @@
     },
     {
       "name": "typ",
-      "type": "Typ"
+      "type": "roq/bitmex/json/Typ"
     },
     {
       "name": "underlying",

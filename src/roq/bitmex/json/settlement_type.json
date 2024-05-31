@@ -1,5 +1,5 @@
 {
-  "name": "SettlementType",
+  "name": "roq/bitmex/json/SettlementType",
   "type": "enum",
   "values": [
     {

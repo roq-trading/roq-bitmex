@@ -1,5 +1,5 @@
 {
-  "name": "LiquidationItem",
+  "name": "roq/bitmex/json/LiquidationItem",
   "type": "item",
   "values": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bitmex/json/Side"
     },
     {
       "name": "symbol",

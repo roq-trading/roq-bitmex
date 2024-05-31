@@ -1,10 +1,10 @@
 {
-  "name": "Funding",
+  "name": "roq/bitmex/json/Funding",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "FundingItem",
+      "type": "roq/bitmex/json/FundingItem",
       "array": "std/span"
     }
   ]
