@@ -44,16 +44,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void operator()(metrics::Writer &);
 
   uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
-  uint16_t operator()(
-      Event<ModifyOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
-  uint16_t operator()(
-      Event<CancelOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+  uint16_t operator()(Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
+  uint16_t operator()(Event<CancelOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
 
   uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
@@ -68,18 +60,10 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void create_order(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
   void create_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
-  void modify_order(
-      Event<ModifyOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+  void modify_order(Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
   void modify_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
-  void cancel_order(
-      Event<CancelOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+  void cancel_order(Event<CancelOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
   void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);

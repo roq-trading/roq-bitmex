@@ -41,11 +41,7 @@ void update(Type &result, Type const type) {
 
 // === IMPLEMENTATION ===
 
-bool StreamParser::dispatch(
-    StreamParser::Handler &handler,
-    std::string_view const &message,
-    std::span<std::byte> const &buffer,
-    TraceInfo const &trace_info) {
+bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN__;

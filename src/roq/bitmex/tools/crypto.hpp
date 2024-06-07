@@ -21,17 +21,9 @@ struct Crypto final {
   Crypto(Crypto &&) = delete;
   Crypto(Crypto const &) = delete;
 
-  std::string create_signature(
-      std::chrono::nanoseconds expires,
-      web::http::Method method,
-      std::string_view const &path,
-      std::string_view const &body);
+  std::string create_signature(std::chrono::nanoseconds expires, web::http::Method method, std::string_view const &path, std::string_view const &body);
 
-  std::string create_headers(
-      std::chrono::nanoseconds expires,
-      web::http::Method method,
-      std::string_view const &path,
-      std::string_view const &body);
+  std::string create_headers(std::chrono::nanoseconds expires, web::http::Method method, std::string_view const &path, std::string_view const &body);
 
  private:
   using MAC = utils::mac::HMAC<utils::hash::SHA256>;

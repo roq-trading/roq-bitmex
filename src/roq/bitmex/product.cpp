@@ -27,9 +27,8 @@ auto strip_time_part(auto timestamp) {
 // XXX openInterest ?
 
 Product::Product(Shared &shared, json::InstrumentItem const &item)
-    : shared_{shared}, quote_currency_{item.quote_currency}, settl_currency_{item.settl_currency},
-      tick_size_{item.tick_size}, multiplier_{item.multiplier}, lot_size_{item.lot_size},
-      option_strike_price_{item.option_strike_price}, underlying_symbol_{item.underlying_symbol}, expiry_{item.expiry},
+    : shared_{shared}, quote_currency_{item.quote_currency}, settl_currency_{item.settl_currency}, tick_size_{item.tick_size}, multiplier_{item.multiplier},
+      lot_size_{item.lot_size}, option_strike_price_{item.option_strike_price}, underlying_symbol_{item.underlying_symbol}, expiry_{item.expiry},
       settle_{item.settle} {
   statistics_.reserve(magic_enum::enum_count<StatisticsType>());
   update(item);
@@ -91,8 +90,7 @@ bool Product::update(json::InstrumentItem const &item) {
     using end_time_t = decltype(Statistics::end_time_utc);
     auto begin_time_utc = std::chrono::duration_cast<begin_time_t>(item.timestamp);
     auto duration = strip_time_part(item.funding_interval);
-    auto end_time_utc =
-        begin_time_utc.count() ? std::chrono::duration_cast<end_time_t>(begin_time_utc + duration) : end_time_t{};
+    auto end_time_utc = begin_time_utc.count() ? std::chrono::duration_cast<end_time_t>(begin_time_utc + duration) : end_time_t{};
     auto update_funding_rate = false;
     update_funding_rate |= utils::update(funding_rate_.value, item.funding_rate) != 0;
     update_funding_rate |= utils::update(funding_rate_.begin_time_utc, begin_time_utc) != 0;

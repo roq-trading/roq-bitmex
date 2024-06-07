@@ -75,8 +75,7 @@ auto create_connection(auto &handler, auto &settings, auto &context, auto &&crea
 }
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(auto &settings, auto const &group, auto const &function)
-      : core::metrics::Factory(settings.app.name, group, function) {}
+  explicit create_metrics(auto &settings, auto const &group, auto const &function) : core::metrics::Factory(settings.app.name, group, function) {}
 };
 
 auto compute_expires() {
@@ -111,8 +110,7 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
           .ping = create_metrics(shared.settings, name_, "ping"sv),
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
-      account_{account}, shared_{shared},
-      download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
+      account_{account}, shared_{shared}, download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void DropCopy::operator()(Event<Start> const &) {
@@ -126,8 +124,7 @@ void DropCopy::operator()(Event<Stop> const &) {
 void DropCopy::operator()(Event<Timer> const &event) {
   if (!(*connection_).refresh(event.value.now))
     return;
-  if (shared_.settings.ws.cancel_on_disconnect && shared_.settings.ws.cancel_all_after.count() && ready_ &&
-      next_cancel_all_after_ <= event.value.now) {
+  if (shared_.settings.ws.cancel_on_disconnect && shared_.settings.ws.cancel_all_after.count() && ready_ && next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ = event.value.now + shared_.settings.ws.cancel_all_after / 4;
     send_cancel_all_after(shared_.settings.ws.cancel_all_after);
   }

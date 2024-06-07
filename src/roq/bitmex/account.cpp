@@ -22,19 +22,11 @@ Account::Account(Settings const &settings, Config const &config, std::string_vie
     : name{name}, base_path{create_base_path(settings)}, crypto_{config.get_api_key(), config.get_secret()} {
 }
 
-std::string Account::create_signature(
-    std::chrono::nanoseconds expires,
-    web::http::Method method,
-    std::string_view const &path,
-    std::string_view const &body) {
+std::string Account::create_signature(std::chrono::nanoseconds expires, web::http::Method method, std::string_view const &path, std::string_view const &body) {
   return crypto_.create_signature(expires, method, path, body);
 }
 
-std::string Account::create_headers(
-    std::chrono::nanoseconds expires,
-    web::http::Method method,
-    std::string_view const &path,
-    std::string_view const &body) {
+std::string Account::create_headers(std::chrono::nanoseconds expires, web::http::Method method, std::string_view const &path, std::string_view const &body) {
   return crypto_.create_headers(expires, method, path, body);
 }
 

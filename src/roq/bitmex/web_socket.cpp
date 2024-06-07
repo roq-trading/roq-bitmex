@@ -77,8 +77,7 @@ auto create_connection(auto &handler, auto &settings, auto &context, auto &&crea
 }
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(auto &settings, auto const &group, auto const &function)
-      : core::metrics::Factory(settings.app.name, group, function) {}
+  explicit create_metrics(auto &settings, auto const &group, auto const &function) : core::metrics::Factory(settings.app.name, group, function) {}
 };
 
 auto compute_expires() {
@@ -116,8 +115,7 @@ WebSocket::WebSocket(Handler &handler, io::Context &context, uint16_t stream_id,
           .ping = create_metrics(shared.settings, name_, "ping"sv),
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
-      account_{account}, shared_{shared},
-      download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
+      account_{account}, shared_{shared}, download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void WebSocket::operator()(Event<Start> const &) {
@@ -131,8 +129,7 @@ void WebSocket::operator()(Event<Stop> const &) {
 void WebSocket::operator()(Event<Timer> const &event) {
   if (!(*connection_).refresh(event.value.now))
     return;
-  if (shared_.settings.ws.cancel_on_disconnect && shared_.settings.ws.cancel_all_after.count() && ready_ &&
-      next_cancel_all_after_ <= event.value.now) {
+  if (shared_.settings.ws.cancel_on_disconnect && shared_.settings.ws.cancel_all_after.count() && ready_ && next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ = event.value.now + shared_.settings.ws.cancel_all_after / 4;
     send_cancel_all_after(shared_.settings.ws.cancel_all_after);
   }
@@ -160,26 +157,19 @@ void WebSocket::operator()(metrics::Writer &writer) {
       .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
 
-uint16_t WebSocket::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+uint16_t WebSocket::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   create_order(event, order, request_id);
   return stream_id_;
 }
 
 uint16_t WebSocket::operator()(
-    Event<ModifyOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   modify_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
 
 uint16_t WebSocket::operator()(
-    Event<CancelOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   cancel_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
@@ -252,8 +242,7 @@ void WebSocket::operator()(ConnectionStatus status) {
 
 // create-order
 
-void WebSocket::create_order(
-    Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
+void WebSocket::create_order(Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
       throw server::oms::NotReady{"not ready"sv};

@@ -130,8 +130,8 @@ struct MarketData final : public web::socket::Client::Handler, public json::Stre
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile parse, cancel_all_after, error, funding, handshake, instrument, liquidation, order_book_l2,
-        quote, settlement, subscribe, unsubscribe, trade;
+    utils::metrics::Profile parse, cancel_all_after, error, funding, handshake, instrument, liquidation, order_book_l2, quote, settlement, subscribe,
+        unsubscribe, trade;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;

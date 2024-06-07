@@ -17,8 +17,7 @@ R create_accounts(auto &settings, auto &config) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[_, account] : config.accounts)
-    result.try_emplace(
-        static_cast<std::string_view>(account.name), std::make_unique<Account>(settings, config, account.name));
+    result.try_emplace(static_cast<std::string_view>(account.name), std::make_unique<Account>(settings, config, account.name));
   return result;
 }
 
@@ -27,9 +26,7 @@ R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accoun
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[name, account] : accounts)
-    result.try_emplace(
-        static_cast<std::string_view>(name),
-        std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
+    result.try_emplace(static_cast<std::string_view>(name), std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 
@@ -38,9 +35,7 @@ R create_web_socket(auto &gateway, auto &context, auto &stream_id, auto &account
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[name, account] : accounts)
-    result.try_emplace(
-        static_cast<std::string_view>(name),
-        std::make_unique<WebSocket>(gateway, context, ++stream_id, *account, shared));
+    result.try_emplace(static_cast<std::string_view>(name), std::make_unique<WebSocket>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 
@@ -49,9 +44,7 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[name, account] : accounts)
-    result.try_emplace(
-        static_cast<std::string_view>(name),
-        std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
+    result.try_emplace(static_cast<std::string_view>(name), std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 }  // namespace
@@ -59,8 +52,7 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 // === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context},
-      shared_{dispatcher, settings},
+    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
       order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)},
       market_data_{*this, context_, ++stream_id_, shared_} {
@@ -88,8 +80,7 @@ void Gateway::operator()(Event<Connected> const &) {
 void Gateway::operator()(Event<Disconnected> const &) {
 }
 
-uint16_t Gateway::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+uint16_t Gateway::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
   if (shared_.settings.misc.oms_using_web_socket)
     return get_web_socket(event.value.account)(event, order, request_id);
@@ -97,10 +88,7 @@ uint16_t Gateway::operator()(
 }
 
 uint16_t Gateway::operator()(
-    Event<ModifyOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   if (shared_.settings.misc.oms_using_web_socket)
@@ -109,10 +97,7 @@ uint16_t Gateway::operator()(
 }
 
 uint16_t Gateway::operator()(
-    Event<CancelOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   if (shared_.settings.misc.oms_using_web_socket)
@@ -164,8 +149,7 @@ void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(
-    Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
+void Gateway::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
   dispatcher_(event, is_last, user_id, request_id);
 }
 

@@ -13,8 +13,7 @@ namespace roq {
 namespace bitmex {
 
 struct OrderUpdate final {
-  explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account)
-      : shared_(shared), stream_id_(stream_id), account_(account) {}
+  explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account) : shared_(shared), stream_id_(stream_id), account_(account) {}
 
   OrderUpdate(OrderUpdate &&) = delete;
   OrderUpdate(OrderUpdate const &) = delete;
@@ -24,10 +23,8 @@ struct OrderUpdate final {
   void operator()(json::Order const &, TraceInfo const &, bool download);
 
   // order entry
-  void operator()(
-      json::OrderItem const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
-  void operator()(
-      json::Order const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
+  void operator()(json::OrderItem const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
+  void operator()(json::Order const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
 
  private:
   Shared &shared_;

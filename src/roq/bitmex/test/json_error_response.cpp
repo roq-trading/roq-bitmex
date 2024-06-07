@@ -19,9 +19,8 @@ using namespace std::literals;
 TEST_CASE("json_error_response_simple_1", "[json_error_response]") {
   auto const message = R"(
   {"error":{"message":"Account has insufficient Available Balance, 5929700 XBt required","name":"CodedHTTPError","details":"19000"}}")"sv;
-  auto res = json::ErrorParser::dispatch(message, [](auto &error) {
-    CHECK(error.message == "Account has insufficient Available Balance, 5929700 XBt required"sv);
-  });
+  auto res =
+      json::ErrorParser::dispatch(message, [](auto &error) { CHECK(error.message == "Account has insufficient Available Balance, 5929700 XBt required"sv); });
   CHECK(res == true);
 }
 

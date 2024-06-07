@@ -31,8 +31,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Stream
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
-    virtual void operator()(
-        Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) = 0;
+    virtual void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) = 0;
     virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
   };
 
@@ -108,8 +107,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Stream
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile parse, cancel_all_after, error, execution, handshake, margin, order, position, subscribe,
-        unsubscribe;
+    utils::metrics::Profile parse, cancel_all_after, error, execution, handshake, margin, order, position, subscribe, unsubscribe;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;

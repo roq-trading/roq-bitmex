@@ -31,8 +31,7 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
-    virtual void operator()(
-        Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) = 0;
+    virtual void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) = 0;
     virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
   };
 
@@ -50,16 +49,8 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
   void operator()(metrics::Writer &);
 
   uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
-  uint16_t operator()(
-      Event<ModifyOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
-  uint16_t operator()(
-      Event<CancelOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+  uint16_t operator()(Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
+  uint16_t operator()(Event<CancelOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
 
   uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
@@ -77,17 +68,9 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
 
   void create_order(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
 
-  void modify_order(
-      Event<ModifyOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+  void modify_order(Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
 
-  void cancel_order(
-      Event<CancelOrder> const &,
-      server::oms::Order const &,
-      std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+  void cancel_order(Event<CancelOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
@@ -136,8 +119,7 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
   } counter_;
   struct {
     utils::metrics::Profile parse,  //
-        create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error, execution, handshake,
-        margin, order, position;
+        create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error, execution, handshake, margin, order, position;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;

@@ -27,11 +27,7 @@ auto create_timestamp_secs(auto value) {
 Crypto::Crypto(std::string_view const &key, std::string_view const &secret) : key_{key}, mac_{secret} {
 }
 
-std::string Crypto::create_signature(
-    std::chrono::nanoseconds expires,
-    web::http::Method method,
-    std::string_view const &path,
-    std::string_view const &body) {
+std::string Crypto::create_signature(std::chrono::nanoseconds expires, web::http::Method method, std::string_view const &path, std::string_view const &body) {
   auto expires_ = create_timestamp_secs(expires);
   auto method_ = magic_enum::enum_name(method);
   mac_.clear();
@@ -46,11 +42,7 @@ std::string Crypto::create_signature(
   return result;
 }
 
-std::string Crypto::create_headers(
-    std::chrono::nanoseconds expires,
-    web::http::Method method,
-    std::string_view const &path,
-    std::string_view const &body) {
+std::string Crypto::create_headers(std::chrono::nanoseconds expires, web::http::Method method, std::string_view const &path, std::string_view const &body) {
   auto signature = create_signature(expires, method, path, body);
   return fmt::format(
       "api-signature: {}\r\n"

@@ -26,10 +26,8 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
   auto external_order_id = order_item.order_id;
   auto order_type = json::map(order_item.ord_type);
   auto time_in_force = json::map(order_item.time_in_force);
-  auto request_type =
-      order_item.ord_status == json::OrdStatus::CANCELED ? RequestType::CANCEL_ORDER : RequestType::UNDEFINED;
-  auto request_status =
-      order_item.ord_status == json::OrdStatus::REJECTED ? RequestStatus::REJECTED : RequestStatus::ACCEPTED;
+  auto request_type = order_item.ord_status == json::OrdStatus::CANCELED ? RequestType::CANCEL_ORDER : RequestType::UNDEFINED;
+  auto request_status = order_item.ord_status == json::OrdStatus::REJECTED ? RequestStatus::REJECTED : RequestStatus::ACCEPTED;
   auto update_type = download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   auto response = server::oms::Response{
       .request_type = request_type,
@@ -75,8 +73,7 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
       .update_type = update_type,
       .sending_time_utc = {},
   };
-  if (shared_.update_order(
-          order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);
@@ -150,8 +147,7 @@ void OrderUpdate::operator()(
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = {},
   };
-  if (shared_.update_order(
-          order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);
@@ -159,12 +155,7 @@ void OrderUpdate::operator()(
 }
 
 void OrderUpdate::operator()(
-    json::Order const &order,
-    TraceInfo const &trace_info,
-    RequestType request_type,
-    uint8_t user_id,
-    uint64_t order_id,
-    uint32_t version) {
+    json::Order const &order, TraceInfo const &trace_info, RequestType request_type, uint8_t user_id, uint64_t order_id, uint32_t version) {
   for (auto &iter : order.data)
     (*this)(iter, trace_info, request_type, user_id, order_id, version);
 }
