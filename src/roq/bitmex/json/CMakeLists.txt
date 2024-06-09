@@ -48,31 +48,27 @@ set(AUTOGEN_SCHEMAS
     typ.json
     unsubscribe.json)
 
-roq_autogen(
+roq_autogen_hpp(
   OUTPUT
   AUTOGEN_HEADERS
-  NAMESPACE
-  "roq/bitmex/json"
-  OUTPUT_TYPE
-  "json"
-  FILE_TYPE
-  "hpp"
   SOURCES
-  ${AUTOGEN_SCHEMAS})
+  ${AUTOGEN_SCHEMAS}
+  TEMPLATE_DIR
+  ${TEMPLATE_DIR}
+  TEMPLATE_TYPE
+  "json")
 
 add_custom_target(autogen-json-headers ALL DEPENDS ${AUTOGEN_HEADERS})
 
-roq_autogen(
+roq_autogen_cpp(
   OUTPUT
   AUTOGEN_SOURCES
-  NAMESPACE
-  "roq/bitmex/json"
-  OUTPUT_TYPE
-  "json"
-  FILE_TYPE
-  "cpp"
   SOURCES
-  ${AUTOGEN_SCHEMAS})
+  ${AUTOGEN_SCHEMAS}
+  TEMPLATE_DIR
+  ${TEMPLATE_DIR}
+  TEMPLATE_TYPE
+  "json")
 
 roq_gitignore(OUTPUT .gitignore SOURCES ${TARGET_NAME} ${AUTOGEN_HEADERS} ${AUTOGEN_SOURCES})
 

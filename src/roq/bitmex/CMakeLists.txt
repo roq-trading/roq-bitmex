@@ -34,17 +34,15 @@ include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS market_data_state.json drop_copy_state.json web_socket_state.json)
 
-roq_autogen(
+roq_autogen_hpp(
   OUTPUT
   AUTOGEN_HEADERS
-  NAMESPACE
-  "roq/bitmex"
-  OUTPUT_TYPE
-  "state"
-  FILE_TYPE
-  "hpp"
   SOURCES
-  ${AUTOGEN_SCHEMAS})
+  ${AUTOGEN_SCHEMAS}
+  TEMPLATE_DIR
+  ${TEMPLATE_DIR}
+  TEMPLATE_TYPE
+  "state")
 
 add_custom_target(autogen-headers ALL DEPENDS ${AUTOGEN_HEADERS})
 
