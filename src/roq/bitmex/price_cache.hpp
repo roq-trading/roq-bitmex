@@ -14,7 +14,6 @@ namespace bitmex {
 struct PriceCache final {
   PriceCache() = default;
 
-  PriceCache(PriceCache &&) = default;
   PriceCache(PriceCache const &) = delete;
 
   std::pair<double, double> operator()(json::Action action, uint64_t id, double price, double size);

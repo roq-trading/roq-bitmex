@@ -18,7 +18,6 @@ namespace bitmex {
 struct Shared final {
   Shared(server::Dispatcher &, Settings const &);
 
-  Shared(Shared &&) = default;
   Shared(Shared const &) = delete;
 
   std::string_view next_request_id();

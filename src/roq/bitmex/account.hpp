@@ -19,7 +19,6 @@ namespace bitmex {
 struct Account final {
   Account(Settings const &, Config const &, std::string_view const &name);
 
-  Account(Account &&) = default;
   Account(Account const &) = delete;
 
   std::string create_signature(std::chrono::nanoseconds expires, web::http::Method, std::string_view const &path, std::string_view const &body);

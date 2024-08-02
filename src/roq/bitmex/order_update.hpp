@@ -15,7 +15,6 @@ namespace bitmex {
 struct OrderUpdate final {
   explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account) : shared_(shared), stream_id_(stream_id), account_(account) {}
 
-  OrderUpdate(OrderUpdate &&) = default;
   OrderUpdate(OrderUpdate const &) = delete;
 
   // drop copy

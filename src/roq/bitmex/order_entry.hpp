@@ -32,7 +32,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
-  OrderEntry(OrderEntry &&) = default;
   OrderEntry(OrderEntry const &) = delete;
 
   bool ready() const { return status_ == ConnectionStatus::READY; }
