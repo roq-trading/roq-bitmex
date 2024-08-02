@@ -43,7 +43,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Stre
 
   MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &);
 
-  MarketData(MarketData &&) = delete;
+  MarketData(MarketData &&) = default;
   MarketData(MarketData const &) = delete;
 
   void operator()(Event<Start> const &);
