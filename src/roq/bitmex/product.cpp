@@ -7,6 +7,7 @@
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
+#include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
 
 namespace roq {
@@ -192,12 +193,11 @@ ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t
 
 MarketStatus Product::market_status(json::InstrumentItem const &item, uint16_t stream_id) const {
   assert(!std::empty(item.symbol));
-  auto trading_status = json::map(state_);
   return {
       .stream_id = stream_id,
       .exchange = shared_.settings.exchange,
       .symbol = item.symbol,
-      .trading_status = trading_status,
+      .trading_status = json::Map{state_},
   };
 }
 

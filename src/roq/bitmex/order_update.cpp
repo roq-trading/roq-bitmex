@@ -8,6 +8,7 @@
 
 #include "roq/bitmex/utils.hpp"
 
+#include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
@@ -21,11 +22,8 @@ namespace bitmex {
 
 void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const &trace_info, bool download) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  auto side = json::map(order_item.side);
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
-  auto order_type = json::map(order_item.ord_type);
-  auto time_in_force = json::map(order_item.time_in_force);
   auto request_type = order_item.ord_status == json::OrdStatus::CANCELED ? RequestType::CANCEL_ORDER : RequestType::UNDEFINED;
   auto request_status = order_item.ord_status == json::OrdStatus::REJECTED ? RequestStatus::REJECTED : RequestStatus::ACCEPTED;
   auto update_type = download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
@@ -44,12 +42,12 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
       .account = account_,
       .exchange = shared_.settings.exchange,
       .symbol = order_item.symbol,
-      .side = side,
+      .side = json::Map{order_item.side},
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = order_type,
-      .time_in_force = time_in_force,
+      .order_type = json::Map{order_item.ord_type},
+      .time_in_force = json::Map{order_item.time_in_force},
       .execution_instructions = {},
       .create_time_utc = {},
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
@@ -95,11 +93,8 @@ void OrderUpdate::operator()(
     [[maybe_unused]] uint64_t order_id,
     uint32_t version) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
-  auto side = json::map(order_item.side);
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
-  auto order_type = json::map(order_item.ord_type);
-  auto time_in_force = json::map(order_item.time_in_force);
   auto request_status = compute_request_status(order_item.ord_status);
   auto error = json::guess_error(order_item.ord_rej_reason);
   auto request_id = request_type != RequestType::CANCEL_ORDER ? order_item.cl_ord_id : std::string_view{};
@@ -118,12 +113,12 @@ void OrderUpdate::operator()(
       .account = account_,
       .exchange = shared_.settings.exchange,
       .symbol = order_item.symbol,
-      .side = side,
+      .side = json::Map{order_item.side},
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = order_type,
-      .time_in_force = time_in_force,
+      .order_type = json::Map{order_item.ord_type},
+      .time_in_force = json::Map{order_item.time_in_force},
       .execution_instructions = {},
       .create_time_utc = {},
       .update_time_utc = order_item.timestamp,  // XXX transact_time?

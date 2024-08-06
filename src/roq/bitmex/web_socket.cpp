@@ -20,6 +20,7 @@
 #include "roq/bitmex/order_update.hpp"
 #include "roq/bitmex/utils.hpp"
 
+#include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
@@ -367,12 +368,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
     auto &execution = event.value;
     log::info<2>("execution={}, action={}"sv, execution, action);
     for (auto &item : execution.data) {
-      auto order_status = json::map(item.ord_status);
-      auto side = json::map(item.side);
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
-      auto order_type = json::map(item.ord_type);
-      auto time_in_force = json::map(item.time_in_force);
-      auto last_liquidity = json::map(item.last_liquidity_ind);
       auto request_type = compute_request_type(item.exec_type);
       auto request_status = compute_request_status(item.exec_type);
       auto error = json::guess_error(item.ord_rej_reason);
@@ -393,19 +389,19 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .account = account_.name,
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
-          .side = side,
+          .side = json::Map{item.side},
           .position_effect = {},
           .margin_mode = {},
           .max_show_quantity = NaN,
-          .order_type = order_type,
-          .time_in_force = time_in_force,
+          .order_type = json::Map{item.ord_type},
+          .time_in_force = json::Map{item.time_in_force},
           .execution_instructions = {},
           .create_time_utc = {},
           .update_time_utc = item.timestamp,
           .external_account = external_account,
           .external_order_id = item.order_id,
           .client_order_id = {},
-          .order_status = order_status,
+          .order_status = json::Map{item.ord_status},
           .quantity = item.order_qty,
           .price = item.price,
           .stop_price = item.stop_px,
@@ -414,7 +410,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .average_traded_price = item.avg_px,
           .last_traded_quantity = item.last_qty,
           .last_traded_price = item.last_px,
-          .last_liquidity = last_liquidity,
+          .last_liquidity = json::Map{item.last_liquidity_ind},
           .routing_id = {},
           .max_request_version = {},
           .max_response_version = {},
@@ -450,7 +446,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .order_id = order_id,
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
-          .side = side,
+          .side = json::Map{item.side},
           .position_effect = {},
           .margin_mode = {},
           .create_time_utc = item.timestamp,

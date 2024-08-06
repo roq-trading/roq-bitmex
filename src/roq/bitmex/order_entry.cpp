@@ -20,6 +20,7 @@
 #include "roq/bitmex/order_update.hpp"
 
 #include "roq/bitmex/json/error_parser.hpp"
+#include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
@@ -219,9 +220,9 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
     auto method = web::http::Method::POST;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto side = json::map(create_order.side).as_raw_text();
-    auto ord_type = json::map(create_order.order_type).as_raw_text();
-    auto time_in_force = json::map(create_order.time_in_force).as_raw_text();
+    auto side = json::map<json::Side>(create_order.side).as_raw_text();
+    auto ord_type = json::map<json::OrdType>(create_order.order_type).as_raw_text();
+    auto time_in_force = json::map<json::TimeInForce>(create_order.time_in_force).as_raw_text();
     auto exec_inst = std::empty(create_order.execution_instructions) ? std::string_view{} : json::map(create_order.execution_instructions).as_raw_text();
     auto body = fmt::format(
         R"({{)"
