@@ -7,15 +7,15 @@
 
 #include "roq/mask.hpp"
 
-#include "roq/server/oms/exceptions.hpp"
-
 #include "roq/utils/update.hpp"
+
+#include "roq/utils/metrics/factory.hpp"
 
 #include "roq/web/socket/client.hpp"
 
 #include "roq/core/tools/exception.hpp"
 
-#include "roq/core/metrics/factory.hpp"
+#include "roq/server/oms/exceptions.hpp"
 
 #include "roq/bitmex/order_update.hpp"
 #include "roq/bitmex/utils.hpp"
@@ -77,8 +77,8 @@ auto create_connection(auto &handler, auto &settings, auto &context, auto &&crea
   return web::socket::Client::create(handler, context, config, std::move(create_upgrade_headers));
 }
 
-struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(auto &settings, auto const &group, auto const &function) : core::metrics::Factory(settings.app.name, group, function) {}
+struct create_metrics final : public utils::metrics::Factory {
+  create_metrics(auto &settings, auto &group, auto const &function) : utils::metrics::Factory{settings.app.name, group, function} {}
 };
 
 auto compute_expires() {

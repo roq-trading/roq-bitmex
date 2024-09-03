@@ -9,11 +9,11 @@
 
 #include "roq/utils/update.hpp"
 
+#include "roq/utils/metrics/factory.hpp"
+
 #include "roq/web/socket/client.hpp"
 
 #include "roq/core/tools/exception.hpp"
-
-#include "roq/core/metrics/factory.hpp"
 
 #include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
@@ -71,8 +71,8 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
   return web::socket::Client::create(handler, context, config, []() { return std::string(); });
 }
 
-struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(auto &settings, auto const &group, auto const &function) : core::metrics::Factory(settings.app.name, group, function) {}
+struct create_metrics final : public utils::metrics::Factory {
+  create_metrics(auto &settings, auto &group, auto const &function) : utils::metrics::Factory{settings.app.name, group, function} {}
 };
 }  // namespace
 
