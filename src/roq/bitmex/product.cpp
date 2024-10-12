@@ -170,6 +170,7 @@ ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t
       .security_type = {},  // XXX typ?
       .base_currency = settl_currency_,
       .quote_currency = quote_currency_,
+      .settlement_currency = {},
       .margin_currency = {},
       .commission_currency = {},
       .tick_size = tick_size_,

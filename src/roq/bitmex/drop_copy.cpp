@@ -444,6 +444,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .side = json::Map{item.side},
           .position_effect = {},
           .margin_mode = {},
+          .quantity_type = {},
           .create_time_utc = item.timestamp,
           .update_time_utc = item.timestamp,
           .external_account = external_account,
