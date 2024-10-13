@@ -25,6 +25,10 @@
     {
       "name": "timestamp",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "transactTime",
+      "type": "std/milliseconds"
     }
   ]
 }
