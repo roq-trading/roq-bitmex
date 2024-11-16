@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include "roq/utils/codec/hex.hpp"
 
