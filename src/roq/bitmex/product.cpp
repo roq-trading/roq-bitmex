@@ -175,6 +175,7 @@ ReferenceData Product::reference_data(json::InstrumentItem const &item, uint16_t
       .margin_currency = {},
       .commission_currency = {},
       .tick_size = tick_size_,
+      .tick_size_steps = {},
       .multiplier = multiplier_,
       .min_notional = NaN,
       .min_trade_vol = lot_size_,  // XXX correct?
