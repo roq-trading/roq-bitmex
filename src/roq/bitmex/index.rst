@@ -91,7 +91,7 @@ Installing
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/stable \
            roq-bitmex
 
@@ -99,7 +99,7 @@ Installing
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/unstable \
            roq-bitmex
 
