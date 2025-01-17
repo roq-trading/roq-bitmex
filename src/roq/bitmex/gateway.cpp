@@ -76,6 +76,22 @@ void Gateway::operator()(Event<Timer> const &event) {
   dispatch(event);
 }
 
+void Gateway::operator()(Event<Control> const &event) {
+  auto &[message_info, control] = event;
+  switch (control.action) {
+    using enum Action;
+    case UNDEFINED:
+      assert(false);
+      break;
+    case ENABLE:
+      dispatcher_(State::ENABLED);
+      break;
+    case DISABLE:
+      dispatcher_(State::DISABLED);
+      break;
+  }
+}
+
 void Gateway::operator()(Event<Connected> const &) {
 }
 
