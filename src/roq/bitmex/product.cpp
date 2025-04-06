@@ -44,47 +44,53 @@ bool Product::update(json::InstrumentItem const &item) {
   market_status_dirty_ |= item.state && utils::update(state_, item.state) != 0;
   // statistics update
   if (utils::update(settlement_price_, item.mark_price) != 0)
-    statistics_.emplace_back(Statistics{
-        .type = StatisticsType::SETTLEMENT_PRICE,
-        .value = settlement_price_,
-        .begin_time_utc = {},
-        .end_time_utc = {},
-    });
+    statistics_.emplace_back(
+        Statistics{
+            .type = StatisticsType::SETTLEMENT_PRICE,
+            .value = settlement_price_,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        });
   if (utils::update(open_interest_, item.open_interest) != 0)
-    statistics_.emplace_back(Statistics{
-        .type = StatisticsType::OPEN_INTEREST,
-        .value = open_interest_,
-        .begin_time_utc = {},
-        .end_time_utc = {},
-    });
+    statistics_.emplace_back(
+        Statistics{
+            .type = StatisticsType::OPEN_INTEREST,
+            .value = open_interest_,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        });
   if (utils::update(indicative_settle_price_, item.indicative_settle_price) != 0)
-    statistics_.emplace_back(Statistics{
-        .type = StatisticsType::PRE_SETTLEMENT_PRICE,
-        .value = indicative_settle_price_,
-        .begin_time_utc = {},
-        .end_time_utc = {},
-    });
+    statistics_.emplace_back(
+        Statistics{
+            .type = StatisticsType::PRE_SETTLEMENT_PRICE,
+            .value = indicative_settle_price_,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        });
   if (utils::update(limit_up_price_, item.limit_up_price) != 0)
-    statistics_.emplace_back(Statistics{
-        .type = StatisticsType::UPPER_LIMIT_PRICE,
-        .value = limit_up_price_,
-        .begin_time_utc = {},
-        .end_time_utc = {},
-    });
+    statistics_.emplace_back(
+        Statistics{
+            .type = StatisticsType::UPPER_LIMIT_PRICE,
+            .value = limit_up_price_,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        });
   if (utils::update(limit_down_price_, item.limit_down_price) != 0)
-    statistics_.emplace_back(Statistics{
-        .type = StatisticsType::LOWER_LIMIT_PRICE,
-        .value = limit_down_price_,
-        .begin_time_utc = {},
-        .end_time_utc = {},
-    });
+    statistics_.emplace_back(
+        Statistics{
+            .type = StatisticsType::LOWER_LIMIT_PRICE,
+            .value = limit_down_price_,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        });
   if (utils::update(fair_price_, item.fair_price) != 0)
-    statistics_.emplace_back(Statistics{
-        .type = StatisticsType::INDEX_VALUE,
-        .value = fair_price_,
-        .begin_time_utc = {},
-        .end_time_utc = {},
-    });
+    statistics_.emplace_back(
+        Statistics{
+            .type = StatisticsType::INDEX_VALUE,
+            .value = fair_price_,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        });
   // funding rate
   if (!std::isnan(item.funding_rate)) {
     using begin_time_t = decltype(Statistics::begin_time_utc);
@@ -97,23 +103,25 @@ bool Product::update(json::InstrumentItem const &item) {
     update_funding_rate |= utils::update(funding_rate_.begin_time_utc, begin_time_utc) != 0;
     update_funding_rate |= utils::update(funding_rate_.end_time_utc, end_time_utc) != 0;
     if (update_funding_rate) {
-      statistics_.emplace_back(Statistics{
-          .type = StatisticsType::FUNDING_RATE,
-          .value = funding_rate_.value,
-          .begin_time_utc = funding_rate_.begin_time_utc,
-          .end_time_utc = funding_rate_.end_time_utc,
-      });
+      statistics_.emplace_back(
+          Statistics{
+              .type = StatisticsType::FUNDING_RATE,
+              .value = funding_rate_.value,
+              .begin_time_utc = funding_rate_.begin_time_utc,
+              .end_time_utc = funding_rate_.end_time_utc,
+          });
     }
   }
   // indicative funding rate
   if (!std::isnan(item.indicative_funding_rate)) {
     if (utils::update(indicative_funding_rate_.value, item.indicative_funding_rate) != 0) {
-      statistics_.emplace_back(Statistics{
-          .type = StatisticsType::FUNDING_RATE_PREDICTION,
-          .value = indicative_funding_rate_.value,
-          .begin_time_utc = {},
-          .end_time_utc = {},
-      });
+      statistics_.emplace_back(
+          Statistics{
+              .type = StatisticsType::FUNDING_RATE_PREDICTION,
+              .value = indicative_funding_rate_.value,
+              .begin_time_utc = {},
+              .end_time_utc = {},
+          });
     }
   }
   return market_status_dirty_ || !std::empty(statistics_);
@@ -200,7 +208,7 @@ MarketStatus Product::market_status(json::InstrumentItem const &item, uint16_t s
       .stream_id = stream_id,
       .exchange = shared_.settings.exchange,
       .symbol = item.symbol,
-      .trading_status = json::Map{state_},
+      .trading_status = map(state_),
   };
 }
 

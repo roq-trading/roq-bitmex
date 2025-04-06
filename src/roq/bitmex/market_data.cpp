@@ -606,7 +606,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
     shared_.trades.clear();
     auto emplace_back = [](auto &result, auto &value) {
       auto trade = Trade{
-          .side = json::Map{value.side},
+          .side = map(value.side),
           .price = value.price,
           .quantity = value.size,
           .trade_id = value.trd_match_id,

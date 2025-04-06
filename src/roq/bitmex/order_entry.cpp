@@ -220,9 +220,9 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
     auto method = web::http::Method::POST;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto side = json::map<json::Side>(create_order.side).as_raw_text();
-    auto ord_type = json::map<json::OrdType>(create_order.order_type).as_raw_text();
-    auto time_in_force = json::map<json::TimeInForce>(create_order.time_in_force).as_raw_text();
+    auto side = map(create_order.side).template get<json::Side>();
+    auto ord_type = map(create_order.order_type).template get<json::OrdType>();
+    auto time_in_force = map(create_order.time_in_force).template get<json::TimeInForce>();
     auto exec_inst = std::empty(create_order.execution_instructions) ? std::string_view{} : json::map(create_order.execution_instructions).as_raw_text();
     auto body = fmt::format(
         R"({{)"
@@ -237,11 +237,11 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
         R"(}})"sv,
         request_id,
         create_order.symbol,
-        side,
+        side.as_raw_text(),
         create_order.price,
         create_order.quantity,
-        ord_type,
-        time_in_force,
+        ord_type.as_raw_text(),
+        time_in_force.as_raw_text(),
         exec_inst);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
