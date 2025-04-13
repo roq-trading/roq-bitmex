@@ -51,6 +51,7 @@ target_link_libraries(
           ${PROJECT_NAME}-tools
           roq-api::roq-api
           roq-core::roq-core
+          roq-codec::roq-codec
           roq-flags::roq-flags
           roq-io::roq-io
           roq-logging::roq-logging
