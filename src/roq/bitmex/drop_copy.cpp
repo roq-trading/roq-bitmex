@@ -9,11 +9,11 @@
 
 #include "roq/utils/update.hpp"
 
+#include "roq/utils/exceptions/unhandled.hpp"
+
 #include "roq/utils/metrics/factory.hpp"
 
 #include "roq/web/socket/client.hpp"
-
-#include "roq/core/tools/exception.hpp"
 
 #include "roq/bitmex/order_update.hpp"
 #include "roq/bitmex/utils.hpp"
@@ -287,7 +287,7 @@ void DropCopy::parse(std::string_view const &message) {
         log_message();
     } catch (...) {
       log_message();
-      core::tools::UnhandledException::terminate();
+      utils::exceptions::Unhandled::terminate();
     }
   });
 }
