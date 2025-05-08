@@ -34,8 +34,9 @@ std::string Crypto::create_signature(std::chrono::nanoseconds expires, web::http
   mac_.update(method_);
   mac_.update(path);
   mac_.update(expires_);
-  if (!std::empty(body))
+  if (!std::empty(body)) {
     mac_.update(body);
+  }
   auto digest = mac_.final(digest_);
   std::string result;
   utils::codec::Hex::encode(result, digest);

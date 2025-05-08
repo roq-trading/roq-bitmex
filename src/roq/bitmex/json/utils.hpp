@@ -40,10 +40,12 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
 
 inline json::ExecInst map(Mask<roq::ExecutionInstruction> execution_instructions) {
   // XXX support multiple?
-  if (execution_instructions.has(roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE))
+  if (execution_instructions.has(roq::ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE)) {
     return json::ExecInst::PARTICIPATE_DO_NOT_INITIATE;
-  if (execution_instructions.has(roq::ExecutionInstruction::DO_NOT_INCREASE))
+  }
+  if (execution_instructions.has(roq::ExecutionInstruction::DO_NOT_INCREASE)) {
     return json::ExecInst::REDUCE_ONLY;
+  }
   return {};
 }
 

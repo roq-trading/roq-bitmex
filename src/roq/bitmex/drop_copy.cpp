@@ -123,8 +123,9 @@ void DropCopy::operator()(Event<Stop> const &) {
 }
 
 void DropCopy::operator()(Event<Timer> const &event) {
-  if (!(*connection_).refresh(event.value.now))
+  if (!(*connection_).refresh(event.value.now)) {
     return;
+  }
   if (shared_.settings.ws.cancel_on_disconnect && shared_.settings.ws.cancel_all_after.count() && ready_ && next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ = event.value.now + shared_.settings.ws.cancel_all_after / 4;
     send_cancel_all_after(shared_.settings.ws.cancel_all_after);
@@ -283,8 +284,9 @@ void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     try {
-      if (!parse_helper(message))
+      if (!parse_helper(message)) {
         log_message();
+      }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
@@ -318,8 +320,9 @@ void DropCopy::operator()(Trace<json::Handshake> const &event) {
     log::info<2>("handshake={}"sv, handshake);
     (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
-    if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0)
+    if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0) {
       send_cancel_all_after(std::chrono::seconds{});
+    }
   });
 }
 
@@ -424,8 +427,9 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
       } else {
         log::warn<1>("*** EXTERNAL ORDER ***"sv);
       }
-      if (item.exec_type != json::ExecType::TRADE)
+      if (item.exec_type != json::ExecType::TRADE) {
         continue;
+      }
       auto fill = Fill{
           .external_trade_id = item.trd_match_id,
           .quantity = item.last_qty,

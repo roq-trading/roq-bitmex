@@ -79,8 +79,9 @@ void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const 
 }
 
 void OrderUpdate::operator()(json::Order const &order, TraceInfo const &trace_info, bool download) {
-  for (auto &iter : order.data)
+  for (auto &iter : order.data) {
     (*this)(iter, trace_info, download);
+  }
 }
 
 // order entry
@@ -151,8 +152,9 @@ void OrderUpdate::operator()(
 
 void OrderUpdate::operator()(
     json::Order const &order, TraceInfo const &trace_info, RequestType request_type, uint8_t user_id, uint64_t order_id, uint32_t version) {
-  for (auto &iter : order.data)
+  for (auto &iter : order.data) {
     (*this)(iter, trace_info, request_type, user_id, order_id, version);
+  }
 }
 
 }  // namespace bitmex

@@ -128,8 +128,9 @@ void WebSocket::operator()(Event<Stop> const &) {
 }
 
 void WebSocket::operator()(Event<Timer> const &event) {
-  if (!(*connection_).refresh(event.value.now))
+  if (!(*connection_).refresh(event.value.now)) {
     return;
+  }
   if (shared_.settings.ws.cancel_on_disconnect && shared_.settings.ws.cancel_all_after.count() && ready_ && next_cancel_all_after_ <= event.value.now) {
     next_cancel_all_after_ = event.value.now + shared_.settings.ws.cancel_all_after / 4;
     send_cancel_all_after(shared_.settings.ws.cancel_all_after);
@@ -245,8 +246,9 @@ void WebSocket::operator()(ConnectionStatus status) {
 
 void WebSocket::create_order(Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
   profile_.create_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
   });
 }
 
@@ -258,8 +260,9 @@ void WebSocket::modify_order(
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
   });
 }
 
@@ -271,8 +274,9 @@ void WebSocket::cancel_order(
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
   });
 }
 
@@ -316,8 +320,9 @@ void WebSocket::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     try {
-      if (!parse_helper(message))
+      if (!parse_helper(message)) {
         log_message();
+      }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
@@ -351,8 +356,9 @@ void WebSocket::operator()(Trace<json::Handshake> const &event) {
     log::info<2>("handshake={}"sv, handshake);
     (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
-    if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0)
+    if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0) {
       send_cancel_all_after(std::chrono::seconds{});
+    }
   });
 }
 
@@ -429,8 +435,9 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
       } else {
         log::warn<1>("*** EXTERNAL ORDER ***"sv);
       }
-      if (item.exec_type != json::ExecType::TRADE)
+      if (item.exec_type != json::ExecType::TRADE) {
         continue;
+      }
       auto fill = Fill{
           .external_trade_id = item.trd_match_id,
           .quantity = item.last_qty,

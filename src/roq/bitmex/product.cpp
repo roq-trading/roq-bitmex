@@ -43,7 +43,7 @@ bool Product::update(json::InstrumentItem const &item) {
   // market status
   market_status_dirty_ |= item.state && utils::update(state_, item.state) != 0;
   // statistics update
-  if (utils::update(settlement_price_, item.mark_price) != 0)
+  if (utils::update(settlement_price_, item.mark_price) != 0) {
     statistics_.emplace_back(
         Statistics{
             .type = StatisticsType::SETTLEMENT_PRICE,
@@ -51,7 +51,8 @@ bool Product::update(json::InstrumentItem const &item) {
             .begin_time_utc = {},
             .end_time_utc = {},
         });
-  if (utils::update(open_interest_, item.open_interest) != 0)
+  }
+  if (utils::update(open_interest_, item.open_interest) != 0) {
     statistics_.emplace_back(
         Statistics{
             .type = StatisticsType::OPEN_INTEREST,
@@ -59,7 +60,8 @@ bool Product::update(json::InstrumentItem const &item) {
             .begin_time_utc = {},
             .end_time_utc = {},
         });
-  if (utils::update(indicative_settle_price_, item.indicative_settle_price) != 0)
+  }
+  if (utils::update(indicative_settle_price_, item.indicative_settle_price) != 0) {
     statistics_.emplace_back(
         Statistics{
             .type = StatisticsType::PRE_SETTLEMENT_PRICE,
@@ -67,7 +69,8 @@ bool Product::update(json::InstrumentItem const &item) {
             .begin_time_utc = {},
             .end_time_utc = {},
         });
-  if (utils::update(limit_up_price_, item.limit_up_price) != 0)
+  }
+  if (utils::update(limit_up_price_, item.limit_up_price) != 0) {
     statistics_.emplace_back(
         Statistics{
             .type = StatisticsType::UPPER_LIMIT_PRICE,
@@ -75,7 +78,8 @@ bool Product::update(json::InstrumentItem const &item) {
             .begin_time_utc = {},
             .end_time_utc = {},
         });
-  if (utils::update(limit_down_price_, item.limit_down_price) != 0)
+  }
+  if (utils::update(limit_down_price_, item.limit_down_price) != 0) {
     statistics_.emplace_back(
         Statistics{
             .type = StatisticsType::LOWER_LIMIT_PRICE,
@@ -83,7 +87,8 @@ bool Product::update(json::InstrumentItem const &item) {
             .begin_time_utc = {},
             .end_time_utc = {},
         });
-  if (utils::update(fair_price_, item.fair_price) != 0)
+  }
+  if (utils::update(fair_price_, item.fair_price) != 0) {
     statistics_.emplace_back(
         Statistics{
             .type = StatisticsType::INDEX_VALUE,
@@ -91,6 +96,7 @@ bool Product::update(json::InstrumentItem const &item) {
             .begin_time_utc = {},
             .end_time_utc = {},
         });
+  }
   // funding rate
   if (!std::isnan(item.funding_rate)) {
     using begin_time_t = decltype(Statistics::begin_time_utc);

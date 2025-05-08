@@ -30,14 +30,16 @@ struct Config final : public server::config::Dispatcher, public server::config::
 
   auto const &get_api_key() const {
     using namespace std::literals;
-    if (std::size(accounts) != 1)
+    if (std::size(accounts) != 1) {
       throw RuntimeError{"More accounts not yet supported"sv};
+    }
     return (*std::begin(accounts)).second.login;
   }
   auto const &get_secret() const {
     using namespace std::literals;
-    if (std::size(accounts) != 1)
+    if (std::size(accounts) != 1) {
       throw RuntimeError{"More accounts not yet supported"sv};
+    }
     return (*std::begin(accounts)).second.secret;
   }
 

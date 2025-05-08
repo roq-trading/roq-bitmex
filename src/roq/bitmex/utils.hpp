@@ -58,17 +58,19 @@ inline OrderStatus compute_order_status(json::OrdStatus ord_status, bool working
     case UNDEFINED__:
     case UNKNOWN__:
       // note! back-stop in case we didn't parse OrdStatus
-      if (working_status)
+      if (working_status) {
         return OrderStatus::WORKING;
+      }
       break;
     case PENDING_NEW:
       return OrderStatus::SENT;
     case NEW:
     case TRIGGERED:
-      if (!working_status)
+      if (!working_status) {
         return OrderStatus::ACCEPTED;
-      else
+      } else {
         return OrderStatus::WORKING;
+      }
     case DONE_FOR_DAY:
       return OrderStatus::SUSPENDED;
     case PARTIALLY_FILLED:

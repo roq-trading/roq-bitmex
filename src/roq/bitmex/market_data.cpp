@@ -303,8 +303,9 @@ void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto log_message = [&]() { log::info<4>(R"(message="{}")"sv, message); };
     try {
-      if (!parse_helper(message))
+      if (!parse_helper(message)) {
         log_message();
+      }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
@@ -446,8 +447,9 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
         // only process after "partial" (as per bitmex documentation)
         if (partial_received_.instrument) {
           for (auto &item : instrument.data) {
-            if (shared_.discard_symbol(item.symbol))
+            if (shared_.discard_symbol(item.symbol)) {
               continue;
+            }
             auto &product = find_product(item);
             if (product.update(item)) {
               if (product.is_market_status_dirty()) {
@@ -490,8 +492,9 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
     // note!
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
-    if (!snapshot && !partial_received_.order_book_l2)
+    if (!snapshot && !partial_received_.order_book_l2) {
       return;
+    }
     bool discard = true;
     std::string_view previous;
     std::chrono::nanoseconds timestamp = {};
@@ -509,8 +512,9 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
       result.emplace_back(std::move(mbp_update));
     };
     auto publish = [&]() {
-      if (!std::empty(previous) && !(std::empty(shared_.bids) && std::empty(shared_.asks)))
+      if (!std::empty(previous) && !(std::empty(shared_.bids) && std::empty(shared_.asks))) {
         publish_market_by_price(trace_info, false, previous, shared_.bids, shared_.asks, snapshot, timestamp);
+      }
     };
     for (auto &item : order_book_l2.data) {
       if (std::empty(previous)) {
@@ -524,8 +528,9 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
         shared_.bids.clear();
         shared_.asks.clear();
       }
-      if (discard)
+      if (discard) {
         continue;
+      }
       utils::update_max(timestamp, item.timestamp);
       auto [price, size] = shared_.price_cache(action, item.id, item.price, item.size);
       if (!std::isnan(price)) {
@@ -547,8 +552,9 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
         return;
       }
     }
-    if (!std::empty(previous) && !(std::empty(shared_.bids) && std::empty(shared_.asks)))
+    if (!std::empty(previous) && !(std::empty(shared_.bids) && std::empty(shared_.asks))) {
       publish();
+    }
     // state management
     if (snapshot) {
       partial_received_.order_book_l2 = true;
@@ -564,8 +570,9 @@ void MarketData::operator()(Trace<json::Quote> const &event, json::Action action
     log::info<4>("quote={}, action={}"sv, quote, action);
     (*connection_).touch(trace_info.source_receive_time);
     for (auto &item : quote.data) {
-      if (shared_.discard_symbol(item.symbol))
+      if (shared_.discard_symbol(item.symbol)) {
         continue;
+      }
       auto top_of_book = TopOfBook{
           .stream_id = stream_id_,
           .exchange = shared_.settings.exchange,
@@ -601,8 +608,9 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
     auto &trade = event.value;
     log::info<4>("trade={}, action={}"sv, trade, action);
     (*connection_).touch(trace_info.source_receive_time);
-    if (action != json::Action::INSERT)
+    if (action != json::Action::INSERT) {
       return;
+    }
     shared_.trades.clear();
     auto emplace_back = [](auto &result, auto &value) {
       auto trade = Trade{
@@ -633,8 +641,9 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
       timestamp = std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));
       if (item.symbol.compare(previous) != 0) {
         if (!std::empty(previous) && !std::empty(shared_.trades)) {
-          if (!shared_.discard_symbol(previous))
+          if (!shared_.discard_symbol(previous)) {
             dispatch(previous, false);
+          }
         }
         previous = item.symbol;
         shared_.trades.clear();
@@ -643,8 +652,9 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
       emplace_back(shared_.trades, item);
     }
     if (!std::empty(previous) && !std::empty(shared_.trades)) {
-      if (!shared_.discard_symbol(previous))
+      if (!shared_.discard_symbol(previous)) {
         dispatch(previous, true);
+      }
     }
   });
 }
@@ -701,10 +711,12 @@ void MarketData::publish_market_by_price(
     bool snapshot,
     std::chrono::nanoseconds const exchange_time_utc) {
   assert(!(std::empty(bids) && std::empty(asks)));
-  if (shared_.discard_symbol(symbol))
+  if (shared_.discard_symbol(symbol)) {
     return;
-  if (snapshot)
+  }
+  if (snapshot) {
     log::info<1>(R"(Received market data snapshot for symbol="{}")"sv, symbol);
+  }
   auto market_by_price_update = MarketByPriceUpdate{
       .stream_id = stream_id_,
       .exchange = shared_.settings.exchange,

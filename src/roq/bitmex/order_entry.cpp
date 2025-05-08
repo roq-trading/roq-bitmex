@@ -214,8 +214,9 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &, std::string_view const &request_id) {
   profile_.create_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, create_order] = event;
     auto method = web::http::Method::POST;
     auto path = shared_.api.order_management.order;
@@ -295,8 +296,9 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
 void OrderEntry::modify_order(
     Event<ModifyOrder> const &event, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, modify_order] = event;
     auto method = web::http::Method::PUT;
     auto path = shared_.api.order_management.order;
@@ -367,8 +369,9 @@ void OrderEntry::cancel_order(
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, cancel_order] = event;
     auto method = web::http::Method::DELETE;
     auto path = shared_.api.order_management.order;
@@ -429,8 +432,9 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
 
 void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
-    if (!ready()) [[unlikely]]
+    if (!ready()) [[unlikely]] {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, cancel_all_orders] = event;
     auto send_ack = [&]() {
       auto cancel_all_orders_ack = CancelAllOrdersAck{

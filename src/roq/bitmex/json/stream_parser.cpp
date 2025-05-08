@@ -300,8 +300,9 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
         return true;
       }
       case TABLE:
-        if (dispatched)
+        if (dispatched) {
           return true;
+        }
         // perhaps we were just unlucky with the ordering of keys
         // XXX increment warning counter
         break;
