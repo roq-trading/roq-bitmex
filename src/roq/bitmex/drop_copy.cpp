@@ -22,7 +22,7 @@
 #include "roq/bitmex/json/utils.hpp"
 
 using namespace std::literals;
-using namespace std::chrono_literals;  // NOLINT
+using namespace std::chrono_literals;
 
 namespace roq {
 namespace bitmex {
