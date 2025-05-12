@@ -16,7 +16,7 @@ namespace bitmex {
 namespace {
 template <typename R>
 R create_accounts(auto &settings, auto &config) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[_, account] : config.accounts) {
     result.try_emplace(static_cast<std::string_view>(account.name), std::make_unique<Account>(settings, config, account.name));
@@ -26,7 +26,7 @@ R create_accounts(auto &settings, auto &config) {
 
 template <typename R>
 R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[name, account] : accounts) {
     result.try_emplace(static_cast<std::string_view>(name), std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
@@ -36,7 +36,7 @@ R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accoun
 
 template <typename R>
 R create_web_socket(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[name, account] : accounts) {
     result.try_emplace(static_cast<std::string_view>(name), std::make_unique<WebSocket>(gateway, context, ++stream_id, *account, shared));
@@ -46,7 +46,7 @@ R create_web_socket(auto &gateway, auto &context, auto &stream_id, auto &account
 
 template <typename R>
 R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[name, account] : accounts) {
     result.try_emplace(static_cast<std::string_view>(name), std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
