@@ -429,6 +429,14 @@
     {
       "name": "minTick",
       "type": "std/double"
+    },
+    {
+      "name": "fundingBaseRate",
+      "type": "std/double"
+    },
+    {
+      "name": "fundingQuoteRate",
+      "type": "std/double"
     }
   ]
 }
