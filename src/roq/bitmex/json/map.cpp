@@ -20,9 +20,9 @@ template <>
 constexpr Helper<bitmex::json::LiquidityInd>::operator std::optional<roq::Liquidity>() const {
   switch (std::get<0>(args_)) {
     using enum bitmex::json::LiquidityInd::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::Liquidity::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::Liquidity::UNDEFINED;
     case ADDED_LIQUIDITY:
       return roq::Liquidity::MAKER;
@@ -32,7 +32,7 @@ constexpr Helper<bitmex::json::LiquidityInd>::operator std::optional<roq::Liquid
   return {};
 }
 
-static_assert(Helper{bitmex::json::LiquidityInd{bitmex::json::LiquidityInd::UNDEFINED__}} == roq::Liquidity::UNDEFINED);
+static_assert(Helper{bitmex::json::LiquidityInd{bitmex::json::LiquidityInd::_UNDEFINED}} == roq::Liquidity::UNDEFINED);
 static_assert(Helper{bitmex::json::LiquidityInd{bitmex::json::LiquidityInd::ADDED_LIQUIDITY}} == roq::Liquidity::MAKER);
 static_assert(Helper{bitmex::json::LiquidityInd{bitmex::json::LiquidityInd::REMOVED_LIQUIDITY}} == roq::Liquidity::TAKER);
 
@@ -49,9 +49,9 @@ template <>
 constexpr Helper<bitmex::json::OrdStatus>::operator std::optional<roq::OrderStatus>() const {
   switch (std::get<0>(args_)) {
     using enum bitmex::json::OrdStatus::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::OrderStatus::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::OrderStatus::UNDEFINED;
     case CANCELED:
       return roq::OrderStatus::CANCELED;
@@ -81,7 +81,7 @@ constexpr Helper<bitmex::json::OrdStatus>::operator std::optional<roq::OrderStat
   return {};
 }
 
-static_assert(Helper{bitmex::json::OrdStatus{bitmex::json::OrdStatus::UNDEFINED__}} == roq::OrderStatus::UNDEFINED);
+static_assert(Helper{bitmex::json::OrdStatus{bitmex::json::OrdStatus::_UNDEFINED}} == roq::OrderStatus::UNDEFINED);
 static_assert(Helper{bitmex::json::OrdStatus{bitmex::json::OrdStatus::CANCELED}} == roq::OrderStatus::CANCELED);
 static_assert(Helper{bitmex::json::OrdStatus{bitmex::json::OrdStatus::DONE_FOR_DAY}} == roq::OrderStatus::SUSPENDED);
 static_assert(Helper{bitmex::json::OrdStatus{bitmex::json::OrdStatus::EXPIRED}} == roq::OrderStatus::EXPIRED);
@@ -108,9 +108,9 @@ template <>
 constexpr Helper<bitmex::json::OrdType>::operator std::optional<roq::OrderType>() const {
   switch (std::get<0>(args_)) {
     using enum bitmex::json::OrdType::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::OrderType::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::OrderType::UNDEFINED;
     case LIMIT:
       return roq::OrderType::LIMIT;
@@ -128,7 +128,7 @@ constexpr Helper<bitmex::json::OrdType>::operator std::optional<roq::OrderType>(
   return {};
 }
 
-static_assert(Helper{bitmex::json::OrdType{bitmex::json::OrdType::UNDEFINED__}} == roq::OrderType::UNDEFINED);
+static_assert(Helper{bitmex::json::OrdType{bitmex::json::OrdType::_UNDEFINED}} == roq::OrderType::UNDEFINED);
 static_assert(Helper{bitmex::json::OrdType{bitmex::json::OrdType::LIMIT}} == roq::OrderType::LIMIT);
 static_assert(Helper{bitmex::json::OrdType{bitmex::json::OrdType::MARKET}} == roq::OrderType::MARKET);
 static_assert(Helper{bitmex::json::OrdType{bitmex::json::OrdType::STOP}} == roq::OrderType::MARKET);
@@ -149,9 +149,9 @@ template <>
 constexpr Helper<bitmex::json::Side>::operator std::optional<roq::Side>() const {
   switch (std::get<0>(args_)) {
     using enum bitmex::json::Side::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::Side::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::Side::UNDEFINED;
     case BUY:
       return roq::Side::BUY;
@@ -161,7 +161,7 @@ constexpr Helper<bitmex::json::Side>::operator std::optional<roq::Side>() const 
   return {};
 }
 
-static_assert(Helper{bitmex::json::Side{bitmex::json::Side::UNDEFINED__}} == roq::Side::UNDEFINED);
+static_assert(Helper{bitmex::json::Side{bitmex::json::Side::_UNDEFINED}} == roq::Side::UNDEFINED);
 static_assert(Helper{bitmex::json::Side{bitmex::json::Side::BUY}} == roq::Side::BUY);
 static_assert(Helper{bitmex::json::Side{bitmex::json::Side::SELL}} == roq::Side::SELL);
 
@@ -178,9 +178,9 @@ template <>
 constexpr Helper<bitmex::json::State>::operator std::optional<roq::TradingStatus>() const {
   switch (std::get<0>(args_)) {
     using enum bitmex::json::State::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::TradingStatus::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::TradingStatus::UNDEFINED;
     case OPEN:
       return roq::TradingStatus::OPEN;
@@ -196,7 +196,7 @@ constexpr Helper<bitmex::json::State>::operator std::optional<roq::TradingStatus
   return {};
 }
 
-static_assert(Helper{bitmex::json::State{bitmex::json::State::UNDEFINED__}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{bitmex::json::State{bitmex::json::State::_UNDEFINED}} == roq::TradingStatus::UNDEFINED);
 static_assert(Helper{bitmex::json::State{bitmex::json::State::OPEN}} == roq::TradingStatus::OPEN);
 static_assert(Helper{bitmex::json::State{bitmex::json::State::CLOSED}} == roq::TradingStatus::CLOSE);
 static_assert(Helper{bitmex::json::State{bitmex::json::State::SETTLED}} == roq::TradingStatus::UNDEFINED);
@@ -216,9 +216,9 @@ template <>
 constexpr Helper<bitmex::json::TimeInForce>::operator std::optional<roq::TimeInForce>() const {
   switch (std::get<0>(args_)) {
     using enum bitmex::json::TimeInForce::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::TimeInForce::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::TimeInForce::UNDEFINED;
     case AT_THE_CLOSE:
       return roq::TimeInForce::AT_THE_CLOSE;
@@ -234,7 +234,7 @@ constexpr Helper<bitmex::json::TimeInForce>::operator std::optional<roq::TimeInF
   return {};
 }
 
-static_assert(Helper{bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__}} == roq::TimeInForce::UNDEFINED);
+static_assert(Helper{bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED}} == roq::TimeInForce::UNDEFINED);
 static_assert(Helper{bitmex::json::TimeInForce{bitmex::json::TimeInForce::AT_THE_CLOSE}} == roq::TimeInForce::AT_THE_CLOSE);
 static_assert(Helper{bitmex::json::TimeInForce{bitmex::json::TimeInForce::DAY}} == roq::TimeInForce::GFD);
 static_assert(Helper{bitmex::json::TimeInForce{bitmex::json::TimeInForce::FILL_OR_KILL}} == roq::TimeInForce::FOK);
@@ -257,7 +257,7 @@ constexpr Helper<roq::OrderType>::operator std::optional<bitmex::json::OrdType>(
   switch (std::get<0>(args_)) {
     using enum roq::OrderType;
     case UNDEFINED:
-      return bitmex::json::OrdType::UNDEFINED__;
+      return bitmex::json::OrdType::_UNDEFINED;
     case MARKET:
       return bitmex::json::OrdType::MARKET;
     case LIMIT:
@@ -266,7 +266,7 @@ constexpr Helper<roq::OrderType>::operator std::optional<bitmex::json::OrdType>(
   return {};
 }
 
-static_assert(Helper{roq::OrderType::UNDEFINED} == bitmex::json::OrdType{bitmex::json::OrdType::UNDEFINED__});
+static_assert(Helper{roq::OrderType::UNDEFINED} == bitmex::json::OrdType{bitmex::json::OrdType::_UNDEFINED});
 static_assert(Helper{roq::OrderType::MARKET} == bitmex::json::OrdType{bitmex::json::OrdType::MARKET});
 static_assert(Helper{roq::OrderType::LIMIT} == bitmex::json::OrdType{bitmex::json::OrdType::LIMIT});
 
@@ -284,7 +284,7 @@ constexpr Helper<roq::Side>::operator std::optional<bitmex::json::Side>() const 
   switch (std::get<0>(args_)) {
     using enum roq::Side;
     case UNDEFINED:
-      return bitmex::json::Side::UNDEFINED__;
+      return bitmex::json::Side::_UNDEFINED;
     case BUY:
       return bitmex::json::Side::BUY;
     case SELL:
@@ -293,7 +293,7 @@ constexpr Helper<roq::Side>::operator std::optional<bitmex::json::Side>() const 
   return {};
 }
 
-static_assert(Helper{roq::Side::UNDEFINED} == bitmex::json::Side{bitmex::json::Side::UNDEFINED__});
+static_assert(Helper{roq::Side::UNDEFINED} == bitmex::json::Side{bitmex::json::Side::_UNDEFINED});
 static_assert(Helper{roq::Side::BUY} == bitmex::json::Side{bitmex::json::Side::BUY});
 static_assert(Helper{roq::Side::SELL} == bitmex::json::Side{bitmex::json::Side::SELL});
 
@@ -311,51 +311,51 @@ constexpr Helper<roq::TimeInForce>::operator std::optional<bitmex::json::TimeInF
   switch (std::get<0>(args_)) {
     using enum roq::TimeInForce;
     case UNDEFINED:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case GFD:
       return bitmex::json::TimeInForce::DAY;
     case GTC:
       return bitmex::json::TimeInForce::GOOD_TILL_CANCEL;
     case OPG:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case IOC:
       return bitmex::json::TimeInForce::IMMEDIATE_OR_CANCEL;
     case FOK:
       return bitmex::json::TimeInForce::FILL_OR_KILL;
     case GTD:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case GTX:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case AT_THE_CLOSE:
       return bitmex::json::TimeInForce::AT_THE_CLOSE;
     case GOOD_THROUGH_CROSSING:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case AT_CROSSING:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case GOOD_FOR_TIME:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case GFA:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
     case GFM:
-      return bitmex::json::TimeInForce::UNDEFINED__;
+      return bitmex::json::TimeInForce::_UNDEFINED;
   }
   return {};
 }
 
-static_assert(Helper{roq::TimeInForce::UNDEFINED} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
+static_assert(Helper{roq::TimeInForce::UNDEFINED} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
 static_assert(Helper{roq::TimeInForce::GFD} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::DAY});
 static_assert(Helper{roq::TimeInForce::GTC} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::GOOD_TILL_CANCEL});
-static_assert(Helper{roq::TimeInForce::OPG} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
+static_assert(Helper{roq::TimeInForce::OPG} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
 static_assert(Helper{roq::TimeInForce::IOC} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::IMMEDIATE_OR_CANCEL});
 static_assert(Helper{roq::TimeInForce::FOK} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::FILL_OR_KILL});
-static_assert(Helper{roq::TimeInForce::GTD} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
-static_assert(Helper{roq::TimeInForce::GTX} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
+static_assert(Helper{roq::TimeInForce::GTD} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
+static_assert(Helper{roq::TimeInForce::GTX} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
 static_assert(Helper{roq::TimeInForce::AT_THE_CLOSE} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::AT_THE_CLOSE});
-static_assert(Helper{roq::TimeInForce::GOOD_THROUGH_CROSSING} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
-static_assert(Helper{roq::TimeInForce::AT_CROSSING} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
-static_assert(Helper{roq::TimeInForce::GOOD_FOR_TIME} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
-static_assert(Helper{roq::TimeInForce::GFA} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
-static_assert(Helper{roq::TimeInForce::GFM} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::UNDEFINED__});
+static_assert(Helper{roq::TimeInForce::GOOD_THROUGH_CROSSING} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
+static_assert(Helper{roq::TimeInForce::AT_CROSSING} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
+static_assert(Helper{roq::TimeInForce::GOOD_FOR_TIME} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
+static_assert(Helper{roq::TimeInForce::GFA} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
+static_assert(Helper{roq::TimeInForce::GFM} == bitmex::json::TimeInForce{bitmex::json::TimeInForce::_UNDEFINED});
 
 template <>
 template <>

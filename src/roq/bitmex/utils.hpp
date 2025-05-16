@@ -13,8 +13,8 @@ namespace bitmex {
 inline RequestType compute_request_type(json::ExecType exec_type) {
   switch (exec_type) {
     using enum json::ExecType::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
+    case _UNDEFINED:
+    case _UNKNOWN:
       break;
     case NEW:
       return RequestType::CREATE_ORDER;
@@ -35,8 +35,8 @@ inline RequestType compute_request_type(json::ExecType exec_type) {
 inline RequestStatus compute_request_status(json::ExecType exec_type) {
   switch (exec_type) {
     using enum json::ExecType::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
+    case _UNDEFINED:
+    case _UNKNOWN:
       break;
     case NEW:
     case REPLACED:
@@ -55,8 +55,8 @@ inline RequestStatus compute_request_status(json::ExecType exec_type) {
 inline OrderStatus compute_order_status(json::OrdStatus ord_status, bool working_status) {
   switch (ord_status) {
     using enum json::OrdStatus::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
+    case _UNDEFINED:
+    case _UNKNOWN:
       // note! back-stop in case we didn't parse OrdStatus
       if (working_status) {
         return OrderStatus::WORKING;
@@ -96,8 +96,8 @@ inline OrderStatus compute_order_status(json::OrdStatus ord_status, bool working
 inline RequestStatus compute_request_status(json::OrdStatus ord_status) {
   switch (ord_status) {
     using enum json::OrdStatus::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
+    case _UNDEFINED:
+    case _UNKNOWN:
       break;
     case PENDING_NEW:
       return RequestStatus::ACCEPTED;

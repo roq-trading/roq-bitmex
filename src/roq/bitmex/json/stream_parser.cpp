@@ -44,8 +44,8 @@ void update(Type &result, Type const type) {
 bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
-  auto table = Table::UNKNOWN__;
-  auto action = Action::UNKNOWN__;
+  auto table = Table::_UNKNOWN;
+  auto action = Action::_UNKNOWN;
   bool dispatched = false;
   for (int i = 0; i < 2; ++i) {
     core::json::Parser parser{message};
@@ -54,10 +54,10 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
       Field field{key};
       switch (field) {
         using enum Field::type_t;
-        case UNDEFINED__:
+        case _UNDEFINED:
           log::warn("Unexpected"sv);
           return false;  // note!
-        case UNKNOWN__:
+        case _UNKNOWN:
           log::warn(R"(Unknown key="{}")"sv, key);
           return false;  // note!
         case ACTION:
@@ -74,14 +74,14 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
           update(type, Type::CANCEL_ALL_AFTER);
           break;
         case DATA:
-          if (action == Action::UNKNOWN__) {
+          if (action == Action::_UNKNOWN) {
             // not ready -- finish and try again
           } else {
             core::json::Buffer buffer_2{buffer};
             switch (table) {
               using enum Table::type_t;
-              case UNDEFINED__:
-              case UNKNOWN__:
+              case _UNDEFINED:
+              case _UNKNOWN:
                 break;
               case EXECUTION: {
                 Execution execution{value, buffer_2};
@@ -225,7 +225,7 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
         case TABLE:
           update(result.table, value);
           update(type, Type::TABLE);
-          assert(table == Table::UNKNOWN__);
+          assert(table == Table::_UNKNOWN);
           table = Table{result.table};
           break;
         case TIMESTAMP:
