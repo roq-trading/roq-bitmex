@@ -18,8 +18,8 @@ std::pair<double, double> PriceCache::operator()(json::Action action, uint64_t i
   auto iter = price_lookup_.find(id);
   switch (action) {
     using enum json::Action::type_t;
-    case _UNDEFINED:
-    case _UNKNOWN:
+    case UNDEFINED_INTERNAL:
+    case UNKNOWN_INTERNAL:
       log::fatal("Unexpected"sv);
       break;
     case PARTIAL:

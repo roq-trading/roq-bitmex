@@ -44,8 +44,8 @@ void update(Type &result, Type const type) {
 bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
-  auto table = Table::_UNKNOWN;
-  auto action = Action::_UNKNOWN;
+  auto table = Table::UNKNOWN_INTERNAL;
+  auto action = Action::UNKNOWN_INTERNAL;
   bool dispatched = false;
   for (int i = 0; i < 2; ++i) {
     core::json::Parser parser{message};
@@ -54,10 +54,10 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
       Field field{key};
       switch (field) {
         using enum Field::type_t;
-        case _UNDEFINED:
+        case UNDEFINED_INTERNAL:
           log::warn("Unexpected"sv);
           return false;  // note!
-        case _UNKNOWN:
+        case UNKNOWN_INTERNAL:
           log::warn(R"(Unknown key="{}")"sv, key);
           return false;  // note!
         case ACTION:
@@ -74,14 +74,14 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
           update(type, Type::CANCEL_ALL_AFTER);
           break;
         case DATA:
-          if (action == Action::_UNKNOWN) {
+          if (action == Action::UNKNOWN_INTERNAL) {
             // not ready -- finish and try again
           } else {
             core::json::Buffer buffer_2{buffer};
             switch (table) {
               using enum Table::type_t;
-              case _UNDEFINED:
-              case _UNKNOWN:
+              case UNDEFINED_INTERNAL:
+              case UNKNOWN_INTERNAL:
                 break;
               case EXECUTION: {
                 Execution execution{value, buffer_2};
@@ -225,7 +225,7 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
         case TABLE:
           update(result.table, value);
           update(type, Type::TABLE);
-          assert(table == Table::_UNKNOWN);
+          assert(table == Table::UNKNOWN_INTERNAL);
           table = Table{result.table};
           break;
         case TIMESTAMP:
