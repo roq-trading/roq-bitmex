@@ -132,7 +132,7 @@ void DropCopy::operator()(Event<Timer> const &event) {
   }
 }
 
-void DropCopy::operator()(metrics::Writer &writer) {
+void DropCopy::operator()(metrics::Writer &writer) const {
   writer
       // counter
       .write(counter_.disconnect, metrics::Type::COUNTER)

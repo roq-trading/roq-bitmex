@@ -49,7 +49,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Stre
   void operator()(Event<Stop> const &);
   void operator()(Event<Timer> const &);
 
-  void operator()(metrics::Writer &);
+  void operator()(metrics::Writer &) const;
 
  protected:
   void operator()(web::socket::Client::Connected const &) override;
