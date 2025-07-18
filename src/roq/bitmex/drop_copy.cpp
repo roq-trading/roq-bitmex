@@ -435,9 +435,11 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
           .quantity = item.last_qty,
           .price = item.last_px,
           .liquidity = {},
-          .quote_quantity = NaN,
-          .commission_quantity = NaN,
+          .base_amount = NaN,
+          .quote_amount = NaN,
+          .commission_amount = NaN,
           .commission_currency = {},
+          .profit_loss_amount = NaN,
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
