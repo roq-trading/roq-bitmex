@@ -447,7 +447,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event, json::Action act
           .quote_amount = NaN,
           .commission_amount = NaN,
           .commission_currency = {},
-          .profit_loss_cost_amount = NaN,
+          .profit_loss_amount = NaN,
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
