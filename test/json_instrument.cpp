@@ -6,6 +6,8 @@
 
 #include "roq/core/datetime.hpp"
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bitmex/json/instrument.hpp"
 
 using namespace roq;
@@ -333,7 +335,7 @@ TEST_CASE("json_instrument_item_open", "[json_instrument_item]") {
 
 TEST_CASE("json_instrument_empty", "[json_instrument]") {
   auto const message = "[]"sv;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Instrument obj{message, buffer};
   CHECK(std::size(obj.data) == size_t{0});
 }
@@ -550,7 +552,7 @@ TEST_CASE("json_instrument_simple", "[json_instrument]") {
                        R"("timestamp":"2020-01-22T19:09:30.000Z")"
                        R"(})"
                        R"(])"sv;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Instrument obj{message, buffer};
   CHECK(std::size(obj.data) == size_t{2});
   // item #0

@@ -7,6 +7,8 @@
 
 #include "roq/trace_info.hpp"
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bitmex/json/action.hpp"
 #include "roq/bitmex/json/cancel_all_after.hpp"
 #include "roq/bitmex/json/error.hpp"
@@ -66,7 +68,7 @@ struct StreamParser final {
   std::string_view version;
   bool heartbeat_enabled = {};
 
-  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &);
 };
 
 }  // namespace json

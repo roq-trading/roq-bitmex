@@ -41,7 +41,8 @@ void update(Type &result, Type const type) {
 
 // === IMPLEMENTATION ===
 
-bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
+bool StreamParser::dispatch(
+    StreamParser::Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
   StreamParser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN_INTERNAL;
@@ -77,84 +78,83 @@ bool StreamParser::dispatch(StreamParser::Handler &handler, std::string_view con
           if (action == Action::UNKNOWN_INTERNAL) {
             // not ready -- finish and try again
           } else {
-            core::json::Buffer buffer_2{buffer};
             switch (table) {
               using enum Table::type_t;
               case UNDEFINED_INTERNAL:
               case UNKNOWN_INTERNAL:
                 break;
               case EXECUTION: {
-                Execution execution{value, buffer_2};
+                Execution execution{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, execution};
                 handler(event, action);
                 break;
               }
               case FUNDING: {
-                Funding funding{value, buffer_2};
+                Funding funding{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, funding};
                 handler(event, action);
                 break;
               }
               case INSTRUMENT: {
-                Instrument instrument{value, buffer_2};
+                Instrument instrument{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, instrument};
                 handler(event, action);
                 break;
               }
               case LIQUIDATION: {
-                Liquidation liquidation{value, buffer_2};
+                Liquidation liquidation{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, liquidation};
                 handler(event, action);
                 break;
               }
               case MARGIN: {
-                Margin margin{value, buffer_2};
+                Margin margin{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, margin};
                 handler(event, action);
                 break;
               }
               case ORDER: {
-                Order order{value, buffer_2};
+                Order order{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, order};
                 handler(event, action);
                 break;
               }
               case ORDER_BOOK_L2: {
-                OrderBookL2 order_book_l2{value, buffer_2};
+                OrderBookL2 order_book_l2{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, order_book_l2};
                 handler(event, action);
                 break;
               }
               case POSITION: {
-                Position position{value, buffer_2};
+                Position position{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, position};
                 handler(event, action);
                 break;
               }
               case QUOTE: {
-                Quote quote{value, buffer_2};
+                Quote quote{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, quote};
                 handler(event, action);
                 break;
               }
               case SETTLEMENT: {
-                Settlement settlement{value, buffer_2};
+                Settlement settlement{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, settlement};
                 handler(event, action);
                 break;
               }
               case TRADE: {
-                Trade trade{value, buffer_2};
+                Trade trade{value, buffer_stack};
                 dispatched = true;
                 Trace event{trace_info, trade};
                 handler(event, action);

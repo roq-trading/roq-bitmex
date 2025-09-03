@@ -39,6 +39,8 @@ auto const SUPPORTS = Mask{
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
+
+size_t const MAX_DECODE_BUFFER_DEPTH = 1;
 }  // namespace
 
 // === HELPERS ===
@@ -97,7 +99,7 @@ auto get_quality_of_service(auto &settings) {
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)}, connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_(shared.settings.misc.decode_buffer_size),
+      decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
