@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/TradeItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "foreignNotional",

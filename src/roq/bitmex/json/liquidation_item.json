@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/LiquidationItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "leavesQty",

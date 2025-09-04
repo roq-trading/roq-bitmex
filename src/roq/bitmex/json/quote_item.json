@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/QuoteItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "askPrice",

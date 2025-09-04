@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/FundingItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "fundingInterval",

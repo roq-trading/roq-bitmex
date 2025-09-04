@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/MarginItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "account",

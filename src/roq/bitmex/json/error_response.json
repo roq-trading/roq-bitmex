@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/ErrorResponse",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "message",

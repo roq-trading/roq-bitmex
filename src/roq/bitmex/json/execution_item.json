@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/ExecutionItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "account",

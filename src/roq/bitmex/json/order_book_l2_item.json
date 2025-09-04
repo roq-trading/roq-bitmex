@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/OrderBookL2Item",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "id",
