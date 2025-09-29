@@ -6,13 +6,35 @@ roq-bitmex
 ==========
 
 
-Links
------
+.. tab:: Unstable
 
-* `Website <https://www.bitmex.com/>`__
-* `Testnet <https://testnet.bitmex.com/>`__
-* `Support <https://www.bitmex.com/app/support>`__
-* `Documentation <https://www.bitmex.com/app/apiOverview>`__
+  .. code-block:: shell
+
+     $ conda install \
+           --channel https://roq-trading.com/conda/unstable \
+           roq-bitmex
+
+.. tab:: Stable
+
+  .. code-block:: shell
+
+     $ conda install \
+           --channel https://roq-trading.com/conda/stable \
+           roq-bitmex
+
+
+:code:`roq-bitmex`
+------------------
+
+.. code-block:: shell
+
+   $ roq-bitmex [FLAGS]
+
+
+Description
+~~~~~~~~~~~
+
+:code:`roq-bitmex` is a gateway
 
 
 Supports
@@ -84,47 +106,10 @@ Supports
         -
 
 
-Installing
-----------
-
-* :ref:`Using Conda <tutorial-conda>`
-
-.. tab:: Unstable
-
-  .. code-block:: shell
-
-     $ conda install \
-           --channel https://roq-trading.com/conda/unstable \
-           roq-bitmex
-
-.. tab:: Stable
-
-  .. code-block:: shell
-
-     $ conda install \
-           --channel https://roq-trading.com/conda/stable \
-           roq-bitmex
-
-
-Using
------
-
-.. code-block:: shell
-
-   $ roq-bitmex \
-         --name "bitmex" \
-         --config_file $CONFIG_FILE_PATH \
-         --client_listen_address $UNIX_SOCKET_PATH \
-         --flagfile $ENVIRONMENT_FLAGFILE
-
-
 .. _roq-bitmex-flags:
 
 Flags
 -----
-
-* :ref:`Using Flags <abseil-cpp>`
-* :ref:`Gateway Flags <gateway-flags>`
 
 .. code-block:: shell
 
@@ -587,6 +572,7 @@ Constraints
 -----------
 
 * The field :code:`clOrdID` is a string and can not exceed 36 characters
+
 
 Comments
 --------
