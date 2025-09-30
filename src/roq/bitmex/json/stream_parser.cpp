@@ -19,6 +19,12 @@ namespace json {
 // === HELPERS ===
 
 namespace {
+template <typename T, typename... Args>
+void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info, Args &&...args) {
+  T obj{message, buffer_stack};
+  create_trace_and_dispatch(handler, trace_info, obj, std::forward<Args>(args)...);
+}
+
 enum class Type {
   UNKNOWN,
   CANCEL_ALL_AFTER,
@@ -42,7 +48,11 @@ void update(Type &result, Type const type) {
 // === IMPLEMENTATION ===
 
 bool StreamParser::dispatch(
-    StreamParser::Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
+    StreamParser::Handler &handler,
+    std::string_view const &message,
+    core::json::BufferStack &buffer_stack,
+    TraceInfo const &trace_info,
+    bool allow_unknown_event_types) {
   StreamParser result;
   auto type = Type::UNKNOWN;
   auto table = Table::UNKNOWN_INTERNAL;
@@ -81,85 +91,53 @@ bool StreamParser::dispatch(
             switch (table) {
               using enum Table::type_t;
               case UNDEFINED_INTERNAL:
+                break;
               case UNKNOWN_INTERNAL:
                 break;
-              case EXECUTION: {
-                Execution execution{value, buffer_stack};
+              case EXECUTION:
+                dispatch_helper<Execution>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, execution};
-                handler(event, action);
                 break;
-              }
-              case FUNDING: {
-                Funding funding{value, buffer_stack};
+              case FUNDING:
+                dispatch_helper<Funding>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, funding};
-                handler(event, action);
                 break;
-              }
-              case INSTRUMENT: {
-                Instrument instrument{value, buffer_stack};
+              case INSTRUMENT:
+                dispatch_helper<Instrument>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, instrument};
-                handler(event, action);
                 break;
-              }
-              case LIQUIDATION: {
-                Liquidation liquidation{value, buffer_stack};
+              case LIQUIDATION:
+                dispatch_helper<Liquidation>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, liquidation};
-                handler(event, action);
                 break;
-              }
-              case MARGIN: {
-                Margin margin{value, buffer_stack};
+              case MARGIN:
+                dispatch_helper<Margin>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, margin};
-                handler(event, action);
                 break;
-              }
-              case ORDER: {
-                Order order{value, buffer_stack};
+              case ORDER:
+                dispatch_helper<Order>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, order};
-                handler(event, action);
                 break;
-              }
-              case ORDER_BOOK_L2: {
-                OrderBookL2 order_book_l2{value, buffer_stack};
+              case ORDER_BOOK_L2:
+                dispatch_helper<OrderBookL2>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, order_book_l2};
-                handler(event, action);
                 break;
-              }
-              case POSITION: {
-                Position position{value, buffer_stack};
+              case POSITION:
+                dispatch_helper<Position>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, position};
-                handler(event, action);
                 break;
-              }
-              case QUOTE: {
-                Quote quote{value, buffer_stack};
+              case QUOTE:
+                dispatch_helper<Quote>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, quote};
-                handler(event, action);
                 break;
-              }
-              case SETTLEMENT: {
-                Settlement settlement{value, buffer_stack};
+              case SETTLEMENT:
+                dispatch_helper<Settlement>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, settlement};
-                handler(event, action);
                 break;
-              }
-              case TRADE: {
-                Trade trade{value, buffer_stack};
+              case TRADE:
+                dispatch_helper<Trade>(handler, message, buffer_stack, trace_info, action);
                 dispatched = true;
-                Trace event{trace_info, trade};
-                handler(event, action);
                 break;
-              }
             }
           }
           break;

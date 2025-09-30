@@ -79,7 +79,6 @@ struct MarketData final : public web::socket::Client::Handler, public json::Stre
   void subscribe_order_book_l2();
 
   void parse(std::string_view const &message);
-  bool parse_helper(std::string_view const &message);
 
   void operator()(Trace<json::CancelAllAfter> const &) override;
   void operator()(Trace<json::Error> const &) override;

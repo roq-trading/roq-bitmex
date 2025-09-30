@@ -68,7 +68,7 @@ struct StreamParser final {
   std::string_view version;
   bool heartbeat_enabled = {};
 
-  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &, bool allow_unknown_event_types);
 };
 
 }  // namespace json

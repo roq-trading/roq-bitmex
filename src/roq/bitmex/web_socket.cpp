@@ -320,9 +320,10 @@ uint32_t WebSocket::download(WebSocketState state) {
 
 void WebSocket::parse(std::string_view const &message) {
   profile_.parse([&]() {
-    auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
+    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
-      if (!parse_helper(message)) {
+      TraceInfo trace_info;
+      if (!json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -330,11 +331,6 @@ void WebSocket::parse(std::string_view const &message) {
       utils::exceptions::Unhandled::terminate();
     }
   });
-}
-
-bool WebSocket::parse_helper(std::string_view const &message) {
-  TraceInfo trace_info;
-  return json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info);
 }
 
 void WebSocket::operator()(Trace<json::CancelAllAfter> const &event) {

@@ -303,9 +303,10 @@ void MarketData::subscribe_order_book_l2() {
 
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
-    auto log_message = [&]() { log::info<4>(R"(message="{}")"sv, message); };
+    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
-      if (!parse_helper(message)) {
+      TraceInfo trace_info;
+      if (!json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -313,11 +314,6 @@ void MarketData::parse(std::string_view const &message) {
       utils::exceptions::Unhandled::terminate();
     }
   });
-}
-
-bool MarketData::parse_helper(std::string_view const &message) {
-  TraceInfo trace_info;
-  return json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info);
 }
 
 void MarketData::operator()(Trace<json::CancelAllAfter> const &event) {
