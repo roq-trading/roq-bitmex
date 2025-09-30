@@ -1,21 +1,22 @@
 {
   "name": "roq/bitmex/json/Subscribe",
-  "type": "struct",
+  "type": "dictionary",
   "values": [
     {
-      "name": "failure",
+      "name": "success",
       "type": "std/bool"
-    },
-    {
-      "name": "request"
     },
     {
       "name": "subscribe",
       "type": "std/string_view"
     },
     {
-      "name": "success",
-      "type": "std/bool"
+      "name": "request",
+      "type": "roq/bitmex/json/SubscribeRequest"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
     }
   ]
 }

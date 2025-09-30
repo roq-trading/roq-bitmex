@@ -3,37 +3,48 @@
   "type": "enum",
   "values": [
     {
-      "name": "execution"
+      "name": "instrument",
+      "comment": "public"
     },
     {
-      "name": "funding"
+      "name": "quote",
+      "comment": "public"
     },
     {
-      "name": "instrument"
+      "name": "orderBookL2",
+      "comment": "public"
     },
     {
-      "name": "liquidation"
+      "name": "trade",
+      "comment": "public"
     },
     {
-      "name": "margin"
+      "name": "funding",
+      "comment": "public"
     },
     {
-      "name": "order"
+      "name": "liquidation",
+      "comment": "public"
     },
     {
-      "name": "orderBookL2"
+      "name": "settlement",
+      "comment": "public"
     },
     {
-      "name": "position"
+      "name": "margin",
+      "comment": "private"
     },
     {
-      "name": "quote"
+      "name": "position",
+      "comment": "private"
     },
     {
-      "name": "settlement"
+      "name": "order",
+      "comment": "private"
     },
     {
-      "name": "trade"
+      "name": "execution",
+      "comment": "private"
     }
   ]
 }

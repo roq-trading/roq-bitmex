@@ -99,10 +99,10 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
       },
       profile_{
           .parse = create_metrics(shared.settings, name_, "parse"sv),
+          .welcome = create_metrics(shared.settings, name_, "welcome"sv),
           .cancel_all_after = create_metrics(shared.settings, name_, "cancel_all_after"sv),
           .error = create_metrics(shared.settings, name_, "error"sv),
           .execution = create_metrics(shared.settings, name_, "execution"sv),
-          .handshake = create_metrics(shared.settings, name_, "handshake"sv),
           .margin = create_metrics(shared.settings, name_, "margin"sv),
           .order = create_metrics(shared.settings, name_, "order"sv),
           .position = create_metrics(shared.settings, name_, "position"sv),
@@ -140,10 +140,10 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       .write(counter_.disconnect, metrics::Type::COUNTER)
       // profile
       .write(profile_.parse, metrics::Type::PROFILE)
+      .write(profile_.welcome, metrics::Type::PROFILE)
       .write(profile_.cancel_all_after, metrics::Type::PROFILE)
       .write(profile_.error, metrics::Type::PROFILE)
       .write(profile_.execution, metrics::Type::PROFILE)
-      .write(profile_.handshake, metrics::Type::PROFILE)
       .write(profile_.margin, metrics::Type::PROFILE)
       .write(profile_.order, metrics::Type::PROFILE)
       .write(profile_.position, metrics::Type::PROFILE)
@@ -287,12 +287,24 @@ void DropCopy::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
+    }
+  });
+}
+
+void DropCopy::operator()(Trace<json::Welcome> const &event) {
+  profile_.welcome([&]() {
+    auto &[trace_info, welcome] = event;
+    log::info<2>("welcome={}"sv, welcome);
+    (*this)(ConnectionStatus::DOWNLOADING);
+    download_.begin();
+    if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0) {
+      send_cancel_all_after(std::chrono::seconds{});
     }
   });
 }
@@ -312,30 +324,14 @@ void DropCopy::operator()(Trace<json::Error> const &event) {
   (*connection_).close();
 }
 
-void DropCopy::operator()(Trace<json::Handshake> const &event) {
-  profile_.handshake([&]() {
-    auto &[trace_info, handshake] = event;
-    log::info<2>("handshake={}"sv, handshake);
-    (*this)(ConnectionStatus::DOWNLOADING);
-    download_.begin();
-    if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0) {
-      send_cancel_all_after(std::chrono::seconds{});
-    }
-  });
-}
-
 void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   profile_.subscribe([&]() {
     auto &[trace_info, subscribe] = event;
     log::info<2>("subscribe={}"sv, subscribe);
     if (subscribe.success) {
-      assert(!subscribe.failure);
       log::info(R"(Successfully subscribed to topic="{}")"sv, subscribe.subscribe);
-    } else if (subscribe.failure) {
-      assert(!subscribe.success);
-      log::warn(R"(Failed to subscribe topic="{}")"sv, subscribe.subscribe);
     } else {
-      log::fatal("Expected success or failure"sv);
+      log::warn(R"(Failed to subscribe topic="{}")"sv, subscribe.subscribe);
     }
     // TODO(thraneh): clear timeout
   });
@@ -358,11 +354,88 @@ void DropCopy::operator()(Trace<json::Unsubscribe> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Execution> const &event, json::Action action) {
+void DropCopy::operator()(Trace<json::Instrument> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Quote> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::OrderBookL2> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Trade> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Funding> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Liquidation> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Settlement> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Margin> const &event) {
+  profile_.margin([&]() {
+    auto &[trace_info, margin] = event;
+    log::info<2>("margin={}"sv, margin);
+    // not used
+  });
+}
+
+void DropCopy::operator()(Trace<json::Position> const &event) {
+  profile_.position([&]() {
+    auto &[trace_info, position] = event;
+    log::info<2>("position={}"sv, position);
+    for (auto &item : position.data) {
+      auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
+      auto long_quantity = std::max(0.0, item.current_qty);
+      auto short_quantity = std::max(0.0, -item.current_qty);
+      auto position_update = PositionUpdate{
+          .stream_id = stream_id_,
+          .account = account_.name,
+          .exchange = shared_.settings.exchange,
+          .symbol = item.symbol,
+          .margin_mode = {},
+          .external_account = external_account,
+          .long_quantity = long_quantity,
+          .short_quantity = short_quantity,
+          .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = item.timestamp,  // ???
+          .sending_time_utc = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, position_update, false);
+    }
+  });
+}
+
+void DropCopy::operator()(Trace<json::Order> const &event) {
+  profile_.order([&]() {
+    auto &[trace_info, order] = event;
+    log::info<2>("order={}"sv, order);
+    auto download = !partial_received_.order && order.action == json::Action::PARTIAL;
+    OrderUpdate{shared_, stream_id_, account_.name}(order, trace_info, download);
+    // state management
+    if (download) {
+      partial_received_.order = true;
+      // release download state
+      download_.check_relaxed(DropCopyState::SUBSCRIBE);
+    }
+  });
+}
+
+void DropCopy::operator()(Trace<json::Execution> const &event) {
   profile_.execution([&]() {
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
-    log::info<2>("execution={}, action={}"sv, execution, action);
+    log::info<2>("execution={}"sv, execution);
     for (auto &item : execution.data) {
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto request_type = compute_request_type(item.exec_type);
@@ -464,90 +537,6 @@ void DropCopy::operator()(Trace<json::Execution> const &event, json::Action acti
       create_trace_and_dispatch(handler_, trace_info, trade_update, true, user_id, item.cl_ord_id);
     }
   });
-}
-
-void DropCopy::operator()(Trace<json::Margin> const &event, json::Action action) {
-  profile_.margin([&]() {
-    auto &[trace_info, margin] = event;
-    log::info<2>("margin={}, action={}"sv, margin, action);
-    // not used
-  });
-}
-
-void DropCopy::operator()(Trace<json::Order> const &event, json::Action action) {
-  profile_.order([&]() {
-    auto &[trace_info, order] = event;
-    log::info<2>("order={}, action={}"sv, order, action);
-    auto download = !partial_received_.order && action == json::Action::PARTIAL;
-    OrderUpdate{shared_, stream_id_, account_.name}(order, trace_info, download);
-    // state management
-    if (download) {
-      partial_received_.order = true;
-      // release download state
-      download_.check_relaxed(DropCopyState::SUBSCRIBE);
-    }
-  });
-}
-
-void DropCopy::operator()(Trace<json::Position> const &event, json::Action action) {
-  profile_.position([&]() {
-    auto &[trace_info, position] = event;
-    log::info<2>("position={}, action={}"sv, position, action);
-    for (auto &item : position.data) {
-      auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
-      auto long_quantity = std::max(0.0, item.current_qty);
-      auto short_quantity = std::max(0.0, -item.current_qty);
-      auto position_update = PositionUpdate{
-          .stream_id = stream_id_,
-          .account = account_.name,
-          .exchange = shared_.settings.exchange,
-          .symbol = item.symbol,
-          .margin_mode = {},
-          .external_account = external_account,
-          .long_quantity = long_quantity,
-          .short_quantity = short_quantity,
-          .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = item.timestamp,  // ???
-          .sending_time_utc = {},
-      };
-      create_trace_and_dispatch(handler_, trace_info, position_update, false);
-    }
-  });
-}
-
-void DropCopy::operator()(Trace<json::Funding> const &event, json::Action action) {
-  auto &[trace_info, funding] = event;
-  log::fatal("Unexpected: funding={}, action={}"sv, funding, action);
-}
-
-void DropCopy::operator()([[maybe_unused]] Trace<json::Instrument> const &event, json::Action action) {
-  auto &[trace_info, instrument] = event;
-  log::fatal("Unexpected: instrument={}, action={}"sv, instrument, action);
-}
-
-void DropCopy::operator()(Trace<json::Liquidation> const &event, json::Action action) {
-  auto &[trace_info, liquidation] = event;
-  log::fatal("Unexpected: liquidation={}, action={}"sv, liquidation, action);
-}
-
-void DropCopy::operator()(Trace<json::OrderBookL2> const &event, json::Action action) {
-  auto &[trace_info, order_book_l2] = event;
-  log::fatal("Unexpected: order_book_l2={}, action={}"sv, order_book_l2, action);
-}
-
-void DropCopy::operator()(Trace<json::Quote> const &event, json::Action action) {
-  auto &[trace_info, quote] = event;
-  log::fatal("Unexpected: quote={}, action={}"sv, quote, action);
-}
-
-void DropCopy::operator()(Trace<json::Settlement> const &event, json::Action action) {
-  auto &[trace_info, settlement] = event;
-  log::fatal("Unexpected: settlement={}, action={}"sv, settlement, action);
-}
-
-void DropCopy::operator()(Trace<json::Trade> const &event, json::Action action) {
-  auto &[trace_info, trade] = event;
-  log::fatal("Unexpected: trade={}, action={}"sv, trade, action);
 }
 
 std::string DropCopy::create_upgrade_headers() {

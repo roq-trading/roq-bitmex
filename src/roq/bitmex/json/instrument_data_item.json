@@ -1,5 +1,5 @@
 {
-  "name": "roq/bitmex/json/InstrumentItem",
+  "name": "roq/bitmex/json/InstrumentDataItem",
   "type": "dictionary",
   "values": [
     {

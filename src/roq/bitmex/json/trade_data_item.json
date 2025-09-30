@@ -1,5 +1,5 @@
 {
-  "name": "roq/bitmex/json/TradeItem",
+  "name": "roq/bitmex/json/TradeDataItem",
   "type": "dictionary",
   "values": [
     {

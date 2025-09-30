@@ -1,0 +1,12 @@
+{
+  "name": "roq/bitmex/json/Op",
+  "type": "enum",
+  "values": [
+    {
+      "name": "subscribe"
+    },
+    {
+      "name": "unsubscribe"
+    }
+  ]
+}

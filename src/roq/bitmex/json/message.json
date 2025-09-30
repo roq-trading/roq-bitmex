@@ -1,0 +1,73 @@
+{
+  "name": "roq/bitmex/json/Message",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "table",
+      "type": "roq/bitmex/json/Table"
+    },
+    {
+      "name": "action",
+      "type": "roq/bitmex/json/Action"
+    },
+    {
+      "name": "keys"
+    },
+    {
+      "name": "types"
+    },
+    {
+      "name": "filter"
+    },
+    {
+      "name": "data"
+    },
+    {
+      "name": "info",
+      "type": "std/string_view",
+      "comment": "welcome"
+    },
+    {
+      "name": "version",
+      "comment": "welcome"
+    },
+    {
+      "name": "timestamp",
+      "comment": "welcome"
+    },
+    {
+      "name": "docs",
+      "comment": "welcome"
+    },
+    {
+      "name": "heartbeatEnabled",
+      "comment": "welcome"
+    },
+    {
+      "name": "limit",
+      "comment": "welcome"
+    },
+    {
+      "name": "appName",
+      "comment": "welcome"
+    },
+    {
+      "name": "success",
+      "comment": "subscribe"
+    },
+    {
+      "name": "subscribe",
+      "type": "std/string_view",
+      "comment": "subscribe"
+    },
+    {
+      "name": "request",
+      "comment": "subscribe"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view",
+      "comment": "subscribe"
+    }
+  ]
+}

@@ -1,21 +1,17 @@
 {
-  "name": "roq/bitmex/json/QuoteItem",
+  "name": "roq/bitmex/json/FundingDataItem",
   "type": "dictionary",
   "values": [
     {
-      "name": "askPrice",
+      "name": "fundingInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "fundingRateDaily",
       "type": "std/double"
     },
     {
-      "name": "askSize",
-      "type": "std/double"
-    },
-    {
-      "name": "bidPrice",
-      "type": "std/double"
-    },
-    {
-      "name": "bidSize",
+      "name": "fundingRate",
       "type": "std/double"
     },
     {

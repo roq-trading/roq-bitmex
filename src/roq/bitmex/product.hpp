@@ -10,27 +10,27 @@
 
 #include "roq/bitmex/shared.hpp"
 
-#include "roq/bitmex/json/funding_item.hpp"
-#include "roq/bitmex/json/instrument_item.hpp"
+#include "roq/bitmex/json/funding_data_item.hpp"
+#include "roq/bitmex/json/instrument_data_item.hpp"
 
 namespace roq {
 namespace bitmex {
 
 struct Product final {
-  Product(Shared &, json::InstrumentItem const &);
-  Product(Shared &, json::FundingItem const &);
+  Product(Shared &, json::InstrumentDataItem const &);
+  Product(Shared &, json::FundingDataItem const &);
 
   Product(Product &&) = default;
   Product(Product const &) = delete;
 
-  bool update(json::InstrumentItem const &);
-  bool update(json::FundingItem const &);
+  bool update(json::InstrumentDataItem const &);
+  bool update(json::FundingDataItem const &);
 
-  ReferenceData reference_data(json::InstrumentItem const &, uint16_t stream_id, bool discard) const;
-  MarketStatus market_status(json::InstrumentItem const &, uint16_t stream_id) const;
-  StatisticsUpdate statistics_update(json::InstrumentItem const &, uint16_t stream_id) const;
+  ReferenceData reference_data(json::InstrumentDataItem const &, uint16_t stream_id, bool discard) const;
+  MarketStatus market_status(json::InstrumentDataItem const &, uint16_t stream_id) const;
+  StatisticsUpdate statistics_update(json::InstrumentDataItem const &, uint16_t stream_id) const;
 
-  StatisticsUpdate statistics_update(json::FundingItem const &, uint16_t stream_id) const;
+  StatisticsUpdate statistics_update(json::FundingDataItem const &, uint16_t stream_id) const;
 
   bool is_market_status_dirty() const { return market_status_dirty_; }
   bool is_statistics_dirty() const { return !std::empty(statistics_); }

@@ -88,10 +88,10 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
       },
       profile_{
           .parse = create_metrics(shared.settings, name_, "parse"sv),
+          .welcome = create_metrics(shared.settings, name_, "welcome"sv),
           .cancel_all_after = create_metrics(shared.settings, name_, "cancel_all_after"sv),
           .error = create_metrics(shared.settings, name_, "error"sv),
           .funding = create_metrics(shared.settings, name_, "funding"sv),
-          .handshake = create_metrics(shared.settings, name_, "handshake"sv),
           .instrument = create_metrics(shared.settings, name_, "instrument"sv),
           .liquidation = create_metrics(shared.settings, name_, "liquidation"sv),
           .order_book_l2 = create_metrics(shared.settings, name_, "order_book_l2"sv),
@@ -126,10 +126,10 @@ void MarketData::operator()(metrics::Writer &writer) const {
       .write(counter_.disconnect, metrics::Type::COUNTER)
       // profile
       .write(profile_.parse, metrics::Type::PROFILE)
+      .write(profile_.welcome, metrics::Type::PROFILE)
       .write(profile_.cancel_all_after, metrics::Type::PROFILE)
       .write(profile_.error, metrics::Type::PROFILE)
       .write(profile_.funding, metrics::Type::PROFILE)
-      .write(profile_.handshake, metrics::Type::PROFILE)
       .write(profile_.instrument, metrics::Type::PROFILE)
       .write(profile_.liquidation, metrics::Type::PROFILE)
       .write(profile_.order_book_l2, metrics::Type::PROFILE)
@@ -291,12 +291,12 @@ void MarketData::subscribe_instrument() {
 // note! actually "everything else" (than instrument)
 void MarketData::subscribe_order_book_l2() {
   std::array<std::string_view, 6> topics{{
+      "quote"sv,
       "orderBookL2"sv,
+      "trade"sv,
       "funding"sv,
       "liquidation"sv,
-      "quote"sv,
       "settlement"sv,
-      "trade"sv,
   }};
   send_subscribe(topics);
 }
@@ -306,13 +306,23 @@ void MarketData::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::StreamParser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
     }
+  });
+}
+
+void MarketData::operator()(Trace<json::Welcome> const &event) {
+  profile_.welcome([&]() {
+    auto &[trace_info, welcome] = event;
+    log::info<2>("welcome={}"sv, welcome);
+    (*connection_).touch(trace_info.source_receive_time);
+    (*this)(ConnectionStatus::DOWNLOADING);
+    download_.begin();
   });
 }
 
@@ -331,28 +341,14 @@ void MarketData::operator()(Trace<json::Error> const &event) {
   (*connection_).close();
 }
 
-void MarketData::operator()(Trace<json::Handshake> const &event) {
-  profile_.handshake([&]() {
-    auto &[trace_info, handshake] = event;
-    log::info<2>("handshake={}"sv, handshake);
-    (*connection_).touch(trace_info.source_receive_time);
-    (*this)(ConnectionStatus::DOWNLOADING);
-    download_.begin();
-  });
-}
-
 void MarketData::operator()(Trace<json::Subscribe> const &event) {
   profile_.subscribe([&]() {
     auto &[trace_info, subscribe] = event;
     log::info<2>("subscribe={}"sv, subscribe);
     if (subscribe.success) {
-      assert(!subscribe.failure);
       log::info(R"(Successfully subscribed to topic="{}")"sv, subscribe.subscribe);
-    } else if (subscribe.failure) {
-      assert(!subscribe.success);
-      log::warn(R"(Failed to subscribe topic="{}")"sv, subscribe.subscribe);
     } else {
-      log::fatal("Expected success or failure"sv);
+      log::warn(R"(Failed to subscribe topic="{}")"sv, subscribe.subscribe);
     }
     // TODO(thraneh): clear timeout
   });
@@ -363,45 +359,23 @@ void MarketData::operator()(Trace<json::Unsubscribe> const &event) {
     auto &[trace_info, unsubscribe] = event;
     log::info<2>("unsubscribe={}"sv, unsubscribe);
     if (unsubscribe.success) {
-      assert(!unsubscribe.failure);
       log::info(R"(Successfully unsubscribed from topic="{}")"sv, unsubscribe.unsubscribe);
-    } else if (unsubscribe.failure) {
-      assert(!unsubscribe.success);
-      log::warn(R"(Failed to unsubscribe topic="{}")"sv, unsubscribe.unsubscribe);
     } else {
-      log::fatal("Expected success or failure"sv);
+      log::warn(R"(Failed to unsubscribe topic="{}")"sv, unsubscribe.unsubscribe);
     }
     // TODO(thraneh): clear timeout
   });
 }
 
-void MarketData::operator()(Trace<json::Funding> const &event, json::Action action) {
-  profile_.funding([&]() {
-    auto &[trace_info, funding] = event;
-    log::info<4>("funding={}, action={}"sv, funding, action);
-    (*connection_).touch(trace_info.source_receive_time);
-    for (auto &item : funding.data) {
-      auto &product = find_product(item);
-      if (product.update(item)) {
-        if (product.is_statistics_dirty()) {
-          auto statistics_update = product.statistics_update(item, stream_id_);
-          create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
-        }
-        product.clear();
-      }
-    }
-  });
-}
-
-void MarketData::operator()(Trace<json::Instrument> const &event, json::Action action) {
+void MarketData::operator()(Trace<json::Instrument> const &event) {
   profile_.instrument([&]() {
     auto &[trace_info, instrument] = event;
-    log::info<4>("instrument={}, action={}"sv, instrument, action);
+    log::info<4>("instrument={}"sv, instrument);
     (*connection_).touch(trace_info.source_receive_time);
     // note!
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
-    switch (action) {
+    switch (instrument.action) {
       using enum json::Action::type_t;
       case UNDEFINED_INTERNAL:
       case UNKNOWN_INTERNAL:
@@ -471,22 +445,42 @@ void MarketData::operator()(Trace<json::Instrument> const &event, json::Action a
   });
 }
 
-void MarketData::operator()(Trace<json::Liquidation> const &event, json::Action action) {
-  profile_.liquidation([&]() {
-    auto &[trace_info, liquidation] = event;
-    log::info<4>("liquidation={}, action={}"sv, liquidation, action);
+void MarketData::operator()(Trace<json::Quote> const &event) {
+  profile_.quote([&]() {
+    auto &[trace_info, quote] = event;
+    log::info<4>("quote={}"sv, quote);
     (*connection_).touch(trace_info.source_receive_time);
-    // don't use
+    for (auto &item : quote.data) {
+      if (shared_.discard_symbol(item.symbol)) {
+        continue;
+      }
+      auto top_of_book = TopOfBook{
+          .stream_id = stream_id_,
+          .exchange = shared_.settings.exchange,
+          .symbol = item.symbol,
+          .layer{
+              .bid_price = item.bid_price,
+              .bid_quantity = item.bid_size,
+              .ask_price = item.ask_price,
+              .ask_quantity = item.ask_size,
+          },
+          .update_type = UpdateType::SNAPSHOT,
+          .exchange_time_utc = item.timestamp,  // XXX not sure
+          .exchange_sequence = {},
+          .sending_time_utc = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+    }
   });
 }
 
-void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action action) {
+void MarketData::operator()(Trace<json::OrderBookL2> const &event) {
   profile_.order_book_l2([&]() {
     auto &[trace_info, order_book_l2] = event;
-    log::info<4>("order_book_l2={}, action={}"sv, order_book_l2, action);
+    log::info<4>("order_book_l2={}"sv, order_book_l2);
     (*connection_).touch(trace_info.source_receive_time);
-    assert(action != json::Action::UNKNOWN_INTERNAL);
-    auto snapshot = action == json::Action::PARTIAL;
+    assert(order_book_l2.action != json::Action::UNKNOWN_INTERNAL);
+    auto snapshot = order_book_l2.action == json::Action::PARTIAL;
     // note!
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
@@ -530,7 +524,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
         continue;
       }
       utils::update_max(timestamp, item.timestamp);
-      auto [price, size] = shared_.price_cache(action, item.id, item.price, item.size);
+      auto [price, size] = shared_.price_cache(order_book_l2.action, item.id, item.price, item.size);
       if (!std::isnan(price)) {
         switch (item.side) {
           using enum json::Side::type_t;
@@ -544,7 +538,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
             log::fatal("Unexpected"sv);
         }
       } else {
-        log::warn("Unexpected: action={}, item={}, cache={{price={}, size={}}}"sv, action, item, price, size);
+        log::warn("Unexpected: action={}, item={}, cache={{price={}, size={}}}"sv, order_book_l2.action, item, price, size);
         (*connection_).close();
         log::warn("Closing web-socket"sv);
         return;
@@ -562,51 +556,13 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event, json::Action 
   });
 }
 
-void MarketData::operator()(Trace<json::Quote> const &event, json::Action action) {
-  profile_.quote([&]() {
-    auto &[trace_info, quote] = event;
-    log::info<4>("quote={}, action={}"sv, quote, action);
-    (*connection_).touch(trace_info.source_receive_time);
-    for (auto &item : quote.data) {
-      if (shared_.discard_symbol(item.symbol)) {
-        continue;
-      }
-      auto top_of_book = TopOfBook{
-          .stream_id = stream_id_,
-          .exchange = shared_.settings.exchange,
-          .symbol = item.symbol,
-          .layer{
-              .bid_price = item.bid_price,
-              .bid_quantity = item.bid_size,
-              .ask_price = item.ask_price,
-              .ask_quantity = item.ask_size,
-          },
-          .update_type = UpdateType::SNAPSHOT,
-          .exchange_time_utc = item.timestamp,  // XXX not sure
-          .exchange_sequence = {},
-          .sending_time_utc = {},
-      };
-      create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
-    }
-  });
-}
-
-void MarketData::operator()(Trace<json::Settlement> const &event, json::Action action) {
-  profile_.settlement([&]() {
-    auto &[trace_info, settlement] = event;
-    log::info<4>("event={{action={}, settlement={}}}"sv, action, settlement);
-    (*connection_).touch(trace_info.source_receive_time);
-    // do nothing
-  });
-}
-
-void MarketData::operator()(Trace<json::Trade> const &event, json::Action action) {
+void MarketData::operator()(Trace<json::Trade> const &event) {
   profile_.trade([&]() {
     auto &trace_info = event.trace_info;
     auto &trade = event.value;
-    log::info<4>("trade={}, action={}"sv, trade, action);
+    log::info<4>("trade={}"sv, trade);
     (*connection_).touch(trace_info.source_receive_time);
-    if (action != json::Action::INSERT) {
+    if (trade.action != json::Action::INSERT) {
       return;
     }
     shared_.trades.clear();
@@ -657,27 +613,59 @@ void MarketData::operator()(Trace<json::Trade> const &event, json::Action action
   });
 }
 
-void MarketData::operator()(Trace<json::Execution> const &event, json::Action action) {
-  auto &[trace_info, execution] = event;
-  log::fatal("Unexpected: execution={}, action"sv, execution, action);
+void MarketData::operator()(Trace<json::Funding> const &event) {
+  profile_.funding([&]() {
+    auto &[trace_info, funding] = event;
+    log::info<4>("funding={}"sv, funding);
+    (*connection_).touch(trace_info.source_receive_time);
+    for (auto &item : funding.data) {
+      auto &product = find_product(item);
+      if (product.update(item)) {
+        if (product.is_statistics_dirty()) {
+          auto statistics_update = product.statistics_update(item, stream_id_);
+          create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
+        }
+        product.clear();
+      }
+    }
+  });
 }
 
-void MarketData::operator()(Trace<json::Margin> const &event, json::Action action) {
-  auto &[trace_info, margin] = event;
-  log::fatal("Unexpected: margin={}, action"sv, margin, action);
+void MarketData::operator()(Trace<json::Liquidation> const &event) {
+  profile_.liquidation([&]() {
+    auto &[trace_info, liquidation] = event;
+    log::info<4>("liquidation={}"sv, liquidation);
+    (*connection_).touch(trace_info.source_receive_time);
+    // don't use
+  });
 }
 
-void MarketData::operator()(Trace<json::Order> const &event, json::Action action) {
-  auto &[trace_info, order] = event;
-  log::fatal("Unexpected: order={}, action"sv, order, action);
+void MarketData::operator()(Trace<json::Settlement> const &event) {
+  profile_.settlement([&]() {
+    auto &[trace_info, settlement] = event;
+    log::info<4>("settlement={}"sv, settlement);
+    (*connection_).touch(trace_info.source_receive_time);
+    // do nothing
+  });
 }
 
-void MarketData::operator()(Trace<json::Position> const &event, json::Action action) {
-  auto &[trace_info, position] = event;
-  log::fatal("Unexpected: position={}, action"sv, position, action);
+void MarketData::operator()(Trace<json::Margin> const &) {
+  log::fatal("Unexpected"sv);
 }
 
-Product &MarketData::find_product(json::InstrumentItem const &item) {
+void MarketData::operator()(Trace<json::Position> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(Trace<json::Order> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(Trace<json::Execution> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+Product &MarketData::find_product(json::InstrumentDataItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
     iter = product_cache_.try_emplace(item.symbol, shared_, item).first;
@@ -688,7 +676,7 @@ Product &MarketData::find_product(json::InstrumentItem const &item) {
   return (*iter).second;
 }
 
-Product &MarketData::find_product(json::FundingItem const &item) {
+Product &MarketData::find_product(json::FundingDataItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
     log::warn<1>(R"(Create product symbol="{}" from funding (no reference data))"sv, item.symbol);

@@ -1,10 +1,30 @@
 {
   "name": "roq/bitmex/json/Trade",
-  "type": "array",
+  "type": "dictionary",
   "values": [
     {
+      "name": "table",
+      "type": "roq/bitmex/json/Table"
+    },
+    {
+      "name": "action",
+      "type": "roq/bitmex/json/Action"
+    },
+    {
+      "name": "keys",
+      "type": "std/string_view",
+      "array": "std/span"
+    },
+    {
+      "name": "types",
+      "comment": "field to type dict"
+    },
+    {
+      "name": "filter"
+    },
+    {
       "name": "data",
-      "type": "roq/bitmex/json/TradeItem",
+      "type": "roq/bitmex/json/TradeDataItem",
       "array": "std/span"
     }
   ]

@@ -1,21 +1,21 @@
 {
-  "name": "roq/bitmex/json/OrderBookL2Item",
+  "name": "roq/bitmex/json/QuoteDataItem",
   "type": "dictionary",
   "values": [
     {
-      "name": "id",
-      "type": "std/uint64"
-    },
-    {
-      "name": "price",
+      "name": "askPrice",
       "type": "std/double"
     },
     {
-      "name": "side",
-      "type": "roq/bitmex/json/Side"
+      "name": "askSize",
+      "type": "std/double"
     },
     {
-      "name": "size",
+      "name": "bidPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "bidSize",
       "type": "std/double"
     },
     {
@@ -24,10 +24,6 @@
     },
     {
       "name": "timestamp",
-      "type": "std/milliseconds"
-    },
-    {
-      "name": "transactTime",
       "type": "std/milliseconds"
     }
   ]

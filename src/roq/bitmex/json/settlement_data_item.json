@@ -1,5 +1,5 @@
 {
-  "name": "roq/bitmex/json/SettlementItem",
+  "name": "roq/bitmex/json/SettlementDataItem",
   "type": "dictionary",
   "values": [
     {

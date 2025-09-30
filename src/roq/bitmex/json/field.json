@@ -73,6 +73,9 @@
     },
     {
       "name": "heartbeatEnabled"
+    },
+    {
+      "name": "appName"
     }
   ]
 }

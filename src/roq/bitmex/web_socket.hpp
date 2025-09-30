@@ -24,12 +24,12 @@
 #include "roq/bitmex/shared.hpp"
 #include "roq/bitmex/web_socket_state.hpp"
 
-#include "roq/bitmex/json/stream_parser.hpp"
+#include "roq/bitmex/json/parser.hpp"
 
 namespace roq {
 namespace bitmex {
 
-struct WebSocket final : public web::socket::Client::Handler, public json::StreamParser::Handler {
+struct WebSocket final : public web::socket::Client::Handler, public json::Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
@@ -81,24 +81,25 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
 
   void parse(std::string_view const &message);
 
+  void operator()(Trace<json::Welcome> const &) override;
+  //
   void operator()(Trace<json::CancelAllAfter> const &) override;
   void operator()(Trace<json::Error> const &) override;
-  void operator()(Trace<json::Handshake> const &) override;
   void operator()(Trace<json::Subscribe> const &) override;
   void operator()(Trace<json::Unsubscribe> const &) override;
-
-  void operator()(Trace<json::Execution> const &, json::Action) override;
-  void operator()(Trace<json::Margin> const &, json::Action) override;
-  void operator()(Trace<json::Order> const &, json::Action) override;
-  void operator()(Trace<json::Position> const &, json::Action) override;
-  // ... unexpected
-  void operator()(Trace<json::Funding> const &, json::Action) override;
-  void operator()(Trace<json::Instrument> const &, json::Action) override;
-  void operator()(Trace<json::Liquidation> const &, json::Action) override;
-  void operator()(Trace<json::OrderBookL2> const &, json::Action) override;
-  void operator()(Trace<json::Quote> const &, json::Action) override;
-  void operator()(Trace<json::Settlement> const &, json::Action) override;
-  void operator()(Trace<json::Trade> const &, json::Action) override;
+  // public
+  void operator()(Trace<json::Instrument> const &) override;
+  void operator()(Trace<json::Quote> const &) override;
+  void operator()(Trace<json::OrderBookL2> const &) override;
+  void operator()(Trace<json::Trade> const &) override;
+  void operator()(Trace<json::Funding> const &) override;
+  void operator()(Trace<json::Liquidation> const &) override;
+  void operator()(Trace<json::Settlement> const &) override;
+  // private
+  void operator()(Trace<json::Margin> const &) override;
+  void operator()(Trace<json::Position> const &) override;
+  void operator()(Trace<json::Order> const &) override;
+  void operator()(Trace<json::Execution> const &) override;
 
   // utilities
 
@@ -119,7 +120,7 @@ struct WebSocket final : public web::socket::Client::Handler, public json::Strea
   } counter_;
   struct {
     utils::metrics::Profile parse,  //
-        create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error, execution, handshake, margin, order, position;
+        welcome, create_order, modify_order, cancel_order, cancel_all_orders, cancel_all_after, error, execution, margin, order, position;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;

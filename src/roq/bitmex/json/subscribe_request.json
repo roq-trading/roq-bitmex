@@ -1,0 +1,14 @@
+{
+  "name": "roq/bitmex/json/SubscribeRequest",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "op",
+      "type": "roq/bitmex/json/Op"
+    },
+    {
+      "name": "args",
+      "comment": "could be anything"
+    }
+  ]
+}

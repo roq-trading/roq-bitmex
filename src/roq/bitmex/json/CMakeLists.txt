@@ -1,6 +1,6 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES map.cpp stream_parser.cpp utils.cpp)
+set(SOURCES map.cpp parser.cpp utils.cpp)
 
 include(RoqAutogen)
 
@@ -11,42 +11,46 @@ set(AUTOGEN_SCHEMAS
     error_response.json
     exec_inst.json
     exec_type.json
-    execution.json
     execution_item.json
+    execution.json
     field.json
+    funding_data_item.json
     funding.json
-    funding_item.json
-    handshake.json
+    instrument_data_item.json
     instrument.json
-    instrument_item.json
+    liquidation_data_item.json
     liquidation.json
-    liquidation_item.json
     liquidity_ind.json
-    margin.json
     margin_item.json
+    margin.json
+    message.json
     multi_leg_reporting_type.json
+    op.json
+    order_book_l2_data_item.json
+    order_book_l2.json
+    order_item.json
+    order.json
     ord_status.json
     ord_type.json
-    order.json
-    order_book_l2.json
-    order_book_l2_item.json
-    order_item.json
-    position.json
     position_item.json
+    position.json
+    quote_data_item.json
     quote.json
-    quote_item.json
+    settlement_data_item.json
     settlement.json
-    settlement_item.json
     settlement_type.json
     side.json
     state.json
     subscribe.json
+    subscribe_request.json
     table.json
     time_in_force.json
+    trade_data_item.json
     trade.json
-    trade_item.json
     typ.json
-    unsubscribe.json)
+    unsubscribe.json
+    welcome.json
+    welcome_limit.json)
 
 roq_autogen_hpp(
   OUTPUT
