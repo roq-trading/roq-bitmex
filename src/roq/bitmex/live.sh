@@ -12,19 +12,14 @@ CONFIG="${CONFIG:-$NAME-prod}"
 
 CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bitmex/$CONFIG.toml"
 
-URI="bitmex.com"
-
-REST_URI="https://www.$URI"
-WS_URI="wss://ws.$URI/realtime"
+FLAGFILE="../../../share/flags/prod/flags.cfg"
 
 $PREFIX ./roq-bitmex \
   --name "$NAME" \
   --config_file "$CONFIG_FILE" \
+  --flagfile "$FLAGFILE" \
   --cache_dir "$HOME/var/lib/roq/cache" \
   --event_log_dir "$HOME/var/lib/roq/data" \
-  --event_log_symlink true \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
-  --ws_uri "$WS_URI" \
-  --rest_uri "$REST_URI" \
   $@
