@@ -90,7 +90,7 @@ Supports
         - |cross-mark|
         -
 
-  .. grid-item-card::  Orders
+  .. grid-item-card::  Orders & Quotes
 
     .. list-table::
       :widths: auto
