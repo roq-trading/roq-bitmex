@@ -4,6 +4,8 @@ set(TARGET_NAME ${PROJECT_NAME}-test)
 
 set(SOURCES
     json_error_response.cpp
+    json_margin.cpp
+    json_execution.cpp
     json_funding.cpp
     json_instrument.cpp
     json_liquidation.cpp

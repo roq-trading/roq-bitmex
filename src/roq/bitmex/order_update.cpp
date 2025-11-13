@@ -20,7 +20,7 @@ namespace bitmex {
 
 // drop copy
 
-void OrderUpdate::operator()(json::OrderItem const &order_item, TraceInfo const &trace_info, bool download) {
+void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo const &trace_info, bool download) {
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
@@ -87,7 +87,7 @@ void OrderUpdate::operator()(json::Order const &order, TraceInfo const &trace_in
 // order entry
 
 void OrderUpdate::operator()(
-    json::OrderItem const &order_item,
+    json::OrderDataItem const &order_item,
     TraceInfo const &trace_info,
     RequestType request_type,
     [[maybe_unused]] uint8_t user_id,

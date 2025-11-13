@@ -11,7 +11,7 @@ set(AUTOGEN_SCHEMAS
     error_response.json
     exec_inst.json
     exec_type.json
-    execution_item.json
+    execution_data_item.json
     execution.json
     field.json
     funding_data_item.json
@@ -21,18 +21,19 @@ set(AUTOGEN_SCHEMAS
     liquidation_data_item.json
     liquidation.json
     liquidity_ind.json
-    margin_item.json
+    margin_data_item.json
     margin.json
     message.json
     multi_leg_reporting_type.json
     op.json
     order_book_l2_data_item.json
     order_book_l2.json
-    order_item.json
+    order_data_item.json
     order.json
     ord_status.json
+    strategy.json
     ord_type.json
-    position_item.json
+    position_data_item.json
     position.json
     quote_data_item.json
     quote.json

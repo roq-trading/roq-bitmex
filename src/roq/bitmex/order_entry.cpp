@@ -271,7 +271,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
 void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::OrderItem order_item{body};
+      json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -341,7 +341,7 @@ void OrderEntry::modify_order(
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::OrderItem order_item{body};
+      json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -525,7 +525,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
 
 // utilities
 
-void OrderEntry::operator()(json::OrderItem const &order_item) {
+void OrderEntry::operator()(json::OrderDataItem const &order_item) {
   TraceInfo trace_info;
   OrderUpdate{shared_, stream_id_, account_.name}(order_item, trace_info, false);
 }

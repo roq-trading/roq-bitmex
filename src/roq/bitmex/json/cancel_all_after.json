@@ -1,6 +1,6 @@
 {
   "name": "roq/bitmex/json/CancelAllAfter",
-  "type": "struct",
+  "type": "dictionary",
   "values": [
     {
       "name": "cancelTime",
@@ -9,6 +9,9 @@
     {
       "name": "now",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "request"
     }
   ]
 }

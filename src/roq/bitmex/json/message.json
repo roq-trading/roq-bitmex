@@ -68,6 +68,14 @@
       "name": "error",
       "type": "std/string_view",
       "comment": "subscribe"
+    },
+    {
+      "name": "cancelTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "now",
+      "type": "std/milliseconds"
     }
   ]
 }

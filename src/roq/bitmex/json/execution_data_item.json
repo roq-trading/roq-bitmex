@@ -1,5 +1,5 @@
 {
-  "name": "roq/bitmex/json/ExecutionItem",
+  "name": "roq/bitmex/json/ExecutionDataItem",
   "type": "dictionary",
   "values": [
     {
@@ -189,6 +189,10 @@
     {
       "name": "workingIndicator",
       "type": "std/bool"
+    },
+    {
+      "name": "strategy",
+      "type": "roq/bitmex/json/Strategy"
     }
   ]
 }

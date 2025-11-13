@@ -21,7 +21,6 @@
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/json/order.hpp"
-#include "roq/bitmex/json/order_item.hpp"
 
 namespace roq {
 namespace bitmex {
@@ -70,7 +69,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
   void cancel_all_orders_ack(Trace<web::rest::Response> const &, std::string_view const &request_id);
 
-  void operator()(json::OrderItem const &);
+  void operator()(json::OrderDataItem const &);
   void operator()(json::Order const &);
 
   template <typename SuccessHandler, typename ErrorHandler>

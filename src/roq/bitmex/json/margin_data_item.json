@@ -1,5 +1,5 @@
 {
-  "name": "roq/bitmex/json/MarginItem",
+  "name": "roq/bitmex/json/MarginDataItem",
   "type": "dictionary",
   "values": [
     {
@@ -173,6 +173,14 @@
     {
       "name": "takerFeeDiscount",
       "comment": "undoc"
+    },
+    {
+      "name": "foreignMarginBalance",
+      "type": "std/double"
+    },
+    {
+      "name": "foreignRequirement",
+      "type": "std/double"
     }
   ]
 }

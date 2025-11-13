@@ -7,7 +7,6 @@
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/json/order.hpp"
-#include "roq/bitmex/json/order_item.hpp"
 
 namespace roq {
 namespace bitmex {
@@ -18,11 +17,11 @@ struct OrderUpdate final {
   OrderUpdate(OrderUpdate const &) = delete;
 
   // drop copy
-  void operator()(json::OrderItem const &, TraceInfo const &, bool download);
+  void operator()(json::OrderDataItem const &, TraceInfo const &, bool download);
   void operator()(json::Order const &, TraceInfo const &, bool download);
 
   // order entry
-  void operator()(json::OrderItem const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
+  void operator()(json::OrderDataItem const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
   void operator()(json::Order const &, TraceInfo const &, RequestType, uint8_t user_id, uint64_t order_id, uint32_t version);
 
  private:

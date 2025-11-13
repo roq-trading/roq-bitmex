@@ -31,8 +31,6 @@
 #include "roq/bitmex/json/order.hpp"
 #include "roq/bitmex/json/position.hpp"
 
-#undef VERSION
-
 namespace roq {
 namespace bitmex {
 namespace json {

@@ -1,5 +1,5 @@
 {
-  "name": "roq/bitmex/json/PositionItem",
+  "name": "roq/bitmex/json/PositionDataItem",
   "type": "dictionary",
   "values": [
     {
@@ -365,6 +365,10 @@
     {
       "name": "varMargin",
       "type": "std/double"
+    },
+    {
+      "name": "strategy",
+      "type": "roq/bitmex/json/Strategy"
     }
   ]
 }

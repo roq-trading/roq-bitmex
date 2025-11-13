@@ -44,6 +44,10 @@ bool Parser::dispatch(
     dispatch_helper<Subscribe>(handler, message, buffer_stack, trace_info);
     return true;
   }
+  if (message_2.now.count() && message_2.cancel_time.count()) {
+    dispatch_helper<CancelAllAfter>(handler, message, buffer_stack, trace_info);
+    return true;
+  }
   switch (message_2.table) {
     using enum Table::type_t;
     case UNDEFINED_INTERNAL:

@@ -1,10 +1,27 @@
 {
   "name": "roq/bitmex/json/Execution",
-  "type": "array",
+  "type": "dictionary",
   "values": [
     {
+      "name": "table",
+      "type": "roq/bitmex/json/Table"
+    },
+    {
+      "name": "action",
+      "type": "roq/bitmex/json/Action"
+    },
+    {
+      "name": "keys"
+    },
+    {
+      "name": "types"
+    },
+    {
+      "name": "filter"
+    },
+    {
       "name": "data",
-      "type": "roq/bitmex/json/ExecutionItem",
+      "type": "roq/bitmex/json/ExecutionDataItem",
       "array": "std/span"
     }
   ]
