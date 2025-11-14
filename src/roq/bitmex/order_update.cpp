@@ -21,6 +21,9 @@ namespace bitmex {
 // drop copy
 
 void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo const &trace_info, bool download) {
+  if (!download) {  // note! the execution table has the information we need
+    return;
+  }
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
@@ -38,6 +41,7 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
+  log::warn("DEBUG response={}"sv, response);
   auto order_update = server::oms::OrderUpdate{
       .account = account_,
       .exchange = shared_.settings.exchange,
@@ -53,7 +57,7 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .external_account = external_account,
       .external_order_id = external_order_id,
-      .client_order_id = {},
+      .client_order_id = order_item.cl_ord_id,
       .order_status = status,
       .quantity = order_item.order_qty,
       .price = order_item.price,
@@ -71,6 +75,7 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
       .update_type = update_type,
       .sending_time_utc = {},
   };
+  log::warn("DEBUG order_update={}"sv, order_update);
   if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
@@ -125,7 +130,7 @@ void OrderUpdate::operator()(
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .external_account = external_account,
       .external_order_id = external_order_id,
-      .client_order_id = {},
+      .client_order_id = order_item.cl_ord_id,
       .order_status = status,
       .quantity = order_item.order_qty,
       .price = order_item.price,
@@ -143,6 +148,7 @@ void OrderUpdate::operator()(
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = {},
   };
+  log::warn("DEBUG order_update={}"sv, order_update);
   if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);

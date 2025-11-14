@@ -100,14 +100,14 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
       profile_{
           .parse = create_metrics(shared.settings, name_, "parse"sv),
           .welcome = create_metrics(shared.settings, name_, "welcome"sv),
-          .cancel_all_after = create_metrics(shared.settings, name_, "cancel_all_after"sv),
           .error = create_metrics(shared.settings, name_, "error"sv),
-          .execution = create_metrics(shared.settings, name_, "execution"sv),
-          .margin = create_metrics(shared.settings, name_, "margin"sv),
-          .order = create_metrics(shared.settings, name_, "order"sv),
-          .position = create_metrics(shared.settings, name_, "position"sv),
           .subscribe = create_metrics(shared.settings, name_, "subscribe"sv),
           .unsubscribe = create_metrics(shared.settings, name_, "unsubscribe"sv),
+          .cancel_all_after = create_metrics(shared.settings, name_, "cancel_all_after"sv),
+          .order = create_metrics(shared.settings, name_, "order"sv),
+          .execution = create_metrics(shared.settings, name_, "execution"sv),
+          .margin = create_metrics(shared.settings, name_, "margin"sv),
+          .position = create_metrics(shared.settings, name_, "position"sv),
       },
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
@@ -141,14 +141,14 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       // profile
       .write(profile_.parse, metrics::Type::PROFILE)
       .write(profile_.welcome, metrics::Type::PROFILE)
-      .write(profile_.cancel_all_after, metrics::Type::PROFILE)
       .write(profile_.error, metrics::Type::PROFILE)
-      .write(profile_.execution, metrics::Type::PROFILE)
-      .write(profile_.margin, metrics::Type::PROFILE)
-      .write(profile_.order, metrics::Type::PROFILE)
-      .write(profile_.position, metrics::Type::PROFILE)
       .write(profile_.subscribe, metrics::Type::PROFILE)
       .write(profile_.unsubscribe, metrics::Type::PROFILE)
+      .write(profile_.cancel_all_after, metrics::Type::PROFILE)
+      .write(profile_.order, metrics::Type::PROFILE)
+      .write(profile_.execution, metrics::Type::PROFILE)
+      .write(profile_.margin, metrics::Type::PROFILE)
+      .write(profile_.position, metrics::Type::PROFILE)
       // latency
       .write(latency_.ping, metrics::Type::LATENCY)
       .write(latency_.heartbeat, metrics::Type::LATENCY);
@@ -382,44 +382,11 @@ void DropCopy::operator()(Trace<json::Settlement> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Margin> const &event) {
-  profile_.margin([&]() {
-    auto &[trace_info, margin] = event;
-    log::info<2>("margin={}"sv, margin);
-    // not used
-  });
-}
-
-void DropCopy::operator()(Trace<json::Position> const &event) {
-  profile_.position([&]() {
-    auto &[trace_info, position] = event;
-    log::info<2>("position={}"sv, position);
-    for (auto &item : position.data) {
-      auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
-      auto long_quantity = std::max(0.0, item.current_qty);
-      auto short_quantity = std::max(0.0, -item.current_qty);
-      auto position_update = PositionUpdate{
-          .stream_id = stream_id_,
-          .account = account_.name,
-          .exchange = shared_.settings.exchange,
-          .symbol = item.symbol,
-          .margin_mode = {},
-          .external_account = external_account,
-          .long_quantity = long_quantity,
-          .short_quantity = short_quantity,
-          .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = item.timestamp,  // ???
-          .sending_time_utc = {},
-      };
-      create_trace_and_dispatch(handler_, trace_info, position_update, false);
-    }
-  });
-}
-
 void DropCopy::operator()(Trace<json::Order> const &event) {
   profile_.order([&]() {
     auto &[trace_info, order] = event;
     log::info<2>("order={}"sv, order);
+    log::warn("DEBUG order={}"sv, order);
     auto download = !partial_received_.order && order.action == json::Action::PARTIAL;
     OrderUpdate{shared_, stream_id_, account_.name}(order, trace_info, download);
     // state management
@@ -433,9 +400,9 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
 
 void DropCopy::operator()(Trace<json::Execution> const &event) {
   profile_.execution([&]() {
-    auto &trace_info = event.trace_info;
-    auto &execution = event.value;
+    auto &[trace_info, execution] = event;
     log::info<2>("execution={}"sv, execution);
+    log::warn("DEBUG execution={}"sv, execution);
     for (auto &item : execution.data) {
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto request_type = compute_request_type(item.exec_type);
@@ -487,6 +454,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event) {
           .update_type = UpdateType::INCREMENTAL,  // XXX not sure if this is correct...
           .sending_time_utc = {},
       };
+      log::warn("DEBUG order_update={}"sv, order_update);
       auto user_id = SOURCE_NONE;
       auto order_id = ORDER_ID_NONE;
       auto strategy_id = STRATEGY_ID_NONE;
@@ -535,6 +503,40 @@ void DropCopy::operator()(Trace<json::Execution> const &event) {
           .strategy_id = strategy_id,
       };
       create_trace_and_dispatch(handler_, trace_info, trade_update, true, user_id, item.cl_ord_id);
+    }
+  });
+}
+
+void DropCopy::operator()(Trace<json::Margin> const &event) {
+  profile_.margin([&]() {
+    auto &[trace_info, margin] = event;
+    log::info<2>("margin={}"sv, margin);
+    // not used
+  });
+}
+
+void DropCopy::operator()(Trace<json::Position> const &event) {
+  profile_.position([&]() {
+    auto &[trace_info, position] = event;
+    log::info<2>("position={}"sv, position);
+    for (auto &item : position.data) {
+      auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
+      auto long_quantity = std::max(0.0, item.current_qty);
+      auto short_quantity = std::max(0.0, -item.current_qty);
+      auto position_update = PositionUpdate{
+          .stream_id = stream_id_,
+          .account = account_.name,
+          .exchange = shared_.settings.exchange,
+          .symbol = item.symbol,
+          .margin_mode = {},
+          .external_account = external_account,
+          .long_quantity = long_quantity,
+          .short_quantity = short_quantity,
+          .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = item.timestamp,  // ???
+          .sending_time_utc = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, position_update, false);
     }
   });
 }

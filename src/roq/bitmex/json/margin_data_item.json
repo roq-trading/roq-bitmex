@@ -181,6 +181,10 @@
     {
       "name": "foreignRequirement",
       "type": "std/double"
+    },
+    {
+      "name": "systemWithdrawableMargin",
+      "type": "std/double"
     }
   ]
 }

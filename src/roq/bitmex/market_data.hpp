@@ -54,6 +54,8 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(metrics::Writer &) const;
 
  protected:
+  // web::socket::Client::Handler
+
   void operator()(web::socket::Client::Connected const &) override;
   void operator()(web::socket::Client::Disconnected const &) override;
   void operator()(web::socket::Client::Ready const &) override;
@@ -80,9 +82,9 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
 
   void parse(std::string_view const &message);
 
+  // json::Parser::Handler
+
   void operator()(Trace<json::Welcome> const &) override;
-  //
-  void operator()(Trace<json::CancelAllAfter> const &) override;
   void operator()(Trace<json::Error> const &) override;
   void operator()(Trace<json::Subscribe> const &) override;
   void operator()(Trace<json::Unsubscribe> const &) override;
@@ -95,10 +97,11 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(Trace<json::Liquidation> const &) override;
   void operator()(Trace<json::Settlement> const &) override;
   // private
-  void operator()(Trace<json::Margin> const &) override;
-  void operator()(Trace<json::Position> const &) override;
+  void operator()(Trace<json::CancelAllAfter> const &) override;
   void operator()(Trace<json::Order> const &) override;
   void operator()(Trace<json::Execution> const &) override;
+  void operator()(Trace<json::Margin> const &) override;
+  void operator()(Trace<json::Position> const &) override;
 
   // utilities
 
@@ -131,8 +134,11 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile parse, welcome, cancel_all_after, error, funding, instrument, liquidation, order_book_l2, quote, settlement, subscribe, unsubscribe,
-        trade;
+    utils::metrics::Profile parse,  //
+        welcome,                    //
+        error,                      //
+        subscribe, unsubscribe,     //
+        instrument, quote, order_book_l2, trade, funding, liquidation, settlement;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;

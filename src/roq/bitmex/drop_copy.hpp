@@ -48,6 +48,8 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void operator()(metrics::Writer &) const;
 
  protected:
+  // web::socket::Client::Handler
+
   void operator()(web::socket::Client::Connected const &) override;
   void operator()(web::socket::Client::Disconnected const &) override;
   void operator()(web::socket::Client::Ready const &) override;
@@ -70,13 +72,12 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
 
   void parse(std::string_view const &message);
 
+  // json::Parser::Handler
+
   void operator()(Trace<json::Welcome> const &) override;
-  //
-  void operator()(Trace<json::CancelAllAfter> const &) override;
   void operator()(Trace<json::Error> const &) override;
   void operator()(Trace<json::Subscribe> const &) override;
   void operator()(Trace<json::Unsubscribe> const &) override;
-
   // public
   void operator()(Trace<json::Instrument> const &) override;
   void operator()(Trace<json::Quote> const &) override;
@@ -86,10 +87,11 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void operator()(Trace<json::Liquidation> const &) override;
   void operator()(Trace<json::Settlement> const &) override;
   // private
-  void operator()(Trace<json::Margin> const &) override;
-  void operator()(Trace<json::Position> const &) override;
+  void operator()(Trace<json::CancelAllAfter> const &) override;
   void operator()(Trace<json::Order> const &) override;
   void operator()(Trace<json::Execution> const &) override;
+  void operator()(Trace<json::Margin> const &) override;
+  void operator()(Trace<json::Position> const &) override;
 
   // utilities
 
@@ -109,7 +111,12 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile parse, welcome, cancel_all_after, error, execution, margin, order, position, subscribe, unsubscribe;
+    utils::metrics::Profile parse,  //
+        welcome,                    //
+        error,                      //
+        subscribe, unsubscribe,     //
+        cancel_all_after,           //
+        order, execution, margin, position;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;

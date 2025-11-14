@@ -27,7 +27,7 @@
     {
       "name": "cancel_on_disconnect",
       "type": "std/bool",
-      "default": true,
+      "default": false,
       "description": "Cancel orders on disconnect?"
     },
     {

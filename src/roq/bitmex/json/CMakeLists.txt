@@ -1,12 +1,14 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES map.cpp parser.cpp utils.cpp)
+set(SOURCES encoder.cpp map.cpp parser.cpp utils.cpp)
 
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
     action.json
     cancel_all_after.json
+    cancel_all_orders_ack.json
+    cancel_order_ack.json
     error.json
     error_response.json
     exec_inst.json
@@ -31,7 +33,6 @@ set(AUTOGEN_SCHEMAS
     order_data_item.json
     order.json
     ord_status.json
-    strategy.json
     ord_type.json
     position_data_item.json
     position.json
@@ -42,6 +43,7 @@ set(AUTOGEN_SCHEMAS
     settlement_type.json
     side.json
     state.json
+    strategy.json
     subscribe.json
     subscribe_request.json
     table.json

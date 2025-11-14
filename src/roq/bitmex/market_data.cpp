@@ -89,17 +89,16 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
       profile_{
           .parse = create_metrics(shared.settings, name_, "parse"sv),
           .welcome = create_metrics(shared.settings, name_, "welcome"sv),
-          .cancel_all_after = create_metrics(shared.settings, name_, "cancel_all_after"sv),
           .error = create_metrics(shared.settings, name_, "error"sv),
-          .funding = create_metrics(shared.settings, name_, "funding"sv),
-          .instrument = create_metrics(shared.settings, name_, "instrument"sv),
-          .liquidation = create_metrics(shared.settings, name_, "liquidation"sv),
-          .order_book_l2 = create_metrics(shared.settings, name_, "order_book_l2"sv),
-          .quote = create_metrics(shared.settings, name_, "quote"sv),
-          .settlement = create_metrics(shared.settings, name_, "settlement"sv),
           .subscribe = create_metrics(shared.settings, name_, "subscribe"sv),
           .unsubscribe = create_metrics(shared.settings, name_, "unsubscribe"sv),
+          .instrument = create_metrics(shared.settings, name_, "instrument"sv),
+          .quote = create_metrics(shared.settings, name_, "quote"sv),
+          .order_book_l2 = create_metrics(shared.settings, name_, "order_book_l2"sv),
           .trade = create_metrics(shared.settings, name_, "trade"sv),
+          .funding = create_metrics(shared.settings, name_, "funding"sv),
+          .liquidation = create_metrics(shared.settings, name_, "liquidation"sv),
+          .settlement = create_metrics(shared.settings, name_, "settlement"sv),
       },
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
@@ -127,17 +126,16 @@ void MarketData::operator()(metrics::Writer &writer) const {
       // profile
       .write(profile_.parse, metrics::Type::PROFILE)
       .write(profile_.welcome, metrics::Type::PROFILE)
-      .write(profile_.cancel_all_after, metrics::Type::PROFILE)
       .write(profile_.error, metrics::Type::PROFILE)
-      .write(profile_.funding, metrics::Type::PROFILE)
-      .write(profile_.instrument, metrics::Type::PROFILE)
-      .write(profile_.liquidation, metrics::Type::PROFILE)
-      .write(profile_.order_book_l2, metrics::Type::PROFILE)
-      .write(profile_.quote, metrics::Type::PROFILE)
-      .write(profile_.settlement, metrics::Type::PROFILE)
       .write(profile_.subscribe, metrics::Type::PROFILE)
       .write(profile_.unsubscribe, metrics::Type::PROFILE)
+      .write(profile_.instrument, metrics::Type::PROFILE)
+      .write(profile_.quote, metrics::Type::PROFILE)
+      .write(profile_.order_book_l2, metrics::Type::PROFILE)
       .write(profile_.trade, metrics::Type::PROFILE)
+      .write(profile_.funding, metrics::Type::PROFILE)
+      .write(profile_.liquidation, metrics::Type::PROFILE)
+      .write(profile_.settlement, metrics::Type::PROFILE)
       // latency
       .write(latency_.ping, metrics::Type::LATENCY)
       .write(latency_.heartbeat, metrics::Type::LATENCY);
@@ -326,13 +324,6 @@ void MarketData::operator()(Trace<json::Welcome> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::CancelAllAfter> const &event) {
-  profile_.cancel_all_after([&]() {
-    auto &[trace_info, cancel_all_after] = event;
-    log::info<2>("cancel_all_after={}"sv, cancel_all_after);
-  });
-}
-
 void MarketData::operator()(Trace<json::Error> const &event) {
   profile_.error([&]() {
     auto &[trace_info, error] = event;
@@ -350,7 +341,6 @@ void MarketData::operator()(Trace<json::Subscribe> const &event) {
     } else {
       log::warn(R"(Failed to subscribe topic="{}")"sv, subscribe.subscribe);
     }
-    // TODO(thraneh): clear timeout
   });
 }
 
@@ -363,7 +353,6 @@ void MarketData::operator()(Trace<json::Unsubscribe> const &event) {
     } else {
       log::warn(R"(Failed to unsubscribe topic="{}")"sv, unsubscribe.unsubscribe);
     }
-    // TODO(thraneh): clear timeout
   });
 }
 
@@ -662,6 +651,10 @@ void MarketData::operator()(Trace<json::Order> const &) {
 }
 
 void MarketData::operator()(Trace<json::Execution> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(Trace<json::CancelAllAfter> const &) {
   log::fatal("Unexpected"sv);
 }
 

@@ -38,8 +38,6 @@ namespace json {
 struct Parser final {
   struct Handler {
     virtual void operator()(Trace<Welcome> const &) = 0;
-    //
-    virtual void operator()(Trace<CancelAllAfter> const &) = 0;
     virtual void operator()(Trace<Error> const &) = 0;
     virtual void operator()(Trace<Subscribe> const &) = 0;
     virtual void operator()(Trace<Unsubscribe> const &) = 0;
@@ -52,9 +50,10 @@ struct Parser final {
     virtual void operator()(Trace<Liquidation> const &) = 0;
     virtual void operator()(Trace<Settlement> const &) = 0;
     // private
+    virtual void operator()(Trace<CancelAllAfter> const &) = 0;
+    virtual void operator()(Trace<Order> const &) = 0;
     virtual void operator()(Trace<Execution> const &) = 0;
     virtual void operator()(Trace<Margin> const &) = 0;
-    virtual void operator()(Trace<Order> const &) = 0;
     virtual void operator()(Trace<Position> const &) = 0;
   };
 

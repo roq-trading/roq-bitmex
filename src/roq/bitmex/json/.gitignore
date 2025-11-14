@@ -2,6 +2,8 @@
 roq-bitmex-json
 action.hpp
 cancel_all_after.hpp
+cancel_all_orders_ack.hpp
+cancel_order_ack.hpp
 error.hpp
 error_response.hpp
 exec_inst.hpp
@@ -26,7 +28,6 @@ order_book_l2.hpp
 order_data_item.hpp
 order.hpp
 ord_status.hpp
-strategy.hpp
 ord_type.hpp
 position_data_item.hpp
 position.hpp
@@ -37,6 +38,7 @@ settlement.hpp
 settlement_type.hpp
 side.hpp
 state.hpp
+strategy.hpp
 subscribe.hpp
 subscribe_request.hpp
 table.hpp
@@ -49,6 +51,8 @@ welcome.hpp
 welcome_limit.hpp
 action.cpp
 cancel_all_after.cpp
+cancel_all_orders_ack.cpp
+cancel_order_ack.cpp
 error.cpp
 error_response.cpp
 exec_inst.cpp
@@ -73,7 +77,6 @@ order_book_l2.cpp
 order_data_item.cpp
 order.cpp
 ord_status.cpp
-strategy.cpp
 ord_type.cpp
 position_data_item.cpp
 position.cpp
@@ -84,6 +87,7 @@ settlement.cpp
 settlement_type.cpp
 side.cpp
 state.cpp
+strategy.cpp
 subscribe.cpp
 subscribe_request.cpp
 table.cpp

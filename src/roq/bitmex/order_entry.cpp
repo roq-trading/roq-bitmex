@@ -20,8 +20,12 @@
 #include "roq/bitmex/order_update.hpp"
 
 #include "roq/bitmex/json/error_parser.hpp"
-#include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
+
+#include "roq/bitmex/json/encoder.hpp"
+
+#include "roq/bitmex/json/cancel_all_orders_ack.hpp"
+#include "roq/bitmex/json/cancel_order_ack.hpp"
 
 using namespace std::literals;
 
@@ -214,7 +218,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 // create-order
 
-void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &, std::string_view const &request_id) {
+void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
@@ -223,30 +227,9 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
     auto method = web::http::Method::POST;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto side = map(create_order.side).template get<json::Side>();
-    auto ord_type = map(create_order.order_type).template get<json::OrdType>();
-    auto time_in_force = map(create_order.time_in_force).template get<json::TimeInForce>();
-    auto exec_inst = std::empty(create_order.execution_instructions) ? std::string_view{} : json::map(create_order.execution_instructions).as_raw_text();
-    auto body = fmt::format(
-        R"({{)"
-        R"("clOrdID":"{}",)"
-        R"("symbol":"{}",)"
-        R"("side":"{}",)"
-        R"("price":{},)"
-        R"("orderQty":{},)"
-        R"("ordType":"{}",)"
-        R"("timeInForce":"{}",)"
-        R"("execInst":"{}")"
-        R"(}})"sv,
-        request_id,
-        create_order.symbol,
-        side.as_raw_text(),
-        create_order.price,
-        create_order.quantity,
-        ord_type.as_raw_text(),
-        time_in_force.as_raw_text(),
-        exec_inst);
+    auto body = json::Encoder::place_order(encode_buffer_, create_order, order, request_id);
     log::info<2>(R"(body="{}")"sv, body);
+    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -271,6 +254,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
 void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::warn(R"(DEBUG body="{}")"sv, body);
       json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
@@ -296,7 +280,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
 // modify-order
 
 void OrderEntry::modify_order(
-    Event<ModifyOrder> const &event, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
@@ -305,18 +289,9 @@ void OrderEntry::modify_order(
     auto method = web::http::Method::PUT;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = fmt::format(
-        R"({{)"
-        R"("clOrdID":"{}",)"
-        R"("origClOrdID":"{}",)"
-        R"("orderQty":{},)"
-        R"("price":{})"
-        R"(}})"sv,
-        request_id,
-        previous_request_id,
-        modify_order.quantity,
-        modify_order.price);
+    auto body = json::Encoder::modify_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
+    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -341,6 +316,7 @@ void OrderEntry::modify_order(
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::warn(R"(DEBUG body="{}")"sv, body);
       json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
@@ -366,10 +342,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
 // cancel-order
 
 void OrderEntry::cancel_order(
-    Event<CancelOrder> const &event,
-    server::oms::Order const &order,
-    [[maybe_unused]] std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
@@ -378,12 +351,9 @@ void OrderEntry::cancel_order(
     auto method = web::http::Method::DELETE;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = fmt::format(
-        R"({{)"
-        R"("orderID":"{}")"
-        R"(}})"sv,
-        order.external_order_id);
+    auto body = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
+    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -408,8 +378,11 @@ void OrderEntry::cancel_order(
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::Order order{body, decode_buffer_};
-      OrderUpdate{shared_, stream_id_, account_.name}(order, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
+      log::warn(R"(DEBUG body="{}")"sv, body);
+      json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
+      for (auto &item : cancel_order_ack.data) {
+        OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
+      }
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       auto response = server::oms::Response{
@@ -464,7 +437,9 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
     auto method = web::http::Method::DELETE;
     auto path = shared_.api.order_management.order_all;
     auto expires = compute_expires(shared_.settings);
-    auto body = "{}"sv;
+    auto body = json::Encoder::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id);
+    log::info<2>(R"(body="{}")"sv, body);
+    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -511,8 +486,11 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       shared_(event_2);
     };
     auto handle_success = [&](auto &body) {
-      json::Order order{body, decode_buffer_};
-      OrderUpdate{shared_, stream_id_, account_.name}(order, event.trace_info, false);
+      log::warn(R"(DEBUG body="{}")"sv, body);
+      json::CancelAllOrdersAck cancel_all_orders_ack{body, decode_buffer_};
+      for (auto &item : cancel_all_orders_ack.data) {
+        OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, false);
+      }
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {

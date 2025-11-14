@@ -3,12 +3,16 @@ include(RoqAutogen)
 set(TARGET_NAME ${PROJECT_NAME}-test)
 
 set(SOURCES
+    json_cancel_all_orders_ack.cpp
+    json_cancel_order_ack.cpp
+    json_create_order_ack.cpp
     json_error_response.cpp
-    json_margin.cpp
     json_execution.cpp
     json_funding.cpp
     json_instrument.cpp
+    json_modify_order_ack.cpp
     json_liquidation.cpp
+    json_margin.cpp
     json_order_book_l2.cpp
     json_position.cpp
     json_quote.cpp

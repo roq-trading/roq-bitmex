@@ -89,14 +89,17 @@ struct OrderEntry final : public web::rest::Client::Handler {
   std::unique_ptr<web::rest::Client> const connection_;
   // buffers
   core::json::BufferStack decode_buffer_;
+  std::string encode_buffer_;
   // metrics
   struct {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile create_order, create_order_ack,  //
-        modify_order, modify_order_ack,                      //
-        cancel_order, cancel_order_ack,                      //
+    utils::metrics::Profile  //
+        create_order,
+        create_order_ack,                //
+        modify_order, modify_order_ack,  //
+        cancel_order, cancel_order_ack,  //
         cancel_all_orders, cancel_all_orders_ack;
   } profile_;
   struct {
