@@ -486,6 +486,7 @@ void WebSocket::operator()(Trace<json::Execution> const &event) {
           .quantity = item.order_qty,
           .price = item.price,
           .stop_price = item.stop_px,
+          .leverage = NaN,
           .remaining_quantity = item.leaves_qty,
           .traded_quantity = item.cum_qty,
           .average_traded_price = item.avg_px,
