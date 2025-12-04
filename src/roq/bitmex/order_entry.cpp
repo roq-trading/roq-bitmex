@@ -174,6 +174,8 @@ uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &event, std::string
   return stream_id_;
 }
 
+// web::rest::Client::Handler
+
 void OrderEntry::operator()(Trace<web::rest::Client::Connected> const &) {
   (*this)(ConnectionStatus::READY);
 }
@@ -501,7 +503,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
   });
 }
 
-// utilities
+// helpers
 
 void OrderEntry::operator()(json::OrderDataItem const &order_item) {
   TraceInfo trace_info;
