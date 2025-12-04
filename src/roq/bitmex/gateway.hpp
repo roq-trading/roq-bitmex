@@ -75,6 +75,22 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   OrderEntry &get_order_entry(std::string_view const &account);
   WebSocket &get_web_socket(std::string_view const &account);
 
+  struct OrderEntryRR final {
+    OrderEntryRR(std::vector<std::unique_ptr<OrderEntry>> &&);
+
+    template <typename... Args>
+    void operator()(Args &&...);
+
+    template <typename... Args>
+    void operator()(Args &&...) const;
+
+    OrderEntry &get_next();
+
+   private:
+    std::vector<std::unique_ptr<OrderEntry>> order_entry_;
+    size_t index_ = {};
+  };
+
  private:
   server::Dispatcher &dispatcher_;
   // accounts
@@ -86,7 +102,7 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   // seed
   uint16_t stream_id_ = {};
   // streams
-  utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
+  utils::unordered_map<std::string, OrderEntryRR> order_entry_;
   utils::unordered_map<std::string, std::unique_ptr<WebSocket>> web_socket_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   MarketData market_data_;

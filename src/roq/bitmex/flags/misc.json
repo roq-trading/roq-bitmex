@@ -27,6 +27,12 @@
       "type": "std/bool",
       "default": false,
       "description": "Use web-socket for order management?"
+    },
+    {
+      "name": "number_of_order_entry_connections",
+      "type": "std/uint32",
+      "default": 1,
+      "description": "Number of order-entry connections"
     }
   ]
 }
