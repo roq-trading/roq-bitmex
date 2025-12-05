@@ -41,7 +41,6 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
-  log::warn("DEBUG response={}"sv, response);
   auto order_update = server::oms::OrderUpdate{
       .account = account_,
       .exchange = shared_.settings.exchange,
@@ -76,7 +75,6 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
       .update_type = update_type,
       .sending_time_utc = {},
   };
-  log::warn("DEBUG order_update={}"sv, order_update);
   if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
@@ -150,7 +148,6 @@ void OrderUpdate::operator()(
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = {},
   };
-  log::warn("DEBUG order_update={}"sv, order_update);
   if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);

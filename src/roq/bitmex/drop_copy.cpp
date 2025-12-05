@@ -386,7 +386,6 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
   profile_.order([&]() {
     auto &[trace_info, order] = event;
     log::info<2>("order={}"sv, order);
-    log::warn("DEBUG order={}"sv, order);
     auto download = !partial_received_.order && order.action == json::Action::PARTIAL;
     OrderUpdate{shared_, stream_id_, account_.name}(order, trace_info, download);
     // state management
@@ -402,7 +401,6 @@ void DropCopy::operator()(Trace<json::Execution> const &event) {
   profile_.execution([&]() {
     auto &[trace_info, execution] = event;
     log::info<2>("execution={}"sv, execution);
-    log::warn("DEBUG execution={}"sv, execution);
     for (auto &item : execution.data) {
       auto external_account = item.account ? fmt::format("{}"sv, item.account) : std::string{};
       auto request_type = compute_request_type(item.exec_type);
@@ -455,7 +453,6 @@ void DropCopy::operator()(Trace<json::Execution> const &event) {
           .update_type = UpdateType::INCREMENTAL,  // XXX not sure if this is correct...
           .sending_time_utc = {},
       };
-      log::warn("DEBUG order_update={}"sv, order_update);
       auto user_id = SOURCE_NONE;
       auto order_id = ORDER_ID_NONE;
       auto strategy_id = STRATEGY_ID_NONE;

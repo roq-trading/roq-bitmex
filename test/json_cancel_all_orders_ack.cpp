@@ -11,6 +11,8 @@ using namespace roq::bitmex;
 
 using namespace std::literals;
 
+using value_type = json::CancelAllOrdersAck;
+
 TEST_CASE("simple", "[json_cancel_all_orders_ack]") {
   auto const message = R"([{)"
                        R"("account":273093,)"
@@ -33,6 +35,11 @@ TEST_CASE("simple", "[json_cancel_all_orders_ack]") {
                        R"("workingIndicator":false)"
                        R"(})"
                        R"(])"sv;
-  core::json::BufferStack buffer{8192, 1};
-  json::CancelAllOrdersAck obj{message, buffer};
+  auto helper = [&](value_type &obj) {
+    REQUIRE(std::size(obj.data) == 1);
+    CHECK(obj.data[0].account == 273093);
+  };
+  core::json::BufferStack buffers{8192, 1};
+  value_type obj{message, buffers};
+  helper(obj);
 }

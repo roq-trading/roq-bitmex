@@ -231,7 +231,6 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
     auto expires = compute_expires(shared_.settings);
     auto body = json::Encoder::place_order(encode_buffer_, create_order, order, request_id);
     log::info<2>(R"(body="{}")"sv, body);
-    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -256,7 +255,6 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
 void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
       json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
@@ -293,7 +291,6 @@ void OrderEntry::modify_order(
     auto expires = compute_expires(shared_.settings);
     auto body = json::Encoder::modify_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
-    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -318,7 +315,6 @@ void OrderEntry::modify_order(
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
       json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
@@ -355,7 +351,6 @@ void OrderEntry::cancel_order(
     auto expires = compute_expires(shared_.settings);
     auto body = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
-    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -380,7 +375,6 @@ void OrderEntry::cancel_order(
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
       for (auto &item : cancel_order_ack.data) {
         OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
@@ -441,7 +435,6 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
     auto expires = compute_expires(shared_.settings);
     auto body = json::Encoder::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id);
     log::info<2>(R"(body="{}")"sv, body);
-    log::warn(R"(DEBUG body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
         .method = method,
@@ -488,7 +481,6 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       shared_(event_2);
     };
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelAllOrdersAck cancel_all_orders_ack{body, decode_buffer_};
       for (auto &item : cancel_all_orders_ack.data) {
         OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, false);

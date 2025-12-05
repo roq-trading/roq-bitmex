@@ -1,14 +1,8 @@
 /* Copyright (c) 2017-2025, Hans Erik Thrane */
 
-#include <cmath>
-
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/datetime.hpp"
-
-#include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/bitmex/json/order_book_l2.hpp"
+#include "parser_tester.hpp"
 
 using namespace roq;
 using namespace roq::bitmex;
@@ -16,6 +10,8 @@ using namespace roq::bitmex;
 using namespace std::literals;
 
 using namespace Catch::literals;
+
+using value_type = json::OrderBookL2;
 
 // note! truncated
 TEST_CASE("simple", "[json_order_book_l2]") {
@@ -56,6 +52,9 @@ TEST_CASE("simple", "[json_order_book_l2]") {
                        R"(})"
                        R"(])"
                        R"(})"sv;
-  core::json::BufferStack buffer{8192, 1};
-  json::OrderBookL2 obj{message, buffer};
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.table == json::Table::ORDER_BOOK_L2);
+    CHECK(obj.action == json::Action::PARTIAL);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

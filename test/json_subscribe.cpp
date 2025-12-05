@@ -1,14 +1,8 @@
 /* Copyright (c) 2017-2025, Hans Erik Thrane */
 
-#include <cmath>
-
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/datetime.hpp"
-
-#include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/bitmex/json/subscribe.hpp"
+#include "parser_tester.hpp"
 
 using namespace roq;
 using namespace roq::bitmex;
@@ -16,6 +10,8 @@ using namespace roq::bitmex;
 using namespace std::literals;
 
 using namespace Catch::literals;
+
+using value_type = json::Subscribe;
 
 TEST_CASE("simple", "[json_subscribe]") {
   auto const message = R"({)"
@@ -26,6 +22,9 @@ TEST_CASE("simple", "[json_subscribe]") {
                        R"("args":"instrument")"
                        R"(})"
                        R"(})"sv;
-  core::json::BufferStack buffer{8192, 1};
-  json::Subscribe obj{message, buffer};
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.success == true);
+    CHECK(obj.subscribe == "instrument"sv);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
