@@ -75,7 +75,13 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
       .update_type = update_type,
       .sending_time_utc = {},
   };
-  if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
+  auto request_or_exchange_id = [&]() {
+    if (std::empty(order_update.client_order_id)) {
+      return order_update.external_order_id;
+    }
+    return order_update.client_order_id;
+  }();
+  if (shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);
@@ -148,7 +154,13 @@ void OrderUpdate::operator()(
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = {},
   };
-  if (shared_.update_order(order_item.cl_ord_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
+  auto request_or_exchange_id = [&]() {
+    if (std::empty(order_update.client_order_id)) {
+      return order_update.external_order_id;
+    }
+    return order_update.client_order_id;
+  }();
+  if (shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);

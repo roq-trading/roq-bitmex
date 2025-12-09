@@ -255,6 +255,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
 void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::debug("{}"sv, body);
       json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
@@ -315,6 +316,7 @@ void OrderEntry::modify_order(
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::debug("{}"sv, body);
       json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
@@ -375,6 +377,7 @@ void OrderEntry::cancel_order(
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::debug("{}"sv, body);
       json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
       for (auto &item : cancel_order_ack.data) {
         OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
@@ -481,6 +484,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       shared_(event_2);
     };
     auto handle_success = [&](auto &body) {
+      log::debug("{}"sv, body);
       json::CancelAllOrdersAck cancel_all_orders_ack{body, decode_buffer_};
       for (auto &item : cancel_all_orders_ack.data) {
         OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, false);

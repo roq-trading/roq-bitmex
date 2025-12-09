@@ -19,14 +19,13 @@
 #include "roq/bitmex/drop_copy.hpp"
 #include "roq/bitmex/market_data.hpp"
 #include "roq/bitmex/order_entry.hpp"
-#include "roq/bitmex/web_socket.hpp"
 
 namespace roq {
 namespace bitmex {
 
 struct MarketData;
 
-struct Gateway final : public server::Handler, public OrderEntry::Handler, public WebSocket::Handler, public DropCopy::Handler, public MarketData::Handler {
+struct Gateway final : public server::Handler, public OrderEntry::Handler, public DropCopy::Handler, public MarketData::Handler {
   Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
   Gateway(Gateway const &) = delete;
@@ -73,7 +72,6 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   static void dispatch_helper(auto &self, Args &&...);
 
   OrderEntry &get_order_entry(std::string_view const &account);
-  WebSocket &get_web_socket(std::string_view const &account);
 
   struct OrderEntryRR final {
     OrderEntryRR(std::vector<std::unique_ptr<OrderEntry>> &&);
@@ -103,7 +101,6 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   uint16_t stream_id_ = {};
   // streams
   utils::unordered_map<std::string, OrderEntryRR> order_entry_;
-  utils::unordered_map<std::string, std::unique_ptr<WebSocket>> web_socket_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   MarketData market_data_;
   // cache

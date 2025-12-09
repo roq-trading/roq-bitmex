@@ -2,4 +2,3 @@
 roq-bitmex
 market_data_state.hpp
 drop_copy_state.hpp
-web_socket_state.hpp

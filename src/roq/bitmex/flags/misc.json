@@ -23,12 +23,6 @@
       "description": "Allow price inversion?"
     },
     {
-      "name": "oms_using_web_socket",
-      "type": "std/bool",
-      "default": false,
-      "description": "Use web-socket for order management?"
-    },
-    {
       "name": "number_of_order_entry_connections",
       "type": "std/uint32",
       "default": 1,

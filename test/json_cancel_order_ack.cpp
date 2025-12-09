@@ -43,3 +43,22 @@ TEST_CASE("simple", "[json_cancel_order_ack]") {
   value_type obj{message, buffers};
   helper(obj);
 }
+
+TEST_CASE("failure", "[json_cancel_order_ack]") {
+  auto const message = R"([{)"
+                       R"("account":424266,)"
+                       R"("error":"Unable to cancel order",)"
+                       R"("orderID":"e119ebc6-c1c9-4108-88e0-c819bb688646",)"
+                       R"("timestamp":"2025-12-09T08:21:26.122Z",)"
+                       R"("transactTime":"2025-12-09T08:21:26.122Z",)"
+                       R"("workingIndicator":false)"
+                       R"(})"
+                       R"(])"sv;
+  auto helper = [&](value_type &obj) {
+    REQUIRE(std::size(obj.data) == 1);
+    CHECK(obj.data[0].account == 424266);
+  };
+  core::json::BufferStack buffers{8192, 1};
+  value_type obj{message, buffers};
+  helper(obj);
+}

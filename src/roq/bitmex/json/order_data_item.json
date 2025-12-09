@@ -137,6 +137,10 @@
     {
       "name": "strategy",
       "type": "roq/bitmex/json/Strategy"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
     }
   ]
 }
