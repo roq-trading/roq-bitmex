@@ -154,6 +154,8 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
 
+// web::socket::Client::Handler
+
 void DropCopy::operator()(web::socket::Client::Connected const &) {
   // note! don't notify gateway: wait for ready
 }
@@ -301,6 +303,7 @@ void DropCopy::operator()(Trace<json::Welcome> const &event) {
   profile_.welcome([&]() {
     auto &[trace_info, welcome] = event;
     log::info<2>("welcome={}"sv, welcome);
+    log::warn("DEBUG welcome={}"sv, welcome);
     (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
     if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0) {

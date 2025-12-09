@@ -10,16 +10,14 @@ namespace bitmex {
 // === HELPERS ===
 
 namespace {
-auto create_base_path(auto &settings) {
-  io::web::URI uri{settings.rest.uri};
-  return std::string{uri.get_path()};
+auto create_crypto(auto &config, auto &name) {
+  return tools::Crypto{config.get_api_key(name), config.get_secret(name)};
 }
 }  // namespace
 
 // === IMPLEMENTATION ===
 
-Account::Account(Settings const &settings, Config const &config, std::string_view const &name)
-    : name{name}, base_path{create_base_path(settings)}, crypto_{config.get_api_key(), config.get_secret()} {
+Account::Account(Settings const &, Config const &config, std::string_view const &name) : name{name}, crypto_{create_crypto(config, name)} {
 }
 
 std::string Account::create_signature(std::chrono::nanoseconds expires, web::http::Method method, std::string_view const &path, std::string_view const &body) {

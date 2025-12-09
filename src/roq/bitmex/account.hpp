@@ -28,7 +28,7 @@ struct Account final {
   std::string const name;
 
  private:
-  std::string const base_path;
+  // std::string const base_path;
   tools::Crypto crypto_;
 };
 
