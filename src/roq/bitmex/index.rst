@@ -198,7 +198,7 @@ Configuration
 
 .. code-block:: shell
 
-   $ --flagfile $CONDA_PREFIX/share/roq-bitmex/config.toml
+   $ --config_file $CONDA_PREFIX/share/roq-bitmex/config.toml
 
 .. important::
 
