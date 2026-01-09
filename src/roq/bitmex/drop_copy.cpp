@@ -420,6 +420,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event) {
           .text = item.text,
           .version = {},
           .request_id = request_id,
+          .external_order_id = {},
           .quantity = item.order_qty,
           .price = item.price,
       };

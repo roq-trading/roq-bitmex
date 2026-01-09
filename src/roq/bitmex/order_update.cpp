@@ -38,6 +38,7 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
       .text = order_item.text,
       .version = {},
       .request_id = {},  // cancel does not rewrite
+      .external_order_id = {},
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
@@ -117,6 +118,7 @@ void OrderUpdate::operator()(
       .text = order_item.text,
       .version = version,
       .request_id = request_id,
+      .external_order_id = {},
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
