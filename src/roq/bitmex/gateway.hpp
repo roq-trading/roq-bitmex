@@ -51,6 +51,8 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) override;
   void operator()(Trace<PositionUpdate> const &, bool is_last) override;
 
+  void operator()(Event<Subscribe> const &) override;
+
   uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id) override;
   uint16_t operator()(
       Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id) override;
