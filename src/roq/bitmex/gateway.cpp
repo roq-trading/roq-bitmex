@@ -102,6 +102,7 @@ void Gateway::operator()(Event<Disconnected> const &) {
 }
 
 void Gateway::operator()(Event<Subscribe> const &) {
+  // all symbols already subscribed ???
 }
 
 uint16_t Gateway::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
