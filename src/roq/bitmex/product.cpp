@@ -182,6 +182,7 @@ ReferenceData Product::reference_data(json::InstrumentDataItem const &item, uint
       .symbol = item.symbol,
       .description = {},
       .security_type = {},  // XXX typ?
+      .external_security_id = {},
       .cfi_code = {},
       .base_currency = settl_currency_,
       .quote_currency = quote_currency_,
