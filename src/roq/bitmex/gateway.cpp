@@ -105,23 +105,32 @@ void Gateway::operator()(Event<Subscribe> const &) {
   // all symbols already subscribed ???
 }
 
-uint16_t Gateway::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+uint16_t Gateway::operator()(
+    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  return get_order_entry(event.value.account)(event, order, request_id);
+  return get_order_entry(event.value.account)(event, order, ref_data, request_id);
 }
 
 uint16_t Gateway::operator()(
-    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &ref_data,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
+  return get_order_entry(event.value.account)(event, order, ref_data, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(
-    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &ref_data,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
+  return get_order_entry(event.value.account)(event, order, ref_data, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {

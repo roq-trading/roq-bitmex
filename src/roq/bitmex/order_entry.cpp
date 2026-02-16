@@ -152,19 +152,28 @@ void OrderEntry::operator()(metrics::Writer &writer) const {
       .write(latency_.ping, metrics::Type::LATENCY);
 }
 
-uint16_t OrderEntry::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+uint16_t OrderEntry::operator()(
+    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &, std::string_view const &request_id) {
   create_order(event, order, request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
-    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   modify_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
-    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   cancel_order(event, order, request_id, previous_request_id);
   return stream_id_;
 }
