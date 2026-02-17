@@ -19,6 +19,9 @@
     },
     {
       "name": "Trade"
+    },
+    {
+      "name": "CancelReject"
     }
   ]
 }

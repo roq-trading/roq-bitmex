@@ -141,6 +141,14 @@
     {
       "name": "error",
       "type": "std/string_view"
+    },
+    {
+      "name": "maxSlippagePct",
+      "type": "std/double"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
     }
   ]
 }

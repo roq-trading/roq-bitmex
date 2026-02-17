@@ -28,6 +28,8 @@ inline RequestType compute_request_type(json::ExecType exec_type) {
       break;
     case FUNDING:
       break;
+    case CANCEL_REJECT:
+      return RequestType::CANCEL_ORDER;
   }
   return {};
 }
@@ -48,6 +50,8 @@ inline RequestStatus compute_request_status(json::ExecType exec_type) {
       break;
     case FUNDING:
       break;
+    case CANCEL_REJECT:
+      return RequestStatus::REJECTED;
   }
   return {};
 }

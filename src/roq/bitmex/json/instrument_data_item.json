@@ -437,6 +437,10 @@
     {
       "name": "fundingQuoteRate",
       "type": "std/double"
+    },
+    {
+      "name": "minPrice",
+      "type": "std/double"
     }
   ]
 }

@@ -153,28 +153,28 @@ void OrderEntry::operator()(metrics::Writer &writer) const {
 }
 
 uint16_t OrderEntry::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &, std::string_view const &request_id) {
-  create_order(event, order, request_id);
+    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
+  create_order(event, order, ref_data, request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
     Event<ModifyOrder> const &event,
     server::oms::Order const &order,
-    server::oms::RefData const &,
+    server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  modify_order(event, order, request_id, previous_request_id);
+  modify_order(event, order, ref_data, request_id, previous_request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
     Event<CancelOrder> const &event,
     server::oms::Order const &order,
-    server::oms::RefData const &,
+    server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  cancel_order(event, order, request_id, previous_request_id);
+  cancel_order(event, order, ref_data, request_id, previous_request_id);
   return stream_id_;
 }
 
@@ -229,7 +229,8 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 // create-order
 
-void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+void OrderEntry::create_order(
+    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
@@ -238,7 +239,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
     auto method = web::http::Method::POST;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = json::Encoder::place_order(encode_buffer_, create_order, order, request_id);
+    auto body = json::Encoder::place_order(encode_buffer_, create_order, order, ref_data, request_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
@@ -291,7 +292,11 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
 // modify-order
 
 void OrderEntry::modify_order(
-    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &ref_data,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
@@ -300,7 +305,7 @@ void OrderEntry::modify_order(
     auto method = web::http::Method::PUT;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = json::Encoder::modify_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
+    auto body = json::Encoder::modify_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
@@ -353,7 +358,11 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
 // cancel-order
 
 void OrderEntry::cancel_order(
-    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &ref_data,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
@@ -362,7 +371,7 @@ void OrderEntry::cancel_order(
     auto method = web::http::Method::DELETE;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id);
+    auto body = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{

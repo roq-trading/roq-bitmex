@@ -193,6 +193,10 @@
     {
       "name": "strategy",
       "type": "roq/bitmex/json/Strategy"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
     }
   ]
 }
