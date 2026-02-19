@@ -62,7 +62,6 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       // proxy
       .proxy = {},
       // http
-      .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
       .ping_frequency = settings.ws.ping_freq,
