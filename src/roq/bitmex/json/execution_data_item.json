@@ -197,6 +197,18 @@
     {
       "name": "pool",
       "type": "std/string_view"
+    },
+    {
+      "name": "feeType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "execCommCcy",
+      "type": "std/string_view"
+    },
+    {
+      "name": "realisedPnl",
+      "type": "std/double"
     }
   ]
 }
