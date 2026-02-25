@@ -59,7 +59,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void operator()(web::socket::Client::Binary const &) override;
 
  private:
-  void operator()(ConnectionStatus);
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void send_cancel_all_after(std::chrono::nanoseconds timeout);
 
@@ -128,7 +128,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   // state
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
-  ConnectionStatus status_ = {};
+  ConnectionStatus connection_status_ = {};
   core::Download<DropCopyState> download_;
   struct {
     bool order = false;

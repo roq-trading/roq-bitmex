@@ -65,7 +65,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(web::socket::Client::Binary const &) override;
 
  private:
-  void operator()(ConnectionStatus);
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void send_subscribe(std::string_view const &topic);
   void send_unsubscribe(std::string_view const &topic);
@@ -148,7 +148,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   utils::unordered_map<std::string, Product> product_cache_;
   // state
   bool ready_ = false;
-  ConnectionStatus status_ = {};
+  ConnectionStatus connection_status_ = {};
   core::Download<MarketDataState> download_;
   struct {
     bool instrument = false;
