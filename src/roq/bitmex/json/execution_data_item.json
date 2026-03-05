@@ -209,6 +209,14 @@
     {
       "name": "realisedPnl",
       "type": "std/double"
+    },
+    {
+      "name": "brokerCommission",
+      "type": "std/double"
+    },
+    {
+      "name": "brokerExecComm",
+      "type": "std/double"
     }
   ]
 }
