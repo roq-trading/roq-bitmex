@@ -304,7 +304,6 @@ void DropCopy::operator()(Trace<json::Welcome> const &event) {
   profile_.welcome([&]() {
     auto &[trace_info, welcome] = event;
     log::info<2>("welcome={}"sv, welcome);
-    log::warn("DEBUG welcome={}"sv, welcome);
     download_.begin();
     if (!shared_.settings.ws.cancel_on_disconnect || shared_.settings.ws.cancel_all_after.count() == 0) {
       send_cancel_all_after(std::chrono::seconds{});
