@@ -25,6 +25,10 @@
     {
       "name": "timestamp",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
     }
   ]
 }

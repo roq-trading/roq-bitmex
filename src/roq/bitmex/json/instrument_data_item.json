@@ -441,6 +441,10 @@
     {
       "name": "minPrice",
       "type": "std/double"
+    },
+    {
+      "name": "instrumentID",
+      "type": "std/int32"
     }
   ]
 }

@@ -45,6 +45,10 @@
     {
       "name": "trdType",
       "type": "std/string_view"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
     }
   ]
 }
