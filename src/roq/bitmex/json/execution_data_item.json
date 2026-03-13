@@ -217,6 +217,10 @@
     {
       "name": "brokerExecComm",
       "type": "std/double"
+    },
+    {
+      "name": "origClOrdID",
+      "type": "std/string_view"
     }
   ]
 }
