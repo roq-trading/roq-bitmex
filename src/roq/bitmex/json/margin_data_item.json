@@ -185,6 +185,10 @@
     {
       "name": "systemWithdrawableMargin",
       "type": "std/double"
+    },
+    {
+      "name": "isolatedUnrealisedPnl",
+      "type": "std/double"
     }
   ]
 }
