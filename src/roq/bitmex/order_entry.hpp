@@ -31,7 +31,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
   };
 
-  OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &, bool master);
+  OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
   OrderEntry(OrderEntry const &) = delete;
 
@@ -117,7 +117,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
   // config
   uint16_t const stream_id_;
   std::string const name_;
-  bool const master_;
   // connection
   std::unique_ptr<web::rest::Client> const connection_;
   // buffers

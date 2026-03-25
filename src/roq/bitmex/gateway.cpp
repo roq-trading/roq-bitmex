@@ -34,8 +34,7 @@ R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accoun
   for (auto &[name, account] : accounts) {
     std::vector<std::unique_ptr<OrderEntry>> order_entry;
     for (size_t i = 0; i < shared.settings.misc.number_of_order_entry_connections; ++i) {
-      auto master = i == 0;
-      order_entry.emplace_back(std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared, master));
+      order_entry.emplace_back(std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
     }
     result.try_emplace(static_cast<std::string_view>(name), std::move(order_entry));
   }
