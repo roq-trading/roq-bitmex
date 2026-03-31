@@ -192,6 +192,8 @@ constexpr Helper<bitmex::json::State>::operator std::optional<roq::TradingStatus
       return roq::TradingStatus::UNDEFINED;
     case EXPIRED:
       return roq::TradingStatus::UNDEFINED;
+    case CLEARED:
+      return roq::TradingStatus::UNDEFINED;
   }
   return {};
 }
