@@ -445,6 +445,10 @@
     {
       "name": "instrumentID",
       "type": "std/int32"
+    },
+    {
+      "name": "tags",
+      "type": "std/string_view"
     }
   ]
 }
