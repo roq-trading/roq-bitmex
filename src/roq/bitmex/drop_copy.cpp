@@ -251,9 +251,9 @@ void DropCopy::send_subscribe(std::span<std::string_view> const &topics) {
   }
 }
 
-uint32_t DropCopy::download(DropCopyState state) {
+uint32_t DropCopy::download(State state) {
   switch (state) {
-    using enum DropCopyState;
+    using enum State;
     case UNDEFINED:
       assert(false);
       break;
@@ -394,7 +394,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
     if (download) {
       partial_received_.order = true;
       // release download state
-      download_.check_relaxed(DropCopyState::SUBSCRIBE);
+      download_.check_relaxed(State::SUBSCRIBE);
     }
   });
 }

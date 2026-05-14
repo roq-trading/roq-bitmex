@@ -21,7 +21,6 @@
 #include "roq/server.hpp"
 
 #include "roq/bitmex/account.hpp"
-#include "roq/bitmex/drop_copy_state.hpp"
 #include "roq/bitmex/shared.hpp"
 
 #include "roq/bitmex/json/parser.hpp"
@@ -66,7 +65,13 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void send_subscribe(std::string_view const &topic);
   void send_subscribe(std::span<std::string_view> const &topics);
 
-  uint32_t download(DropCopyState);
+  enum class State {
+    UNDEFINED = 0,
+    SUBSCRIBE,
+    DONE,
+  };
+
+  uint32_t download(State);
 
   void subscribe();
 
@@ -129,7 +134,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   bool ready_ = false;
   std::chrono::nanoseconds next_cancel_all_after_ = {};
   ConnectionStatus connection_status_ = {};
-  core::Download<DropCopyState> download_;
+  core::Download<State> download_;
   struct {
     bool order = false;
     // XXX maybe everything else too?

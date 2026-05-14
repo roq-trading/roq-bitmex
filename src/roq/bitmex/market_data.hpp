@@ -22,7 +22,6 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bitmex/market_data_state.hpp"
 #include "roq/bitmex/product.hpp"
 #include "roq/bitmex/shared.hpp"
 
@@ -75,7 +74,15 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void send_subscribe(std::string_view const &topic, std::string_view const &symbol);
   void send_unsubscribe(std::string_view const &topic, std::string_view const &symbol);
 
-  uint32_t download(MarketDataState);
+  enum class State {
+    UNDEFINED = 0,
+    ACCOUNTS,
+    INSTRUMENT,
+    ORDER_BOOK_L2,
+    DONE,
+  };
+
+  uint32_t download(State);
 
   void subscribe_instrument();
   void subscribe_order_book_l2();
@@ -149,7 +156,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   // state
   bool ready_ = false;
   ConnectionStatus connection_status_ = {};
-  core::Download<MarketDataState> download_;
+  core::Download<State> download_;
   struct {
     bool instrument = false;
     bool order_book_l2 = false;

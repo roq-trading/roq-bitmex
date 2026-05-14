@@ -257,9 +257,9 @@ void MarketData::send_unsubscribe(std::string_view const &topic, std::string_vie
   (*connection_).send_text(message);
 }
 
-uint32_t MarketData::download(MarketDataState state) {
+uint32_t MarketData::download(State state) {
   switch (state) {
-    using enum MarketDataState;
+    using enum State;
     case UNDEFINED:
       assert(false);
       break;
@@ -399,7 +399,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event) {
           }
           log::info<2>("- securities: {} (/{})"sv, security_count, std::size(instrument.data));
           // release download state
-          download_.check_relaxed(MarketDataState::INSTRUMENT);
+          download_.check_relaxed(State::INSTRUMENT);
         }
         break;
       case INSERT:
@@ -541,7 +541,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event) {
     if (snapshot) {
       partial_received_.order_book_l2 = true;
       // release download state
-      download_.check_relaxed(MarketDataState::ORDER_BOOK_L2);
+      download_.check_relaxed(State::ORDER_BOOK_L2);
     }
   });
 }
