@@ -76,7 +76,8 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) override;
   void operator()(Trace<PositionUpdate> const &, bool is_last) override;
 
- private:
+  // utilities
+
   template <typename... Args>
   void dispatch(Args &&...);
 
