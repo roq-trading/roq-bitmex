@@ -14,7 +14,6 @@ set(SOURCES
     order_update.cpp
     price_cache.cpp
     product.cpp
-    settings.cpp
     shared.cpp
     main.cpp)
 
@@ -42,7 +41,6 @@ target_link_libraries(
           roq-logging::roq-logging
           roq-logging::roq-logging-flags
           roq-server::roq-server
-          roq-server::roq-server-flags
           roq-web::roq-web
           fmt::fmt
           unordered_dense::unordered_dense)
