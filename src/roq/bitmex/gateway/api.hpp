@@ -4,10 +4,11 @@
 
 #include <string_view>
 
-#include "roq/bitmex/settings.hpp"
+#include "roq/bitmex/gateway/settings.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct API final {
   struct {
@@ -26,5 +27,6 @@ struct API final {
   static API create(Settings const &);
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

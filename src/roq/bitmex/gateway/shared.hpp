@@ -8,12 +8,13 @@
 #include "roq/api.hpp"
 #include "roq/server.hpp"
 
-#include "roq/bitmex/api.hpp"
-#include "roq/bitmex/price_cache.hpp"
-#include "roq/bitmex/settings.hpp"
+#include "roq/bitmex/gateway/api.hpp"
+#include "roq/bitmex/gateway/price_cache.hpp"
+#include "roq/bitmex/gateway/settings.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct Shared final {
   Shared(server::Dispatcher &, Settings const &);
@@ -53,5 +54,6 @@ struct Shared final {
   std::string request_id_encode_buffer_;
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

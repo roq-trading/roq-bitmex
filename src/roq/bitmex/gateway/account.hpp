@@ -8,13 +8,14 @@
 
 #include "roq/web/http/method.hpp"
 
-#include "roq/bitmex/config.hpp"
-#include "roq/bitmex/settings.hpp"
+#include "roq/bitmex/gateway/config.hpp"
+#include "roq/bitmex/gateway/settings.hpp"
 
 #include "roq/bitmex/tools/crypto.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct Account final {
   Account(Settings const &, Config const &, std::string_view const &name);
@@ -32,5 +33,6 @@ struct Account final {
   tools::Crypto crypto_;
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

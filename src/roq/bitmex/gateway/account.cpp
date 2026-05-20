@@ -1,11 +1,12 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/account.hpp"
+#include "roq/bitmex/gateway/account.hpp"
 
 #include "roq/io/web/uri.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === HELPERS ===
 
@@ -28,5 +29,6 @@ std::string Account::create_headers(std::chrono::nanoseconds expires, web::http:
   return crypto_.create_headers(expires, method, path, body);
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

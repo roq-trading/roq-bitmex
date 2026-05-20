@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/drop_copy.hpp"
+#include "roq/bitmex/gateway/drop_copy.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -15,8 +15,8 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/bitmex/order_update.hpp"
-#include "roq/bitmex/utils.hpp"
+#include "roq/bitmex/gateway/order_update.hpp"
+#include "roq/bitmex/gateway/utils.hpp"
 
 #include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
@@ -26,6 +26,7 @@ using namespace std::chrono_literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -549,5 +550,6 @@ std::string DropCopy::create_upgrade_headers() {
   return account_.create_headers(expires, web::http::Method::GET, shared_.api.ws.realtime, {});
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

@@ -9,6 +9,7 @@
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 inline RequestType compute_request_type(json::ExecType exec_type) {
   switch (exec_type) {
@@ -131,5 +132,6 @@ inline RequestStatus compute_request_status(json::OrdStatus ord_status) {
   return {};
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

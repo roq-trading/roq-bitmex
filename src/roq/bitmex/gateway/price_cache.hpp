@@ -10,6 +10,7 @@
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct PriceCache final {
   PriceCache() = default;
@@ -22,5 +23,6 @@ struct PriceCache final {
   utils::unordered_map<uint64_t, double> price_lookup_;
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

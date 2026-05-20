@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/order_entry.hpp"
+#include "roq/bitmex/gateway/order_entry.hpp"
 
 #include <fmt/chrono.h>
 
@@ -17,7 +17,7 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
-#include "roq/bitmex/order_update.hpp"
+#include "roq/bitmex/gateway/order_update.hpp"
 
 #include "roq/bitmex/json/error_parser.hpp"
 #include "roq/bitmex/json/utils.hpp"
@@ -31,6 +31,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -592,5 +593,6 @@ void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event, std::s
   }
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

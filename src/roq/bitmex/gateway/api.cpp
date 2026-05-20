@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/api.hpp"
+#include "roq/bitmex/gateway/api.hpp"
 
 #include "roq/exceptions.hpp"
 
@@ -8,6 +8,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -27,5 +28,6 @@ API API::create(Settings const &) {
   };
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/market_data.hpp"
+#include "roq/bitmex/gateway/market_data.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -22,6 +22,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -732,5 +733,6 @@ void MarketData::resubscribe_order_book_l2(std::string_view const &symbol) {
   // note! we should maybe also reset all MbP books here...
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

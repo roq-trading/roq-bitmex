@@ -17,13 +17,14 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bitmex/account.hpp"
-#include "roq/bitmex/shared.hpp"
+#include "roq/bitmex/gateway/account.hpp"
+#include "roq/bitmex/gateway/shared.hpp"
 
 #include "roq/bitmex/json/order.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct OrderEntry final : public web::rest::Client::Handler {
   struct Handler {
@@ -145,5 +146,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
   ConnectionStatus connection_status_ = {};
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

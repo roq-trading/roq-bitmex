@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "roq/compat.hpp"
+
 #include <memory>
 #include <string>
 
@@ -11,24 +13,25 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/bitmex/account.hpp"
-#include "roq/bitmex/config.hpp"
-#include "roq/bitmex/settings.hpp"
-#include "roq/bitmex/shared.hpp"
+#include "roq/bitmex/gateway/account.hpp"
+#include "roq/bitmex/gateway/config.hpp"
+#include "roq/bitmex/gateway/settings.hpp"
+#include "roq/bitmex/gateway/shared.hpp"
 
-#include "roq/bitmex/drop_copy.hpp"
-#include "roq/bitmex/market_data.hpp"
-#include "roq/bitmex/order_entry.hpp"
+#include "roq/bitmex/gateway/drop_copy.hpp"
+#include "roq/bitmex/gateway/market_data.hpp"
+#include "roq/bitmex/gateway/order_entry.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct MarketData;
 
-struct Gateway final : public server::Handler, public OrderEntry::Handler, public DropCopy::Handler, public MarketData::Handler {
-  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+struct ROQ_PUBLIC Controller final : public server::Handler, public OrderEntry::Handler, public DropCopy::Handler, public MarketData::Handler {
+  Controller(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
-  Gateway(Gateway const &) = delete;
+  Controller(Controller const &) = delete;
 
  protected:
   // server::Handler
@@ -120,5 +123,6 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   std::vector<MBPUpdate> bids_, asks_;
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

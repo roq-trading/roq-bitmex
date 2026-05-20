@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/price_cache.hpp"
+#include "roq/bitmex/gateway/price_cache.hpp"
 
 #include "roq/logging.hpp"
 
@@ -10,6 +10,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -60,5 +61,6 @@ std::pair<double, double> PriceCache::operator()(json::Action action, uint64_t i
   return {result, std::isnan(size) ? 0.0 : size};
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

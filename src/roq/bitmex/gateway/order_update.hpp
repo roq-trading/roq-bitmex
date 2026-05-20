@@ -4,12 +4,13 @@
 
 #include <string_view>
 
-#include "roq/bitmex/shared.hpp"
+#include "roq/bitmex/gateway/shared.hpp"
 
 #include "roq/bitmex/json/order.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct OrderUpdate final {
   explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account) : shared_(shared), stream_id_(stream_id), account_(account) {}
@@ -30,5 +31,6 @@ struct OrderUpdate final {
   std::string_view const account_;
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include "roq/utils/container.hpp"
+
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
 #include "roq/utils/metrics/profile.hpp"
@@ -20,25 +22,30 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bitmex/account.hpp"
-#include "roq/bitmex/shared.hpp"
+#include "roq/bitmex/gateway/product.hpp"
+#include "roq/bitmex/gateway/shared.hpp"
 
 #include "roq/bitmex/json/parser.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
-struct DropCopy final : public web::socket::Client::Handler, public json::Parser::Handler {
+struct MarketData final : public web::socket::Client::Handler, public json::Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
-    virtual void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) = 0;
-    virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
+    virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
   };
 
-  DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
+  MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &);
 
-  DropCopy(DropCopy const &) = delete;
+  MarketData(MarketData const &) = delete;
 
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
@@ -60,20 +67,26 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
  private:
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
-  void send_cancel_all_after(std::chrono::nanoseconds timeout);
-
   void send_subscribe(std::string_view const &topic);
+  void send_unsubscribe(std::string_view const &topic);
+
   void send_subscribe(std::span<std::string_view> const &topics);
+
+  void send_subscribe(std::string_view const &topic, std::string_view const &symbol);
+  void send_unsubscribe(std::string_view const &topic, std::string_view const &symbol);
 
   enum class State {
     UNDEFINED = 0,
-    SUBSCRIBE,
+    ACCOUNTS,
+    INSTRUMENT,
+    ORDER_BOOK_L2,
     DONE,
   };
 
   uint32_t download(State);
 
-  void subscribe();
+  void subscribe_instrument();
+  void subscribe_order_book_l2();
 
   void parse(std::string_view const &message);
 
@@ -100,7 +113,20 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
 
   // utilities
 
-  std::string create_upgrade_headers();
+  Product &find_product(json::InstrumentDataItem const &);
+  Product &find_product(json::FundingDataItem const &);
+
+  // experimental
+
+  void publish_market_by_price(
+      TraceInfo const &,
+      bool is_last,
+      std::string_view const &symbol,
+      std::span<MBPUpdate> const &bids,
+      std::span<MBPUpdate> const &asks,
+      bool snapshot,
+      std::chrono::nanoseconds const exchange_time_utc);
+  void resubscribe_order_book_l2(std::string_view const &symbol);
 
  private:
   Handler &handler_;
@@ -120,26 +146,24 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
         welcome,                    //
         error,                      //
         subscribe, unsubscribe,     //
-        cancel_all_after,           //
-        order, execution, margin, position;
+        instrument, quote, order_book_l2, trade, funding, liquidation, settlement;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;
   } latency_;
-  // account
-  Account &account_;
   // cache
   Shared &shared_;
+  utils::unordered_map<std::string, Product> product_cache_;
   // state
   bool ready_ = false;
-  std::chrono::nanoseconds next_cancel_all_after_ = {};
   ConnectionStatus connection_status_ = {};
   core::Download<State> download_;
   struct {
-    bool order = false;
-    // XXX maybe everything else too?
+    bool instrument = false;
+    bool order_book_l2 = false;
   } partial_received_;
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

@@ -8,13 +8,14 @@
 
 #include "roq/api.hpp"
 
-#include "roq/bitmex/shared.hpp"
+#include "roq/bitmex/gateway/shared.hpp"
 
 #include "roq/bitmex/json/funding_data_item.hpp"
 #include "roq/bitmex/json/instrument_data_item.hpp"
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 struct Product final {
   Product(Shared &, json::InstrumentDataItem const &);
@@ -73,5 +74,6 @@ struct Product final {
   mutable std::vector<Statistics> statistics_;  // XXX mutable due to span
 };
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

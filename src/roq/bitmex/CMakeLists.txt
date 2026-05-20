@@ -1,24 +1,11 @@
 set(TARGET_NAME ${PROJECT_NAME})
 
 add_subdirectory(flags)
-
-set(SOURCES
-    account.cpp
-    api.cpp
-    application.cpp
-    config.cpp
-    drop_copy.cpp
-    gateway.cpp
-    market_data.cpp
-    order_entry.cpp
-    order_update.cpp
-    price_cache.cpp
-    product.cpp
-    shared.cpp
-    main.cpp)
-
+add_subdirectory(gateway)
 add_subdirectory(json)
 add_subdirectory(tools)
+
+set(SOURCES application.cpp main.cpp)
 
 include(RoqAutogen)
 
@@ -30,20 +17,14 @@ add_dependencies(${TARGET_NAME} autogen-json-headers)
 
 target_link_libraries(
   ${TARGET_NAME}
-  PRIVATE ${PROJECT_NAME}-json
-          ${PROJECT_NAME}-flags
+  PRIVATE ${PROJECT_NAME}-flags
+          ${PROJECT_NAME}-gateway
+          ${PROJECT_NAME}-json
           ${PROJECT_NAME}-tools
-          roq-api::roq-api
-          roq-core::roq-core
-          roq-codec::roq-codec
           roq-flags::roq-flags
-          roq-io::roq-io
           roq-logging::roq-logging
           roq-logging::roq-logging-flags
-          roq-server::roq-server
-          roq-web::roq-web
-          fmt::fmt
-          unordered_dense::unordered_dense)
+          roq-server::roq-server)
 
 if(ROQ_BUILD_TYPE STREQUAL "Release")
   set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)

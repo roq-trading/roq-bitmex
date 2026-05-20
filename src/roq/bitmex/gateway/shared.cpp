@@ -1,11 +1,12 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/shared.hpp"
+#include "roq/bitmex/gateway/shared.hpp"
 
 using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -19,5 +20,6 @@ std::string_view Shared::next_request_id() {
   return request_id_encode_buffer_;
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

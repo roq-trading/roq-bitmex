@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/product.hpp"
+#include "roq/bitmex/gateway/product.hpp"
 
 #include "roq/logging.hpp"
 
@@ -12,6 +12,7 @@
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === HELPERS ===
 
@@ -247,5 +248,6 @@ StatisticsUpdate Product::statistics_update(json::FundingDataItem const &item, u
   };
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

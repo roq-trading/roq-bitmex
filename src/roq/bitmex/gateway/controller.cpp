@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/gateway.hpp"
+#include "roq/bitmex/gateway/controller.hpp"
 
 #include "roq/logging.hpp"
 
@@ -10,6 +10,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === HELPERS ===
 
@@ -54,7 +55,7 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 
 // === IMPLEMENTATION ===
 
-Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
+Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
       order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)},
@@ -66,21 +67,21 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Confi
 
 // server::Handler
 
-void Gateway::operator()(Event<Start> const &event) {
+void Controller::operator()(Event<Start> const &event) {
   log::info("Starting..."sv);
   dispatch(event);
 }
 
-void Gateway::operator()(Event<Stop> const &event) {
+void Controller::operator()(Event<Stop> const &event) {
   log::info("Stopping..."sv);
   dispatch(event);
 }
 
-void Gateway::operator()(Event<Timer> const &event) {
+void Controller::operator()(Event<Timer> const &event) {
   dispatch(event);
 }
 
-void Gateway::operator()(Event<Control> const &event) {
+void Controller::operator()(Event<Control> const &event) {
   auto &[message_info, control] = event;
   switch (control.action) {
     using enum Action;
@@ -96,23 +97,23 @@ void Gateway::operator()(Event<Control> const &event) {
   }
 }
 
-void Gateway::operator()(Event<Connected> const &) {
+void Controller::operator()(Event<Connected> const &) {
 }
 
-void Gateway::operator()(Event<Disconnected> const &) {
+void Controller::operator()(Event<Disconnected> const &) {
 }
 
-void Gateway::operator()(Event<Subscribe> const &) {
+void Controller::operator()(Event<Subscribe> const &) {
   // all symbols already subscribed ???
 }
 
-uint16_t Gateway::operator()(
+uint16_t Controller::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
   return get_order_entry(event.value.account)(event, order, ref_data, request_id);
 }
 
-uint16_t Gateway::operator()(
+uint16_t Controller::operator()(
     Event<ModifyOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
@@ -123,7 +124,7 @@ uint16_t Gateway::operator()(
   return get_order_entry(event.value.account)(event, order, ref_data, request_id, previous_request_id);
 }
 
-uint16_t Gateway::operator()(
+uint16_t Controller::operator()(
     Event<CancelOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
@@ -134,75 +135,75 @@ uint16_t Gateway::operator()(
   return get_order_entry(event.value.account)(event, order, ref_data, request_id, previous_request_id);
 }
 
-uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
+uint16_t Controller::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
   return get_order_entry(event.value.account)(event, request_id);
 }
 
-uint16_t Gateway::operator()(Event<MassQuote> const &) {
+uint16_t Controller::operator()(Event<MassQuote> const &) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
-uint16_t Gateway::operator()(Event<CancelQuotes> const &) {
+uint16_t Controller::operator()(Event<CancelQuotes> const &) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
-void Gateway::operator()(metrics::Writer &writer) const {
+void Controller::operator()(metrics::Writer &writer) const {
   dispatch_helper(*this, writer);
 }
 
 // streams
 
-void Gateway::operator()(Trace<StreamStatus> const &event) {
+void Controller::operator()(Trace<StreamStatus> const &event) {
   dispatcher_(event);
 }
 
-void Gateway::operator()(Trace<ExternalLatency> const &event) {
+void Controller::operator()(Trace<ExternalLatency> const &event) {
   dispatcher_(event);
 }
 
-void Gateway::operator()(Trace<ReferenceData> const &event, bool is_last) {
+void Controller::operator()(Trace<ReferenceData> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<MarketStatus> const &event, bool is_last) {
+void Controller::operator()(Trace<MarketStatus> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<TopOfBook> const &event, bool is_last) {
+void Controller::operator()(Trace<TopOfBook> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<MarketByPriceUpdate> const &event, bool is_last) {
+void Controller::operator()(Trace<MarketByPriceUpdate> const &event, bool is_last) {
   auto callback = []([[maybe_unused]] auto &market_by_price) {};
   dispatcher_(event, is_last, bids_, asks_, callback);
 }
 
-void Gateway::operator()(Trace<TradeSummary> const &event, bool is_last) {
+void Controller::operator()(Trace<TradeSummary> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
+void Controller::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
+void Controller::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
   dispatcher_(event, is_last, user_id, request_id);
 }
 
-void Gateway::operator()(Trace<PositionUpdate> const &event, bool is_last) {
+void Controller::operator()(Trace<PositionUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
 // utilities
 
 template <typename... Args>
-void Gateway::dispatch(Args &&...args) {
+void Controller::dispatch(Args &&...args) {
   dispatch_helper(*this, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
-void Gateway::dispatch_helper(auto &self, Args &&...args) {
+void Controller::dispatch_helper(auto &self, Args &&...args) {
   auto helper = [&](auto &target) { target(std::forward<Args>(args)...); };
   for (auto &[_, item] : self.order_entry_) {
     helper(item);
@@ -213,7 +214,7 @@ void Gateway::dispatch_helper(auto &self, Args &&...args) {
   helper(self.market_data_);
 }
 
-OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
+OrderEntry &Controller::get_order_entry(std::string_view const &account) {
   auto iter = order_entry_.find(account);
   if (iter != std::end(order_entry_)) {
     return (*iter).second.get_next();
@@ -223,7 +224,7 @@ OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
 
 // OrderEntryRR
 
-Gateway::OrderEntryRR::OrderEntryRR(std::vector<std::unique_ptr<OrderEntry>> &&order_entry) : order_entry_{std::move(order_entry)} {
+Controller::OrderEntryRR::OrderEntryRR(std::vector<std::unique_ptr<OrderEntry>> &&order_entry) : order_entry_{std::move(order_entry)} {
   for (auto &item : order_entry_) {
     if (item == nullptr) {
       log::fatal("HERE"sv);
@@ -232,20 +233,20 @@ Gateway::OrderEntryRR::OrderEntryRR(std::vector<std::unique_ptr<OrderEntry>> &&o
 }
 
 template <typename... Args>
-void Gateway::OrderEntryRR::operator()(Args &&...args) {
+void Controller::OrderEntryRR::operator()(Args &&...args) {
   for (auto &item : order_entry_) {
     (*item)(args...);
   }
 }
 
 template <typename... Args>
-void Gateway::OrderEntryRR::operator()(Args &&...args) const {
+void Controller::OrderEntryRR::operator()(Args &&...args) const {
   for (auto &item : order_entry_) {
     (*item)(args...);
   }
 }
 
-OrderEntry &Gateway::OrderEntryRR::get_next() {
+OrderEntry &Controller::OrderEntryRR::get_next() {
   auto length = std::size(order_entry_);
   for (size_t offset = 0; offset < length; ++offset) {
     auto index = (index_ + offset) % length;
@@ -259,5 +260,6 @@ OrderEntry &Gateway::OrderEntryRR::get_next() {
   throw server::oms::NotReady{"get_next"sv};
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

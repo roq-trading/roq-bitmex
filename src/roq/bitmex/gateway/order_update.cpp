@@ -1,12 +1,12 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bitmex/order_update.hpp"
+#include "roq/bitmex/gateway/order_update.hpp"
 
 #include <string>
 
 #include "roq/logging.hpp"
 
-#include "roq/bitmex/utils.hpp"
+#include "roq/bitmex/gateway/utils.hpp"
 
 #include "roq/bitmex/json/map.hpp"
 #include "roq/bitmex/json/utils.hpp"
@@ -15,6 +15,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bitmex {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -180,5 +181,6 @@ void OrderUpdate::operator()(
   }
 }
 
+}  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq
