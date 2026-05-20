@@ -13,16 +13,8 @@ roq_gitignore(OUTPUT .gitignore SOURCES ${TARGET_NAME})
 
 add_executable(${TARGET_NAME} ${SOURCES})
 
-add_dependencies(${TARGET_NAME} autogen-json-headers)
-
-target_link_libraries(
-  ${TARGET_NAME}
-  PRIVATE ${PROJECT_NAME}-flags
-          ${PROJECT_NAME}-gateway
-          roq-flags::roq-flags
-          roq-logging::roq-logging
-          roq-logging::roq-logging-flags
-          roq-server::roq-server)
+target_link_libraries(${TARGET_NAME} PRIVATE ${PROJECT_NAME}-flags ${PROJECT_NAME}-gateway roq-flags::roq-flags roq-logging::roq-logging
+                                             roq-logging::roq-logging-flags roq-server::roq-server)
 
 if(ROQ_BUILD_TYPE STREQUAL "Release")
   set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
