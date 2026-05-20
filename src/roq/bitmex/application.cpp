@@ -24,7 +24,7 @@ int Application::main(args::Parser const &args) {
   flags::Settings settings{args};
   gateway::Config config{settings};
   auto context = server::create_io_context(settings);
-  server::Trading<gateway::Controller>{settings, config, *context, API_2}.dispatch();
+  server::Trading2<gateway::Controller>{settings, config, *context, API_2}.dispatch();
   return EXIT_SUCCESS;
 }
 
