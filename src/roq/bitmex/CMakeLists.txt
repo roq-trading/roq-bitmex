@@ -19,8 +19,6 @@ target_link_libraries(
   ${TARGET_NAME}
   PRIVATE ${PROJECT_NAME}-flags
           ${PROJECT_NAME}-gateway
-          ${PROJECT_NAME}-json
-          ${PROJECT_NAME}-tools
           roq-flags::roq-flags
           roq-logging::roq-logging
           roq-logging::roq-logging-flags
