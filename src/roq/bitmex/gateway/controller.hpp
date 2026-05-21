@@ -35,8 +35,6 @@ struct Controller final : public server::Handler, public OrderEntry::Handler, pu
 
   Controller(Controller const &) = delete;
 
-  virtual ~Controller() = default;
-
  protected:
   // server::Handler
 
