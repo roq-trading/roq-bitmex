@@ -76,6 +76,10 @@
     {
       "name": "now",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
     }
   ]
 }

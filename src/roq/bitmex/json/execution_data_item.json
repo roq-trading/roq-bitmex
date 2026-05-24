@@ -221,6 +221,10 @@
     {
       "name": "origClOrdID",
       "type": "std/string_view"
+    },
+    {
+      "name": "positionID",
+      "type": "std/string_view"
     }
   ]
 }
