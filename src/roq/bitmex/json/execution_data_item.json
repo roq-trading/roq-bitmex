@@ -225,6 +225,10 @@
     {
       "name": "positionID",
       "type": "std/string_view"
+    },
+    {
+      "name": "tradePool",
+      "type": "std/string_view"
     }
   ]
 }
