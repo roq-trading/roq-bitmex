@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Subscribe;
+using value_type = protocol::json::Subscribe;
 
 TEST_CASE("simple", "[json_subscribe]") {
   auto const message = R"({)"

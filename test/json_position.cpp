@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Position;
+using value_type = protocol::json::Position;
 
 TEST_CASE("simple", "[json_position]") {
   auto const message = R"({)"
@@ -86,8 +86,8 @@ TEST_CASE("simple", "[json_position]") {
                        R"("data":[])"
                        R"(})"sv;
   auto helper = [](value_type const &obj) {
-    CHECK(obj.table == json::Table::POSITION);
-    CHECK(obj.action == json::Action::PARTIAL);
+    CHECK(obj.table == protocol::json::Table::POSITION);
+    CHECK(obj.action == protocol::json::Action::PARTIAL);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

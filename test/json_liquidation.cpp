@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Liquidation;
+using value_type = protocol::json::Liquidation;
 
 // note! truncated
 TEST_CASE("empty", "[json_liquidation]") {
@@ -30,8 +30,8 @@ TEST_CASE("empty", "[json_liquidation]") {
                        R"("data":[])"
                        R"(})"sv;
   auto helper = [](value_type const &obj) {
-    CHECK(obj.table == json::Table::LIQUIDATION);
-    CHECK(obj.action == json::Action::PARTIAL);
+    CHECK(obj.table == protocol::json::Table::LIQUIDATION);
+    CHECK(obj.action == protocol::json::Action::PARTIAL);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

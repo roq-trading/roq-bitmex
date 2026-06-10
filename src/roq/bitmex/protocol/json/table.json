@@ -1,0 +1,50 @@
+{
+  "name": "roq/bitmex/protocol/json/Table",
+  "type": "enum",
+  "values": [
+    {
+      "name": "instrument",
+      "comment": "public"
+    },
+    {
+      "name": "quote",
+      "comment": "public"
+    },
+    {
+      "name": "orderBookL2",
+      "comment": "public"
+    },
+    {
+      "name": "trade",
+      "comment": "public"
+    },
+    {
+      "name": "funding",
+      "comment": "public"
+    },
+    {
+      "name": "liquidation",
+      "comment": "public"
+    },
+    {
+      "name": "settlement",
+      "comment": "public"
+    },
+    {
+      "name": "margin",
+      "comment": "private"
+    },
+    {
+      "name": "position",
+      "comment": "private"
+    },
+    {
+      "name": "order",
+      "comment": "private"
+    },
+    {
+      "name": "execution",
+      "comment": "private"
+    }
+  ]
+}

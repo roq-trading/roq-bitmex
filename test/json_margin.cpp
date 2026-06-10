@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Margin;
+using value_type = protocol::json::Margin;
 
 TEST_CASE("simple", "[json_margin]") {
   auto const message = R"({)"
@@ -85,8 +85,8 @@ TEST_CASE("simple", "[json_margin]") {
                        R"(])"
                        R"(})"sv;
   auto helper = [](value_type const &obj) {
-    CHECK(obj.table == json::Table::MARGIN);
-    CHECK(obj.action == json::Action::PARTIAL);
+    CHECK(obj.table == protocol::json::Table::MARGIN);
+    CHECK(obj.action == protocol::json::Action::PARTIAL);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

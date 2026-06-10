@@ -1,0 +1,18 @@
+{
+  "name": "roq/bitmex/protocol/json/Action",
+  "type": "enum",
+  "values": [
+    {
+      "name": "delete"
+    },
+    {
+      "name": "insert"
+    },
+    {
+      "name": "partial"
+    },
+    {
+      "name": "update"
+    }
+  ]
+}

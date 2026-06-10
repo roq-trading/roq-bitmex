@@ -1,0 +1,9 @@
+{
+  "name": "roq/bitmex/protocol/json/Strategy",
+  "type": "enum",
+  "values": [
+    {
+      "name": "OneWay"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "roq/bitmex/protocol/json/FundingDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "fundingInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "fundingRateDaily",
+      "type": "std/double"
+    },
+    {
+      "name": "fundingRate",
+      "type": "std/double"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    }
+  ]
+}

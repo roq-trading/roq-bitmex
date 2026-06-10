@@ -1,0 +1,454 @@
+{
+  "name": "roq/bitmex/protocol/json/InstrumentDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "askPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "bankruptLimitDownPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "bankruptLimitUpPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "bidPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "buyLeg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "calcInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "capped",
+      "type": "std/bool"
+    },
+    {
+      "name": "closingTimestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "deleverage",
+      "type": "std/bool"
+    },
+    {
+      "name": "expiry",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "fairBasis",
+      "type": "std/double"
+    },
+    {
+      "name": "fairBasisRate",
+      "type": "std/double"
+    },
+    {
+      "name": "fairMethod",
+      "type": "std/string_view"
+    },
+    {
+      "name": "fairPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "foreignNotional24h",
+      "type": "std/double"
+    },
+    {
+      "name": "front",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "fundingBaseSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "fundingInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "fundingPremiumSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "fundingQuoteSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "fundingRate",
+      "type": "std/double"
+    },
+    {
+      "name": "fundingTimestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "hasLiquidity",
+      "type": "std/bool"
+    },
+    {
+      "name": "highPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "homeNotional24h",
+      "type": "std/double"
+    },
+    {
+      "name": "impactAskPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "impactBidPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "impactMidPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "indicativeFundingRate",
+      "type": "std/double"
+    },
+    {
+      "name": "indicativeSettlePrice",
+      "type": "std/double"
+    },
+    {
+      "name": "indicativeTaxRate",
+      "type": "std/double"
+    },
+    {
+      "name": "initMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "insuranceFee",
+      "type": "std/double"
+    },
+    {
+      "name": "inverseLeg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "isInverse",
+      "type": "std/bool"
+    },
+    {
+      "name": "isQuanto",
+      "type": "std/bool"
+    },
+    {
+      "name": "lastChangePcnt",
+      "type": "std/double"
+    },
+    {
+      "name": "lastPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "lastPriceProtected",
+      "type": "std/double"
+    },
+    {
+      "name": "lastTickDirection",
+      "type": "std/string_view"
+    },
+    {
+      "name": "limit",
+      "type": "std/double"
+    },
+    {
+      "name": "limitDownPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "limitUpPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "listedSettle",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "listing",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "lotSize",
+      "type": "std/double"
+    },
+    {
+      "name": "lowPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "maintMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "makerFee",
+      "type": "std/double"
+    },
+    {
+      "name": "markMethod",
+      "type": "std/string_view"
+    },
+    {
+      "name": "markPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "maxOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "maxPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "midPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "multiplier",
+      "type": "std/double"
+    },
+    {
+      "name": "openInterest",
+      "type": "std/double"
+    },
+    {
+      "name": "openValue",
+      "type": "std/double"
+    },
+    {
+      "name": "openingTimestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "optionMultiplier",
+      "type": "std/double"
+    },
+    {
+      "name": "optionStrikePcnt",
+      "type": "std/double"
+    },
+    {
+      "name": "optionStrikePrice",
+      "type": "std/double"
+    },
+    {
+      "name": "optionStrikeRound",
+      "type": "std/double"
+    },
+    {
+      "name": "optionUnderlyingPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "positionCurrency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "prevClosePrice",
+      "type": "std/double"
+    },
+    {
+      "name": "prevPrice24h",
+      "type": "std/double"
+    },
+    {
+      "name": "prevTotalTurnover",
+      "type": "std/double"
+    },
+    {
+      "name": "prevTotalVolume",
+      "type": "std/double"
+    },
+    {
+      "name": "publishInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "publishTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "quoteCurrency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "quoteToSettleMultiplier",
+      "type": "std/double"
+    },
+    {
+      "name": "rebalanceInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "rebalanceTimestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "reference",
+      "type": "std/string_view"
+    },
+    {
+      "name": "referenceSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "relistInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "riskLimit",
+      "type": "std/double"
+    },
+    {
+      "name": "riskStep",
+      "type": "std/double"
+    },
+    {
+      "name": "rootSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "sellLeg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "sessionInterval",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "settlCurrency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "settle",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "settledPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "settledPriceAdjustmentRate",
+      "type": "std/double"
+    },
+    {
+      "name": "settlementFee",
+      "type": "std/double"
+    },
+    {
+      "name": "state",
+      "type": "roq/bitmex/protocol/json/State"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "takerFee",
+      "type": "std/double"
+    },
+    {
+      "name": "taxed",
+      "type": "std/bool"
+    },
+    {
+      "name": "tickSize",
+      "type": "std/double"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "totalTurnover",
+      "type": "std/double"
+    },
+    {
+      "name": "totalVolume",
+      "type": "std/double"
+    },
+    {
+      "name": "turnover",
+      "type": "std/double"
+    },
+    {
+      "name": "turnover24h",
+      "type": "std/double"
+    },
+    {
+      "name": "typ",
+      "type": "roq/bitmex/protocol/json/Typ"
+    },
+    {
+      "name": "underlying",
+      "type": "std/string_view"
+    },
+    {
+      "name": "underlyingSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "underlyingToPositionMultiplier",
+      "type": "std/double"
+    },
+    {
+      "name": "underlyingToSettleMultiplier",
+      "type": "std/double"
+    },
+    {
+      "name": "volume",
+      "type": "std/double"
+    },
+    {
+      "name": "volume24h",
+      "type": "std/double"
+    },
+    {
+      "name": "vwap",
+      "type": "std/double"
+    },
+    {
+      "name": "instantPnl",
+      "type": "std/bool"
+    },
+    {
+      "name": "minTick",
+      "type": "std/double"
+    },
+    {
+      "name": "fundingBaseRate",
+      "type": "std/double"
+    },
+    {
+      "name": "fundingQuoteRate",
+      "type": "std/double"
+    },
+    {
+      "name": "minPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "instrumentID",
+      "type": "std/int32"
+    },
+    {
+      "name": "tags",
+      "type": "std/string_view"
+    }
+  ]
+}

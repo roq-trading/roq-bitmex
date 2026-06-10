@@ -1,0 +1,11 @@
+{
+  "name": "roq/bitmex/protocol/json/CancelOrderAck",
+  "type": "array",
+  "values": [
+    {
+      "name": "data",
+      "type": "roq/bitmex/protocol/json/OrderDataItem",
+      "array": "std/span"
+    }
+  ]
+}

@@ -8,8 +8,8 @@
 
 #include "roq/bitmex/gateway/utils.hpp"
 
-#include "roq/bitmex/json/map.hpp"
-#include "roq/bitmex/json/utils.hpp"
+#include "roq/bitmex/protocol/json/map.hpp"
+#include "roq/bitmex/protocol/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -21,21 +21,21 @@ namespace gateway {
 
 // drop copy
 
-void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo const &trace_info, bool download) {
+void OrderUpdate::operator()(protocol::json::OrderDataItem const &order_item, TraceInfo const &trace_info, bool download) {
   if (!download) {  // note! the execution table has the information we need
     return;
   }
   auto status = compute_order_status(order_item.ord_status, order_item.working_indicator);
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
-  auto request_type = order_item.ord_status == json::OrdStatus::CANCELED ? RequestType::CANCEL_ORDER : RequestType::UNDEFINED;
-  auto request_status = order_item.ord_status == json::OrdStatus::REJECTED ? RequestStatus::REJECTED : RequestStatus::ACCEPTED;
+  auto request_type = order_item.ord_status == protocol::json::OrdStatus::CANCELED ? RequestType::CANCEL_ORDER : RequestType::UNDEFINED;
+  auto request_status = order_item.ord_status == protocol::json::OrdStatus::REJECTED ? RequestStatus::REJECTED : RequestStatus::ACCEPTED;
   auto update_type = download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   auto response = server::oms::Response{
       .request_type = request_type,
       .origin = Origin::EXCHANGE,
       .request_status = request_status,
-      .error = json::guess_error(order_item.ord_rej_reason),
+      .error = protocol::json::guess_error(order_item.ord_rej_reason),
       .text = order_item.text,
       .version = {},
       .request_id = {},  // cancel does not rewrite
@@ -92,7 +92,7 @@ void OrderUpdate::operator()(json::OrderDataItem const &order_item, TraceInfo co
   }
 }
 
-void OrderUpdate::operator()(json::Order const &order, TraceInfo const &trace_info, bool download) {
+void OrderUpdate::operator()(protocol::json::Order const &order, TraceInfo const &trace_info, bool download) {
   for (auto &iter : order.data) {
     (*this)(iter, trace_info, download);
   }
@@ -101,7 +101,7 @@ void OrderUpdate::operator()(json::Order const &order, TraceInfo const &trace_in
 // order entry
 
 void OrderUpdate::operator()(
-    json::OrderDataItem const &order_item,
+    protocol::json::OrderDataItem const &order_item,
     TraceInfo const &trace_info,
     RequestType request_type,
     [[maybe_unused]] uint8_t user_id,
@@ -111,7 +111,7 @@ void OrderUpdate::operator()(
   auto external_account = order_item.account ? fmt::format("{}"sv, order_item.account) : std::string{};
   auto external_order_id = order_item.order_id;
   auto request_status = compute_request_status(order_item.ord_status);
-  auto error = json::guess_error(order_item.ord_rej_reason);
+  auto error = protocol::json::guess_error(order_item.ord_rej_reason);
   auto request_id = request_type != RequestType::CANCEL_ORDER ? order_item.cl_ord_id : std::string_view{};
   auto response = server::oms::Response{
       .request_type = request_type,
@@ -175,7 +175,7 @@ void OrderUpdate::operator()(
 }
 
 void OrderUpdate::operator()(
-    json::Order const &order, TraceInfo const &trace_info, RequestType request_type, uint8_t user_id, uint64_t order_id, uint32_t version) {
+    protocol::json::Order const &order, TraceInfo const &trace_info, RequestType request_type, uint8_t user_id, uint64_t order_id, uint32_t version) {
   for (auto &iter : order.data) {
     (*this)(iter, trace_info, request_type, user_id, order_id, version);
   }

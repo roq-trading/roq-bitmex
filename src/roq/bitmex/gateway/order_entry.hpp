@@ -20,7 +20,7 @@
 #include "roq/bitmex/gateway/account.hpp"
 #include "roq/bitmex/gateway/shared.hpp"
 
-#include "roq/bitmex/json/order.hpp"
+#include "roq/bitmex/protocol/json/order.hpp"
 
 namespace roq {
 namespace bitmex {
@@ -102,8 +102,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   // helpers
 
-  void operator()(json::OrderDataItem const &);
-  void operator()(json::Order const &);
+  void operator()(protocol::json::OrderDataItem const &);
+  void operator()(protocol::json::Order const &);
 
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);

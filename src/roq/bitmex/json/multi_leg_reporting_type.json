@@ -1,9 +1,0 @@
-{
-  "name": "roq/bitmex/json/MultiLegReportingType",
-  "type": "enum",
-  "values": [
-    {
-      "name": "SingleSecurity"
-    }
-  ]
-}

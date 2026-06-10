@@ -19,13 +19,13 @@
 
 #include "roq/bitmex/gateway/order_update.hpp"
 
-#include "roq/bitmex/json/error_parser.hpp"
-#include "roq/bitmex/json/utils.hpp"
+#include "roq/bitmex/protocol/json/error_parser.hpp"
+#include "roq/bitmex/protocol/json/utils.hpp"
 
-#include "roq/bitmex/json/encoder.hpp"
+#include "roq/bitmex/protocol/json/encoder.hpp"
 
-#include "roq/bitmex/json/cancel_all_orders_ack.hpp"
-#include "roq/bitmex/json/cancel_order_ack.hpp"
+#include "roq/bitmex/protocol/json/cancel_all_orders_ack.hpp"
+#include "roq/bitmex/protocol/json/cancel_order_ack.hpp"
 
 using namespace std::literals;
 
@@ -240,7 +240,7 @@ void OrderEntry::create_order(
     auto method = web::http::Method::POST;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = json::Encoder::place_order(encode_buffer_, create_order, order, ref_data, request_id);
+    auto body = protocol::json::Encoder::place_order(encode_buffer_, create_order, order, ref_data, request_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
@@ -267,7 +267,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       log::debug("{}"sv, body);
-      json::OrderDataItem order_item{body};
+      protocol::json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::CREATE_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -306,7 +306,7 @@ void OrderEntry::modify_order(
     auto method = web::http::Method::PUT;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = json::Encoder::modify_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id);
+    auto body = protocol::json::Encoder::modify_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
@@ -333,7 +333,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       log::debug("{}"sv, body);
-      json::OrderDataItem order_item{body};
+      protocol::json::OrderDataItem order_item{body};
       OrderUpdate{shared_, stream_id_, account_.name}(order_item, event.trace_info, RequestType::MODIFY_ORDER, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -372,7 +372,7 @@ void OrderEntry::cancel_order(
     auto method = web::http::Method::DELETE;
     auto path = shared_.api.order_management.order;
     auto expires = compute_expires(shared_.settings);
-    auto body = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id);
+    auto body = protocol::json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
@@ -399,7 +399,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       log::debug("{}"sv, body);
-      json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
+      protocol::json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
       for (auto &item : cancel_order_ack.data) {
         OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, RequestType::CANCEL_ORDER, user_id, order_id, version);
       }
@@ -458,7 +458,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
     auto method = web::http::Method::DELETE;
     auto path = shared_.api.order_management.order_all;
     auto expires = compute_expires(shared_.settings);
-    auto body = json::Encoder::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id);
+    auto body = protocol::json::Encoder::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id);
     log::info<2>(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(expires, method, path, body);
     auto request = web::rest::Request{
@@ -507,7 +507,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
     };
     auto handle_success = [&](auto &body) {
       log::debug("{}"sv, body);
-      json::CancelAllOrdersAck cancel_all_orders_ack{body, decode_buffer_};
+      protocol::json::CancelAllOrdersAck cancel_all_orders_ack{body, decode_buffer_};
       for (auto &item : cancel_all_orders_ack.data) {
         OrderUpdate{shared_, stream_id_, account_.name}(item, event.trace_info, false);
       }
@@ -523,12 +523,12 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
 
 // helpers
 
-void OrderEntry::operator()(json::OrderDataItem const &order_item) {
+void OrderEntry::operator()(protocol::json::OrderDataItem const &order_item) {
   TraceInfo trace_info;
   OrderUpdate{shared_, stream_id_, account_.name}(order_item, trace_info, false);
 }
 
-void OrderEntry::operator()(json::Order const &order) {
+void OrderEntry::operator()(protocol::json::Order const &order) {
   TraceInfo trace_info;
   OrderUpdate{shared_, stream_id_, account_.name}(order, trace_info, false);
 }
@@ -544,7 +544,7 @@ void OrderEntry::process_response(web::rest::Response const &response, SuccessHa
         break;
       case CLIENT_ERROR: {  // 4xx
         std::string_view text;
-        if (json::ErrorParser::dispatch(body, [&](auto &error) {
+        if (protocol::json::ErrorParser::dispatch(body, [&](auto &error) {
               log::warn("error={}"sv, error);
               text = error.message;
             })) {
@@ -552,7 +552,7 @@ void OrderEntry::process_response(web::rest::Response const &response, SuccessHa
           log::warn(R"(Unable to parse response="{}")"sv, body);
           text = "Unknown"sv;
         }
-        auto error = json::guess_error(text);
+        auto error = protocol::json::guess_error(text);
         error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, error, text);
         break;
       }

@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Instrument;
+using value_type = protocol::json::Instrument;
 
 // note! truncated
 TEST_CASE("simple", "[json_instrument]") {
@@ -222,8 +222,8 @@ TEST_CASE("simple", "[json_instrument]") {
                        R"(])"
                        R"(})"sv;
   auto helper = [](value_type const &obj) {
-    CHECK(obj.table == json::Table::INSTRUMENT);
-    CHECK(obj.action == json::Action::PARTIAL);
+    CHECK(obj.table == protocol::json::Table::INSTRUMENT);
+    CHECK(obj.action == protocol::json::Action::PARTIAL);
     REQUIRE(std::size(obj.data) == 2);
     CHECK(obj.data[0].symbol == ".BPENGUT_NEXT");
     CHECK(obj.data[1].symbol == "TRXUSDT");

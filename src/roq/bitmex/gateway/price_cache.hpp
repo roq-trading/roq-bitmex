@@ -6,7 +6,7 @@
 
 #include "roq/utils/container.hpp"
 
-#include "roq/bitmex/json/action.hpp"
+#include "roq/bitmex/protocol/json/action.hpp"
 
 namespace roq {
 namespace bitmex {
@@ -17,7 +17,7 @@ struct PriceCache final {
 
   PriceCache(PriceCache const &) = delete;
 
-  std::pair<double, double> operator()(json::Action action, uint64_t id, double price, double size);
+  std::pair<double, double> operator()(protocol::json::Action action, uint64_t id, double price, double size);
 
  private:
   utils::unordered_map<uint64_t, double> price_lookup_;

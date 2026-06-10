@@ -1,0 +1,26 @@
+{
+  "name": "roq/bitmex/protocol/json/LiquidationDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "leavesQty",
+      "type": "std/double"
+    },
+    {
+      "name": "orderID",
+      "type": "std/string_view"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "side",
+      "type": "roq/bitmex/protocol/json/Side"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    }
+  ]
+}

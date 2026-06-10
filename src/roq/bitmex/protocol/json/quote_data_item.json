@@ -1,0 +1,34 @@
+{
+  "name": "roq/bitmex/protocol/json/QuoteDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "askPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "askSize",
+      "type": "std/double"
+    },
+    {
+      "name": "bidPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "bidSize",
+      "type": "std/double"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
+    }
+  ]
+}

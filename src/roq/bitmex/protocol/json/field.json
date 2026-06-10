@@ -1,0 +1,81 @@
+{
+  "name": "roq/bitmex/protocol/json/Field",
+  "type": "enum",
+  "values": [
+    {
+      "name": "action"
+    },
+    {
+      "name": "attributes"
+    },
+    {
+      "name": "cancelTime"
+    },
+    {
+      "name": "data"
+    },
+    {
+      "name": "docs"
+    },
+    {
+      "name": "error"
+    },
+    {
+      "name": "failure"
+    },
+    {
+      "name": "filter"
+    },
+    {
+      "name": "foreignKeys"
+    },
+    {
+      "name": "info"
+    },
+    {
+      "name": "keys"
+    },
+    {
+      "name": "limit"
+    },
+    {
+      "name": "meta"
+    },
+    {
+      "name": "now"
+    },
+    {
+      "name": "request"
+    },
+    {
+      "name": "status"
+    },
+    {
+      "name": "subscribe"
+    },
+    {
+      "name": "success"
+    },
+    {
+      "name": "table"
+    },
+    {
+      "name": "timestamp"
+    },
+    {
+      "name": "types"
+    },
+    {
+      "name": "unsubscribe"
+    },
+    {
+      "name": "version"
+    },
+    {
+      "name": "heartbeatEnabled"
+    },
+    {
+      "name": "appName"
+    }
+  ]
+}

@@ -4,14 +4,14 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/bitmex/json/cancel_all_orders_ack.hpp"
+#include "roq/bitmex/protocol/json/cancel_all_orders_ack.hpp"
 
 using namespace roq;
 using namespace roq::bitmex;
 
 using namespace std::literals;
 
-using value_type = json::CancelAllOrdersAck;
+using value_type = protocol::json::CancelAllOrdersAck;
 
 TEST_CASE("simple", "[json_cancel_all_orders_ack]") {
   auto const message = R"([{)"

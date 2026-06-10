@@ -1,0 +1,21 @@
+{
+  "name": "roq/bitmex/protocol/json/TimeInForce",
+  "type": "enum",
+  "values": [
+    {
+      "name": "AtTheClose"
+    },
+    {
+      "name": "Day"
+    },
+    {
+      "name": "FillOrKill"
+    },
+    {
+      "name": "GoodTillCancel"
+    },
+    {
+      "name": "ImmediateOrCancel"
+    }
+  ]
+}

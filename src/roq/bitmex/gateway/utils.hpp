@@ -4,16 +4,16 @@
 
 #include "roq/api.hpp"
 
-#include "roq/bitmex/json/exec_type.hpp"
-#include "roq/bitmex/json/ord_status.hpp"
+#include "roq/bitmex/protocol/json/exec_type.hpp"
+#include "roq/bitmex/protocol/json/ord_status.hpp"
 
 namespace roq {
 namespace bitmex {
 namespace gateway {
 
-inline RequestType compute_request_type(json::ExecType exec_type) {
+inline RequestType compute_request_type(protocol::json::ExecType exec_type) {
   switch (exec_type) {
-    using enum json::ExecType::type_t;
+    using enum protocol::json::ExecType::type_t;
     case UNDEFINED_INTERNAL:
     case UNKNOWN_INTERNAL:
       break;
@@ -35,9 +35,9 @@ inline RequestType compute_request_type(json::ExecType exec_type) {
   return {};
 }
 
-inline RequestStatus compute_request_status(json::ExecType exec_type) {
+inline RequestStatus compute_request_status(protocol::json::ExecType exec_type) {
   switch (exec_type) {
-    using enum json::ExecType::type_t;
+    using enum protocol::json::ExecType::type_t;
     case UNDEFINED_INTERNAL:
     case UNKNOWN_INTERNAL:
       break;
@@ -57,9 +57,9 @@ inline RequestStatus compute_request_status(json::ExecType exec_type) {
   return {};
 }
 
-inline OrderStatus compute_order_status(json::OrdStatus ord_status, bool working_status) {
+inline OrderStatus compute_order_status(protocol::json::OrdStatus ord_status, bool working_status) {
   switch (ord_status) {
-    using enum json::OrdStatus::type_t;
+    using enum protocol::json::OrdStatus::type_t;
     case UNDEFINED_INTERNAL:
     case UNKNOWN_INTERNAL:
       // note! back-stop in case we didn't parse OrdStatus
@@ -98,9 +98,9 @@ inline OrderStatus compute_order_status(json::OrdStatus ord_status, bool working
   return {};
 }
 
-inline RequestStatus compute_request_status(json::OrdStatus ord_status) {
+inline RequestStatus compute_request_status(protocol::json::OrdStatus ord_status) {
   switch (ord_status) {
-    using enum json::OrdStatus::type_t;
+    using enum protocol::json::OrdStatus::type_t;
     case UNDEFINED_INTERNAL:
     case UNKNOWN_INTERNAL:
       break;

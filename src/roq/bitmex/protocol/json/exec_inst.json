@@ -1,0 +1,24 @@
+{
+  "name": "roq/bitmex/protocol/json/ExecInst",
+  "type": "enum",
+  "values": [
+    {
+      "name": "ParticipateDoNotInitiate"
+    },
+    {
+      "name": "MarkPrice"
+    },
+    {
+      "name": "LastPrice"
+    },
+    {
+      "name": "IndexPrice"
+    },
+    {
+      "name": "ReduceOnly"
+    },
+    {
+      "name": "Close"
+    }
+  ]
+}

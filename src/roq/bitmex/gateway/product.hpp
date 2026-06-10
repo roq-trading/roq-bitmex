@@ -10,28 +10,28 @@
 
 #include "roq/bitmex/gateway/shared.hpp"
 
-#include "roq/bitmex/json/funding_data_item.hpp"
-#include "roq/bitmex/json/instrument_data_item.hpp"
+#include "roq/bitmex/protocol/json/funding_data_item.hpp"
+#include "roq/bitmex/protocol/json/instrument_data_item.hpp"
 
 namespace roq {
 namespace bitmex {
 namespace gateway {
 
 struct Product final {
-  Product(Shared &, json::InstrumentDataItem const &);
-  Product(Shared &, json::FundingDataItem const &);
+  Product(Shared &, protocol::json::InstrumentDataItem const &);
+  Product(Shared &, protocol::json::FundingDataItem const &);
 
   Product(Product &&) = default;
   Product(Product const &) = delete;
 
-  bool update(json::InstrumentDataItem const &);
-  bool update(json::FundingDataItem const &);
+  bool update(protocol::json::InstrumentDataItem const &);
+  bool update(protocol::json::FundingDataItem const &);
 
-  ReferenceData reference_data(json::InstrumentDataItem const &, uint16_t stream_id, bool discard) const;
-  MarketStatus market_status(json::InstrumentDataItem const &, uint16_t stream_id) const;
-  StatisticsUpdate statistics_update(json::InstrumentDataItem const &, uint16_t stream_id) const;
+  ReferenceData reference_data(protocol::json::InstrumentDataItem const &, uint16_t stream_id, bool discard) const;
+  MarketStatus market_status(protocol::json::InstrumentDataItem const &, uint16_t stream_id) const;
+  StatisticsUpdate statistics_update(protocol::json::InstrumentDataItem const &, uint16_t stream_id) const;
 
-  StatisticsUpdate statistics_update(json::FundingDataItem const &, uint16_t stream_id) const;
+  StatisticsUpdate statistics_update(protocol::json::FundingDataItem const &, uint16_t stream_id) const;
 
   bool is_market_status_dirty() const { return market_status_dirty_; }
   bool is_statistics_dirty() const { return !std::empty(statistics_); }
@@ -56,7 +56,7 @@ struct Product final {
   std::chrono::milliseconds settle_ = {};
   // market status
   bool market_status_dirty_ = false;
-  json::State state_ = {};
+  protocol::json::State state_ = {};
   // statistics
   double settlement_price_ = NaN;
   double open_interest_ = NaN;

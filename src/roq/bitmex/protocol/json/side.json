@@ -1,0 +1,12 @@
+{
+  "name": "roq/bitmex/protocol/json/Side",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Buy"
+    },
+    {
+      "name": "Sell"
+    }
+  ]
+}

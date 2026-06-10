@@ -1,0 +1,26 @@
+{
+  "name": "roq/bitmex/protocol/json/Subscribe",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "success",
+      "type": "std/bool"
+    },
+    {
+      "name": "subscribe",
+      "type": "std/string_view"
+    },
+    {
+      "name": "request",
+      "type": "roq/bitmex/protocol/json/SubscribeRequest"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
+    }
+  ]
+}

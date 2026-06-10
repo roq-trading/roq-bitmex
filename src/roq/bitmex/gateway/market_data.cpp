@@ -15,8 +15,8 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/bitmex/json/map.hpp"
-#include "roq/bitmex/json/utils.hpp"
+#include "roq/bitmex/protocol/json/map.hpp"
+#include "roq/bitmex/protocol/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -307,7 +307,7 @@ void MarketData::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!protocol::json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -317,7 +317,7 @@ void MarketData::parse(std::string_view const &message) {
   });
 }
 
-void MarketData::operator()(Trace<json::Welcome> const &event) {
+void MarketData::operator()(Trace<protocol::json::Welcome> const &event) {
   profile_.welcome([&]() {
     auto &[trace_info, welcome] = event;
     log::info<2>("welcome={}"sv, welcome);
@@ -326,7 +326,7 @@ void MarketData::operator()(Trace<json::Welcome> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Error> const &event) {
+void MarketData::operator()(Trace<protocol::json::Error> const &event) {
   profile_.error([&]() {
     auto &[trace_info, error] = event;
     log::warn("error={}"sv, error);
@@ -334,7 +334,7 @@ void MarketData::operator()(Trace<json::Error> const &event) {
   (*connection_).close();
 }
 
-void MarketData::operator()(Trace<json::Subscribe> const &event) {
+void MarketData::operator()(Trace<protocol::json::Subscribe> const &event) {
   profile_.subscribe([&]() {
     auto &[trace_info, subscribe] = event;
     log::info<2>("subscribe={}"sv, subscribe);
@@ -346,7 +346,7 @@ void MarketData::operator()(Trace<json::Subscribe> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Unsubscribe> const &event) {
+void MarketData::operator()(Trace<protocol::json::Unsubscribe> const &event) {
   profile_.unsubscribe([&]() {
     auto &[trace_info, unsubscribe] = event;
     log::info<2>("unsubscribe={}"sv, unsubscribe);
@@ -358,7 +358,7 @@ void MarketData::operator()(Trace<json::Unsubscribe> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Instrument> const &event) {
+void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
   profile_.instrument([&]() {
     auto &[trace_info, instrument] = event;
     log::info<4>("instrument={}"sv, instrument);
@@ -367,7 +367,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event) {
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
     switch (instrument.action) {
-      using enum json::Action::type_t;
+      using enum protocol::json::Action::type_t;
       case UNDEFINED_INTERNAL:
       case UNKNOWN_INTERNAL:
         log::fatal("Unexpected"sv);
@@ -436,7 +436,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Quote> const &event) {
+void MarketData::operator()(Trace<protocol::json::Quote> const &event) {
   profile_.quote([&]() {
     auto &[trace_info, quote] = event;
     log::info<4>("quote={}"sv, quote);
@@ -465,13 +465,13 @@ void MarketData::operator()(Trace<json::Quote> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::OrderBookL2> const &event) {
+void MarketData::operator()(Trace<protocol::json::OrderBookL2> const &event) {
   profile_.order_book_l2([&]() {
     auto &[trace_info, order_book_l2] = event;
     log::info<4>("order_book_l2={}"sv, order_book_l2);
     (*connection_).touch(trace_info.source_receive_time);
-    assert(order_book_l2.action != json::Action::UNKNOWN_INTERNAL);
-    auto snapshot = order_book_l2.action == json::Action::PARTIAL;
+    assert(order_book_l2.action != protocol::json::Action::UNKNOWN_INTERNAL);
+    auto snapshot = order_book_l2.action == protocol::json::Action::PARTIAL;
     // note!
     //   first partial update will include *all* instruments
     //   drop everything received before partial (as per bitmex documentation)
@@ -518,7 +518,7 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event) {
       auto [price, size] = shared_.price_cache(order_book_l2.action, item.id, item.price, item.size);
       if (!std::isnan(price)) {
         switch (item.side) {
-          using enum json::Side::type_t;
+          using enum protocol::json::Side::type_t;
           case BUY:
             emplace_back(shared_.bids, price, size);
             break;
@@ -547,13 +547,13 @@ void MarketData::operator()(Trace<json::OrderBookL2> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Trade> const &event) {
+void MarketData::operator()(Trace<protocol::json::Trade> const &event) {
   profile_.trade([&]() {
     auto &trace_info = event.trace_info;
     auto &trade = event.value;
     log::info<4>("trade={}"sv, trade);
     (*connection_).touch(trace_info.source_receive_time);
-    if (trade.action != json::Action::INSERT) {
+    if (trade.action != protocol::json::Action::INSERT) {
       return;
     }
     shared_.trades.clear();
@@ -604,7 +604,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Funding> const &event) {
+void MarketData::operator()(Trace<protocol::json::Funding> const &event) {
   profile_.funding([&]() {
     auto &[trace_info, funding] = event;
     log::info<4>("funding={}"sv, funding);
@@ -622,7 +622,7 @@ void MarketData::operator()(Trace<json::Funding> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Liquidation> const &event) {
+void MarketData::operator()(Trace<protocol::json::Liquidation> const &event) {
   profile_.liquidation([&]() {
     auto &[trace_info, liquidation] = event;
     log::info<4>("liquidation={}"sv, liquidation);
@@ -631,7 +631,7 @@ void MarketData::operator()(Trace<json::Liquidation> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Settlement> const &event) {
+void MarketData::operator()(Trace<protocol::json::Settlement> const &event) {
   profile_.settlement([&]() {
     auto &[trace_info, settlement] = event;
     log::info<4>("settlement={}"sv, settlement);
@@ -640,27 +640,27 @@ void MarketData::operator()(Trace<json::Settlement> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Margin> const &) {
+void MarketData::operator()(Trace<protocol::json::Margin> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::Position> const &) {
+void MarketData::operator()(Trace<protocol::json::Position> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::Order> const &) {
+void MarketData::operator()(Trace<protocol::json::Order> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::Execution> const &) {
+void MarketData::operator()(Trace<protocol::json::Execution> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::CancelAllAfter> const &) {
+void MarketData::operator()(Trace<protocol::json::CancelAllAfter> const &) {
   log::fatal("Unexpected"sv);
 }
 
-Product &MarketData::find_product(json::InstrumentDataItem const &item) {
+Product &MarketData::find_product(protocol::json::InstrumentDataItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
     iter = product_cache_.try_emplace(item.symbol, shared_, item).first;
@@ -671,7 +671,7 @@ Product &MarketData::find_product(json::InstrumentDataItem const &item) {
   return (*iter).second;
 }
 
-Product &MarketData::find_product(json::FundingDataItem const &item) {
+Product &MarketData::find_product(protocol::json::FundingDataItem const &item) {
   auto iter = product_cache_.find(item.symbol);
   if (iter == std::end(product_cache_)) {
     log::warn<1>(R"(Create product symbol="{}" from funding (no reference data))"sv, item.symbol);

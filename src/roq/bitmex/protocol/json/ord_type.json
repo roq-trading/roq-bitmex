@@ -1,0 +1,24 @@
+{
+  "name": "roq/bitmex/protocol/json/OrdType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Limit"
+    },
+    {
+      "name": "Market"
+    },
+    {
+      "name": "Stop"
+    },
+    {
+      "name": "StopLimit"
+    },
+    {
+      "name": "MarketIfTouched"
+    },
+    {
+      "name": "LimitIfTouched"
+    }
+  ]
+}

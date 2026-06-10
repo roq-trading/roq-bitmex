@@ -1,0 +1,374 @@
+{
+  "name": "roq/bitmex/protocol/json/PositionDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "account",
+      "type": "std/uint64"
+    },
+    {
+      "name": "avgCostPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "avgEntryPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "bankruptPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "breakEvenPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "commission",
+      "type": "std/double"
+    },
+    {
+      "name": "crossMargin",
+      "type": "std/bool"
+    },
+    {
+      "name": "currency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "currentComm",
+      "type": "std/double"
+    },
+    {
+      "name": "currentCost",
+      "type": "std/double"
+    },
+    {
+      "name": "currentQty",
+      "type": "std/double"
+    },
+    {
+      "name": "currentTimestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "deleveragePercentile",
+      "type": "std/double"
+    },
+    {
+      "name": "execBuyCost",
+      "type": "std/double"
+    },
+    {
+      "name": "execBuyQty",
+      "type": "std/double"
+    },
+    {
+      "name": "execComm",
+      "type": "std/double"
+    },
+    {
+      "name": "execCost",
+      "type": "std/double"
+    },
+    {
+      "name": "execQty",
+      "type": "std/double"
+    },
+    {
+      "name": "execSellCost",
+      "type": "std/double"
+    },
+    {
+      "name": "execSellQty",
+      "type": "std/double"
+    },
+    {
+      "name": "foreignNotional",
+      "type": "std/double"
+    },
+    {
+      "name": "grossExecCost",
+      "type": "std/double"
+    },
+    {
+      "name": "grossOpenCost",
+      "type": "std/double"
+    },
+    {
+      "name": "grossOpenPremium",
+      "type": "std/double"
+    },
+    {
+      "name": "homeNotional",
+      "type": "std/double"
+    },
+    {
+      "name": "indicativeTax",
+      "type": "std/double"
+    },
+    {
+      "name": "indicativeTaxRate",
+      "type": "std/double"
+    },
+    {
+      "name": "initMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "initMarginReq",
+      "type": "std/double"
+    },
+    {
+      "name": "isOpen",
+      "type": "std/bool"
+    },
+    {
+      "name": "lastPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "lastValue",
+      "type": "std/double"
+    },
+    {
+      "name": "leverage",
+      "type": "std/double"
+    },
+    {
+      "name": "liquidationPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "longBankrupt",
+      "type": "std/double"
+    },
+    {
+      "name": "maintMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "maintMarginReq",
+      "type": "std/double"
+    },
+    {
+      "name": "marginCallPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "markPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "markValue",
+      "type": "std/double"
+    },
+    {
+      "name": "openingComm",
+      "type": "std/double"
+    },
+    {
+      "name": "openingCost",
+      "type": "std/double"
+    },
+    {
+      "name": "openingQty",
+      "type": "std/double"
+    },
+    {
+      "name": "openingTimestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "openOrderBuyCost",
+      "type": "std/double"
+    },
+    {
+      "name": "openOrderBuyPremium",
+      "type": "std/double"
+    },
+    {
+      "name": "openOrderBuyQty",
+      "type": "std/double"
+    },
+    {
+      "name": "openOrderSellCost",
+      "type": "std/double"
+    },
+    {
+      "name": "openOrderSellPremium",
+      "type": "std/double"
+    },
+    {
+      "name": "openOrderSellQty",
+      "type": "std/double"
+    },
+    {
+      "name": "posAllowance",
+      "type": "std/double"
+    },
+    {
+      "name": "posComm",
+      "type": "std/double"
+    },
+    {
+      "name": "posCost",
+      "type": "std/double"
+    },
+    {
+      "name": "posCost2",
+      "type": "std/double"
+    },
+    {
+      "name": "posCross",
+      "type": "std/double"
+    },
+    {
+      "name": "posInit",
+      "type": "std/double"
+    },
+    {
+      "name": "posLoss",
+      "type": "std/double"
+    },
+    {
+      "name": "posMaint",
+      "type": "std/double"
+    },
+    {
+      "name": "posMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "posState",
+      "type": "std/string_view"
+    },
+    {
+      "name": "prevClosePrice",
+      "type": "std/double"
+    },
+    {
+      "name": "prevRealisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "prevUnrealisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "quoteCurrency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "realisedCost",
+      "type": "std/double"
+    },
+    {
+      "name": "realisedGrossPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "realisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "realisedTax",
+      "type": "std/double"
+    },
+    {
+      "name": "rebalancedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "riskLimit",
+      "type": "std/double"
+    },
+    {
+      "name": "riskValue",
+      "type": "std/double"
+    },
+    {
+      "name": "sessionMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "shortBankrupt",
+      "type": "std/double"
+    },
+    {
+      "name": "simpleCost",
+      "type": "std/double"
+    },
+    {
+      "name": "simplePnl",
+      "type": "std/double"
+    },
+    {
+      "name": "simplePnlPcnt",
+      "type": "std/double"
+    },
+    {
+      "name": "simpleQty",
+      "type": "std/double"
+    },
+    {
+      "name": "simpleValue",
+      "type": "std/double"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "targetExcessMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "taxableMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "taxBase",
+      "type": "std/double"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "underlying",
+      "type": "std/string_view"
+    },
+    {
+      "name": "unrealisedCost",
+      "type": "std/double"
+    },
+    {
+      "name": "unrealisedGrossPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "unrealisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "unrealisedPnlPcnt",
+      "type": "std/double"
+    },
+    {
+      "name": "unrealisedRoePcnt",
+      "type": "std/double"
+    },
+    {
+      "name": "unrealisedTax",
+      "type": "std/double"
+    },
+    {
+      "name": "varMargin",
+      "type": "std/double"
+    },
+    {
+      "name": "strategy",
+      "type": "roq/bitmex/protocol/json/Strategy"
+    }
+  ]
+}

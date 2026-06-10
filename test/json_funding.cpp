@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Funding;
+using value_type = protocol::json::Funding;
 
 // note! truncated
 TEST_CASE("simple", "[json_funding]") {
@@ -39,8 +39,8 @@ TEST_CASE("simple", "[json_funding]") {
                        R"(])"
                        R"(})"sv;
   auto helper = [](value_type const &obj) {
-    CHECK(obj.table == json::Table::FUNDING);
-    CHECK(obj.action == json::Action::PARTIAL);
+    CHECK(obj.table == protocol::json::Table::FUNDING);
+    CHECK(obj.action == protocol::json::Action::PARTIAL);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

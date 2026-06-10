@@ -1,0 +1,28 @@
+{
+  "name": "roq/bitmex/protocol/json/Position",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "table",
+      "type": "roq/bitmex/protocol/json/Table"
+    },
+    {
+      "name": "action",
+      "type": "roq/bitmex/protocol/json/Action"
+    },
+    {
+      "name": "keys"
+    },
+    {
+      "name": "types"
+    },
+    {
+      "name": "filter"
+    },
+    {
+      "name": "data",
+      "type": "roq/bitmex/protocol/json/PositionDataItem",
+      "array": "std/span"
+    }
+  ]
+}

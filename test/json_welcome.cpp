@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Welcome;
+using value_type = protocol::json::Welcome;
 
 // note! truncated
 TEST_CASE("simple", "[json_welcome]") {

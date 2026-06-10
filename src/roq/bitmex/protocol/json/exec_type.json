@@ -1,0 +1,27 @@
+{
+  "name": "roq/bitmex/protocol/json/ExecType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Canceled"
+    },
+    {
+      "name": "Funding"
+    },
+    {
+      "name": "New"
+    },
+    {
+      "name": "Rejected"
+    },
+    {
+      "name": "Replaced"
+    },
+    {
+      "name": "Trade"
+    },
+    {
+      "name": "CancelReject"
+    }
+  ]
+}

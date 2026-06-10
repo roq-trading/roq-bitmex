@@ -14,11 +14,11 @@ namespace gateway {
 
 // === IMPLEMENTATION ===
 
-std::pair<double, double> PriceCache::operator()(json::Action action, uint64_t id, double price, double size) {
+std::pair<double, double> PriceCache::operator()(protocol::json::Action action, uint64_t id, double price, double size) {
   auto result = price;
   auto iter = price_lookup_.find(id);
   switch (action) {
-    using enum json::Action::type_t;
+    using enum protocol::json::Action::type_t;
     case UNDEFINED_INTERNAL:
     case UNKNOWN_INTERNAL:
       log::fatal("Unexpected"sv);

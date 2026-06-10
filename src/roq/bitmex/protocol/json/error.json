@@ -1,0 +1,20 @@
+{
+  "name": "roq/bitmex/protocol/json/Error",
+  "type": "struct",
+  "values": [
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "meta"
+    },
+    {
+      "name": "request"
+    },
+    {
+      "name": "status",
+      "type": "std/int32"
+    }
+  ]
+}

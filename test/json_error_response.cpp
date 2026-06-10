@@ -6,8 +6,8 @@
 
 #include "roq/core/datetime.hpp"
 
-#include "roq/bitmex/json/error_parser.hpp"
-#include "roq/bitmex/json/error_response.hpp"
+#include "roq/bitmex/protocol/json/error_parser.hpp"
+#include "roq/bitmex/protocol/json/error_response.hpp"
 
 using namespace roq;
 using namespace roq::bitmex;
@@ -19,13 +19,13 @@ using namespace std::literals;
 TEST_CASE("json_error_response_simple_1", "[json_error_response]") {
   auto const message = R"(
   {"error":{"message":"Account has insufficient Available Balance, 5929700 XBt required","name":"CodedHTTPError","details":"19000"}}")"sv;
-  auto res =
-      json::ErrorParser::dispatch(message, [](auto &error) { CHECK(error.message == "Account has insufficient Available Balance, 5929700 XBt required"sv); });
+  auto res = protocol::json::ErrorParser::dispatch(
+      message, [](auto &error) { CHECK(error.message == "Account has insufficient Available Balance, 5929700 XBt required"sv); });
   CHECK(res == true);
 }
 
 TEST_CASE("json_error_response_simple_2", "[json_error_response]") {
   auto const message = R"({"error":{"message":"Invalid leavesQty","name":"HTTPError"}})"sv;
-  auto res = json::ErrorParser::dispatch(message, [](auto &error) { CHECK(error.message == "Invalid leavesQty"sv); });
+  auto res = protocol::json::ErrorParser::dispatch(message, [](auto &error) { CHECK(error.message == "Invalid leavesQty"sv); });
   CHECK(res == true);
 }

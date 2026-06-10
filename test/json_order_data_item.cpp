@@ -4,14 +4,14 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/bitmex/json/order_data_item.hpp"
+#include "roq/bitmex/protocol/json/order_data_item.hpp"
 
 using namespace roq;
 using namespace roq::bitmex;
 
 using namespace std::literals;
 
-using value_type = json::OrderDataItem;
+using value_type = protocol::json::OrderDataItem;
 
 TEST_CASE("create_ack", "[json_order_data_item]") {
   auto message = R"({)"

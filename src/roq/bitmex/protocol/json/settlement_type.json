@@ -1,0 +1,12 @@
+{
+  "name": "roq/bitmex/protocol/json/SettlementType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Rebalance"
+    },
+    {
+      "name": "Settlement"
+    }
+  ]
+}

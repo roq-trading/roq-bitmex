@@ -1,0 +1,154 @@
+{
+  "name": "roq/bitmex/protocol/json/OrderDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "account",
+      "type": "std/uint64"
+    },
+    {
+      "name": "avgPx",
+      "type": "std/double"
+    },
+    {
+      "name": "clOrdID",
+      "type": "std/string_view"
+    },
+    {
+      "name": "clOrdLinkID",
+      "type": "std/string_view"
+    },
+    {
+      "name": "contingencyType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "cumQty",
+      "type": "std/double"
+    },
+    {
+      "name": "currency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "displayQty",
+      "type": "std/double"
+    },
+    {
+      "name": "exDestination",
+      "type": "std/string_view"
+    },
+    {
+      "name": "execInst",
+      "type": "roq/bitmex/protocol/json/ExecInst"
+    },
+    {
+      "name": "leavesQty",
+      "type": "std/double"
+    },
+    {
+      "name": "multiLegReportingType",
+      "type": "roq/bitmex/protocol/json/MultiLegReportingType"
+    },
+    {
+      "name": "orderID",
+      "type": "std/string_view"
+    },
+    {
+      "name": "orderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "ordRejReason",
+      "type": "std/string_view"
+    },
+    {
+      "name": "ordStatus",
+      "type": "roq/bitmex/protocol/json/OrdStatus"
+    },
+    {
+      "name": "ordType",
+      "type": "roq/bitmex/protocol/json/OrdType"
+    },
+    {
+      "name": "pegOffsetValue",
+      "type": "std/double"
+    },
+    {
+      "name": "pegPriceType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "settlCurrency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "side",
+      "type": "roq/bitmex/protocol/json/Side"
+    },
+    {
+      "name": "simpleCumQty",
+      "type": "std/double"
+    },
+    {
+      "name": "simpleLeavesQty",
+      "type": "std/double"
+    },
+    {
+      "name": "simpleOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "stopPx",
+      "type": "std/double"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "text",
+      "type": "std/string_view"
+    },
+    {
+      "name": "timeInForce",
+      "type": "roq/bitmex/protocol/json/TimeInForce"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "transactTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "triggered",
+      "type": "std/string_view"
+    },
+    {
+      "name": "workingIndicator",
+      "type": "std/bool"
+    },
+    {
+      "name": "strategy",
+      "type": "roq/bitmex/protocol/json/Strategy"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "maxSlippagePct",
+      "type": "std/double"
+    },
+    {
+      "name": "pool",
+      "type": "std/string_view"
+    }
+  ]
+}

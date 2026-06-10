@@ -1,0 +1,17 @@
+{
+  "name": "roq/bitmex/protocol/json/CancelAllAfter",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "cancelTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "now",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "request"
+    }
+  ]
+}

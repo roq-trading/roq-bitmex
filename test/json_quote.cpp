@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Quote;
+using value_type = protocol::json::Quote;
 
 TEST_CASE("simple", "[json_quote]") {
   auto const message = R"({)"
@@ -45,8 +45,8 @@ TEST_CASE("simple", "[json_quote]") {
                        R"(])"
                        R"(})"sv;
   auto helper = [](value_type const &obj) {
-    CHECK(obj.table == json::Table::QUOTE);
-    CHECK(obj.action == json::Action::PARTIAL);
+    CHECK(obj.table == protocol::json::Table::QUOTE);
+    CHECK(obj.action == protocol::json::Action::PARTIAL);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
