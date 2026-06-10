@@ -449,6 +449,18 @@
     {
       "name": "tags",
       "type": "std/string_view"
+    },
+    {
+      "name": "farLegSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "nearLegSymbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "referencePrice",
+      "type": "std/double"
     }
   ]
 }
