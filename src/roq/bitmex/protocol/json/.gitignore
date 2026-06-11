@@ -1,5 +1,5 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
-roq-bitmex-json
+roq-bitmex-protocol-json
 action.hpp
 cancel_all_after.hpp
 cancel_all_orders_ack.hpp
