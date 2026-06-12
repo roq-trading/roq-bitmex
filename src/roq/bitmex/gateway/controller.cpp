@@ -59,6 +59,10 @@ std::unique_ptr<server::Handler> Controller::create(server::Dispatcher &dispatch
   return std::make_unique<Controller>(dispatcher, settings, config, context);
 }
 
+uint8_t Controller::parse_api(Settings const &) {
+  return {};
+}
+
 Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
       order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},

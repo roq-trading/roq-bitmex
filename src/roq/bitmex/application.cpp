@@ -12,19 +12,13 @@ using namespace std::literals;
 namespace roq {
 namespace bitmex {
 
-// === CONSTANTS ===
-
-namespace {
-uint8_t const API_2 = {};
-}
-
 // === IMPLEMENTATION ===
 
 int Application::main(args::Parser const &args) {
   flags::Settings settings{args};
   gateway::Config config{settings};
   auto context = server::create_io_context(settings);
-  server::Trading2<gateway::Controller>{settings, config, *context, API_2}.dispatch();
+  server::Trading<gateway::Controller>{settings, config, *context}.dispatch();
   return EXIT_SUCCESS;
 }
 
