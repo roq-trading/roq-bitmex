@@ -229,6 +229,14 @@
     {
       "name": "tradePool",
       "type": "std/string_view"
+    },
+    {
+      "name": "stopLossExecInst",
+      "type": "std/string_view"
+    },
+    {
+      "name": "takeProfitExecInst",
+      "type": "std/string_view"
     }
   ]
 }
