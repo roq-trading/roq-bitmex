@@ -461,6 +461,10 @@
     {
       "name": "referencePrice",
       "type": "std/double"
+    },
+    {
+      "name": "launchingTimestamp",
+      "type": "std/milliseconds"
     }
   ]
 }
