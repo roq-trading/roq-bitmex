@@ -40,6 +40,7 @@ void OrderUpdate::operator()(protocol::json::OrderDataItem const &order_item, Tr
       .version = {},
       .request_id = {},  // cancel does not rewrite
       .external_order_id = {},
+      .client_order_id = {},
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
@@ -122,6 +123,7 @@ void OrderUpdate::operator()(
       .version = version,
       .request_id = request_id,
       .external_order_id = {},
+      .client_order_id = {},
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
