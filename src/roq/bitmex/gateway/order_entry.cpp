@@ -588,14 +588,6 @@ void OrderEntry::operator()(Trace<server::oms::Response> const &event, uint8_t u
   }
 }
 
-void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event, std::string_view const &client_order_id) {
-  auto &[trace_info, order_update] = event;
-  if (shared_.update_order(client_order_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
-  } else {
-    log::warn("*** EXTERNAL ORDER ***"sv);
-  }
-}
-
 }  // namespace gateway
 }  // namespace bitmex
 }  // namespace roq

@@ -39,8 +39,8 @@ void OrderUpdate::operator()(protocol::json::OrderDataItem const &order_item, Tr
       .text = order_item.text,
       .version = {},
       .request_id = {},  // cancel does not rewrite
-      .external_order_id = {},
-      .client_order_id = {},
+      .external_order_id = external_order_id,
+      .client_order_id = order_item.cl_ord_id,
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
@@ -80,13 +80,7 @@ void OrderUpdate::operator()(protocol::json::OrderDataItem const &order_item, Tr
       .update_type = update_type,
       .sending_time_utc = {},
   };
-  auto request_or_exchange_id = [&]() {
-    if (std::empty(order_update.client_order_id)) {
-      return order_update.external_order_id;
-    }
-    return order_update.client_order_id;
-  }();
-  if (shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);
@@ -122,8 +116,8 @@ void OrderUpdate::operator()(
       .text = order_item.text,
       .version = version,
       .request_id = request_id,
-      .external_order_id = {},
-      .client_order_id = {},
+      .external_order_id = external_order_id,
+      .client_order_id = order_item.cl_ord_id,
       .quantity = order_item.order_qty,
       .price = order_item.price,
   };
@@ -163,13 +157,7 @@ void OrderUpdate::operator()(
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = {},
   };
-  auto request_or_exchange_id = [&]() {
-    if (std::empty(order_update.client_order_id)) {
-      return order_update.external_order_id;
-    }
-    return order_update.client_order_id;
-  }();
-  if (shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order_item={}"sv, order_item);

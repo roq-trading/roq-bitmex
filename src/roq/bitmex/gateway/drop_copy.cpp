@@ -419,8 +419,8 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
           .text = item.text,
           .version = {},
           .request_id = request_id,
-          .external_order_id = {},
-          .client_order_id = {},
+          .external_order_id = item.order_id,
+          .client_order_id = item.cl_ord_id,
           .quantity = item.order_qty,
           .price = item.price,
       };
@@ -439,7 +439,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
           .update_time_utc = item.timestamp,
           .external_account = external_account,
           .external_order_id = item.order_id,
-          .client_order_id = {},
+          .client_order_id = item.cl_ord_id,
           .order_status = map(item.ord_status),
           .error = {},
           .text = {},
@@ -463,7 +463,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
       auto user_id = SOURCE_NONE;
       auto order_id = ORDER_ID_NONE;
       auto strategy_id = STRATEGY_ID_NONE;
-      if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, response, order_update, [&](auto &order) {
+      if (shared_.update_order(stream_id_, trace_info, response, order_update, [&](auto &order) {
             user_id = order.user_id;
             order_id = order.order_id;
             strategy_id = order.strategy_id;
@@ -499,7 +499,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
           .update_time_utc = item.timestamp,
           .external_account = external_account,
           .external_order_id = item.order_id,
-          .client_order_id = {},
+          .client_order_id = item.cl_ord_id,
           .fills = {&fill, 1},
           .routing_id = {},
           .update_type = UpdateType::INCREMENTAL,
@@ -507,7 +507,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
           .user = {},
           .strategy_id = strategy_id,
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_update, true, user_id, item.cl_ord_id);
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, user_id);
     }
   });
 }

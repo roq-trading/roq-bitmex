@@ -195,8 +195,8 @@ void Controller::operator()(Trace<StatisticsUpdate> const &event, bool is_last) 
   dispatcher_(event, is_last);
 }
 
-void Controller::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
-  dispatcher_(event, is_last, user_id, request_id);
+void Controller::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id) {
+  dispatcher_(event, is_last, user_id);
 }
 
 void Controller::operator()(Trace<PositionUpdate> const &event, bool is_last) {

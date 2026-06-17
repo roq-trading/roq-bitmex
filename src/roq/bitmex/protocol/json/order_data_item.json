@@ -149,6 +149,30 @@
     {
       "name": "pool",
       "type": "std/string_view"
+    },
+    {
+      "name": "stoplossexecinst",
+      "type": "std/string_view"
+    },
+    {
+      "name": "stoplossprice",
+      "type": "std/double"
+    },
+    {
+      "name": "stoplossstoppx",
+      "type": "std/double"
+    },
+    {
+      "name": "takeprofitexecinst",
+      "type": "std/string_view"
+    },
+    {
+      "name": "takeprofitprice",
+      "type": "std/double"
+    },
+    {
+      "name": "takeprofitstoppx",
+      "type": "std/double"
     }
   ]
 }
