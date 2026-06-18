@@ -80,11 +80,7 @@ void OrderUpdate::operator()(protocol::json::OrderDataItem const &order_item, Tr
       .update_type = update_type,
       .sending_time_utc = {},
   };
-  if (shared_.update_order(stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
-  } else {
-    log::warn("*** EXTERNAL ORDER ***"sv);
-    log::warn("order_item={}"sv, order_item);
-  }
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, response, order_update, stream_id_);
 }
 
 void OrderUpdate::operator()(protocol::json::Order const &order, TraceInfo const &trace_info, bool download) {
@@ -157,11 +153,7 @@ void OrderUpdate::operator()(
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = {},
   };
-  if (shared_.update_order(stream_id_, trace_info, response, order_update, []([[maybe_unused]] auto &order) {})) {
-  } else {
-    log::warn("*** EXTERNAL ORDER ***"sv);
-    log::warn("order_item={}"sv, order_item);
-  }
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, response, order_update, stream_id_);
 }
 
 void OrderUpdate::operator()(

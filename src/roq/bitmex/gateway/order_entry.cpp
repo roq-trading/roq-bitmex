@@ -265,6 +265,7 @@ void OrderEntry::create_order(
 
 void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_success = [&](auto &body) {
       log::debug("{}"sv, body);
       protocol::json::OrderDataItem order_item{body};
@@ -284,8 +285,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
-      Trace event_2{event, response};
-      (*this)(event_2, user_id, order_id);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_, user_id, order_id);
     };
     process_response(event, handle_success, handle_error);
   });
@@ -332,6 +332,7 @@ void OrderEntry::modify_order(
 
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_success = [&](auto &body) {
       log::debug("{}"sv, body);
       protocol::json::OrderDataItem order_item{body};
@@ -351,8 +352,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
-      Trace event_2{event, response};
-      (*this)(event_2, user_id, order_id);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_, user_id, order_id);
     };
     process_response(event, handle_success, handle_error);
   });
@@ -399,6 +399,7 @@ void OrderEntry::cancel_order(
 
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_success = [&](auto &body) {
       log::debug("{}"sv, body);
       protocol::json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
@@ -420,8 +421,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
-      Trace event_2{event, response};
-      (*this)(event_2, user_id, order_id);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_, user_id, order_id);
     };
     process_response(event, handle_success, handle_error);
   });
@@ -576,15 +576,6 @@ void OrderEntry::process_response(web::rest::Response const &response, SuccessHa
   } catch (std::exception &e) {
     log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
     error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, e.what());
-  }
-}
-
-template <typename... Args>
-void OrderEntry::operator()(Trace<server::oms::Response> const &event, uint8_t user_id, uint64_t order_id, Args &&...args) {
-  auto &[trace_info, response] = event;
-  if (shared_.update_order(user_id, order_id, stream_id_, trace_info, response, std::forward<Args>(args)..., []([[maybe_unused]] auto &order) {})) {
-  } else {
-    log::warn("Did not find order: user_id={}, order_id={}"sv, user_id, order_id);
   }
 }
 

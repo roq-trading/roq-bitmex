@@ -463,14 +463,12 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
       auto user_id = SOURCE_NONE;
       auto order_id = ORDER_ID_NONE;
       auto strategy_id = STRATEGY_ID_NONE;
-      if (shared_.update_order(stream_id_, trace_info, response, order_update, [&](auto &order) {
-            user_id = order.user_id;
-            order_id = order.order_id;
-            strategy_id = order.strategy_id;
-          })) {
-      } else {
-        log::warn<1>("*** EXTERNAL ORDER ***"sv);
-      }
+      auto callback = [&](auto &order) {
+        user_id = order.user_id;
+        order_id = order.order_id;
+        strategy_id = order.strategy_id;
+      };
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, order_update, stream_id_, callback);
       if (item.exec_type != protocol::json::ExecType::TRADE) {
         continue;
       }

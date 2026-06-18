@@ -108,9 +108,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
 
-  template <typename... Args>
-  void operator()(Trace<server::oms::Response> const &, uint8_t user_id, uint64_t order_id, Args &&...);
-
  private:
   Handler &handler_;
   // config

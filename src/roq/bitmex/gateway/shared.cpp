@@ -10,7 +10,7 @@ namespace gateway {
 
 // === IMPLEMENTATION ===
 
-Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings) : dispatcher_{dispatcher}, settings{settings}, api{API::create(settings)} {
+Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings) : dispatcher{dispatcher}, settings{settings}, api{API::create(settings)} {
 }
 
 std::string_view Shared::next_request_id() {
