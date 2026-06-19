@@ -70,19 +70,6 @@ struct Controller final : public server::Handler, public OrderEntry::Handler, pu
 
   void operator()(metrics::Writer &) const override;
 
-  // streams
-
-  void operator()(Trace<StreamStatus> const &) override;
-  void operator()(Trace<ExternalLatency> const &) override;
-  void operator()(Trace<ReferenceData> const &, bool is_last) override;
-  void operator()(Trace<MarketStatus> const &, bool is_last) override;
-  void operator()(Trace<TopOfBook> const &, bool is_last) override;
-  void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) override;
-  void operator()(Trace<TradeSummary> const &, bool is_last) override;
-  void operator()(Trace<StatisticsUpdate> const &, bool is_last) override;
-  void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id) override;
-  void operator()(Trace<PositionUpdate> const &, bool is_last) override;
-
   // utilities
 
   template <typename... Args>
@@ -123,8 +110,6 @@ struct Controller final : public server::Handler, public OrderEntry::Handler, pu
   utils::unordered_map<std::string, OrderEntryRR> order_entry_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   MarketData market_data_;
-  // cache
-  std::vector<MBPUpdate> bids_, asks_;
 };
 
 }  // namespace gateway

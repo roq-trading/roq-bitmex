@@ -167,7 +167,7 @@ void MarketData::operator()(web::socket::Client::Latency const &latency) {
       .account = {},
       .latency = latency.sample,
   };
-  create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -198,7 +198,7 @@ void MarketData::operator()(ConnectionStatus connection_status, std::string_view
       .proxy = (*connection_).get_proxy(),
   };
   log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(handler_, trace_info, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
 void MarketData::send_subscribe(std::string_view const &topic) {
@@ -379,10 +379,10 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
           partial_received_.instrument = true;
           size_t security_count = {};
           for (auto &item : instrument.data) {
-            auto discard = shared_.discard_symbol(item.symbol);
+            auto discard = shared_.dispatcher.discard_symbol(item.symbol);
             auto &product = find_product(item);
             auto reference_data = product.reference_data(item, stream_id_, discard);
-            create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+            create_trace_and_dispatch(shared_.dispatcher, trace_info, reference_data, true);
             if (discard) {
               log::info<2>(R"(Drop symbol="{}")"sv, item.symbol);
               continue;
@@ -390,11 +390,11 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
             ++security_count;
             if (product.is_market_status_dirty()) {
               auto market_status = product.market_status(item, stream_id_);
-              create_trace_and_dispatch(handler_, trace_info, market_status, true);
+              create_trace_and_dispatch(shared_.dispatcher, trace_info, market_status, true);
             }
             if (product.is_statistics_dirty()) {
               auto statistics_update = product.statistics_update(item, stream_id_);
-              create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
+              create_trace_and_dispatch(shared_.dispatcher, trace_info, statistics_update, true);
             }
             product.clear();
           }
@@ -410,18 +410,18 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
         // only process after "partial" (as per bitmex documentation)
         if (partial_received_.instrument) {
           for (auto &item : instrument.data) {
-            if (shared_.discard_symbol(item.symbol)) {
+            if (shared_.dispatcher.discard_symbol(item.symbol)) {
               continue;
             }
             auto &product = find_product(item);
             if (product.update(item)) {
               if (product.is_market_status_dirty()) {
                 auto market_status = product.market_status(item, stream_id_);
-                create_trace_and_dispatch(handler_, trace_info, market_status, true);
+                create_trace_and_dispatch(shared_.dispatcher, trace_info, market_status, true);
               }
               if (product.is_statistics_dirty()) {
                 auto statistics_update = product.statistics_update(item, stream_id_);
-                create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
+                create_trace_and_dispatch(shared_.dispatcher, trace_info, statistics_update, true);
               }
               product.clear();
             }
@@ -442,7 +442,7 @@ void MarketData::operator()(Trace<protocol::json::Quote> const &event) {
     log::info<4>("quote={}"sv, quote);
     (*connection_).touch(trace_info.source_receive_time);
     for (auto &item : quote.data) {
-      if (shared_.discard_symbol(item.symbol)) {
+      if (shared_.dispatcher.discard_symbol(item.symbol)) {
         continue;
       }
       auto top_of_book = TopOfBook{
@@ -460,7 +460,7 @@ void MarketData::operator()(Trace<protocol::json::Quote> const &event) {
           .exchange_sequence = {},
           .sending_time_utc = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, top_of_book, true);
     }
   });
 }
@@ -502,11 +502,11 @@ void MarketData::operator()(Trace<protocol::json::OrderBookL2> const &event) {
     for (auto &item : order_book_l2.data) {
       if (std::empty(previous)) {
         previous = item.symbol;
-        discard = shared_.discard_symbol(previous);
+        discard = shared_.dispatcher.discard_symbol(previous);
       } else if (previous.compare(item.symbol) != 0) {
         publish();
         previous = item.symbol;
-        discard = shared_.discard_symbol(previous);
+        discard = shared_.dispatcher.discard_symbol(previous);
         timestamp = {};
         shared_.bids.clear();
         shared_.asks.clear();
@@ -579,14 +579,14 @@ void MarketData::operator()(Trace<protocol::json::Trade> const &event) {
           .exchange_sequence = {},
           .sending_time_utc = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_summary, is_last);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, trade_summary, is_last);
     };
     std::string_view previous;
     for (auto &item : trade.data) {
       timestamp = std::max(timestamp, std::chrono::duration_cast<decltype(timestamp)>(item.timestamp));
       if (item.symbol.compare(previous) != 0) {
         if (!std::empty(previous) && !std::empty(shared_.trades)) {
-          if (!shared_.discard_symbol(previous)) {
+          if (!shared_.dispatcher.discard_symbol(previous)) {
             dispatch(previous, false);
           }
         }
@@ -597,7 +597,7 @@ void MarketData::operator()(Trace<protocol::json::Trade> const &event) {
       emplace_back(shared_.trades, item);
     }
     if (!std::empty(previous) && !std::empty(shared_.trades)) {
-      if (!shared_.discard_symbol(previous)) {
+      if (!shared_.dispatcher.discard_symbol(previous)) {
         dispatch(previous, true);
       }
     }
@@ -614,7 +614,7 @@ void MarketData::operator()(Trace<protocol::json::Funding> const &event) {
       if (product.update(item)) {
         if (product.is_statistics_dirty()) {
           auto statistics_update = product.statistics_update(item, stream_id_);
-          create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
+          create_trace_and_dispatch(shared_.dispatcher, trace_info, statistics_update, true);
         }
         product.clear();
       }
@@ -692,7 +692,7 @@ void MarketData::publish_market_by_price(
     bool snapshot,
     std::chrono::nanoseconds const exchange_time_utc) {
   assert(!(std::empty(bids) && std::empty(asks)));
-  if (shared_.discard_symbol(symbol)) {
+  if (shared_.dispatcher.discard_symbol(symbol)) {
     return;
   }
   if (snapshot) {
@@ -714,7 +714,7 @@ void MarketData::publish_market_by_price(
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
   try {
-    create_trace_and_dispatch(handler_, trace_info, market_by_price_update, is_last);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, market_by_price_update, is_last, shared_.final_bids, shared_.final_asks);
   } catch (BadState &) {
     resubscribe_order_book_l2(symbol);
   }
