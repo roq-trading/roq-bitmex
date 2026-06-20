@@ -2,18 +2,9 @@
 
 #include "roq/bitmex/gateway/order_entry.hpp"
 
-#include <fmt/chrono.h>
-
-#include <chrono>
-#include <utility>
-
 #include "roq/mask.hpp"
 
-#include "roq/utils/update.hpp"
-
 #include "roq/utils/metrics/factory.hpp"
-
-#include "roq/web/rest/client.hpp"
 
 #include "roq/server/oms/exceptions.hpp"
 

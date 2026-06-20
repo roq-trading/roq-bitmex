@@ -2,9 +2,7 @@
 
 #pragma once
 
-#include <chrono>
 #include <string>
-#include <string_view>
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -53,7 +51,8 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
 
- private:
+  // helpers
+
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void send_cancel_all_after(std::chrono::nanoseconds timeout);
@@ -94,7 +93,7 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(Trace<protocol::json::Margin> const &) override;
   void operator()(Trace<protocol::json::Position> const &) override;
 
-  // utilities
+  // helpers
 
   std::string create_upgrade_headers();
 

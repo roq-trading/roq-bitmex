@@ -2,9 +2,7 @@
 
 #pragma once
 
-#include <chrono>
 #include <string>
-#include <string_view>
 
 #include "roq/utils/container.hpp"
 
@@ -55,7 +53,8 @@ struct MarketData final : public web::socket::Client::Handler, public protocol::
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
 
- private:
+  // helpers
+
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void send_subscribe(std::string_view const &topic);
@@ -102,7 +101,7 @@ struct MarketData final : public web::socket::Client::Handler, public protocol::
   void operator()(Trace<protocol::json::Margin> const &) override;
   void operator()(Trace<protocol::json::Position> const &) override;
 
-  // utilities
+  // helpers
 
   Product &find_product(protocol::json::InstrumentDataItem const &);
   Product &find_product(protocol::json::FundingDataItem const &);
