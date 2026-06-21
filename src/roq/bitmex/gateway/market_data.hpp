@@ -119,7 +119,7 @@ struct MarketData final : public web::socket::Client::Handler, public protocol::
   void resubscribe_order_book_l2(std::string_view const &symbol);
 
  private:
-  Handler &handler_;
+  [[maybe_unused]] Handler &handler_;
   // config
   uint16_t const stream_id_;
   std::string const name_;

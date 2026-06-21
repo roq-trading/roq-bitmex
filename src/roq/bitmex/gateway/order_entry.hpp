@@ -106,7 +106,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
 
  private:
-  Handler &handler_;
+  [[maybe_unused]] Handler &handler_;
   // config
   uint16_t const stream_id_;
   std::string const name_;

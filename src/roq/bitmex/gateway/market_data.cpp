@@ -546,8 +546,7 @@ void MarketData::operator()(Trace<protocol::json::OrderBookL2> const &event) {
 
 void MarketData::operator()(Trace<protocol::json::Trade> const &event) {
   profile_.trade([&]() {
-    auto &trace_info = event.trace_info;
-    auto &trade = event.value;
+    auto &[trace_info, trade] = event;
     log::info<4>("trade={}"sv, trade);
     (*connection_).touch(trace_info.source_receive_time);
     if (trade.action != protocol::json::Action::INSERT) {
