@@ -41,6 +41,14 @@ Product::Product(Shared &shared, protocol::json::FundingDataItem const &) : shar
 }
 
 bool Product::update(protocol::json::InstrumentDataItem const &item) {
+  // reference data
+  reference_data_dirty_ |= utils::update(tick_size_, item.tick_size);
+  reference_data_dirty_ |= utils::update(multiplier_, item.multiplier);
+  reference_data_dirty_ |= utils::update(lot_size_, item.lot_size);
+  reference_data_dirty_ |= utils::update(option_strike_price_, item.option_strike_price);
+  reference_data_dirty_ |= utils::update(underlying_symbol_, item.underlying_symbol);
+  reference_data_dirty_ |= utils::update(expiry_, item.expiry);
+  reference_data_dirty_ |= utils::update(settle_, item.settle);
   // market status
   market_status_dirty_ |= item.state && utils::update(state_, item.state) != 0;
   // statistics update
@@ -131,7 +139,7 @@ bool Product::update(protocol::json::InstrumentDataItem const &item) {
           });
     }
   }
-  return market_status_dirty_ || !std::empty(statistics_);
+  return reference_data_dirty_ || market_status_dirty_ || !std::empty(statistics_);
 }
 
 bool Product::update(protocol::json::FundingDataItem const &) {

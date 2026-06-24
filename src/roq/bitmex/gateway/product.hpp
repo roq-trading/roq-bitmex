@@ -33,10 +33,12 @@ struct Product final {
 
   StatisticsUpdate statistics_update(protocol::json::FundingDataItem const &, uint16_t stream_id) const;
 
+  bool is_reference_data_dirty() const { return reference_data_dirty_; }
   bool is_market_status_dirty() const { return market_status_dirty_; }
   bool is_statistics_dirty() const { return !std::empty(statistics_); }
 
   void clear() {
+    reference_data_dirty_ = false;
     market_status_dirty_ = false;
     statistics_.clear();
   }
@@ -44,6 +46,7 @@ struct Product final {
  private:
   Shared &shared_;
   // reference data
+  bool reference_data_dirty_ = false;
   std::string description_;
   std::string quote_currency_;
   std::string settl_currency_;
