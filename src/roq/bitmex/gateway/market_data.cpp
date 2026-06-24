@@ -415,6 +415,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
             if (product.is_reference_data_dirty()) {
               auto discard = shared_.dispatcher.discard_symbol(item.symbol);
               auto reference_data = product.reference_data(item, stream_id_, discard);
+              log::warn("DEBUG reference_data={}"sv, reference_data);
               create_trace_and_dispatch(shared_.dispatcher, trace_info, reference_data, true);
             }
             if (product.is_market_status_dirty()) {
