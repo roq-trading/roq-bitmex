@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Removed
+
+* BREAKING CHANGE: Remove default URIs (#611)
+
 ### Fixed
 
 * ReferenceData was not updated in real-time (#610)
