@@ -1,6 +1,6 @@
 set(TARGET_NAME ${PROJECT_NAME}-fix-bridge)
 
-set(SOURCES application.cpp config.cpp settings.cpp main.cpp)
+set(SOURCES application.cpp settings.cpp main.cpp)
 
 include(RoqAutogen)
 
