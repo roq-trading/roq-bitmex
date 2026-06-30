@@ -24,7 +24,7 @@ int Application::main(args::Parser const &args) {
   Config config{settings};
   log::warn("config={}"sv, config);
   auto context = server::create_io_context(settings);
-  server::fix_bridge::Controller2<gateway::Controller>{settings, config, *context, "trader"sv}.dispatch();
+  server::fix_bridge::Controller<gateway::Controller>{settings, config, *context}.dispatch();
   return EXIT_SUCCESS;
 }
 
