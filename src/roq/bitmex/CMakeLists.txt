@@ -7,6 +7,7 @@ add_subdirectory(flags)
 add_subdirectory(gateway)
 
 add_subdirectory(fix_bridge)
+add_subdirectory(proto_bridge)
 
 set(SOURCES application.cpp main.cpp)
 
