@@ -6,10 +6,10 @@
 
 namespace roq {
 namespace bitmex {
-namespace proto_bridge {
+namespace bridge {
 
 using Config = gateway::Config;
 
-}  // namespace proto_bridge
+}  // namespace bridge
 }  // namespace bitmex
 }  // namespace roq

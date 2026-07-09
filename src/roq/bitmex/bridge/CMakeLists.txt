@@ -1,4 +1,4 @@
-set(TARGET_NAME ${PROJECT_NAME}-proto-bridge)
+set(TARGET_NAME ${PROJECT_NAME}-bridge)
 
 set(SOURCES application.cpp settings.cpp main.cpp)
 
@@ -18,7 +18,7 @@ target_link_libraries(
           roq-logging::roq-logging
           roq-logging::roq-logging-flags
           roq-server::roq-server
-          roq-server::roq-server-proto-bridge-flags
+          roq-server::roq-server-bridge-flags
           fmt::fmt)
 
 if(ROQ_BUILD_TYPE STREQUAL "Release")
