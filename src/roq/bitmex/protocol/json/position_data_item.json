@@ -369,6 +369,10 @@
     {
       "name": "strategy",
       "type": "roq/bitmex/protocol/json/Strategy"
+    },
+    {
+      "name": "openedAt",
+      "type": "std/milliseconds"
     }
   ]
 }
