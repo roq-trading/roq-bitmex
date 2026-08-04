@@ -237,6 +237,10 @@
     {
       "name": "takeProfitExecInst",
       "type": "std/string_view"
+    },
+    {
+      "name": "trdType",
+      "type": "std/string_view"
     }
   ]
 }
