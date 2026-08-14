@@ -194,6 +194,8 @@ constexpr Helper<bitmex::protocol::json::State>::operator std::optional<roq::Tra
       return roq::TradingStatus::UNDEFINED;
     case CLEARED:
       return roq::TradingStatus::UNDEFINED;
+    case DELISTED:
+      return roq::TradingStatus::UNDEFINED;
   }
   return {};
 }
@@ -204,6 +206,7 @@ static_assert(Helper{bitmex::protocol::json::State{bitmex::protocol::json::State
 static_assert(Helper{bitmex::protocol::json::State{bitmex::protocol::json::State::SETTLED}} == roq::TradingStatus::UNDEFINED);
 static_assert(Helper{bitmex::protocol::json::State{bitmex::protocol::json::State::UNLISTED}} == roq::TradingStatus::UNDEFINED);
 static_assert(Helper{bitmex::protocol::json::State{bitmex::protocol::json::State::EXPIRED}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{bitmex::protocol::json::State{bitmex::protocol::json::State::DELISTED}} == roq::TradingStatus::UNDEFINED);
 
 template <>
 template <>
