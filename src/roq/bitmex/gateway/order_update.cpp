@@ -55,6 +55,7 @@ void OrderUpdate::operator()(protocol::json::OrderDataItem const &order_item, Tr
       .order_type = map(order_item.ord_type),
       .time_in_force = map(order_item.time_in_force),
       .execution_instructions = {},
+      .execution_destination = {},
       .create_time_utc = {},
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .external_account = external_account,
@@ -128,6 +129,7 @@ void OrderUpdate::operator()(
       .order_type = map(order_item.ord_type),
       .time_in_force = map(order_item.time_in_force),
       .execution_instructions = {},
+      .execution_destination = {},
       .create_time_utc = {},
       .update_time_utc = order_item.timestamp,  // XXX transact_time?
       .external_account = external_account,
